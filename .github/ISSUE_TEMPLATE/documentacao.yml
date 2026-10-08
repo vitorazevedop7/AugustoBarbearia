@@ -1,0 +1,24 @@
+name: Documentação
+description: Criar ou atualizar um documento em docs/
+title: "docs: "
+labels: ["documentation"]
+body:
+  - type: input
+    id: documento
+    attributes:
+      label: Documento
+      placeholder: docs/<caminho>.md
+    validations:
+      required: true
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: O que precisa mudar e por quê
+    validations:
+      required: true
+  - type: textarea
+    id: pronto
+    attributes:
+      label: Critério de pronto
+    validations:
+      required: true

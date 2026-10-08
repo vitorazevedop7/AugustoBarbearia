@@ -1,0 +1,38 @@
+name: Bug
+description: Algo que não funciona como deveria
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: comportamento
+    attributes:
+      label: O que aconteceu
+      description: O comportamento observado, com prints ou a mensagem de erro, se houver.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que deveria acontecer
+      description: O comportamento esperado. Cite a RN ou o critério de aceite da spec, se existir.
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Como reproduzir
+      placeholder: |
+        1. Entrar como ...
+        2. Clicar em ...
+        3. Ver ...
+    validations:
+      required: true
+  - type: dropdown
+    id: ambiente
+    attributes:
+      label: Ambiente
+      options:
+        - Produção (Railway)
+        - Desenvolvimento (docker compose)
+    validations:
+      required: true

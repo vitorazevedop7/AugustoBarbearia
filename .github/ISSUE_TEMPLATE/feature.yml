@@ -1,0 +1,39 @@
+name: Funcionalidade
+description: Algo novo que o sistema deve fazer
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: O que deve ser possível fazer quando esta issue estiver pronta, e para quem.
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Spec
+      description: Caminho da spec em docs/specs/ (ex. docs/specs/agendamento-cliente.md). Se ainda não existir, escrever a spec é a primeira tarefa.
+      placeholder: docs/specs/<nome>.md
+    validations:
+      required: true
+  - type: input
+    id: regras
+    attributes:
+      label: Regras envolvidas
+      description: RNs de docs/dominio/regras.md que esta issue implementa.
+      placeholder: RN-05, RN-08, RN-11
+  - type: textarea
+    id: escopo
+    attributes:
+      label: Escopo desta issue
+      description: O que entra nesta issue (do tamanho de uma sessão de trabalho). O que fica de fora.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependências
+      description: Issues que precisam estar prontas antes (também marque como "blocked by" no GitHub).
+      placeholder: "- Bloqueada por #"
