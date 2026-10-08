@@ -1,6 +1,6 @@
 name: Documentação
 description: Criar ou atualizar um documento em docs/
-title: "[S?] docs: "
+title: "[S?.??] docs: "
 labels: ["documentation"]
 body:
   - type: input

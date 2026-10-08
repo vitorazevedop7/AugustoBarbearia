@@ -1,6 +1,6 @@
 name: Funcionalidade
 description: Algo novo que o sistema deve fazer
-title: "[S?] feat: "
+title: "[S?.??] feat: "
 labels: ["enhancement"]
 body:
   - type: textarea
