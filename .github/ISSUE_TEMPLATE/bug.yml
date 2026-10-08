@@ -1,6 +1,6 @@
 name: Bug
 description: Algo que não funciona como deveria
-title: "[S?] fix: "
+title: "[S?.??] fix: "
 labels: ["bug"]
 body:
   - type: textarea

@@ -51,7 +51,12 @@ cd web && pnpm gen:api            # regenera os tipos a partir do OpenAPI da API
 ### Kanban
 
 - O quadro é o GitHub Project **"Augusto Barbearia"**. A sprint é o **milestone** (ex.: "Sprint 2 — Fundação (Fase 0)").
-- **Título de issue:** `[Sn] tipo: descrição`, onde `Sn` é a sprint (milestone) e `tipo` segue o Conventional Commits. Exemplo: `[S2] feat: login com Google pelo Better Auth no web`. Uma issue sem sprint definida usa `[Backlog]`. Se a issue mudar de sprint, atualize o prefixo e o milestone juntos.
+- **Título de issue:** `[Sn.mm] tipo: descrição`.
+  - `Sn` é a sprint (milestone) e `mm` é a sequência dentro da sprint, com dois dígitos (`01`, `02`…). Exemplo: `[S2.08] feat: login com Google pelo Better Auth no web`.
+  - **A sequência segue as dependências:** uma tarefa sempre tem número maior que todas as que a bloqueiam. Então, ler de `01` em diante é uma ordem válida de execução. Tarefas sem dependência entre si podem ser feitas em qualquer ordem.
+  - Uma tarefa que entra na sprint depois do planejamento recebe o próximo número livre. Os números não são renumerados depois que a sprint começa.
+  - `tipo` segue o Conventional Commits. Uma issue sem sprint usa `[Backlog]`. Se a issue mudar de sprint, ela ganha um código novo, e o milestone muda junto.
+  - Na descrição, as dependências citam o número e o código: `Bloqueada por #27 (S2.05)`.
 - `gh issue list --milestone "<nome da sprint>"` lista a sprint; `gh issue list --label documentation` filtra por tipo.
 - As dependências entre issues são marcadas como "blocked by" no GitHub. Não comece uma issue bloqueada.
 
