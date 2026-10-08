@@ -103,3 +103,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
   - **D7.** Os horários oferecidos começam numa **grade de 30 em 30 minutos**, e o agendamento ocupa a **duração do serviço**.
   - **D8.** Ao **concluir** um atendimento, a administração registra o **valor cobrado** (que pode ser diferente do preço de tabela) e a **forma de pagamento**: dinheiro, Pix, débito ou crédito.
 - **Pendências geradas:** P9
+
+### 2026-10-08 — Nome também no repositório e no kanban
+- **Com:** registro interno (Vitor)
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D1 (revisão).** O nome **Augusto Barbearia** vale para tudo: o repositório passa a se chamar `AugustoBarbearia`, e o Project do kanban, "Augusto Barbearia". Isso substitui o trecho de D1 que dizia que o nome do repositório não mudaria.

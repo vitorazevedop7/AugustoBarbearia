@@ -2,7 +2,7 @@
 
 Sistema web de agendamento e gestão para a **Augusto Barbearia**, uma barbearia real com três barbeiros. O cliente agenda online (com login Google), e a administração (a equipe da barbearia) cuida da agenda, dos cadastros, da conclusão dos atendimentos com pagamento e do relatório financeiro. O barbeiro **não** é usuário do sistema. Estamos construindo o **MVP**, que será apresentado pronto aos proprietários.
 
-> O repositório se chama `AugustusBarbearia`, mas o nome do negócio é **Augusto Barbearia** (D1).
+> O nome é **Augusto Barbearia** (D1). "Augustus" está errado. O repositório se chama `AugustoBarbearia`.
 
 ## Stack
 
@@ -50,7 +50,8 @@ cd web && pnpm gen:api            # regenera os tipos a partir do OpenAPI da API
 
 ### Kanban
 
-- O quadro é o GitHub Project **"Augustus Barbearia"**. A sprint é o **milestone**.
+- O quadro é o GitHub Project **"Augusto Barbearia"**. A sprint é o **milestone** (ex.: "Sprint 2 — Fundação (Fase 0)").
+- **Título de issue:** `[Sn] tipo: descrição`, onde `Sn` é a sprint (milestone) e `tipo` segue o Conventional Commits. Exemplo: `[S2] feat: login com Google pelo Better Auth no web`. Uma issue sem sprint definida usa `[Backlog]`. Se a issue mudar de sprint, atualize o prefixo e o milestone juntos.
 - `gh issue list --milestone "<nome da sprint>"` lista a sprint; `gh issue list --label documentation` filtra por tipo.
 - As dependências entre issues são marcadas como "blocked by" no GitHub. Não comece uma issue bloqueada.
 
