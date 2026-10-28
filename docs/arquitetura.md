@@ -56,6 +56,8 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. Banco, autenticação e módulos de domínio entram nas issues seguintes. As pastas abaixo mostram a estrutura alvo; `app/health.py` contém o router de saúde sem dependências externas.
+
 ### Estrutura de pastas
 
 ```
@@ -67,6 +69,7 @@ api/
 ├── app/
 │   ├── main.py               # cria o FastAPI e registra os routers
 │   ├── config.py             # settings (pydantic-settings, lê env)
+│   ├── health.py             # router e schema de GET /health
 │   ├── db.py                 # engine, sessão, base declarativa
 │   ├── errors.py             # erro de domínio → {code, message} (0008)
 │   ├── auth/                 # validação do JWT, dependências current_user / require_admin
@@ -165,10 +168,11 @@ Não há ambiente de homologação no MVP. Até a demonstração, o sistema só 
 
 ## Variáveis de ambiente
 
-Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas variáveis da Railway. O `.env.example` versionado lista todas.
+Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas variáveis da Railway. `api/.env.example` lista a configuração opcional já usada pelo esqueleto; o `.env.example` da raiz com as integrações será entregue com o Compose (#26).
 
 | Variável | Serviço | Para quê |
 |---|---|---|
+| `APP_NAME` | api | Opcional: título do OpenAPI; padrão "Augusto Barbearia API" |
 | `DATABASE_URL` | api, jobs, web | Conexão com o PostgreSQL |
 | `ADMIN_EMAILS` | api | Lista de e-mails da administração (RN-71) |
 | `AUTH_JWKS_URL` | api, jobs | Endpoint JWKS do Better Auth |

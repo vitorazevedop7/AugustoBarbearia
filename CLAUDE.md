@@ -13,16 +13,48 @@ Sistema web de agendamento e gestão para a **Augusto Barbearia**, uma barbearia
 
 ## Comandos
 
-> Os comandos passam a existir com o setup da Fase 0. Se algum não funcionar, confira o README e atualize este bloco.
+API (#24) e web (#25) são entregas independentes. Os comandos abaixo ficam disponíveis após a respectiva entrega estar integrada.
+
+### API — disponível a partir da S2.02
 
 ```bash
-docker compose up                 # sobe db + api + web
-docker compose exec api alembic upgrade head      # aplica migrações
+cd api
+uv sync --locked
+uv run uvicorn app.main:app --reload
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run pyright
+```
+
+Na raiz, `docker build -t augusto-api ./api` e `docker run --rm -p 8000:8000 augusto-api` constroem e iniciam a imagem de produção. `GET /health` responde `{ "status": "ok" }` e `/docs` expõe o contrato. O healthcheck não depende de banco. `api/.env.example` documenta a configuração opcional do esqueleto.
+
+### Web — disponível a partir da S2.03
+
+```bash
+cd web
+pnpm install --frozen-lockfile  # Node.js 24 LTS + pnpm 10.34.9
+pnpm dev
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm start
+```
+
+Na raiz, `docker build -t augusto-web ./web` e `docker run --rm -p 3000:3000 augusto-web` constroem e iniciam a imagem standalone com usuário não-root. O build baixa Inter e Playfair Display e inclui os assets na saída standalone.
+
+### Próximas entregas da Fase 0
+
+Os comandos abaixo estarão disponíveis após suas issues: Compose (#26), banco/Alembic (#27) e geração do cliente tipado. Consulte o README antes de executá-los.
+
+```bash
+docker compose up
+docker compose exec api alembic upgrade head
 docker compose exec api alembic revision --autogenerate -m "msg"
-docker compose exec api uv run pytest             # testes da API
+docker compose exec api uv run pytest
 docker compose exec api sh -c "uv run ruff check . && uv run pyright"
-cd web && pnpm lint && pnpm typecheck && pnpm test
-cd web && pnpm gen:api            # regenera os tipos a partir do OpenAPI da API
+cd web && pnpm gen:api
 ```
 
 ## Mapa da documentação
