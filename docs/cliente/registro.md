@@ -44,6 +44,7 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 | P7 | Nome oficial: "Augusto" ou "Augustus" Barbearia | 2026-10-08 | Vitor | Resolvida: decisão D1 (2026-10-08) | — |
 | P8 | Quem é o ponto de contato principal e quem administra o sistema | 2026-10-08 | Vitor | Parcial: a administração é feita pela equipe da barbearia (D2); o ponto de contato fica para a apresentação | — |
 | P9 | Lista real de serviços, com preço e duração | 2026-10-08 | Proprietários | Apresentação. Até lá, o sistema usa os serviços do projeto acadêmico | — |
+| P10 | Fotos da barbearia e dos barbeiros para a vitrine (a referência visual depende de fotos no hero e nos cards da equipe) | 2026-10-28 | Proprietários | Apresentação. Até lá, a vitrine funciona sem fotos | — |
 
 ## Entradas
 

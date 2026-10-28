@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Tokens da identidade visual (docs/design/identidade-visual.md). */
 :root {
   --brand: #c41e3a;
   --brand-strong: #8b1528;
@@ -10,6 +11,8 @@
   --paper: #faf7f2;
   --surface: #ffffff;
   --line: #e5e1da;
+  --on-ink-muted: #bdb8b0;
+  --line-on-ink: #333333;
   --success: #1e7f4f;
   --warning: #9a5b00;
   --danger: #b42318;
@@ -25,11 +28,34 @@
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-line: var(--line);
+  --color-on-ink-muted: var(--on-ink-muted);
+  --color-line-on-ink: var(--line-on-ink);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --font-sans: var(--font-inter);
   --font-heading: var(--font-playfair);
+}
+
+@theme {
+  /* Títulos da vitrine: crescem com a tela, do celular ao desktop. */
+  --text-display-1: clamp(2.5rem, 1.75rem + 3.75vw, 4.5rem);
+  --text-display-1--line-height: 1.08;
+  --text-display-2: clamp(2rem, 1.6rem + 2vw, 3rem);
+  --text-display-2--line-height: 1.15;
+  --text-display-3: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --text-display-3--line-height: 1.25;
+
+  --shadow-card: 0 2px 12px rgb(16 16 16 / 0.08);
+
+  --animate-rise: rise 500ms ease-out both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
 }
 
 body {
@@ -40,4 +66,20 @@ body {
 ::selection {
   background: var(--brand);
   color: var(--surface);
+}
+
+/* Entrada ao rolar: só esconde o que o RevealObserver marcou como pendente
+   (abaixo da dobra, com JS ativo). Sem JS ou com menos movimento, nada some. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    transition:
+      opacity 500ms ease-out,
+      transform 500ms ease-out;
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal="pending"] {
+    opacity: 0;
+    transform: translateY(24px);
+  }
 }
