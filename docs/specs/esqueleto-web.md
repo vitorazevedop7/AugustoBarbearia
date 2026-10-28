@@ -19,10 +19,13 @@ Esta fundação não implementa regras de negócio. Respeita a separação web/A
 
 ## Critérios de aceite
 **CA-1 — Página inicial**
-- **Dado** o web instalado, **quando** acesso `/`, **então** vejo cabeçalho com logo e nome, título “Em construção” e rodapé em português.
+- **Dado** o web instalado, **quando** acesso `/`, **então** vejo o cabeçalho claro e fixo com logo e nome, um hero escuro com o título “Em construção”, a seção “O que vem por aí” com três novidades e o rodapé com o horário de funcionamento.
 
 **CA-2 — Identidade e acessibilidade**
 - **Dado** um viewport de 360px, **quando** acesso `/`, **então** todo o conteúdo cabe sem rolagem horizontal, o logo fica sobre fundo claro, os títulos usam Playfair Display e a interface usa Inter, com as cores vindas dos tokens documentados.
+
+**CA-2b — Movimento acessível**
+- **Dado** um navegador sem JavaScript, ou com `prefers-reduced-motion: reduce`, **quando** acesso `/`, **então** todo o conteúdo aparece sem animação e nada fica escondido.
 
 **CA-3 — Qualidade e build**
 - **Dado** Node.js e pnpm compatíveis, **quando** instalo com o lockfile e executo `lint`, `typecheck`, `test` e `build`, **então** todos passam e o build gera `.next/standalone/server.js`.
@@ -33,7 +36,7 @@ Esta fundação não implementa regras de negócio. Respeita a separação web/A
 ## Fluxo e telas
 Uma página pública estática, renderizada no servidor, com cabeçalho, conteúdo “Em construção” e rodapé. Não há carregamento assíncrono nem chamadas de API nesta etapa. As pastas `(cliente)` e `admin` ficam reservadas, sem páginas ou proteção fictícias. A validação inclui um teste de renderização da página, os comandos de qualidade e a inspeção visual em 360px.
 
-Direção visual: composição sóbria, fundo paper, logo em superfície clara, tipografia editorial e um único acento brand. Conteúdo: cabeçalho, estado em construção e rodapé. Interações: foco visível e transição curta nos links; sem animação ornamental em uma página de estado estática.
+Direção visual: a linguagem da referência [Beard X](../design/referencia-beard-x.md) adaptada à [identidade visual](../design/identidade-visual.md), com formas quadradas, faixas escuras e claras, o ornamento de bigode acima dos títulos e botões em caixa alta. Conteúdo: cabeçalho, hero “Em construção”, “O que vem por aí” (agendamento online, lembrete por e-mail, remarcação até 2h antes) e rodapé com o horário de funcionamento. Interações: foco visível, hover de 300ms, cascata curta no hero e entrada única dos cards ao rolar, tudo respeitando `prefers-reduced-motion`.
 
 ## API
 Nenhuma rota de API, autenticação ou cliente HTTP nesta etapa.

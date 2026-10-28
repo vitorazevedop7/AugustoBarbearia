@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
+import { RevealObserver } from "@/components/reveal-observer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
@@ -13,7 +14,7 @@ const inter = Inter({
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["700"],
   variable: "--font-playfair",
   display: "swap",
 });
@@ -27,17 +28,22 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${playfair.variable}`}>
+    <html
+      lang="pt-BR"
+      data-scroll-behavior="smooth"
+      className={`${inter.variable} ${playfair.variable} motion-safe:scroll-smooth`}
+    >
       <body className="flex min-h-dvh flex-col font-sans antialiased">
         <a
           href="#main-content"
-          className="sr-only z-10 bg-surface px-4 py-3 text-brand focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+          className="sr-only z-10 bg-surface px-4 py-3 text-brand focus:not-sr-only focus:fixed focus:z-50 focus:top-2 focus:left-2 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
         >
           Pular para o conteúdo
         </a>
         <SiteHeader />
         {children}
         <SiteFooter />
+        <RevealObserver />
       </body>
     </html>
   );

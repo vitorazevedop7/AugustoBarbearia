@@ -40,5 +40,6 @@ A imagem final usa o build standalone e usuário não-root. O build precisa de a
 - `src/app/(cliente)` e `src/app/admin`: reservadas para as próximas telas, sem rotas publicadas nesta etapa.
 - `src/app/api/auth/[...all]`: reservado ao handler de autenticação futuro.
 - `src/lib/api`: reservado ao cliente HTTP e contrato gerado em uma etapa posterior.
-- `src/components`: cabeçalho e rodapé compartilhados; `ui` reserva os componentes visuais básicos.
-- `src/app/globals.css`: tokens CSS e mapeamento do tema Tailwind. Componentes usam `bg-brand`, `text-ink`, `font-heading` e `font-sans`, sem cores literais.
+- `src/components`: cabeçalho, rodapé e `RevealObserver` (entrada dos elementos com `data-reveal` ao rolar).
+- `src/components/ui`: componentes visuais básicos (`ButtonLink`, `Ornament`, `SectionHeading`).
+- `src/app/globals.css`: tokens CSS, escala `text-display-*`, `shadow-card`, a animação `rise` e o mapeamento do tema Tailwind. Componentes usam `bg-brand`, `text-ink`, `font-heading` e `font-sans`, sem cores literais. A linguagem visual está em [identidade-visual.md](../docs/design/identidade-visual.md).

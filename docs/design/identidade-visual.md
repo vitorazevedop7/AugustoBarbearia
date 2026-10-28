@@ -26,6 +26,8 @@ A paleta tem preto, branco e vermelho. O vermelho vivo do logo (`#FF3131`) **nã
 | `paper` | `#FAF7F2` | Fundo das páginas (off-white quente) | — |
 | `surface` | `#FFFFFF` | Cartões, modais, campos | — |
 | `line` | `#E5E1DA` | Bordas e divisores | — |
+| `on-ink-muted` | `#BDB8B0` | Texto secundário sobre fundo escuro (`ink`) | 9,6:1 sobre `#111111` ✅ |
+| `line-on-ink` | `#333333` | Divisores sobre fundo escuro | — |
 | `success` | `#1E7F4F` | Concluído, confirmações | 5,0:1 com branco ✅ |
 | `warning` | `#9A5B00` | Avisos (ex.: "faltam menos de 2h") | 5,4:1 com branco ✅ |
 | `danger` | `#B42318` | Cancelado, erro, falta | 6,6:1 com branco ✅ |
@@ -36,10 +38,19 @@ A paleta tem preto, branco e vermelho. O vermelho vivo do logo (`#FF3131`) **nã
 
 | Papel | Fonte | Uso |
 |---|---|---|
-| Títulos | **Playfair Display** (Google Fonts), 600–700 | Títulos da vitrine e nomes de seção. Conversa com o "A" serifado do logo |
+| Títulos | **Playfair Display** (Google Fonts), 700 | Títulos da vitrine e nomes de seção. Conversa com o "A" serifado do logo |
 | Texto e interface | **Inter** (Google Fonts), 400/500/600 | Todo o resto: formulários, tabelas, botões, administração |
 
-- A escala mobile first (base 16px) usa a escala padrão do Tailwind, de `text-sm` até `text-4xl`.
+- O texto usa a escala padrão do Tailwind, com base de 16px.
+- Os títulos da vitrine usam uma escala própria, que cresce com a tela (`clamp`):
+
+| Token | Celular → desktop | Uso |
+|---|---|---|
+| `text-display-1` | 40 → 72px | Título do hero |
+| `text-display-2` | 32 → 48px | Título de seção |
+| `text-display-3` | 24 → 32px | Destaques e números |
+
+- Botões, rótulos e textos pequenos em destaque usam Inter 600 em **caixa alta com espaçamento de 0,08em**.
 - Na administração, os títulos também usam Inter: lá a prioridade é densidade e leitura rápida.
 
 ## Tom
@@ -48,6 +59,29 @@ A paleta tem preto, branco e vermelho. O vermelho vivo do logo (`#FF3131`) **nã
 - **Texto:** próximo e simples, tratando o cliente por "você". Frases curtas. Nada de jargão técnico em mensagens de erro: a mensagem diz o que aconteceu e o que fazer.
   - ✅ "Esse horário acabou de ser reservado. Escolha outro."
   - ❌ "Erro 409: conflito de agendamento."
+
+## Linguagem visual
+
+A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), adaptados às cores e às fontes acima.
+
+- **Formas quadradas:** botões, cards e campos não têm arredondamento. A exceção é o círculo claro que segura o logo em fundo escuro.
+- **Faixas escuras e claras:** o hero e o rodapé ficam em `ink`; as seções, em `paper`, com cards em `surface`.
+- **Ornamento:** um bigode entre duas linhas, em `brand` (`brand-on-dark` sobre o escuro), fica 24px acima dos títulos de seção, no lugar de um texto pequeno.
+- **Elevação mínima:** uma única sombra, `shadow-card` (`0 2px 12px` a 8%), nos cards claros.
+- **Botões:** primário em `brand` com texto branco, contorno em `ink` e contorno claro sobre o escuro. Altura mínima de 56px, caixa alta e anel de foco visível.
+- **Cabeçalho:** claro e fixo no topo (`sticky`), porque o logo só funciona sobre fundo claro e o botão de agendar precisa ficar sempre à mão.
+- **Respiro:** seções com 80px de padding vertical no celular e 128px no desktop; conteúdo em até 1280px.
+
+## Movimento
+
+- Tudo dura **300ms** (hover) ou **500ms** (entradas), com `ease-out`.
+- **Hover:** botões trocam de cor e sobem 2px. Fotos em cards dão um zoom de 1,05 dentro da moldura.
+- **Hero:** o conteúdo sobe e aparece em cascata ao carregar, com delays de 0, 80, 160 e 240ms. É só CSS, e o cabeçalho nunca anima.
+- **Entrada ao rolar:** elementos com `data-reveal` sobem 24px e aparecem uma única vez (componente `RevealObserver`). Só o que está abaixo da dobra começa escondido.
+- **Regras:**
+  - Todo movimento respeita `prefers-reduced-motion`.
+  - Nenhum conteúdo depende de JavaScript para aparecer.
+  - Nada de parallax, loader ou autoplay.
 
 ## Tokens para o código
 
@@ -64,13 +98,15 @@ No Next.js, as cores viram variáveis CSS mapeadas no tema do Tailwind:
   --paper: #FAF7F2;
   --surface: #FFFFFF;
   --line: #E5E1DA;
+  --on-ink-muted: #BDB8B0;
+  --line-on-ink: #333333;
   --success: #1E7F4F;
   --warning: #9A5B00;
   --danger: #B42318;
 }
 ```
 
-O componente usa sempre o token (`bg-brand`, `text-ink`), nunca o hex direto.
+O componente usa sempre o token (`bg-brand`, `text-ink`, `text-display-2`, `shadow-card`), nunca o hex direto. Os tokens estão em `web/src/app/globals.css`.
 
 ## Telas
 
