@@ -70,7 +70,7 @@ Estas são as capacidades que o sistema deve ter ao longo do tempo. **O que entr
 
 - **Mobile first:** a maioria dos clientes vai usar pelo celular. O layout precisa ser responsivo e funcionar nos navegadores atuais.
 - **Operação simples:** a equipe da barbearia não é técnica. O dia a dia (ver a agenda, marcar, concluir um atendimento) precisa ser possível em poucos toques no celular.
-- **Custo baixo de operação:** até a apresentação do MVP, o custo de infraestrutura é do Vitor. Por isso a preferência é por planos gratuitos ou bem baratos.
+- **Custo baixo de operação:** até a apresentação do MVP, **nada é pago**. A demonstração roda num ambiente gratuito (D9, [ADR 0009](../decisoes/0009-demonstracao-no-trial.md)). Se os proprietários quiserem o sistema, a hospedagem definitiva é paga pela barbearia, e a preferência é por planos baratos.
 - **Dados pessoais:** o sistema guarda nome, e-mail e telefone de clientes, então precisa atender à LGPD (política de privacidade e uso dos dados só para o atendimento).
 - **Segurança:** a área de administração só é acessível por contas autorizadas, e os dados de um cliente só são visíveis para ele e para a administração.
 - **Desempenho:** a agenda deve carregar em menos de 3 segundos.

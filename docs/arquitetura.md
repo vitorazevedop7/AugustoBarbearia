@@ -149,9 +149,10 @@ web/
 | Ambiente | Como sobe | Banco |
 |---|---|---|
 | Desenvolvimento | `docker compose up` ([0004](decisoes/0004-docker.md)) | Postgres do compose |
-| Produção | Push na `main` → deploy na Railway ([0005](decisoes/0005-hospedagem.md)) | Postgres da Railway |
+| Demonstração | Deploy no trial da Railway, cerca de uma semana antes da apresentação ([0009](decisoes/0009-demonstracao-no-trial.md)) | Postgres da Railway |
+| Produção | Push na `main` → deploy na Railway ([0005](decisoes/0005-hospedagem.md)). É a demonstração depois que a barbearia assina o plano | Postgres da Railway |
 
-Não há ambiente de homologação no MVP.
+Não há ambiente de homologação no MVP. Até a demonstração, o sistema só roda localmente.
 
 ### Serviços na Railway
 

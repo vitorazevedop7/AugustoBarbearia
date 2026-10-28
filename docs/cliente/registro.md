@@ -109,3 +109,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Canal:** —
 - **Fatos e decisões:**
   - **D1 (revisão).** O nome **Augusto Barbearia** vale para tudo: o repositório passa a se chamar `AugustoBarbearia`, e o Project do kanban, "Augusto Barbearia". Isso substitui o trecho de D1 que dizia que o nome do repositório não mudaria.
+
+### 2026-10-28 — Custo da hospedagem até a apresentação
+- **Com:** registro interno. Decisão do Vitor como product owner
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D9.** **Nada é pago até a apresentação.** O MVP é demonstrado num ambiente gratuito, no ar e acessível pelo celular dos proprietários. Se eles quiserem o sistema, a hospedagem definitiva (com mensalidade) passa a ser **paga pela barbearia**. Isso substitui a premissa de `visao.md` de que o custo seria do Vitor até a apresentação. Detalhes técnicos no [ADR 0009](../decisoes/0009-demonstracao-no-trial.md).
