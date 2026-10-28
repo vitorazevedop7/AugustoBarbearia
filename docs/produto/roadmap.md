@@ -2,26 +2,26 @@
 
 O roadmap diz **o que entra em cada fase e por quê**. O andamento das tarefas (a fazer, fazendo, feito) fica no kanban do GitHub Projects, não aqui.
 
-Decisões que embasam este documento: D0–D8 em [registro.md](../cliente/registro.md). Visão geral do produto: [visao.md](visao.md).
+Decisões que embasam este documento: D0–D9 em [registro.md](../cliente/registro.md). Visão geral do produto: [visao.md](visao.md).
 
 ## Fases
 
 ```mermaid
 flowchart LR
-    F0[Fase 0<br/>Fundação] --> F1[Fase 1<br/>MVP] --> A{{Apresentação<br/>aos proprietários}} --> F2[Fase 2<br/>Ajustes + WhatsApp] --> F3[Fase 3<br/>Fidelidade]
+    F0[Fase 0<br/>Fundação] --> F1[Fase 1<br/>MVP] --> D[Demonstração<br/>no ar] --> A{{Apresentação<br/>aos proprietários}} --> F2[Fase 2<br/>Ajustes + WhatsApp] --> F3[Fase 3<br/>Fidelidade]
 ```
 
 ### Fase 0 — Fundação
 
-**Objetivo:** ter um sistema vazio, mas no ar, com a base que todas as funcionalidades usam.
+**Objetivo:** ter um sistema vazio, mas rodando de ponta a ponta no `docker compose`, com a base que todas as funcionalidades usam.
 
 - Repositório, stack e convenções (ADRs em `docs/decisoes/`).
-- Deploy automático da `main` num ambiente acessível pela internet.
+- Ambiente local com as mesmas imagens Docker que vão para a Railway, e CI na `main`.
 - Banco de dados com migrações.
 - Login com Google, separando o acesso do cliente e o da administração.
 - Layout base e identidade visual (cores, logo, tipografia).
 
-**Por que primeiro:** tudo depende disso, e colocar o sistema no ar desde o início evita surpresa de deploy na véspera da apresentação.
+**Por que primeiro:** tudo depende disso. O sistema não vai para a internet nesta fase porque nada é pago até a apresentação (D9). O risco de surpresa no deploy é reduzido porque as imagens de produção já rodam no compose desde o início.
 
 ### Fase 1 — MVP
 
@@ -53,11 +53,21 @@ flowchart LR
 
 **Por que este recorte:** ele ataca os três problemas centrais (sobreposição, faltas e falta de registro) com o mínimo de funcionalidades. O financeiro entra no MVP porque concluir o atendimento é o que fecha o ciclo da agenda, e o registro sai quase de graça junto.
 
+### Demonstração no ar
+
+**Objetivo:** os proprietários abrem o sistema no próprio celular, por um link de verdade, durante e depois da apresentação.
+
+- Cerca de uma semana antes da apresentação, deploy no **trial gratuito da Railway** ([ADR 0009](../decisoes/0009-demonstracao-no-trial.md)). A conta só é criada nesse momento, porque o trial dura 30 dias a partir do cadastro.
+- Cliente OAuth do Google para o domínio da demonstração, com o app publicado ou as contas dos proprietários incluídas como usuários de teste.
+- Dados de exemplo realistas: os três barbeiros, os serviços e alguns agendamentos.
+
+**Por que assim:** custo zero até a decisão dos proprietários (D9). Se eles aprovarem, a barbearia assina o plano no mesmo projeto, e a demonstração vira produção sem migração.
+
 ### Fase 2 — Ajustes pós-apresentação e WhatsApp
 
 **Objetivo:** incorporar o feedback dos proprietários e levar as notificações para o canal que o cliente mais lê.
 
-- Ajustes vindos da apresentação. As decisões D0–D8 podem ser revistas aqui.
+- Ajustes vindos da apresentação. As decisões D0–D9 podem ser revistas aqui.
 - Notificações por **WhatsApp** (D4). Exige uma conta Business verificada da barbearia, com CNPJ (P3), então só é viável depois da apresentação.
 - Passagem da infraestrutura para o nome da barbearia (domínio próprio, contas e custos).
 

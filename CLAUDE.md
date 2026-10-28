@@ -9,7 +9,7 @@ Sistema web de agendamento e gestão para a **Augusto Barbearia**, uma barbearia
 - **web/**: Next.js (App Router, TypeScript strict), Tailwind, Better Auth (Google + plugin JWT). É também o BFF.
 - **api/**: Python + FastAPI, SQLAlchemy 2 + Alembic, Pydantic v2, pytest. Todas as regras de negócio ficam aqui.
 - **PostgreSQL**, Docker / `docker compose`, deploy na Railway, e-mail via Resend.
-- Os motivos de cada escolha estão em `docs/decisoes/` (ADRs 0001–0008).
+- Os motivos de cada escolha estão em `docs/decisoes/` (ADRs 0001–0009).
 
 ## Comandos
 
@@ -37,7 +37,7 @@ cd web && pnpm gen:api            # regenera os tipos a partir do OpenAPI da API
 | `docs/decisoes/*.md` | For questionar uma escolha técnica. Os ADRs explicam o porquê |
 | `docs/design/identidade-visual.md` | For criar ou alterar qualquer tela (tokens de cor, fontes, tom) |
 | `docs/specs/<feature>.md` | For implementar uma funcionalidade. É o contrato dela |
-| `docs/cliente/registro.md` | For precisar saber de onde veio um fato ou uma decisão de produto (D0–D8) |
+| `docs/cliente/registro.md` | For precisar saber de onde veio um fato ou uma decisão de produto (D0–D9) |
 
 ## Como trabalhar
 
