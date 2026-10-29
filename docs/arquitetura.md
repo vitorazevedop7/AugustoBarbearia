@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. O módulo `barbers` (S3.03), em [cadastro-barbeiros.md](specs/cadastro-barbeiros.md), cuida do cadastro de barbeiros. O módulo `catalog` (S3.04), em [cadastro-servicos.md](specs/cadastro-servicos.md), cuida dos serviços e da associação Barbeiro–Serviço; ele depende de `barbers`, e não o contrário. A vitrine (S3.05), em [vitrine.md](specs/vitrine.md), lê os serviços e os barbeiros ativos pelos routers públicos (`public_router`) desses dois módulos, separados dos routers `/admin`. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. O módulo `barbers` (S3.03), em [cadastro-barbeiros.md](specs/cadastro-barbeiros.md), cuida do cadastro de barbeiros. O módulo `catalog` (S3.04), em [cadastro-servicos.md](specs/cadastro-servicos.md), cuida dos serviços e da associação Barbeiro–Serviço; ele depende de `barbers`, e não o contrário. A vitrine (S3.05), em [vitrine.md](specs/vitrine.md), lê os serviços e os barbeiros ativos pelos routers públicos (`public_router`) desses dois módulos, separados dos routers `/admin`. O módulo `appointments` (S3.07), em [disponibilidade.md](specs/disponibilidade.md), tem o agendamento e a exclusion constraint da RN-08; `barbers` depende dele para a trava da RN-60. O módulo `availability` (S3.07) calcula os horários disponíveis numa função pura (`slots.py`) e carrega os dados em `service.py`, que também tem `ensure_slot_available` para a criação de agendamento. `app/clock.py` guarda o fuso de São Paulo (RN-01) e a dependência `utc_now`, que as rotas usam para o relógio e os testes substituem. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -71,6 +71,7 @@ api/
 │   ├── config.py             # settings (pydantic-settings, lê env)
 │   ├── health.py             # router e schema de GET /health
 │   ├── db.py                 # engine, sessão, base declarativa
+│   ├── clock.py              # fuso America/Sao_Paulo (RN-01) e utc_now, o relógio das rotas
 │   ├── errors.py             # erro de domínio → {code, message} (0008)
 │   ├── export_openapi.py     # python -m app.export_openapi: OpenAPI em JSON, sem servidor
 │   ├── auth/                 # validação do JWT, dependências current_user / require_admin
@@ -79,8 +80,8 @@ api/
 │   │   ├── barbers/          # Barbeiro
 │   │   ├── catalog/          # Serviço e Barbeiro–Serviço (o nome evita confusão com service.py)
 │   │   ├── customers/        # Cliente, vínculo com a conta e current_customer (dependencies.py)
-│   │   ├── availability/     # cálculo de horários disponíveis (RN-05) e bloqueios
-│   │   ├── appointments/     # agendamento e ciclo de vida (RN-10 a RN-33)
+│   │   ├── availability/     # horários disponíveis (RN-05): slots.py (puro), service.py e a rota pública; bloqueios na Sprint 4
+│   │   ├── appointments/     # agendamento, exclusion constraint (RN-08) e ciclo de vida (RN-10 a RN-33)
 │   │   ├── payments/         # conclusão, pagamento e relatório (RN-40 a RN-44)
 │   │   └── notifications/    # registro e envio de e-mail, templates (RN-50 a RN-54)
 │   └── jobs/
@@ -128,11 +129,12 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `GET /public/shop` | Qualquer um | Dados da barbearia e horário de funcionamento ([barbearia-horarios.md](specs/barbearia-horarios.md)) |
 | `PUT /admin/shop`, `PUT /admin/business-hours` | Administração (`require_admin`) | Alteram os dados da barbearia e o horário de funcionamento |
 | `GET /admin/barbers`, `POST /admin/barbers` | Administração (`require_admin`) | Lista todos os barbeiros (ativos primeiro) e cria um barbeiro ativo ([cadastro-barbeiros.md](specs/cadastro-barbeiros.md)) |
-| `GET /admin/barbers/{id}`, `PATCH /admin/barbers/{id}` | Administração (`require_admin`) | Lê e altera um barbeiro; o `PATCH` muda só os campos enviados, inclusive `active` para inativar ou reativar (RN-60) |
+| `GET /admin/barbers/{id}`, `PATCH /admin/barbers/{id}` | Administração (`require_admin`) | Lê e altera um barbeiro; o `PATCH` muda só os campos enviados, inclusive `active` para inativar ou reativar. Inativar com agendamento ativo que ainda não terminou responde `409 BARBER_HAS_FUTURE_APPOINTMENTS` (RN-60) |
 | `GET /admin/services`, `POST /admin/services` | Administração (`require_admin`) | Lista todos os serviços (ativos primeiro), com os barbeiros que os realizam, e cria um serviço ativo ([cadastro-servicos.md](specs/cadastro-servicos.md)) |
 | `GET /admin/services/{id}`, `PATCH /admin/services/{id}` | Administração (`require_admin`) | Lê e altera um serviço; o `PATCH` muda só os campos enviados, `barber_ids` substitui a lista e `active` inativa ou reativa. Não há exclusão (RN-61) |
 | `GET /public/services` | Qualquer um | Serviços ativos com pelo menos um barbeiro ativo, por nome, cada um com os barbeiros ativos que o realizam (RN-60, RN-61, RN-05 item 5) ([vitrine.md](specs/vitrine.md)) |
 | `GET /public/barbers` | Qualquer um | Barbeiros ativos, por nome, com foto e apresentação (RN-60) |
+| `GET /public/availability?barber_id=&service_id=&date=` | Qualquer um | Horários de início disponíveis do barbeiro para o serviço na data local, com o fim de cada atendimento, no fuso de São Paulo (RN-05 a RN-07). Barbeiro ou serviço inexistente responde 404 ([disponibilidade.md](specs/disponibilidade.md)) |
 
 As rotas `/me` do cliente recebem o `Customer` pela dependência `current_customer` (`app/modules/customers/dependencies.py`), que sempre parte do `sub` do token, nunca de um id na requisição. A tabela `customers` guarda o `sub` em `auth_user_id`, sem FK para a tabela `user` do Better Auth ([perfil-cliente.md](specs/perfil-cliente.md)).
 

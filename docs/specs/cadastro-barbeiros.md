@@ -108,7 +108,7 @@ Administração. A vitrine e o agendamento leem os barbeiros ativos nas próxima
 O barbeiro trafega como `{ id, name, photo_path, bio, active }`.
 
 ## Fora do escopo desta spec
-- **A trava da RN-60** que impede inativar um barbeiro com agendamentos ativos no futuro. Ela entra na S3.07 (#56), junto com o agendamento.
+- **A trava da RN-60** que impede inativar um barbeiro com agendamentos ativos no futuro. Ela entrou na S3.07 (#56), junto com o agendamento: ver o CA-12 de [disponibilidade.md](disponibilidade.md).
 - Upload de foto: as fotos são arquivos estáticos do web.
 - A vitrine e a rota pública com os barbeiros ativos: S3.05 (#54).
 - Quais serviços cada barbeiro realiza (`BarberService`): S3.04 (#53).

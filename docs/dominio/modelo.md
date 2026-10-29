@@ -45,7 +45,7 @@ erDiagram
 
 ### Conceitos que não são armazenados
 
-- **Horário disponível (slot):** é **calculado** a cada consulta, a partir do horário de funcionamento, da grade de 30 minutos, dos bloqueios e dos agendamentos ativos (RN-05). Não existe uma tabela de horários. O projeto acadêmico tinha uma (`Schedule`) e ela foi abandonada de propósito, porque duplicava estado e permitia inconsistência.
+- **Horário disponível (slot):** é **calculado** a cada consulta, a partir do horário de funcionamento, da grade de 30 minutos, dos bloqueios e dos agendamentos ativos (RN-05). O cálculo é uma função pura, que recebe os intervalos ocupados do barbeiro (agendamentos ativos e bloqueios) sem saber de onde eles vêm. Não existe uma tabela de horários. O projeto acadêmico tinha uma (`Schedule`) e ela foi abandonada de propósito, porque duplicava estado e permitia inconsistência.
 - **Faturamento:** é a soma dos pagamentos do período, calculada pelo relatório (RN-43).
 
 ### Entidades futuras (Fase 3, fidelidade)
@@ -89,6 +89,7 @@ Os documentos usam os termos em português. **No código, os identificadores sã
 | Status `CANCELADO` | `CANCELED` | Cancelado |
 | Status `FALTOU` | `NO_SHOW` | O cliente não compareceu |
 | Origem do agendamento | `source`: `ONLINE` / `ADMIN` | Quem criou o agendamento |
+| Quem cancelou | `canceled_by`: `CUSTOMER` / `ADMIN` | Registrado junto com `canceled_at` no cancelamento (RN-33) |
 | Pagamento | `Payment` | Valor cobrado e forma de pagamento na conclusão |
 | Forma de pagamento | `PaymentMethod`: `CASH`, `PIX`, `DEBIT`, `CREDIT` | Dinheiro, Pix, débito, crédito |
 | Notificação | `Notification` | Registro de envio de e-mail |

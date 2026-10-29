@@ -47,7 +47,7 @@ Visitante e cliente (consultam os horários livres). A administração é afetad
     WHERE (status = 'SCHEDULED')
   ```
 
-  Só `SCHEDULED` ocupa a agenda. Um agendamento cancelado, concluído ou com falta não bloqueia o horário (RN-32). Duas transações simultâneas que tentam o mesmo intervalo: a segunda espera a primeira e, se ela confirmar, falha com `ExclusionViolation` (SQLSTATE `23P01`). A S3.08 traduz esse erro para "Este horário não está mais disponível. Escolha outro.".
+  Só `SCHEDULED` ocupa a agenda. Um agendamento cancelado, concluído ou com falta não bloqueia o horário (RN-32). Duas transações simultâneas que tentam o mesmo intervalo: a segunda espera a primeira e, se ela confirmar, falha com `ExclusionViolation` (SQLSTATE `23P01`); se a primeira desistir, a segunda fica com o horário. Quando as duas gravam no índice no mesmo instante, cada uma espera a outra e o Postgres desfaz uma delas com `DeadlockDetected` (`40P01`), depois de cerca de 1 segundo. Nos dois casos só uma confirma. `is_slot_conflict` (`appointments/service.py`) reconhece os dois erros, e a S3.08 responde com ele "Este horário não está mais disponível. Escolha outro.".
 - Um índice em `customer_id` atende a lista "Meus agendamentos" e o limite da RN-11 nas próximas issues.
 
 ## Cálculo dos horários (RN-05)
@@ -74,6 +74,7 @@ Segunda-feira, das 10h às 19h, Corte + Barba (45 min). O barbeiro já tem um ag
 - `list_available_slots(session, barber_id=, service_id=, day=, now=, policy=)`: carrega os dados e chama a função pura;
 - `is_slot_available(session, barber_id=, service_id=, starts_at=, now=, policy=)`: `True` se `starts_at` é exatamente um dos inícios oferecidos naquele dia;
 - `ensure_slot_available(...)`: o mesmo, mas levanta `409 SLOT_UNAVAILABLE` ("Este horário não está mais disponível. Escolha outro.") e trava a linha do barbeiro com `FOR SHARE` até o fim da transação. É o ponto de entrada da criação: a trava serializa a criação com a inativação do barbeiro (RN-60), e a exclusion constraint continua sendo a garantia final da RN-08.
+- `is_slot_conflict(error)` (`app/modules/appointments/service.py`): `True` quando o insert perdeu a disputa pelo horário (violação de `ex_appointments_barber_overlap` ou deadlock), para a S3.08 responder o mesmo `SLOT_UNAVAILABLE`.
 
 ## Trava da RN-60
 Ao receber `PATCH /admin/barbers/{id}` com `active: false` para um barbeiro ativo, a API trava a linha do barbeiro (`FOR UPDATE`) e procura agendamentos `SCHEDULED` dele que ainda não terminaram (`ends_at > agora`). Se houver, recusa com `409 BARBER_HAS_FUTURE_APPOINTMENTS` e nada muda. Agendamentos que já terminaram e ficaram `SCHEDULED` (a administração ainda não concluiu nem marcou falta) não impedem.
@@ -128,7 +129,7 @@ Ao receber `PATCH /admin/barbers/{id}` com `active: false` para um barbeiro ativ
 **CA-10 — Sem sobreposição, mesmo com concorrência (RN-08)**
 - **Dado** um agendamento `SCHEDULED` de um barbeiro
 - **Quando** outro agendamento `SCHEDULED` do mesmo barbeiro cruza o intervalo, inclusive em duas transações simultâneas
-- **Então** o banco recusa o segundo com `ExclusionViolation`. Encostar no fim (`10h45` depois de `10h00–10h45`), outro barbeiro ou um agendamento cancelado no mesmo horário são aceitos.
+- **Então** o banco recusa o segundo com `ExclusionViolation` (ou, se os dois gravaram no mesmo instante, desfaz um deles com deadlock), e só um fica gravado. Encostar no fim (`10h45` depois de `10h00–10h45`), outro barbeiro ou um agendamento cancelado no mesmo horário são aceitos.
 
 **CA-11 — Preço e duração congelados (RN-13)**
 - **Dado** um agendamento com o preço e a duração do serviço

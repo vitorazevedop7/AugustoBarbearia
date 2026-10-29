@@ -1,11 +1,13 @@
 """Rotas de barbeiros: o cadastro, só para a administração, e a vitrine (RN-70)."""
 
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_admin
+from app.clock import utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
 from app.modules.barbers import service
@@ -62,13 +64,18 @@ def get_barber(
     return to_response(service.get_barber(session, barber_id))
 
 
-@router.patch("/{barber_id}", response_model=BarberResponse, responses=not_found)
+@router.patch(
+    "/{barber_id}",
+    response_model=BarberResponse,
+    responses={**not_found, 409: {"model": ErrorResponse}},
+)
 def update_barber(
     barber_id: int,
     data: BarberUpdate,
     session: Annotated[Session, Depends(get_session)],
+    now: Annotated[datetime, Depends(utc_now)],
 ) -> BarberResponse:
-    return to_response(service.update_barber(session, barber_id, data))
+    return to_response(service.update_barber(session, barber_id, data, now=now))
 
 
 @public_router.get("", response_model=list[PublicBarberResponse])

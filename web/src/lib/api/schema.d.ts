@@ -230,6 +230,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Availability
+         * @description Horários de início disponíveis para o cliente (RN-05 a RN-07).
+         */
+        get: operations["get_availability_public_availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -242,6 +262,37 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** AvailabilityResponse */
+        AvailabilityResponse: {
+            /** Barber Id */
+            barber_id: number;
+            /** Service Id */
+            service_id: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Slots */
+            slots: components["schemas"]["AvailableSlot"][];
+        };
+        /**
+         * AvailableSlot
+         * @description Um horário de início e o fim do atendimento, com o fuso de São Paulo
+         *     (`-03:00`, RN-01).
+         */
+        AvailableSlot: {
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
         };
         /** BarberCreate */
         BarberCreate: {
@@ -1185,6 +1236,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description Unprocessable Content */
             422: {
                 headers: {
@@ -1513,6 +1573,58 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublicServiceResponse"][];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_availability_public_availability_get: {
+        parameters: {
+            query: {
+                barber_id: number;
+                service_id: number;
+                /** @description Data local de São Paulo. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailabilityResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Unprocessable Content */
