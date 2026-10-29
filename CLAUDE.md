@@ -94,6 +94,7 @@ A geração do cliente tipado estará disponível após #29: `cd web && pnpm gen
 1. **Todo trabalho começa de uma issue.** Leia a issue (`gh issue view <n>`), as dependências dela e a spec indicada. Sem spec, a primeira tarefa é escrever a spec com `docs/specs/_TEMPLATE.md`.
 2. **Uma issue por vez**, dentro do escopo dela. Se aparecer trabalho extra, abra outra issue em vez de expandir esta.
 3. **Branch** `tipo/<n>-descricao` (ex.: `feat/23-agendamento-cliente`). **PR** com `Closes #n`, seguindo o template. Merge por rebase.
+   - O **CI** (`.github/workflows/ci.yml`) roda os mesmos comandos de qualidade da API e do web em todo PR. **PR com CI vermelho não é mergeado** (ADR 0007). Rode as verificações antes de abrir o PR.
 4. **Documentação no mesmo PR:** mudou o comportamento → atualize `regras.md`, a spec, `modelo.md` (se mudou entidade ou relacionamento) ou `arquitetura.md`. Documentação desatualizada é bug.
 5. **ADRs aceitos não são editados.** Se uma decisão precisa mudar, pare e pergunte ao humano. A mudança vira um ADR novo que substitui o anterior.
 6. **Dúvida de produto** (algo que nenhuma RN ou spec responde): pergunte em vez de inventar. Se a resposta virar regra, ela entra em `regras.md`.
