@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const openingHours = [
   { days: "Segunda a sexta", hours: "10h às 19h" },
@@ -33,9 +34,15 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-line-on-ink">
-        <p className="mx-auto max-w-7xl px-4 py-6 text-center text-sm text-on-ink-muted sm:px-6 lg:px-8">
-          © {new Date().getFullYear()} Augusto Barbearia
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-2 px-4 py-4 text-sm text-on-ink-muted sm:flex-row sm:justify-between sm:px-6 lg:px-8">
+          <p>© {new Date().getFullYear()} Augusto Barbearia</p>
+          <Link
+            href="/privacidade"
+            className="inline-flex min-h-11 items-center underline underline-offset-4 transition-colors duration-300 ease-out hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none"
+          >
+            Política de privacidade
+          </Link>
+        </div>
       </div>
     </footer>
   );

@@ -53,4 +53,14 @@ describe("página inicial", () => {
     expect(footer).toHaveTextContent("Segunda a sexta10h às 19h");
     expect(footer).toHaveTextContent("Sábado9h às 14h");
   });
+
+  it("leva à política de privacidade pelo rodapé", () => {
+    render(<SiteFooter />);
+
+    expect(
+      within(screen.getByRole("contentinfo")).getByRole("link", {
+        name: "Política de privacidade",
+      }),
+    ).toHaveAttribute("href", "/privacidade");
+  });
 });
