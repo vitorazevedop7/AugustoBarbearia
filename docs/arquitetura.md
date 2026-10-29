@@ -127,14 +127,18 @@ web/
 ├── Dockerfile
 └── src/
     ├── app/
-    │   ├── (publico)/              # vitrine: /, /servicos, /barbeiros, /privacidade
+    │   ├── (publico)/              # vitrine: /, /entrar, /servicos, /barbeiros, /privacidade
     │   ├── (cliente)/              # exige login: /agendar, /meus-agendamentos, /perfil
     │   ├── admin/                  # exige admin: /admin/agenda, /admin/clientes, /admin/cadastros, /admin/relatorio
     │   ├── design-system/          # vitrine dos componentes, fora do menu e dos buscadores
     │   └── api/auth/[...all]/      # handler do Better Auth
     ├── lib/
     │   ├── auth.ts                 # configuração do Better Auth (Google + plugin JWT)
+    │   ├── auth-jwt.ts             # o JWT para a API (EdDSA, 15 min, sub/email/name)
+    │   ├── auth-actions.ts         # Server Actions de entrar e sair
+    │   ├── session.ts              # sessão atual para Server Components
     │   └── api/
+    │       ├── token.ts            # getApiToken(): JWT da sessão atual
     │       ├── client.ts           # openapi-fetch com o Bearer JWT
     │       └── schema.d.ts         # GERADO por `pnpm gen:api`, não editar
     └── components/
@@ -178,7 +182,7 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 | `DATABASE_URL` | api, jobs, web | Conexão com o PostgreSQL |
 | `ADMIN_EMAILS` | api | Lista de e-mails da administração (RN-71) |
 | `AUTH_JWKS_URL` | api, jobs | Endpoint JWKS do Better Auth |
-| `AUTH_ISSUER` / `AUTH_AUDIENCE` | api | Conferência do JWT |
+| `AUTH_ISSUER` / `AUTH_AUDIENCE` | web, api | `iss` e `aud` do JWT: o web emite com eles e a API confere |
 | `RESEND_API_KEY` | api, jobs | Envio de e-mail |
 | `EMAIL_FROM` | api, jobs | Remetente dos e-mails |
 | `WEB_BASE_URL` | api, jobs | Links nos e-mails (ex.: "Meus agendamentos") |

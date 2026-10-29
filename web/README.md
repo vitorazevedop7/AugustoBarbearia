@@ -38,8 +38,10 @@ A imagem final usa o build standalone e usuário não-root. O build precisa de a
 
 - `src/app/(publico)`: página inicial e futuras páginas públicas.
 - `src/app/(cliente)` e `src/app/admin`: reservadas para as próximas telas, sem rotas publicadas nesta etapa.
-- `src/app/api/auth/[...all]`: reservado ao handler de autenticação futuro.
-- `src/lib/api`: reservado ao cliente HTTP e contrato gerado em uma etapa posterior.
+- `src/app/api/auth/[...all]`: handler do Better Auth (callback do Google, `/api/auth/token`, `/api/auth/jwks`).
+- `src/app/(publico)/entrar`: página de login, que também mostra os erros do Google.
+- `src/lib/auth.ts`, `auth-jwt.ts`, `auth-actions.ts` e `session.ts`: login com Google, o JWT para a API, as Server Actions de entrar e sair e a sessão atual ([spec](../docs/specs/login-google.md)). As tabelas do Better Auth são criadas com `pnpm auth:migrate`.
+- `src/lib/api/token.ts`: `getApiToken()`, o JWT da sessão atual para chamar a API. O cliente HTTP e o contrato gerado chegam na #29.
 - `src/components`: cabeçalho, rodapé e `RevealObserver` (entrada dos elementos com `data-reveal` ao rolar).
 - `src/app/design-system`: página `/design-system`, que renderiza os tokens e os componentes. Fica fora do menu e dos buscadores.
 - `src/components/ui`: componentes do [design system](../docs/design/design-system.md) (`Button`, `ButtonLink`, `TextField`, `SelectField`, `ChoiceChip`, `Badge`, `StatusBadge`, `Alert`, `EmptyState`, `Ornament`, `SectionHeading`).
