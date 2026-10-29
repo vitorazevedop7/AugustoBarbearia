@@ -116,6 +116,8 @@ Entre com Google e abra http://localhost:3000/admin: um e-mail da lista vê “A
 
 **Cadastro de barbeiros.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta de `ADMIN_EMAILS` e abra http://localhost:3000/admin/cadastros/barbeiros. Edvaldo, Lauro e Manoel já aparecem, ainda com a inicial do nome no lugar da foto (as fotos placeholder entram na S3.10, e as reais são a pendência P10). Crie um barbeiro, edite a apresentação (até 400 caracteres) e mude a situação para Inativo; ele continua na lista, depois dos ativos. Detalhes na [spec do cadastro de barbeiros](docs/specs/cadastro-barbeiros.md).
 
+**Cadastro de serviços.** Com a conta de administração, abra http://localhost:3000/admin/cadastros/servicos. Corte Simples (30 min, R$ 25,00) e Corte + Barba (45 min, R$ 35,00) já aparecem, feitos pelos três proprietários (os preços reais são a pendência P9). Crie um serviço, escolha os barbeiros que o realizam e depois mude a situação para Inativo; ele continua na lista, depois dos ativos. Uma duração fora dos múltiplos de 5 (ou abaixo de 10 minutos), um preço negativo ou um serviço sem barbeiro voltam com a explicação da API. Detalhes na [spec do cadastro de serviços](docs/specs/cadastro-servicos.md).
+
 A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
 
 As verificações rodam nos próprios containers:

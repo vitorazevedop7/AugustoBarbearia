@@ -109,6 +109,15 @@ docker compose exec api uv run pytest tests/test_barbers.py
 
 A administração cria, edita, inativa e reativa barbeiros em `/admin/cadastros/barbeiros` (`GET`/`POST /admin/barbers`, `GET`/`PATCH /admin/barbers/{id}`). A foto é o caminho de um arquivo em `web/public/images/barbeiros/`, sem upload; as fotos fictícias dos proprietários (D10) entram na S3.10 (#63). Nos testes da API, as fixtures `admin` e `customer` do `conftest.py` dão um cliente HTTP já autenticado. A [spec](docs/specs/cadastro-barbeiros.md) documenta as validações; a trava da RN-60 (agendamentos futuros) entra na S3.07.
 
+### Cadastro de serviços — S3.04
+
+```bash
+docker compose exec api alembic upgrade head          # cria services e barber_services com Corte Simples e Corte + Barba
+docker compose exec api uv run pytest tests/test_catalog.py
+```
+
+A administração cria, edita, inativa e reativa serviços em `/admin/cadastros/servicos` (`GET`/`POST /admin/services`, `GET`/`PATCH /admin/services/{id}`), escolhendo os barbeiros que os realizam. O módulo é `app/modules/catalog/` (`Service` e `BarberService`); as regras da RN-61 ficam em `service.py` (`check_price`, `check_duration`, `resolve_barbers`). O preço trafega como string decimal (`"25.00"`) e o web formata com `formatPrice` de `src/lib/format.ts`, sem `float`. A [spec](docs/specs/cadastro-servicos.md) documenta as validações e o formato do preço.
+
 ## Mapa da documentação
 
 | Documento | Leia quando |

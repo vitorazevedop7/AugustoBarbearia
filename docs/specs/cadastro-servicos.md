@@ -139,3 +139,8 @@ Administração. A vitrine e o agendamento leem os serviços ativos nas próxima
 
 ## Dúvidas em aberto
 - Lista real de serviços, com preço e duração: pendência P9, resolvida na apresentação.
+- Escolhas desta implementação que nenhuma RN decide, a confirmar:
+  - o teto de 1440 minutos para a duração é só técnico (evita estourar o `integer`), não uma regra de negócio;
+  - um barbeiro inativo pode continuar ligado ao serviço, e "pelo menos um barbeiro" conta também os inativos;
+  - a descrição tem até 400 caracteres, como a apresentação do barbeiro;
+  - o nome do serviço não é único.
