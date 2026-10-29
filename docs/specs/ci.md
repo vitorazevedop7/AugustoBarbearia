@@ -48,13 +48,13 @@ Nenhuma regra de negócio. Segue o ADR 0007 e os comandos do `CLAUDE.md`.
   - **`changes`** decide o que rodar com `git diff` entre a base do PR e o commit de merge. Não usa nenhuma action de terceiros para isso.
   - **`api`**, que roda dentro de `api/`.
   - **`web`**, que roda dentro de `web/`.
-- **Pulado conta como aprovado.** Um job pulado pelo `if` não bloqueia o PR: um PR que só mexe numa pasta, ou só em `docs/`, fica com o outro job (ou os dois) como *skipped*.
+- **Pulado só vale com o `changes` verde.** Um PR que só mexe numa pasta, ou só em `docs/`, fica com o outro job (ou os dois) como *skipped*. Mas, se o próprio `changes` falhar, `api` e `web` também aparecem como *skipped* sem ter verificado nada. Por isso, o `changes` sempre precisa estar verde.
 - **Versões:**
   - as actions ficam fixadas por SHA, com a versão em comentário;
   - Node, pnpm, Python e uv vêm dos mesmos arquivos do projeto: `web/.node-version`, `packageManager`, `api/.python-version` e a versão do uv do `api/Dockerfile`.
 - **Segurança:** o token do workflow só lê o repositório (`permissions: contents: read`), e o checkout não guarda credenciais.
 - **Execuções antigas:** um push novo no mesmo PR cancela a execução anterior.
-- **CI verde antes do merge é regra de processo** (#46). O repositório é privado numa conta GitHub Free, e nesse plano o GitHub não aplica rulesets nem proteção de branch. Tornar o repositório público ou pagar o Pro/Team contraria a D9 e o ADR 0009. Por isso, quem faz o merge confere antes que os checks `api` e `web` estão verdes ou pulados. Se o plano mudar, a regra no GitHub exige esses dois checks.
+- **CI verde antes do merge é regra de processo** (#46). O repositório é privado numa conta GitHub Free, e nesse plano o GitHub não aplica rulesets nem proteção de branch. Tornar o repositório público ou pagar o Pro/Team contraria a D9 e o ADR 0009. Por isso, quem faz o merge confere antes que o `changes` está verde e que `api` e `web` estão verdes ou pulados. Se o plano mudar, a regra no GitHub exige os três checks: `changes`, `api` e `web`.
 
 ## API
 Nenhuma rota nova.
