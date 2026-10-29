@@ -2,10 +2,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Alert } from "./alert";
 import { StatusBadge } from "./badge";
+import { BarberCard } from "./barber-card";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { ChoiceChip } from "./choice-chip";
 import { TextAreaField, TextField } from "./field";
+import { ServiceCard } from "./service-card";
 
 describe("Button", () => {
   it("trava e marca como ocupado enquanto a ação está pendente", () => {
@@ -98,5 +100,68 @@ describe("Alert", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "Seu horário está confirmado.",
     );
+  });
+});
+
+describe("ServiceCard", () => {
+  it("mostra preço, duração e quem realiza, com o link para agendar", () => {
+    render(
+      <ServiceCard
+        name="Corte + Barba"
+        description="Com toalha quente."
+        price="35.00"
+        durationMinutes={45}
+        barbers={["Edvaldo", "Lauro"]}
+        href="/agendar?servico=2"
+      />,
+    );
+    const card = screen.getByRole("article");
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Corte + Barba" }),
+    ).toBeVisible();
+    expect(card).toHaveTextContent("Preço: R$ 35,00");
+    expect(card).toHaveTextContent("Duração: 45 min");
+    expect(card).toHaveTextContent("Com toalha quente.");
+    expect(card).toHaveTextContent("Com Edvaldo e Lauro");
+    expect(
+      screen.getByRole("link", { name: "Agendar Corte + Barba" }),
+    ).toHaveAttribute("href", "/agendar?servico=2");
+  });
+});
+
+describe("BarberCard", () => {
+  it("usa a foto 4:5 com texto alternativo", () => {
+    render(
+      <BarberCard
+        name="Lauro"
+        photoPath="/images/barbeiros/lauro.jpg"
+        bio="Apresentação."
+        href="/agendar?barbeiro=2"
+        sizes="100vw"
+        headingLevel="h2"
+      />,
+    );
+    const photo = screen.getByRole("img", { name: "Foto de Lauro" });
+    expect(photo.parentElement).toHaveClass("aspect-[4/5]", "overflow-hidden");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Lauro" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Agendar com Lauro" }),
+    ).toHaveAttribute("href", "/agendar?barbeiro=2");
+  });
+
+  it("mostra a inicial, sem imagem, quando não há foto", () => {
+    render(
+      <BarberCard
+        name=" manoel"
+        photoPath={null}
+        bio={null}
+        href="/agendar?barbeiro=3"
+        sizes="100vw"
+      />,
+    );
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.getByText("M")).toHaveAttribute("aria-hidden", "true");
   });
 });

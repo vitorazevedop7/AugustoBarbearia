@@ -75,3 +75,12 @@ class BarberResponse(BaseModel):
     photo_path: str | None
     bio: str | None
     active: bool
+
+
+class PublicBarberResponse(BaseModel):
+    """Barbeiro na vitrine: só os ativos aparecem, então não há `active`."""
+
+    id: int
+    name: str
+    photo_path: str | None
+    bio: str | None

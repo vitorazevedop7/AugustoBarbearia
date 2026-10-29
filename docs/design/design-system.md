@@ -106,7 +106,9 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Alert` | `alert.tsx` | Pronto |
 | `EmptyState` | `empty-state.tsx` | Pronto |
 | `Ornament`, `SectionHeading` | `ornament.tsx`, `section-heading.tsx` | Pronto |
-| Menu do celular, faixa de dias, card de serviço, card de barbeiro, card de agendamento, tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
+| `ServiceCard`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
+| `MobileMenu` | `mobile-menu.tsx` | Pronto |
+| Faixa de dias, card de agendamento, tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
 
 ### Botão
 
@@ -117,7 +119,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 |---|---|
 | `primary` | A ação principal da tela: "Agendar horário", "Confirmar agendamento", "Salvar" |
 | `outline` | Ação secundária ao lado da principal: "Ver serviços", "Remarcar" |
-| `outline-light` | Qualquer botão sobre faixa `ink` |
+| `outline-light` | Botão secundário sobre faixa `ink`. O `primary` também pode ficar no `ink` quando é a ação principal da faixa ("Agendar horário" no hero): a borda `brand` tem 3,3:1 sobre `ink`, e o texto, 5,8:1 sobre `brand` |
 | `danger` | Ação destrutiva: "Cancelar agendamento", "Marcar falta". Sempre pede confirmação |
 | `ghost` | Ação de baixa ênfase: "Voltar", "Limpar filtro" |
 
@@ -166,6 +168,21 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 - **`EmptyState`** aparece quando uma lista não tem itens. Ele diz o que aconteceu e oferece o próximo passo: "Você ainda não tem horários" + "Agendar horário".
 - Uma busca ou filtro sem resultado diz o filtro usado e oferece limpar.
+
+### Cards da vitrine
+
+- **`ServiceCard`:** nome, preço (`brand`, `tabular-nums`), duração, descrição opcional, "Com <barbeiros>" e o botão "Agendar" (`outline`, `sm`), com o nome do serviço no nome acessível ("Agendar Corte Simples"). Preço e duração levam um prefixo só para leitor de tela ("Preço:", "Duração:").
+- **`BarberCard`:** a foto 4:5 em cima, e o nome, a apresentação e "Agendar com <nome>" embaixo. O texto não fica sobre a foto, para o card funcionar igual com e sem foto.
+- **`BarberPhoto`:** a moldura 4:5 com `next/image`. Sem foto, mostra a inicial do nome (decorativa, `aria-hidden`), num tamanho que acompanha a largura da moldura. Com `zoom`, a foto cresce 5% no hover do card.
+- Os dois cards recebem o nível do título: `h3` dentro de uma seção com título (página inicial) e `h2` numa página que só tem o `h1` antes (`/servicos`, `/barbeiros`).
+- Em grade: serviços em 1 coluna no celular e 2 a partir de `md`; barbeiros em 1, 2 (`sm`) e 3 (`lg`).
+
+### Menu do celular
+
+- **`MobileMenu`** é um `<details>` nativo com o botão "Menu" (ícone e texto). Abaixo de 1024px, ele guarda a navegação, o "Agendar horário" na largura toda e o login; a partir de 1024px, tudo fica na linha do cabeçalho.
+- Funciona sem JS. Com JS, fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link.
+- O painel desce logo abaixo do cabeçalho, sem cobrir a tela inteira, então a rolagem não é travada.
+- O link da página atual tem `aria-current="page"` e um traço em `brand`.
 
 ### Ornamento e título de seção
 

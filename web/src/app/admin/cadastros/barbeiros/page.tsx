@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { BarberPhoto } from "@/components/ui/barber-photo";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createApiClient } from "@/lib/api/client";
 import { AdminPage } from "../../admin-page";
 import { apiMessage } from "../../form-state";
-import { BarberPhoto } from "./barber-photo";
 import { BARBERS_PATH, noticeMessage } from "./form-data";
 
 export const metadata: Metadata = {

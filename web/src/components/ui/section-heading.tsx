@@ -2,11 +2,14 @@ import { Ornament } from "./ornament";
 
 /** Bloco de título de seção: ornamento, título e texto de apoio. */
 export function SectionHeading({
+  id,
   title,
   description,
   align = "center",
   tone = "light",
 }: {
+  /** `id` do `h2`, para a seção apontar para ele com `aria-labelledby`. */
+  id?: string;
   title: string;
   description?: string;
   align?: "center" | "start";
@@ -17,6 +20,7 @@ export function SectionHeading({
     <div className={`max-w-2xl ${centered ? "mx-auto text-center" : ""}`}>
       <Ornament align={align} tone={tone} />
       <h2
+        id={id}
         className={`mt-6 font-heading text-display-2 font-bold ${tone === "dark" ? "text-surface" : "text-ink"}`}
       >
         {title}

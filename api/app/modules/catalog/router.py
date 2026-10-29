@@ -1,4 +1,4 @@
-"""Rotas do cadastro de serviços, só para a administração (RN-70)."""
+"""Rotas de serviços: o cadastro, só para a administração, e a vitrine (RN-70)."""
 
 from typing import Annotated
 
@@ -11,6 +11,8 @@ from app.errors import ErrorResponse
 from app.modules.catalog import service
 from app.modules.catalog.models import Service
 from app.modules.catalog.schemas import (
+    PublicServiceBarber,
+    PublicServiceResponse,
     ServiceBarber,
     ServiceCreate,
     ServiceResponse,
@@ -24,6 +26,9 @@ router = APIRouter(
     responses={401: {"model": ErrorResponse}, 403: {"model": ErrorResponse}},
 )
 not_found: dict[int | str, dict[str, object]] = {404: {"model": ErrorResponse}}
+
+# A vitrine é pública: qualquer um vê os serviços oferecidos (RN-70).
+public_router = APIRouter(prefix="/public/services", tags=["Vitrine"])
 
 
 def to_response(item: Service) -> ServiceResponse:
@@ -71,3 +76,23 @@ def update_service(
     session: Annotated[Session, Depends(get_session)],
 ) -> ServiceResponse:
     return to_response(service.update_service(session, service_id, data))
+
+
+@public_router.get("", response_model=list[PublicServiceResponse])
+def list_public_services(
+    session: Annotated[Session, Depends(get_session)],
+) -> list[PublicServiceResponse]:
+    return [
+        PublicServiceResponse(
+            id=offered.service.id,
+            name=offered.service.name,
+            description=offered.service.description,
+            price=offered.service.price,
+            duration_minutes=offered.service.duration_minutes,
+            barbers=[
+                PublicServiceBarber(id=barber.id, name=barber.name)
+                for barber in offered.barbers
+            ],
+        )
+        for offered in service.list_offered_services(session)
+    ]

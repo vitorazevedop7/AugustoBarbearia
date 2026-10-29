@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. O módulo `barbers` (S3.03), em [cadastro-barbeiros.md](specs/cadastro-barbeiros.md), cuida do cadastro de barbeiros. O módulo `catalog` (S3.04), em [cadastro-servicos.md](specs/cadastro-servicos.md), cuida dos serviços e da associação Barbeiro–Serviço; ele depende de `barbers`, e não o contrário. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. O módulo `barbers` (S3.03), em [cadastro-barbeiros.md](specs/cadastro-barbeiros.md), cuida do cadastro de barbeiros. O módulo `catalog` (S3.04), em [cadastro-servicos.md](specs/cadastro-servicos.md), cuida dos serviços e da associação Barbeiro–Serviço; ele depende de `barbers`, e não o contrário. A vitrine (S3.05), em [vitrine.md](specs/vitrine.md), lê os serviços e os barbeiros ativos pelos routers públicos (`public_router`) desses dois módulos, separados dos routers `/admin`. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -131,6 +131,8 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `GET /admin/barbers/{id}`, `PATCH /admin/barbers/{id}` | Administração (`require_admin`) | Lê e altera um barbeiro; o `PATCH` muda só os campos enviados, inclusive `active` para inativar ou reativar (RN-60) |
 | `GET /admin/services`, `POST /admin/services` | Administração (`require_admin`) | Lista todos os serviços (ativos primeiro), com os barbeiros que os realizam, e cria um serviço ativo ([cadastro-servicos.md](specs/cadastro-servicos.md)) |
 | `GET /admin/services/{id}`, `PATCH /admin/services/{id}` | Administração (`require_admin`) | Lê e altera um serviço; o `PATCH` muda só os campos enviados, `barber_ids` substitui a lista e `active` inativa ou reativa. Não há exclusão (RN-61) |
+| `GET /public/services` | Qualquer um | Serviços ativos com pelo menos um barbeiro ativo, por nome, cada um com os barbeiros ativos que o realizam (RN-60, RN-61, RN-05 item 5) ([vitrine.md](specs/vitrine.md)) |
+| `GET /public/barbers` | Qualquer um | Barbeiros ativos, por nome, com foto e apresentação (RN-60) |
 
 As rotas `/me` do cliente recebem o `Customer` pela dependência `current_customer` (`app/modules/customers/dependencies.py`), que sempre parte do `sub` do token, nunca de um id na requisição. A tabela `customers` guarda o `sub` em `auth_user_id`, sem FK para a tabela `user` do Better Auth ([perfil-cliente.md](specs/perfil-cliente.md)).
 
@@ -147,7 +149,7 @@ web/
 ├── scripts/gen-api.mjs         # `pnpm gen:api`: OpenAPI da API → src/lib/api/schema.d.ts
 └── src/
     ├── app/
-    │   ├── (publico)/              # vitrine: /, /entrar, /servicos, /barbeiros, /privacidade
+    │   ├── (publico)/              # vitrine: / (em (inicio)/), /entrar, /servicos, /barbeiros, /privacidade
     │   ├── (cliente)/              # exige login: /agendar, /meus-agendamentos, /perfil
     │   ├── admin/                  # exige admin; layout.tsx checa o acesso e mostra a navegação: /admin, /admin/cadastros(/barbearia, /barbeiros, /servicos), depois /admin/agenda, /admin/clientes, /admin/relatorio
     │   ├── design-system/          # vitrine dos componentes, fora do menu e dos buscadores
@@ -159,17 +161,20 @@ web/
     │   ├── session.ts              # sessão atual para Server Components
     │   └── api/
     │       ├── token.ts            # getApiToken(): JWT da sessão atual
-    │       ├── client.ts           # openapi-fetch com o Bearer JWT
+    │       ├── client.ts           # openapi-fetch com o Bearer JWT; createPublicApiClient() sem token
+    │       ├── public.ts           # leituras das rotas /public para a vitrine e o rodapé
     │       └── schema.d.ts         # GERADO por `pnpm gen:api`, não editar
     └── components/
         ├── api-status.tsx          # status de GET /health na página inicial, só em desenvolvimento
+        ├── site-header.tsx / site-nav.tsx / site-footer.tsx  # cabeçalho com navegação e "Agendar"; rodapé com dados da API
+        ├── vitrine/                # seções da vitrine: listas de serviços e barbeiros, horário e contato, topo e esqueleto
         └── ui/                     # componentes do design system (docs/design/design-system.md)
 ```
 
 ### Regras do front
 
 - O web chama a API só pelo `createApiClient()` de `lib/api/client.ts`, tipado pelo `schema.d.ts` gerado ([contrato-openapi.md](specs/contrato-openapi.md)). Mudou um schema da API, rode `pnpm gen:api` no mesmo PR; o job `contract` do CI confere.
-- O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. O layout de `/admin` consulta `/admin/ping` sem cache antes de qualquer página da área: 200 mostra a navegação e a página, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
+- O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. As rotas `/public` da vitrine usam `createPublicApiClient()`, que nunca envia token nem consulta a sessão; `lib/api/public.ts` junta essas leituras com o `cache` do React, para o rodapé e a página dividirem a mesma chamada. O layout de `/admin` consulta `/admin/ping` sem cache antes de qualquer página da área: 200 mostra a navegação e a página, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
 - **Server Components** buscam dados pela API. **Server Actions** fazem as mutações chamando a API. O navegador nunca chama a API diretamente.
 - **Nenhuma regra de negócio no front.** Validação no front é só para a experiência do usuário; quem decide é a API, e o front mostra o `message` do erro que a API devolve.
 - O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware, layout ou na própria página). `/perfil` confere a sessão antes de chamar a API e leva ao login com `voltar=/perfil`; a administração (403) vai para `/admin`. Mesmo assim, a API valida tudo de novo.
