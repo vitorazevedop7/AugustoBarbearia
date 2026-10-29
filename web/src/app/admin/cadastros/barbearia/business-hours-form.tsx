@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { SelectField, TextField } from "@/components/ui/field";
 import { toTimeInput } from "@/lib/format";
 import { saveBusinessHours } from "./actions";
-import { type BusinessHoursDay, type FormState, WEEKDAYS } from "./form-data";
+import type { FormState } from "../../form-state";
+import { type BusinessHoursDay, WEEKDAYS } from "./form-data";
 
 const initialState: FormState = { status: "idle" };
 

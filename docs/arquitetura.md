@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. O módulo `barbers` (S3.03), em [cadastro-barbeiros.md](specs/cadastro-barbeiros.md), cuida do cadastro de barbeiros; o vínculo com os serviços entra na S3.04. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -127,6 +127,8 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `GET /admin/ping` | Administração (`require_admin`) | `{ "status": "ok" }`, rota de prova da S2.09 |
 | `GET /public/shop` | Qualquer um | Dados da barbearia e horário de funcionamento ([barbearia-horarios.md](specs/barbearia-horarios.md)) |
 | `PUT /admin/shop`, `PUT /admin/business-hours` | Administração (`require_admin`) | Alteram os dados da barbearia e o horário de funcionamento |
+| `GET /admin/barbers`, `POST /admin/barbers` | Administração (`require_admin`) | Lista todos os barbeiros (ativos primeiro) e cria um barbeiro ativo ([cadastro-barbeiros.md](specs/cadastro-barbeiros.md)) |
+| `GET /admin/barbers/{id}`, `PATCH /admin/barbers/{id}` | Administração (`require_admin`) | Lê e altera um barbeiro; o `PATCH` muda só os campos enviados, inclusive `active` para inativar ou reativar (RN-60) |
 
 As rotas `/me` do cliente recebem o `Customer` pela dependência `current_customer` (`app/modules/customers/dependencies.py`), que sempre parte do `sub` do token, nunca de um id na requisição. A tabela `customers` guarda o `sub` em `auth_user_id`, sem FK para a tabela `user` do Better Auth ([perfil-cliente.md](specs/perfil-cliente.md)).
 
@@ -145,7 +147,7 @@ web/
     ├── app/
     │   ├── (publico)/              # vitrine: /, /entrar, /servicos, /barbeiros, /privacidade
     │   ├── (cliente)/              # exige login: /agendar, /meus-agendamentos, /perfil
-    │   ├── admin/                  # exige admin; layout.tsx checa o acesso e mostra a navegação: /admin, /admin/cadastros(/barbearia), depois /admin/agenda, /admin/clientes, /admin/relatorio
+    │   ├── admin/                  # exige admin; layout.tsx checa o acesso e mostra a navegação: /admin, /admin/cadastros(/barbearia, /barbeiros), depois /admin/agenda, /admin/clientes, /admin/relatorio
     │   ├── design-system/          # vitrine dos componentes, fora do menu e dos buscadores
     │   └── api/auth/[...all]/      # handler do Better Auth
     ├── lib/

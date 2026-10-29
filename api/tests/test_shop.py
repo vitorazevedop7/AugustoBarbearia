@@ -1,5 +1,4 @@
 from datetime import time
-from typing import Literal
 
 import pytest
 from fastapi.testclient import TestClient
@@ -7,10 +6,6 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import current_user
-from app.auth.schemas import CurrentUser
-from app.db import get_session
-from app.main import create_app
 from app.modules.shop.models import BusinessHours
 
 WEEK = [
@@ -33,25 +28,6 @@ SHOP = {
     "instagram": "@augusto",
     "email": "contato@example.com",
 }
-
-
-def client_as(db_session: Session, role: Literal["admin", "customer"]) -> TestClient:
-    app = create_app()
-    app.dependency_overrides[get_session] = lambda: db_session
-    app.dependency_overrides[current_user] = lambda: CurrentUser(
-        sub=f"{role}-1", email=f"{role}@example.com", name="Pessoa", role=role
-    )
-    return TestClient(app)
-
-
-@pytest.fixture
-def admin(db_session: Session) -> TestClient:
-    return client_as(db_session, "admin")
-
-
-@pytest.fixture
-def customer(db_session: Session) -> TestClient:
-    return client_as(db_session, "customer")
 
 
 def test_rn02_dados_iniciais_seguem_o_horario_padrao(client: TestClient) -> None:

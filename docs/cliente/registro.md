@@ -44,7 +44,7 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 | P7 | Nome oficial: "Augusto" ou "Augustus" Barbearia | 2026-10-08 | Vitor | Resolvida: decisão D1 (2026-10-08) | — |
 | P8 | Quem é o ponto de contato principal e quem administra o sistema | 2026-10-08 | Vitor | Parcial: a administração é feita pela equipe da barbearia (D2); o ponto de contato fica para a apresentação | — |
 | P9 | Lista real de serviços, com preço e duração | 2026-10-08 | Proprietários | Apresentação. Até lá, o sistema usa os serviços do projeto acadêmico | — |
-| P10 | Fotos da barbearia e dos barbeiros para a vitrine (a referência visual depende de fotos no hero e nos cards da equipe) | 2026-10-28 | Proprietários | Apresentação. Até lá, a vitrine funciona sem fotos | — |
+| P10 | Fotos da barbearia e dos barbeiros para a vitrine (a referência visual depende de fotos no hero e nos cards da equipe) | 2026-10-28 | Proprietários | Apresentação. Até lá, os barbeiros usam fotos fictícias como placeholder (D10) e o restante da vitrine funciona sem fotos | #52 |
 
 ## Entradas
 
@@ -116,3 +116,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Canal:** —
 - **Fatos e decisões:**
   - **D9.** **Nada é pago até a apresentação.** O MVP é demonstrado num ambiente gratuito, no ar e acessível pelo celular dos proprietários. Se eles quiserem o sistema, a hospedagem definitiva (com mensalidade) passa a ser **paga pela barbearia**. Isso substitui a premissa de `visao.md` de que o custo seria do Vitor até a apresentação. Detalhes técnicos no [ADR 0009](../decisoes/0009-demonstracao-no-trial.md).
+
+### 2026-10-29 — Fotos placeholder dos barbeiros
+- **Com:** registro interno. Decisão do Vitor como product owner
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D10.** Enquanto as fotos reais não chegam (P10), os três barbeiros aparecem com **fotos fictícias geradas por IA**, em proporção 4:5. Elas **não retratam os proprietários** e servem só para a vitrine e o cadastro não ficarem vazios na apresentação. Quando as fotos reais chegarem, elas substituem as fictícias. Elas não são fotos de banco de imagem, que o design system continua não usando.

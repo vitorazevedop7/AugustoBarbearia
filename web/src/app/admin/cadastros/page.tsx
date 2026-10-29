@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Cadastros — Administração — Augusto Barbearia",
 };
 
-/** Barbeiros e serviços entram aqui nas próximas issues (S3.03, S3.04). */
+/** Serviços entram aqui na próxima issue (S3.04). */
 export default function CadastrosPage() {
   return (
     <AdminPage title="Cadastros">
@@ -16,6 +16,13 @@ export default function CadastrosPage() {
             href="/admin/cadastros/barbearia"
             title="Barbearia"
             description="Endereço, contato, textos da vitrine e horário de funcionamento."
+          />
+        </li>
+        <li>
+          <AdminLinkCard
+            href="/admin/cadastros/barbeiros"
+            title="Barbeiros"
+            description="Nome, foto, apresentação e situação de cada barbeiro."
           />
         </li>
       </ul>

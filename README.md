@@ -114,6 +114,8 @@ Entre com Google e abra http://localhost:3000/admin: um e-mail da lista vê “A
 
 **Perfil do cliente.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta Google fora de `ADMIN_EMAILS` e abra http://localhost:3000/perfil. O primeiro acesso cria o cadastro de cliente com o nome e o e-mail do Google, ou o vincula a um cadastro com o mesmo e-mail (RN-23). Informe o telefone com DDD e salve; `GET /me` passa a indicar `has_phone: true`. Detalhes na [spec do perfil](docs/specs/perfil-cliente.md).
 
+**Cadastro de barbeiros.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta de `ADMIN_EMAILS` e abra http://localhost:3000/admin/cadastros/barbeiros. Edvaldo, Lauro e Manoel já aparecem, com fotos fictícias de placeholder (as fotos reais são a pendência P10). Crie um barbeiro, edite a apresentação (até 400 caracteres) e mude a situação para Inativo; ele continua na lista, depois dos ativos. Detalhes na [spec do cadastro de barbeiros](docs/specs/cadastro-barbeiros.md).
+
 A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
 
 As verificações rodam nos próprios containers:
