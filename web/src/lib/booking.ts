@@ -73,6 +73,8 @@ function positiveInteger(value: string | undefined): number | undefined {
 function calendarDate(value: string | undefined): string | undefined {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
   const parsed = new Date(`${value}T00:00:00Z`);
+  // Mês ou dia fora do intervalo (2026-13-01) dá Invalid Date, e o toISOString lançaria.
+  if (Number.isNaN(parsed.getTime())) return undefined;
   return parsed.toISOString().startsWith(value) ? value : undefined;
 }
 

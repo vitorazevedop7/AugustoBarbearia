@@ -88,6 +88,14 @@ describe("parseBookingParams", () => {
       { barbeiro: 1, servico: 2 },
     ],
     [
+      { barbeiro: "1", servico: "2", data: "2026-13-01" },
+      { barbeiro: 1, servico: 2 },
+    ],
+    [
+      { barbeiro: "1", servico: "2", data: "2026-11-00" },
+      { barbeiro: 1, servico: 2 },
+    ],
+    [
       { barbeiro: "1", servico: "2", data: "03/11/2026" },
       { barbeiro: 1, servico: 2 },
     ],
