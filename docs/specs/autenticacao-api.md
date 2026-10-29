@@ -22,7 +22,7 @@ Cliente e administração. Visitantes continuam acessando as rotas públicas.
 **CA-1 — Identidade autenticada**
 - **Dado** um JWT assinado com EdDSA/Ed25519 por uma chave do JWKS configurado, com `kid`, `iss`, `aud`, `exp`, `sub`, `email` e `name` válidos
 - **Quando** `GET /me` recebe `Authorization: Bearer <token>`
-- **Então** responde 200 com `sub`, `email`, `name` e `role`, sem acessar ou criar clientes no banco.
+- **Então** responde 200 com `sub`, `email`, `name` e `role`, sem acessar ou criar clientes no banco. *A partir da S3.06, `GET /me` também resolve o cadastro do cliente e devolve `has_phone` ([perfil-cliente.md](perfil-cliente.md)).*
 
 **CA-2 — Credenciais inválidas**
 - **Dado** um pedido sem Bearer válido, ou um token expirado, adulterado, malformado, com algoritmo, emissor, audiência ou claims obrigatórios inválidos

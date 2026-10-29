@@ -30,3 +30,12 @@ def require_admin(user: Annotated[CurrentUser, Depends(current_user)]) -> Curren
     if user.role != "admin":
         raise HTTPException(status_code=403)
     return user
+
+
+def require_customer(
+    user: Annotated[CurrentUser, Depends(current_user)],
+) -> CurrentUser:
+    """RN-70/RN-71: a administração não agenda para si nem tem perfil de cliente."""
+    if user.role != "customer":
+        raise HTTPException(status_code=403)
+    return user

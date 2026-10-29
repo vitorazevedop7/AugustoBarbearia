@@ -28,8 +28,17 @@ erDiagram
 | **Serviço** | O que é oferecido, com preço e duração. Pode estar ativo ou inativo (RN-61) |
 | **Barbeiro–Serviço** | Quais barbeiros realizam quais serviços (N:N) |
 | **Bloqueio** | Intervalo em que um barbeiro não atende: almoço, folga, compromisso (RN-03) |
-| **Cliente** | Pessoa atendida. Pode ter conta Google (agenda online) ou não (cadastrada pela administração) (RN-62, RN-20) |
+| **Cliente** | Pessoa atendida. Pode ter conta Google (agenda online) ou não (cadastrada pela administração) (RN-62, RN-20). O e-mail, quando existe, é único entre os clientes |
 | **Conta Google** | A identidade de login. Ou está vinculada a um cliente, ou pertence a um e-mail da lista de administração (RN-71) |
+
+### Vínculo entre Cliente e Conta Google
+
+- O cliente guarda o identificador da conta (o `sub` do JWT, que é o id do usuário do Better Auth). Cada conta se vincula a no máximo um cliente, e cada cliente a no máximo uma conta.
+- No primeiro acesso de uma conta que não é da administração, o cadastro é procurado pelo vínculo; sem ele, pelo e-mail, vinculando um cadastro feito pela administração (RN-23); sem os dois, é criado com o nome e o e-mail do Google, ainda sem telefone.
+- Um cadastro já vinculado nunca passa sozinho para outra conta com o mesmo e-mail: a barbearia resolve o caso.
+- A conta da administração não ganha cadastro de cliente (RN-71).
+- O cliente sem conta tem telefone desde o cadastro; o cliente com conta informa o telefone no perfil, e só agenda depois disso (RN-10).
+- A conta fica nas tabelas do Better Auth, e o cliente nas tabelas de domínio. Por isso o vínculo não tem chave estrangeira entre os dois donos de schema (ADR 0002).
 | **Agendamento** | Um horário reservado de um cliente com um barbeiro para um serviço. Guarda o preço e a duração "congelados" (RN-13) e a origem (online ou administração) |
 | **Pagamento** | O registro da conclusão: o valor cobrado e a forma de pagamento (RN-40). Existe só para agendamentos concluídos |
 | **Notificação** | Registro de cada e-mail enviado ou que falhou: confirmação, lembrete, remarcação, cancelamento (RN-50 a RN-54) |
