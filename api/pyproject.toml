@@ -4,8 +4,11 @@ version = "0.1.0"
 description = "API de agendamento e gestão da Augusto Barbearia"
 requires-python = "==3.14.10"
 dependencies = [
+    "alembic>=1.20.1",
     "fastapi>=0.162.0",
+    "psycopg[binary]>=3,<4",
     "pydantic-settings>=2.16.2",
+    "sqlalchemy>=2.0,<2.1",
     "uvicorn[standard]>=0.54.0",
 ]
 

@@ -20,3 +20,12 @@ def test_settings_cache_can_be_reset(monkeypatch: MonkeyPatch) -> None:
         assert get_settings().app_name == "Nova configuração"
     finally:
         get_settings.cache_clear()
+
+
+def test_database_url_is_required(monkeypatch: MonkeyPatch) -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    monkeypatch.setenv("DATABASE_URL", "")
+    with pytest.raises(ValidationError):
+        Settings()

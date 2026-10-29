@@ -30,6 +30,8 @@ RUN groupadd --system --gid 10001 app \
     && useradd --system --uid 10001 --gid app --no-create-home app
 COPY --from=builder /app/.venv /app/.venv
 COPY app ./app
+COPY alembic.ini ./
+COPY alembic ./alembic
 USER app
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
