@@ -22,3 +22,5 @@ export function safeRedirectPath(value: unknown): string {
   if (value.startsWith("//") || value.startsWith("/\\")) return "/";
   return value;
 }
+
+const variavelNaoUsada = 1;
