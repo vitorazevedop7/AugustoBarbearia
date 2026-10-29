@@ -57,3 +57,7 @@ Banco, modelos de domínio, Alembic, autenticação, e-mails, regras de agendame
 
 ## Dúvidas em aberto
 Nenhuma.
+
+## Evolução na S2.05
+
+A spec [banco-api.md](banco-api.md), da #27, substitui o healthcheck sem dependências externas: `/health` agora consulta o PostgreSQL e pode retornar 503. `DATABASE_URL` passa a ser obrigatória, e a suíte usa o banco de teste separado no Compose.

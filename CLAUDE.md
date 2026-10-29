@@ -19,6 +19,7 @@ API (#24) e web (#25) são entregas independentes. Os comandos abaixo ficam disp
 
 ```bash
 cd api
+cp .env.example .env
 uv sync --locked
 uv run uvicorn app.main:app --reload
 uv run pytest
@@ -27,7 +28,7 @@ uv run ruff format --check .
 uv run pyright
 ```
 
-Na raiz, `docker build -t augusto-api ./api` e `docker run --rm -p 8000:8000 augusto-api` constroem e iniciam a imagem de produção. `GET /health` responde `{ "status": "ok" }` e `/docs` expõe o contrato. O healthcheck não depende de banco. `api/.env.example` documenta a configuração opcional do esqueleto.
+Na raiz, `docker build -t augusto-api ./api` e `docker run --rm --env-file api/.env -p 8000:8000 augusto-api` constroem e iniciam a imagem de produção (configure no `.env` um host de banco acessível pelo container). `GET /health` responde `{ "status": "ok" }` e `/docs` expõe o contrato. O healthcheck verifica o PostgreSQL e retorna 503 se ele estiver indisponível. `api/.env.example` documenta a configuração da API; `DATABASE_URL` é obrigatória.
 
 ### Web — disponível a partir da S2.03
 
@@ -58,15 +59,19 @@ docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
 docker compose down               # para tudo; `down -v` apaga também o banco
 ```
 
-### Próximas entregas da Fase 0
-
-Os comandos abaixo estarão disponíveis após suas issues: banco/Alembic (#27) e geração do cliente tipado (#29). Consulte o README antes de executá-los.
+### Banco e migrações — S2.05
 
 ```bash
 docker compose exec api alembic upgrade head
 docker compose exec api alembic revision --autogenerate -m "msg"
-cd web && pnpm gen:api
+docker compose exec api alembic check
 ```
+
+Os testes criam o banco `<POSTGRES_DB>_test` no mesmo servidor e aplicam migrações uma vez por sessão. Cada teste usa uma transação externa com rollback, inclusive quando o service faz commit. O usuário de desenvolvimento precisa de permissão `CREATEDB`. Importe novos modelos em `api/alembic/env.py` antes de gerar migrações.
+
+### Próximas entregas da Fase 0
+
+A geração do cliente tipado estará disponível após #29: `cd web && pnpm gen:api`.
 
 ## Mapa da documentação
 

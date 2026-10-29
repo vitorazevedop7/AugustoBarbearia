@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. Banco, autenticação e módulos de domínio entram nas issues seguintes. As pastas abaixo mostram a estrutura alvo; `app/health.py` contém o router de saúde sem dependências externas.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. Autenticação e módulos de domínio entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -175,7 +175,7 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 |---|---|---|
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | db | Só no desenvolvimento: credenciais do Postgres do compose |
 | `APP_NAME` | api | Opcional: título do OpenAPI; padrão "Augusto Barbearia API" |
-| `DATABASE_URL` | api, jobs, web | Conexão com o PostgreSQL |
+| `DATABASE_URL` | api, jobs, web | Conexão com o PostgreSQL; obrigatória na API. Testes usam o mesmo servidor com o nome do banco acrescido de `_test` |
 | `ADMIN_EMAILS` | api | Lista de e-mails da administração (RN-71) |
 | `AUTH_JWKS_URL` | api, jobs | Endpoint JWKS do Better Auth |
 | `AUTH_ISSUER` / `AUTH_AUDIENCE` | api | Conferência do JWT |
@@ -186,3 +186,9 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 | `BETTER_AUTH_URL` | web | URL pública do site |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | web | Login com Google |
 | `API_INTERNAL_URL` | web | Endereço da API na rede privada |
+
+### Sessões, migrações e testes
+
+`app/db.py` mantém o engine com `pool_pre_ping` e timeout de conexão de 5 segundos. Cada requisição recebe uma `Session`, fechada ao final; os services decidem o commit e alterações pendentes são desfeitas no fechamento. O Alembic lê `DATABASE_URL` e ignora as cinco tabelas do Better Auth. Novos modelos devem ser importados no `alembic/env.py` para alimentar `Base.metadata`.
+
+As fixtures criam o banco separado `<banco>_test`, aplicam migrações uma vez e usam transação externa com savepoints por teste, preservando o isolamento mesmo com commits dos services. `client` substitui a dependência de sessão por essa sessão isolada.

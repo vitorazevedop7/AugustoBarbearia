@@ -21,6 +21,7 @@ Pré-requisito: [uv](https://docs.astral.sh/uv/getting-started/installation/). A
 
 ```bash
 cd api
+cp .env.example .env
 uv sync --locked
 uv run uvicorn app.main:app --reload
 ```
@@ -29,7 +30,7 @@ uv run uvicorn app.main:app --reload
 - Documentação: http://localhost:8000/docs
 - OpenAPI: http://localhost:8000/openapi.json
 
-O esqueleto inicia sem banco e sem credenciais. Opcionalmente, copie `api/.env.example` para `api/.env` para personalizar `APP_NAME`, o título da documentação. O padrão é "Augusto Barbearia API".
+Copie `api/.env.example` para `api/.env` e configure `DATABASE_URL`. A API exige PostgreSQL acessível; `APP_NAME` personaliza opcionalmente o título da documentação.
 
 Na pasta `api/`, rode as verificações:
 
@@ -40,16 +41,16 @@ uv run ruff format --check .
 uv run pyright
 ```
 
-Para formatar: `uv run ruff format .`. O Pyright verifica `app/` em modo strict. Os testes atuais usam o cliente HTTP do FastAPI e não precisam de banco; testes de persistência entrarão com o PostgreSQL e Alembic.
+Para formatar: `uv run ruff format .`. O Pyright verifica `app/` em modo strict. Os testes usam o cliente HTTP do FastAPI e um banco Postgres separado, criado pelas fixtures.
 
 Para testar a imagem, na raiz do repositório:
 
 ```bash
 docker build -t augusto-api ./api
-docker run --rm -p 8000:8000 augusto-api
+docker run --rm --env-file api/.env -p 8000:8000 augusto-api
 ```
 
-A imagem final executa Uvicorn com usuário não-root e inclui somente dependências de execução. Consulte `/health` para confirmar o funcionamento.
+No `api/.env` passado ao Docker, use um host acessível pelo container (por exemplo, `host.docker.internal` no Docker Desktop). A imagem final executa Uvicorn com usuário não-root e inclui somente dependências de execução. Consulte `/health` para confirmar o funcionamento.
 
 ### Web
 
@@ -95,8 +96,22 @@ docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
 
 Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`, rode `docker compose up --build -V` para reconstruir as imagens e recriar os volumes de dependências. `docker compose down` para tudo; `docker compose down -v` também apaga os dados do banco.
 
-O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). Banco, migrações, autenticação e geração dos tipos para o cliente web têm tarefas próprias da Fase 0.
+O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). Autenticação e geração dos tipos para o cliente web têm tarefas próprias da Fase 0.
 
 ## Documentação
 
 Tudo está em [`docs/`](docs/). Para começar, leia a [visão do produto](docs/produto/visao.md), as [regras de negócio](docs/dominio/regras.md) e a [arquitetura](docs/arquitetura.md). Agentes de IA começam pelo [CLAUDE.md](CLAUDE.md).
+
+## Banco e migrações
+
+A API exige `DATABASE_URL`, normaliza a URL para Psycopg 3 e usa sessões SQLAlchemy 2. O `/health` consulta o banco: retorna 200 quando acessível ou 503 (`DATABASE_UNAVAILABLE`) quando indisponível. Fora do Compose, copie `api/.env.example` para `api/.env` e mantenha um Postgres acessível em `localhost:5432`.
+
+```bash
+docker compose exec api alembic upgrade head
+docker compose exec api alembic check
+docker compose exec api alembic revision --autogenerate -m "descricao"
+```
+
+A primeira migração habilita `btree_gist` (preparação para RN-08). Importe os futuros modelos em `api/alembic/env.py` e revise toda migração gerada. As tabelas `user`, `session`, `account`, `verification` e `jwks` pertencem ao Better Auth e são ignoradas pelo autogenerate. A imagem de produção inclui os arquivos do Alembic; aplicar migrações continua sendo um passo explícito.
+
+`docker compose exec api uv run pytest` cria, se necessário, um banco com o nome de `DATABASE_URL` acrescido de `_test`, no mesmo servidor. O usuário precisa de `CREATEDB` (o usuário do Compose já tem). As migrações rodam uma vez por sessão de pytest; cada teste recebe uma transação com rollback, mesmo se chamar `commit()`. Use as fixtures `db_session` e `client`; não execute testes simultâneos contra o mesmo banco de teste. O banco de desenvolvimento não recebe as migrações ou os dados dos testes.
