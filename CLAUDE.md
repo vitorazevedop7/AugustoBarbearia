@@ -67,7 +67,7 @@ docker compose exec api alembic revision --autogenerate -m "msg"
 docker compose exec api alembic check
 ```
 
-Os testes criam o banco `<POSTGRES_DB>_test` no mesmo servidor e aplicam migrações uma vez por sessão. Cada teste usa uma transação externa com rollback, inclusive quando o service faz commit. O usuário de desenvolvimento precisa de permissão `CREATEDB`. Importe novos modelos em `api/alembic/env.py` antes de gerar migrações.
+Os testes criam o banco `<banco da DATABASE_URL>_test` no mesmo servidor e aplicam migrações uma vez por sessão. Cada teste usa uma transação externa com rollback, inclusive quando o service faz commit. O usuário de desenvolvimento precisa de permissão `CREATEDB`. Importe novos modelos em `api/alembic/env.py` antes de gerar migrações.
 
 ### Próximas entregas da Fase 0
 

@@ -22,7 +22,7 @@ Mantenedores e ferramentas de monitoramento.
 - Dado um banco novo, quando executo `alembic upgrade head`, então `btree_gist` fica ativa, sem criar entidades de domínio. Reexecutar é seguro.
 
 **CA-2 — Dois donos de schema**
-- Dadas as tabelas `user`, `session`, `account`, `verification` e `jwks`, quando o Alembic compara o schema, então não propõe modificá-las ou excluí-las, mas continua detectando diferenças de domínio.
+- Dadas as tabelas `user`, `session`, `account`, `verification` e `jwks`, quando o Alembic compara o schema, então não propõe criá-las, modificá-las ou excluí-las, mesmo quando uma delas está declarada nos modelos como alvo de chave estrangeira (ex.: `user.id`), mas continua detectando diferenças de domínio.
 
 **CA-3 — Saúde do banco**
 - Dado um banco acessível, quando consulto `/health`, então recebo 200 e `{"status":"ok"}` após executar `SELECT 1`.
