@@ -24,7 +24,7 @@ erDiagram
 |---|---|
 | **Barbearia** | O registro único com os dados do negócio: nome, endereço, contato e textos da vitrine |
 | **Horário de funcionamento** | Abertura e fechamento (ou "fechado") para cada dia da semana. Vale para todos os barbeiros (RN-02) |
-| **Barbeiro** | Profissional cadastrado, com foto e apresentação. **Não faz login** (D2). Pode estar ativo ou inativo (RN-60) |
+| **Barbeiro** | Profissional cadastrado, com foto e apresentação. **Não faz login** (D2). Pode estar ativo ou inativo (RN-60). Não é excluído: quem sai é inativado e o cadastro continua para o histórico. A foto é o caminho de um arquivo estático do web, sem upload no MVP (D10) |
 | **Serviço** | O que é oferecido, com preço e duração. Pode estar ativo ou inativo (RN-61) |
 | **Barbeiro–Serviço** | Quais barbeiros realizam quais serviços (N:N) |
 | **Bloqueio** | Intervalo em que um barbeiro não atende: almoço, folga, compromisso (RN-03) |

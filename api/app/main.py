@@ -6,6 +6,7 @@ from app.auth.router import router as auth_router
 from app.config import get_settings
 from app.errors import ErrorResponse, register_error_handlers
 from app.health import router as health_router
+from app.modules.barbers.router import router as barbers_router
 from app.modules.customers.router import router as customers_router
 from app.modules.shop.router import router as shop_router
 
@@ -21,6 +22,7 @@ def create_app() -> FastAPI:
     application.include_router(auth_router)
     application.include_router(shop_router)
     application.include_router(customers_router)
+    application.include_router(barbers_router)
     return application
 
 

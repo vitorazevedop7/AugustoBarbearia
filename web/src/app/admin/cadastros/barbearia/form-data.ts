@@ -3,13 +3,6 @@ import type { components } from "@/lib/api/schema";
 export type ShopUpdate = components["schemas"]["ShopUpdate"];
 export type BusinessHoursDay = components["schemas"]["BusinessHoursDay"];
 
-/** Resultado de uma Server Action de formulário. `values` repõe o que foi digitado. */
-export type FormState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-  values?: Record<string, string>;
-};
-
 export const WEEKDAYS = [
   "Segunda-feira",
   "Terça-feira",
@@ -19,14 +12,6 @@ export const WEEKDAYS = [
   "Sábado",
   "Domingo",
 ] as const;
-
-export function formValues(formData: FormData): Record<string, string> {
-  const values: Record<string, string> = {};
-  formData.forEach((value, key) => {
-    if (typeof value === "string" && !key.startsWith("$")) values[key] = value;
-  });
-  return values;
-}
 
 /** Envia os campos como vieram; a API apara, normaliza e valida. */
 export function parseShopForm(formData: FormData): ShopUpdate {

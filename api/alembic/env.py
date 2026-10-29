@@ -5,6 +5,7 @@ from sqlalchemy.schema import SchemaItem
 
 from alembic import context
 from app.db import Base, get_engine
+from app.modules.barbers import models as barbers_models  # noqa: F401
 from app.modules.customers import models as customers_models  # noqa: F401
 from app.modules.shop import models as shop_models  # noqa: F401
 

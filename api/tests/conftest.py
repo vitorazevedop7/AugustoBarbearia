@@ -2,6 +2,7 @@ import json
 from collections.abc import Iterator
 from io import BytesIO
 from pathlib import Path
+from typing import Literal
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,6 +14,8 @@ from sqlalchemy import Engine, text
 from sqlalchemy.orm import Session
 
 from alembic import command
+from app.auth.dependencies import current_user
+from app.auth.schemas import CurrentUser
 from app.auth.service import get_token_verifier
 from app.config import get_settings
 from app.db import create_db_engine, database_url, get_session
@@ -73,6 +76,26 @@ def client(db_session: Session) -> Iterator[TestClient]:
     app.dependency_overrides[get_session] = lambda: db_session
     with TestClient(app) as test_client:
         yield test_client
+
+
+def client_as(db_session: Session, role: Literal["admin", "customer"]) -> TestClient:
+    """API com o usuário autenticado já resolvido, sem JWT."""
+    app = create_app()
+    app.dependency_overrides[get_session] = lambda: db_session
+    app.dependency_overrides[current_user] = lambda: CurrentUser(
+        sub=f"{role}-1", email=f"{role}@example.com", name="Pessoa", role=role
+    )
+    return TestClient(app)
+
+
+@pytest.fixture
+def admin(db_session: Session) -> TestClient:
+    return client_as(db_session, "admin")
+
+
+@pytest.fixture
+def customer(db_session: Session) -> TestClient:
+    return client_as(db_session, "customer")
 
 
 @pytest.fixture

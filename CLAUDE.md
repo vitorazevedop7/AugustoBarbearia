@@ -100,6 +100,15 @@ docker compose exec api uv run pytest tests/test_customers.py
 
 O primeiro acesso autenticado de um cliente cria o `Customer` ou o vincula pelo e-mail (RN-23). Com uma conta fora de `ADMIN_EMAILS`, `/perfil` mostra nome, e-mail e telefone e salva por Server Action; a administração é levada para `/admin`. Novas rotas do cliente usam a dependência `current_customer` de `app/modules/customers/dependencies.py`. A [spec](docs/specs/perfil-cliente.md) documenta o vínculo e o formato do telefone.
 
+### Cadastro de barbeiros — S3.03
+
+```bash
+docker compose exec api alembic upgrade head          # cria a tabela barbers com Edvaldo, Lauro e Manoel
+docker compose exec api uv run pytest tests/test_barbers.py
+```
+
+A administração cria, edita, inativa e reativa barbeiros em `/admin/cadastros/barbeiros` (`GET`/`POST /admin/barbers`, `GET`/`PATCH /admin/barbers/{id}`). A foto é o caminho de um arquivo em `web/public/images/barbeiros/`, sem upload; os proprietários usam fotos fictícias como placeholder (D10). Nos testes da API, as fixtures `admin` e `customer` do `conftest.py` dão um cliente HTTP já autenticado. A [spec](docs/specs/cadastro-barbeiros.md) documenta as validações; a trava da RN-60 (agendamentos futuros) entra na S3.07.
+
 ## Mapa da documentação
 
 | Documento | Leia quando |

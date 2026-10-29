@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { TextAreaField, TextField } from "@/components/ui/field";
 import { formatPhone } from "@/lib/format";
 import { saveShop } from "./actions";
-import type { FormState, ShopUpdate } from "./form-data";
+import type { FormState } from "../../form-state";
+import type { ShopUpdate } from "./form-data";
 
 const initialState: FormState = { status: "idle" };
 

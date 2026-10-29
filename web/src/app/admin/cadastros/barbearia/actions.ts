@@ -3,23 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createApiClient } from "@/lib/api/client";
 import {
+  apiMessage,
   type FormState,
   formValues,
-  parseBusinessHoursForm,
-  parseShopForm,
-} from "./form-data";
+  saveUnavailableMessage as unavailable,
+} from "../../form-state";
+import { parseBusinessHoursForm, parseShopForm } from "./form-data";
 
 const PATH = "/admin/cadastros/barbearia";
-const unavailable =
-  "Não foi possível salvar agora. Tente novamente em instantes.";
-
-function apiMessage(error: unknown): string {
-  if (typeof error === "object" && error !== null && "message" in error) {
-    const { message } = error;
-    if (typeof message === "string" && message) return message;
-  }
-  return unavailable;
-}
 
 export async function saveShop(
   _previous: FormState,
