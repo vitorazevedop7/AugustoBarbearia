@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. Os módulos de domínio entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -118,7 +118,7 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `/admin` | Administração | Agenda, agendamento manual, bloqueios, conclusão, falta, cadastros, relatório |
 | `/health` | Railway | Healthcheck |
 
-Na fundação (S2.09), `GET /me` aceita qualquer identidade autenticada e retorna `sub`, `email`, `name` e `role`, sem criar ou consultar clientes. `GET /admin/ping` exige `require_admin` e retorna `{ "status": "ok" }`. As próximas rotas de domínio aplicarão as permissões da RN-70.
+Na fundação (S2.09), `GET /me` aceita qualquer identidade autenticada e retorna `sub`, `email`, `name` e `role`, sem criar ou consultar clientes. `GET /admin/ping` exige `require_admin` e retorna `{ "status": "ok" }`. As rotas de domínio aplicam as permissões da RN-70: `GET /public/shop` é aberta, e `PUT /admin/shop` e `PUT /admin/business-hours` exigem `require_admin`.
 
 `app/auth/` valida apenas JWT EdDSA com chave Ed25519 do `AUTH_JWKS_URL`, exigindo identidade, emissor, audiência e expiração. As chaves são cacheadas por até 5 minutos e um `kid` desconhecido provoca nova busca, com timeout de 5 segundos. `current_user` responde 401 com `WWW-Authenticate: Bearer` quando não há credencial válida; `require_admin` responde 403 para clientes, sempre no contrato `{code, message}`. O papel vem exclusivamente de `ADMIN_EMAILS`: a lista separada por vírgulas ignora espaços nas extremidades e diferenças de caixa. Um papel enviado no token não concede permissão. Falhas de JWKS negam o acesso.
 
@@ -135,7 +135,7 @@ web/
     ├── app/
     │   ├── (publico)/              # vitrine: /, /entrar, /servicos, /barbeiros, /privacidade
     │   ├── (cliente)/              # exige login: /agendar, /meus-agendamentos, /perfil
-    │   ├── admin/                  # exige admin: /admin/agenda, /admin/clientes, /admin/cadastros, /admin/relatorio
+    │   ├── admin/                  # exige admin; layout.tsx checa o acesso e mostra a navegação: /admin, /admin/cadastros(/barbearia), depois /admin/agenda, /admin/clientes, /admin/relatorio
     │   ├── design-system/          # vitrine dos componentes, fora do menu e dos buscadores
     │   └── api/auth/[...all]/      # handler do Better Auth
     ├── lib/
@@ -155,7 +155,7 @@ web/
 ### Regras do front
 
 - O web chama a API só pelo `createApiClient()` de `lib/api/client.ts`, tipado pelo `schema.d.ts` gerado ([contrato-openapi.md](specs/contrato-openapi.md)). Mudou um schema da API, rode `pnpm gen:api` no mesmo PR; o job `contract` do CI confere.
-- O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. `/admin` consulta `/admin/ping` sem cache: 200 mostra “Acesso permitido”, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
+- O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. O layout de `/admin` consulta `/admin/ping` sem cache antes de qualquer página da área: 200 mostra a navegação e a página, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
 - **Server Components** buscam dados pela API. **Server Actions** fazem as mutações chamando a API. O navegador nunca chama a API diretamente.
 - **Nenhuma regra de negócio no front.** Validação no front é só para a experiência do usuário; quem decide é a API, e o front mostra o `message` do erro que a API devolve.
 - O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware ou layout). Mesmo assim, a API valida tudo de novo.

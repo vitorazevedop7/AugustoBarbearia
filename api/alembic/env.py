@@ -5,6 +5,7 @@ from sqlalchemy.schema import SchemaItem
 
 from alembic import context
 from app.db import Base, get_engine
+from app.modules.shop import models as shop_models  # noqa: F401
 
 # Ao criar modelos, importe-os aqui para registrar suas tabelas em Base.metadata.
 AUTH_TABLES = {"user", "session", "account", "verification", "jwks"}

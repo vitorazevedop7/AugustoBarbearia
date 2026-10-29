@@ -99,7 +99,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | Componente | Arquivo | Status |
 |---|---|---|
 | `Button`, `ButtonLink` | `button.tsx` | Pronto |
-| `TextField`, `SelectField` | `field.tsx` | Pronto |
+| `TextField`, `TextAreaField`, `SelectField` | `field.tsx` | Pronto |
 | `ChoiceChip` | `choice-chip.tsx` | Pronto |
 | `Badge`, `StatusBadge` | `badge.tsx` | Pronto |
 | `Alert` | `alert.tsx` | Pronto |
@@ -127,7 +127,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 ### Campos
 
-- **`TextField`** (texto, telefone, e-mail, número) e **`SelectField`** (lista nativa). Os dois têm rótulo, dica (`hint`) e erro (`error`) ligados ao campo por `aria-describedby`.
+- **`TextField`** (texto, telefone, e-mail, número), **`TextAreaField`** (texto de várias linhas, como uma apresentação) e **`SelectField`** (lista nativa). Os três têm rótulo, dica (`hint`) e erro (`error`) ligados ao campo por `aria-describedby`.
 - O rótulo fica **sempre visível acima** do campo. Placeholder é só exemplo, nunca rótulo.
 - **Obrigatório é o padrão;** o campo opcional ganha "(opcional)" no rótulo (`optional`).
 - **Erro:** a borda fica `danger`, e a mensagem aparece abaixo do campo. Quando a API devolve um erro de campo, o `message` dela vai direto para `error`. Erro geral (ex.: horário tomado) vai num `Alert` `danger` no topo do formulário.

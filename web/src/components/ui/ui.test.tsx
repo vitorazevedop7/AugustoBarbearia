@@ -4,7 +4,7 @@ import { Alert } from "./alert";
 import { StatusBadge } from "./badge";
 import { Button } from "./button";
 import { ChoiceChip } from "./choice-chip";
-import { TextField } from "./field";
+import { TextAreaField, TextField } from "./field";
 
 describe("Button", () => {
   it("trava e marca como ocupado enquanto a ação está pendente", () => {
@@ -37,6 +37,23 @@ describe("TextField", () => {
   it("marca só o campo opcional", () => {
     render(<TextField name="note" label="Observação" optional />);
     expect(screen.getByLabelText("Observação (opcional)")).not.toBeRequired();
+  });
+});
+
+describe("TextAreaField", () => {
+  it("liga rótulo e dica ao campo de várias linhas", () => {
+    render(
+      <TextAreaField
+        name="about"
+        label="Sobre"
+        hint="Até 1000 caracteres."
+        optional
+      />,
+    );
+    const textarea = screen.getByLabelText("Sobre (opcional)");
+    expect(textarea.tagName).toBe("TEXTAREA");
+    expect(textarea).not.toBeRequired();
+    expect(textarea).toHaveAccessibleDescription("Até 1000 caracteres.");
   });
 });
 
