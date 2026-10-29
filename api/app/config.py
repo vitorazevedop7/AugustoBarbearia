@@ -13,6 +13,12 @@ class Settings(BaseSettings):
 
     database_url: str = Field(default="", min_length=1)
     app_name: str = "Augusto Barbearia API"
+    auth_jwks_url: str = Field(
+        default="http://localhost:3000/api/auth/jwks", min_length=1
+    )
+    auth_issuer: str = Field(default="http://localhost:3000", min_length=1)
+    auth_audience: str = Field(default="http://localhost:3000", min_length=1)
+    admin_emails: str = ""
 
 
 @lru_cache

@@ -1,6 +1,10 @@
 // @vitest-environment node
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApiClient } from "./client";
+import { getApiToken } from "./token";
+
+vi.mock("server-only", () => ({}));
+vi.mock("./token", () => ({ getApiToken: vi.fn() }));
 
 function stubFetch() {
   const fetchMock = vi.fn<(request: Request) => Promise<Response>>(
@@ -14,6 +18,10 @@ function stubFetch() {
 }
 
 describe("createApiClient", () => {
+  beforeEach(() => {
+    vi.mocked(getApiToken).mockReset().mockResolvedValue(null);
+  });
+
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
@@ -31,14 +39,49 @@ describe("createApiClient", () => {
     expect(request.headers.has("Authorization")).toBe(false);
   });
 
-  it("envia o token como Bearer", async () => {
+  it("RN-71: envia o JWT da sessão atual como Bearer, sem cache", async () => {
     vi.stubEnv("API_INTERNAL_URL", "http://api.test:8000");
     const fetchMock = stubFetch();
 
-    await createApiClient({ token: "jwt-de-teste" }).GET("/health");
+    vi.mocked(getApiToken).mockResolvedValue("jwt-de-teste");
+
+    await createApiClient().GET("/health");
 
     const request = fetchMock.mock.calls[0][0];
     expect(request.headers.get("Authorization")).toBe("Bearer jwt-de-teste");
+    expect(request.cache).toBe("no-store");
+  });
+
+  it("RN-71: não reutiliza o token de outra sessão entre requisições", async () => {
+    vi.stubEnv("API_INTERNAL_URL", "http://api.test:8000");
+    const fetchMock = stubFetch();
+    vi.mocked(getApiToken)
+      .mockResolvedValueOnce("jwt-admin")
+      .mockResolvedValueOnce("jwt-cliente")
+      .mockResolvedValueOnce(null);
+    const client = createApiClient();
+
+    await client.GET("/health");
+    await client.GET("/health");
+    await client.GET("/health");
+
+    expect(
+      fetchMock.mock.calls.map(([request]) =>
+        request.headers.get("Authorization"),
+      ),
+    ).toEqual(["Bearer jwt-admin", "Bearer jwt-cliente", null]);
+  });
+
+  it("RN-71: não chama a API quando não consegue obter o token", async () => {
+    vi.stubEnv("API_INTERNAL_URL", "http://api.test:8000");
+    const fetchMock = stubFetch();
+    vi.mocked(getApiToken).mockRejectedValue(new Error("Sessão indisponível"));
+
+    await expect(createApiClient().GET("/health")).rejects.toThrow(
+      "Sessão indisponível",
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("falha com mensagem clara sem API_INTERNAL_URL", () => {

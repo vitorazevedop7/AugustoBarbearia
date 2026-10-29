@@ -31,8 +31,8 @@ Nenhuma regra de negócio. Segue os ADRs 0001 (o navegador não chama a API) e 0
 
 **CA-3 — Cliente tipado**
 - **Dado** `API_INTERNAL_URL` configurada
-- **Quando** o servidor do web chama `createApiClient({ token })`
-- **Então** recebe um cliente openapi-fetch tipado por `schema.d.ts`, que envia `Authorization: Bearer <token>` quando há token. Sem `API_INTERNAL_URL`, falha com "API_INTERNAL_URL não está configurada.".
+- **Quando** o servidor do web chama `createApiClient()`
+- **Então** recebe um cliente openapi-fetch tipado por `schema.d.ts`, que obtém `getApiToken()` por requisição e envia `Authorization: Bearer <token>` quando há sessão (integrado na #31). Sem `API_INTERNAL_URL`, falha com "API_INTERNAL_URL não está configurada.".
 
 **CA-4 — Prova de vida**
 - **Dado** o sistema rodando com `docker compose up`
@@ -47,7 +47,7 @@ Nenhuma regra de negócio. Segue os ADRs 0001 (o navegador não chama a API) e 0
 ## Fluxo e telas
 - **API:** `app/export_openapi.py` usa `app.openapi()`, o mesmo documento servido em `/openapi.json`.
 - **Web:** `scripts/gen-api.mjs` (o `pnpm gen:api`) usa a API Node do openapi-typescript e escreve um cabeçalho avisando que o arquivo é gerado.
-- **Cliente:** `src/lib/api/client.ts` exporta `createApiClient` e o tipo `ApiClient`. O token vem de `getApiToken()` (`src/lib/api/token.ts`). A API passa a validar o JWT na #31.
+- **Cliente:** `src/lib/api/client.ts` exporta `createApiClient` e o tipo `ApiClient`. O token vem de `getApiToken()` (`src/lib/api/token.ts`). A validação na API está descrita na [spec de autenticação](autenticacao-api.md) (#31).
 - **Status:** `src/components/api-status.tsx` chama `GET /health` com timeout de 3 segundos, dentro de um `Suspense` ("verificando…"), para não travar a página.
 - **CI:** o job `contract` roda quando `api/`, `web/` ou o workflow mudam. Ele instala a API sem dependências de desenvolvimento, exporta o OpenAPI para um arquivo temporário, roda `pnpm gen:api` com esse arquivo e falha se `web/src/lib/api/schema.d.ts` ficar diferente do commitado.
 

@@ -80,6 +80,17 @@ docker compose exec web pnpm gen:api                         # lê http://api:80
 (cd web && pnpm gen:api /tmp/openapi.json)                     # gera a partir do arquivo exportado
 ```
 
+### Autenticação da API — S2.09
+
+Configure `ADMIN_EMAILS` no `.env` (e-mails Google separados por vírgula), `AUTH_JWKS_URL` (no Compose, `http://web:3000/api/auth/jwks`) e os mesmos `AUTH_ISSUER` / `AUTH_AUDIENCE` no web e na API.
+
+```bash
+docker compose up -d api web                         # aplica mudanças nas variáveis
+docker compose exec api uv run pytest tests/test_auth.py
+```
+
+Os testes de auth usam chaves Ed25519 locais e JWKS simulado, sem web/Google. Após entrar com Google, `/admin` mostra “Acesso permitido” apenas para contas em `ADMIN_EMAILS`; outras voltam para `/`. A API expõe `GET /me` (identidade e papel, sem tabela de clientes) e `GET /admin/ping` (administradores). O cliente web envia o Bearer de `getApiToken()` automaticamente por requisição. A [spec](docs/specs/autenticacao-api.md) documenta validação, erros e rotação de chaves.
+
 ## Mapa da documentação
 
 | Documento | Leia quando |
