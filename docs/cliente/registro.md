@@ -122,3 +122,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Canal:** —
 - **Fatos e decisões:**
   - **D10.** Enquanto as fotos reais não chegam (P10), os três barbeiros aparecem com **fotos fictícias geradas por IA**, em proporção 4:5. Elas **não retratam os proprietários** e servem só para a vitrine e o cadastro não ficarem vazios na apresentação. Quando as fotos reais chegarem, elas substituem as fictícias. Elas não são fotos de banco de imagem, que o design system continua não usando.
+
+### 2026-10-29 — Ordem do fluxo de agendamento
+- **Com:** registro interno. Decisão do Vitor como product owner
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D11.** No agendamento pelo cliente, a ordem é **barbeiro → serviço → dia → horário → confirmar**. O cliente escolhe primeiro com quem quer ser atendido, e a tela de serviço mostra só os serviços que aquele barbeiro realiza. Isso substitui a ordem serviço → barbeiro do [roadmap](../produto/roadmap.md) e da proposta de fluxo em `referencia-beard-x.md`. Detalhes na [spec do agendamento](../specs/agendamento-cliente.md).
