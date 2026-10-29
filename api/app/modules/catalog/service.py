@@ -1,6 +1,7 @@
 """Regras do cadastro de serviços (RN-61, RN-63)."""
 
 from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -74,6 +75,38 @@ def list_services(session: Session) -> Sequence[Service]:
         .options(selectinload(Service.barbers))
         .order_by(Service.active.desc(), Service.name, Service.id)
     ).all()
+
+
+@dataclass(frozen=True)
+class OfferedService:
+    """Serviço como a vitrine o oferece: só com os barbeiros ativos."""
+
+    service: Service
+    barbers: list[Barber]
+
+
+def list_offered_services(session: Session) -> list[OfferedService]:
+    """Serviços da vitrine, por nome (RN-60, RN-61, RN-70).
+
+    - RN-61: o serviço inativo some da vitrine.
+    - RN-60: o barbeiro inativo some da vitrine, inclusive da lista de quem
+      realiza o serviço.
+    - RN-05, item 5: o serviço só é oferecido com um barbeiro ativo que o
+      realiza. Por isso, um serviço ativo cujos barbeiros estão todos inativos
+      também não aparece; ele volta quando um deles é reativado.
+    """
+    services = session.scalars(
+        select(Service)
+        .where(Service.active)
+        .options(selectinload(Service.barbers))
+        .order_by(Service.name, Service.id)
+    ).all()
+    offered: list[OfferedService] = []
+    for item in services:
+        barbers = [barber for barber in item.barbers if barber.active]
+        if barbers:
+            offered.append(OfferedService(service=item, barbers=barbers))
+    return offered
 
 
 def get_service(session: Session, service_id: int) -> Service:

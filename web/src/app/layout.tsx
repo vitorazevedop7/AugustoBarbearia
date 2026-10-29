@@ -22,7 +22,8 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "Augusto Barbearia",
-  description: "O site da Augusto Barbearia está em construção.",
+  description:
+    "Serviços com preço e duração, barbeiros, endereço, horário de funcionamento e contato da Augusto Barbearia. Agende seu horário pelo site.",
 };
 
 export default async function RootLayout({

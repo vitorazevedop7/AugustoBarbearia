@@ -116,3 +116,21 @@ class ServiceResponse(BaseModel):
     duration_minutes: int
     active: bool
     barbers: list[ServiceBarber]
+
+
+class PublicServiceBarber(BaseModel):
+    """Barbeiro ativo que realiza o serviço, como a vitrine o mostra."""
+
+    id: int
+    name: str
+
+
+class PublicServiceResponse(BaseModel):
+    """Serviço na vitrine: só os ativos aparecem, então não há `active`."""
+
+    id: int
+    name: str
+    description: str | None
+    price: Money
+    duration_minutes: int
+    barbers: list[PublicServiceBarber]

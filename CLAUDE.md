@@ -118,6 +118,14 @@ docker compose exec api uv run pytest tests/test_catalog.py
 
 A administração cria, edita, inativa e reativa serviços em `/admin/cadastros/servicos` (`GET`/`POST /admin/services`, `GET`/`PATCH /admin/services/{id}`), escolhendo os barbeiros que os realizam. O módulo é `app/modules/catalog/` (`Service` e `BarberService`); as regras da RN-61 ficam em `service.py` (`check_price`, `check_duration`, `resolve_barbers`). O preço trafega como string decimal (`"25.00"`) e o web formata com `formatPrice` de `src/lib/format.ts`, sem `float`. A [spec](docs/specs/cadastro-servicos.md) documenta as validações e o formato do preço.
 
+### Vitrine pública — S3.05
+
+```bash
+docker compose exec api uv run pytest tests/test_vitrine.py
+```
+
+Sem login, `/` mostra o hero, até 4 serviços, a equipe e o bloco de horário e contato (`#contato`); `/servicos` e `/barbeiros` mostram todos. A API expõe `GET /public/services` (serviços ativos com os barbeiros ativos que os realizam; o serviço sem nenhum barbeiro ativo não aparece) e `GET /public/barbers` (barbeiros ativos), em routers públicos dos módulos `catalog` e `barbers`; os dados da barbearia vêm de `GET /public/shop`. O web lê essas rotas por `src/lib/api/public.ts` (`createPublicApiClient`, sem token), e o rodapé também lê o horário e o contato da API. Todo "Agendar" leva a `/agendar` (S3.08), que até lá responde 404. Os cards (`ServiceCard`, `BarberCard`, `BarberPhoto`) e o `MobileMenu` estão em `src/components/ui/`. A [spec](docs/specs/vitrine.md) documenta o que aparece e por quê.
+
 ## Mapa da documentação
 
 | Documento | Leia quando |

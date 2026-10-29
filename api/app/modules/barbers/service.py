@@ -17,6 +17,13 @@ def list_barbers(session: Session) -> Sequence[Barber]:
     ).all()
 
 
+def list_active_barbers(session: Session) -> Sequence[Barber]:
+    """RN-60: o barbeiro inativo some da vitrine. Os ativos vêm por nome."""
+    return session.scalars(
+        select(Barber).where(Barber.active).order_by(Barber.name, Barber.id)
+    ).all()
+
+
 def get_barber(session: Session, barber_id: int) -> Barber:
     barber = session.get(Barber, barber_id)
     if barber is None:

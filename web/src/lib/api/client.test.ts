@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createApiClient } from "./client";
+import { createApiClient, createPublicApiClient } from "./client";
 import { getApiToken } from "./token";
 
 vi.mock("server-only", () => ({}));
@@ -88,6 +88,38 @@ describe("createApiClient", () => {
     vi.stubEnv("API_INTERNAL_URL", "");
 
     expect(() => createApiClient()).toThrow(
+      "API_INTERNAL_URL não está configurada.",
+    );
+  });
+});
+
+describe("createPublicApiClient", () => {
+  beforeEach(() => {
+    vi.mocked(getApiToken).mockReset().mockResolvedValue("jwt-de-teste");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("RN-70: lê as rotas públicas sem token e sem consultar a sessão", async () => {
+    vi.stubEnv("API_INTERNAL_URL", "http://api.test:8000");
+    const fetchMock = stubFetch();
+
+    await createPublicApiClient().GET("/public/shop");
+
+    const request = fetchMock.mock.calls[0][0];
+    expect(request.url).toBe("http://api.test:8000/public/shop");
+    expect(request.headers.has("Authorization")).toBe(false);
+    expect(request.cache).toBe("no-store");
+    expect(getApiToken).not.toHaveBeenCalled();
+  });
+
+  it("falha com mensagem clara sem API_INTERNAL_URL", () => {
+    vi.stubEnv("API_INTERNAL_URL", "");
+
+    expect(() => createPublicApiClient()).toThrow(
       "API_INTERNAL_URL não está configurada.",
     );
   });

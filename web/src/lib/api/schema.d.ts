@@ -196,6 +196,40 @@ export interface paths {
         patch: operations["update_service_admin_services__service_id__patch"];
         trace?: never;
     };
+    "/public/barbers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Public Barbers */
+        get: operations["list_public_barbers_public_barbers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Public Services */
+        get: operations["list_public_services_public_services_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -310,6 +344,48 @@ export interface components {
             role: "admin" | "customer";
             /** Has Phone */
             has_phone: boolean;
+        };
+        /**
+         * PublicBarberResponse
+         * @description Barbeiro na vitrine: só os ativos aparecem, então não há `active`.
+         */
+        PublicBarberResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Photo Path */
+            photo_path: string | null;
+            /** Bio */
+            bio: string | null;
+        };
+        /**
+         * PublicServiceBarber
+         * @description Barbeiro ativo que realiza o serviço, como a vitrine o mostra.
+         */
+        PublicServiceBarber: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /**
+         * PublicServiceResponse
+         * @description Serviço na vitrine: só os ativos aparecem, então não há `active`.
+         */
+        PublicServiceResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Description */
+            description: string | null;
+            /** Price */
+            price: string;
+            /** Duration Minutes */
+            duration_minutes: number;
+            /** Barbers */
+            barbers: components["schemas"]["PublicServiceBarber"][];
         };
         /**
          * ServiceBarber
@@ -1361,6 +1437,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_public_barbers_public_barbers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicBarberResponse"][];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_public_services_public_services_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicServiceResponse"][];
                 };
             };
             /** @description Unprocessable Content */

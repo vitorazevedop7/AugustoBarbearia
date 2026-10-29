@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
+import { BarberCard } from "@/components/ui/barber-card";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChoiceChip } from "@/components/ui/choice-chip";
@@ -9,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { ServiceCard } from "@/components/ui/service-card";
 
 /** Vitrine viva do design system (docs/design/design-system.md). Fora da navegação e dos buscadores. */
 export const metadata: Metadata = {
@@ -62,6 +64,7 @@ const sections = [
   { id: "status", title: "Badges" },
   { id: "avisos", title: "Avisos" },
   { id: "titulos", title: "Títulos de seção" },
+  { id: "cards", title: "Cards da vitrine" },
   { id: "composicao", title: "Composição" },
 ];
 
@@ -351,6 +354,30 @@ export default function DesignSystemPage() {
               />
             </div>
           </div>
+        </Showcase>
+
+        <Showcase id="cards" title="Cards da vitrine">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <ServiceCard
+              name="Corte + barba"
+              description="Descrição opcional do serviço (exemplo)."
+              price="70.00"
+              durationMinutes={50}
+              barbers={["Barbeiro 1", "Barbeiro 2"]}
+              href="#cards"
+            />
+            <BarberCard
+              name="Barbeiro 1"
+              photoPath={null}
+              bio="Sem foto, o card mostra a inicial do nome (exemplo)."
+              href="#cards"
+              sizes="(min-width: 1024px) 400px, 100vw"
+            />
+          </div>
+          <p className="mt-6 max-w-2xl text-sm text-ink-muted">
+            O menu do celular está no cabeçalho desta página: reduza a janela
+            para menos de 1024px para vê-lo.
+          </p>
         </Showcase>
 
         <Showcase id="composicao" title="Composição">
