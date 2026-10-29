@@ -2,7 +2,7 @@
 
 O roadmap diz **o que entra em cada fase e por quê**. O andamento das tarefas (a fazer, fazendo, feito) fica no kanban do GitHub Projects, não aqui.
 
-Decisões que embasam este documento: D0–D9 em [registro.md](../cliente/registro.md). Visão geral do produto: [visao.md](visao.md).
+Decisões que embasam este documento: D0–D11 em [registro.md](../cliente/registro.md). Visão geral do produto: [visao.md](visao.md).
 
 ## Fases
 
@@ -29,7 +29,7 @@ flowchart LR
 
 **Lado do cliente**
 - **Vitrine:** a barbearia, os serviços e preços, os barbeiros (foto e apresentação), o endereço, o horário de funcionamento e o contato.
-- **Agendamento:** escolher serviço → barbeiro → dia → horário livre → confirmar.
+- **Agendamento:** escolher barbeiro → serviço (só os que ele realiza) → dia → horário livre → confirmar (D11).
 - **Meus agendamentos:** ver, remarcar e cancelar (até 2h antes, D6).
 - **Perfil:** nome (vem do Google) e telefone.
 - **E-mails:** confirmação, lembrete, remarcação e cancelamento (D4).
