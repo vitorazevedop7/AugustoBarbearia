@@ -67,11 +67,14 @@ def upgrade() -> None:
             },
         ],
     )
-    # RN-63: os três proprietários realizam os dois serviços.
+    # RN-63: os três proprietários realizam os dois serviços. Eles são os três
+    # primeiros registros, criados pela 0004. O nome não serve para achá-los,
+    # porque a administração pode ter editado antes desta migração rodar.
     op.execute(
         "INSERT INTO barber_services (barber_id, service_id)"
-        " SELECT barbers.id, services.id FROM barbers CROSS JOIN services"
-        " WHERE barbers.name IN ('Edvaldo', 'Lauro', 'Manoel')"
+        " SELECT owners.id, services.id"
+        " FROM (SELECT id FROM barbers ORDER BY id LIMIT 3) AS owners"
+        " CROSS JOIN services"
     )
 
 

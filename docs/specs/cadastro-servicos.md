@@ -35,7 +35,7 @@ Administração. A vitrine e o agendamento leem os serviços ativos nas próxima
 - As regras de preço e de duração também são `CHECK` no banco, como última barreira.
 - Não há exclusão: um serviço que sai é inativado (RN-61), para preservar o histórico de agendamentos que virá nas próximas issues.
 - O nome não é único. Nenhuma regra impede dois serviços com o mesmo nome.
-- A migração `0005` cria as duas tabelas e os serviços iniciais (RN-63), ativos, sem descrição e realizados por Edvaldo, Lauro e Manoel:
+- A migração `0005` cria as duas tabelas e os serviços iniciais (RN-63), ativos, sem descrição e realizados por Edvaldo, Lauro e Manoel. Ela acha os proprietários pelos três primeiros ids da tabela, criados pela `0004`, e não pelo nome, que a administração já pode ter editado:
   - **Corte Simples**, 30 min, R$ 25,00;
   - **Corte + Barba**, 45 min, R$ 35,00.
 
