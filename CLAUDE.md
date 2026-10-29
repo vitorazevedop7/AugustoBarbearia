@@ -107,7 +107,7 @@ docker compose exec api alembic upgrade head          # cria a tabela barbers co
 docker compose exec api uv run pytest tests/test_barbers.py
 ```
 
-A administração cria, edita, inativa e reativa barbeiros em `/admin/cadastros/barbeiros` (`GET`/`POST /admin/barbers`, `GET`/`PATCH /admin/barbers/{id}`). A foto é o caminho de um arquivo em `web/public/images/barbeiros/`, sem upload; as fotos fictícias dos proprietários (D10) entram na S3.10 (#63). Nos testes da API, as fixtures `admin` e `customer` do `conftest.py` dão um cliente HTTP já autenticado. A [spec](docs/specs/cadastro-barbeiros.md) documenta as validações; a trava da RN-60 (agendamentos futuros) entra na S3.07.
+A administração cria, edita, inativa e reativa barbeiros em `/admin/cadastros/barbeiros` (`GET`/`POST /admin/barbers`, `GET`/`PATCH /admin/barbers/{id}`). A foto é o caminho de um arquivo em `web/public/images/barbeiros/`, sem upload; as fotos fictícias dos proprietários (D10) entram na S3.10 (#63). Nos testes da API, as fixtures `admin` e `customer` do `conftest.py` dão um cliente HTTP já autenticado. A [spec](docs/specs/cadastro-barbeiros.md) documenta as validações; a trava da RN-60 (agendamentos futuros) entrou na S3.07.
 
 ### Cadastro de serviços — S3.04
 
@@ -125,6 +125,16 @@ docker compose exec api uv run pytest tests/test_vitrine.py
 ```
 
 Sem login, `/` mostra o hero, até 4 serviços, a equipe e o bloco de horário e contato (`#contato`); `/servicos` e `/barbeiros` mostram todos. A API expõe `GET /public/services` (serviços ativos com os barbeiros ativos que os realizam; o serviço sem nenhum barbeiro ativo não aparece) e `GET /public/barbers` (barbeiros ativos), em routers públicos dos módulos `catalog` e `barbers`; os dados da barbearia vêm de `GET /public/shop`. O web lê essas rotas por `src/lib/api/public.ts` (`createPublicApiClient`, sem token), e o rodapé também lê o horário e o contato da API. Todo "Agendar" leva a `/agendar` (S3.08), que até lá responde 404. Os cards (`ServiceCard`, `BarberCard`, `BarberPhoto`) e o `MobileMenu` estão em `src/components/ui/`. A [spec](docs/specs/vitrine.md) documenta o que aparece e por quê.
+
+### Agendamento e disponibilidade — S3.07
+
+```bash
+docker compose exec api alembic upgrade head          # cria appointments com a exclusion constraint da RN-08
+docker compose exec api uv run pytest tests/test_availability_slots.py tests/test_availability.py tests/test_appointments.py
+curl "http://localhost:8000/public/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"
+```
+
+O cálculo dos horários (RN-05) é a função pura `available_slots` de `app/modules/availability/slots.py`: recebe o dia, o expediente, a oferta (duração, ativos, quem realiza), os intervalos ocupados, o agora e a política (`CUSTOMER_POLICY`: 1h e 30 dias). Os bloqueios (RN-03) entram na lista de ocupados na Sprint 4. A criação de agendamento (S3.08) chama `ensure_slot_available` (`availability/service.py`), que trava o barbeiro com `FOR SHARE` e levanta `409 SLOT_UNAVAILABLE`, e traduz o erro do insert com `is_slot_conflict` (`appointments/service.py`), que reconhece a violação da constraint e o deadlock entre duas reservas simultâneas. Rotas que dependem do relógio recebem `utc_now` (`app/clock.py`) por `Depends`, e os testes o substituem. Os testes de concorrência usam conexões próprias e apagam o que gravaram. A [spec](docs/specs/disponibilidade.md) documenta as regras e as decisões.
 
 ## Mapa da documentação
 

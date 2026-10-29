@@ -1,5 +1,14 @@
+from datetime import datetime
+from typing import cast
+
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.clock import utc_now
+from app.modules.appointments.models import AppointmentStatus
+from tests.factories import barber_id, local, make_appointment
 
 NEW_BARBER = {
     "name": "  Carlos  ",
@@ -191,3 +200,93 @@ def test_rn70_so_administracao_acessa_os_barbeiros(
     assert as_customer.status_code == 403
     assert anonymous.status_code == 401
     assert admin.get("/admin/barbers").json() == before
+
+
+# Segunda-feira, 2/11/2026, 8h em São Paulo.
+NOW = local(2026, 11, 2, 8)
+HAS_FUTURE_APPOINTMENTS = {
+    "code": "BARBER_HAS_FUTURE_APPOINTMENTS",
+    "message": (
+        "Este barbeiro tem agendamentos marcados. Cancele ou remarque "
+        "esses agendamentos antes de inativá-lo."
+    ),
+}
+
+
+def at(admin: TestClient, now: datetime) -> TestClient:
+    """Fixa o relógio da API no instante `now`."""
+    cast(FastAPI, admin.app).dependency_overrides[utc_now] = lambda: now
+    return admin
+
+
+def test_rn60_nao_inativa_barbeiro_com_agendamento_futuro(
+    admin: TestClient, db_session: Session
+) -> None:
+    edvaldo = barber_id(db_session, "Edvaldo")
+    make_appointment(db_session, barber=edvaldo, starts_at=local(2026, 11, 20, 10))
+    path = f"/admin/barbers/{edvaldo}"
+
+    response = at(admin, NOW).patch(path, json={"active": False, "bio": "Saiu."})
+
+    assert response.status_code == 409
+    assert response.json() == HAS_FUTURE_APPOINTMENTS
+    assert admin.get(path).json()["active"] is True
+    assert admin.get(path).json()["bio"] is None
+
+
+def test_rn60_agendamento_em_andamento_tambem_impede(
+    admin: TestClient, db_session: Session
+) -> None:
+    edvaldo = barber_id(db_session, "Edvaldo")
+    make_appointment(db_session, barber=edvaldo, starts_at=local(2026, 11, 2, 10))
+
+    response = at(admin, local(2026, 11, 2, 10, 44)).patch(
+        f"/admin/barbers/{edvaldo}", json={"active": False}
+    )
+
+    assert response.status_code == 409
+    assert response.json() == HAS_FUTURE_APPOINTMENTS
+
+
+def test_rn60_inativa_sem_agendamento_ativo_no_futuro(
+    admin: TestClient, db_session: Session
+) -> None:
+    edvaldo = barber_id(db_session, "Edvaldo")
+    # Já terminou (ainda sem conclusão), foi cancelado ou é de outro barbeiro.
+    make_appointment(db_session, barber=edvaldo, starts_at=local(2026, 11, 2, 7))
+    for status in (
+        AppointmentStatus.CANCELED,
+        AppointmentStatus.COMPLETED,
+        AppointmentStatus.NO_SHOW,
+    ):
+        make_appointment(
+            db_session,
+            barber=edvaldo,
+            starts_at=local(2026, 11, 20, 10),
+            status=status,
+        )
+    make_appointment(
+        db_session,
+        barber=barber_id(db_session, "Lauro"),
+        starts_at=local(2026, 11, 20, 10),
+    )
+
+    response = at(admin, NOW).patch(f"/admin/barbers/{edvaldo}", json={"active": False})
+
+    assert response.status_code == 200
+    assert response.json()["active"] is False
+
+
+def test_rn60_com_agendamento_futuro_os_outros_campos_mudam(
+    admin: TestClient, db_session: Session
+) -> None:
+    edvaldo = barber_id(db_session, "Edvaldo")
+    make_appointment(db_session, barber=edvaldo, starts_at=local(2026, 11, 20, 10))
+
+    response = at(admin, NOW).patch(
+        f"/admin/barbers/{edvaldo}", json={"bio": "Fundador.", "active": True}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["bio"] == "Fundador."
+    assert response.json()["active"] is True

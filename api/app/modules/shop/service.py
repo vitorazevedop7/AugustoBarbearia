@@ -32,6 +32,11 @@ def list_business_hours(session: Session) -> Sequence[BusinessHours]:
     return session.scalars(select(BusinessHours).order_by(BusinessHours.weekday)).all()
 
 
+def get_business_hours(session: Session, weekday: int) -> BusinessHours | None:
+    """RN-02: o horário de um dia da semana (0 = segunda … 6 = domingo)."""
+    return session.get(BusinessHours, weekday)
+
+
 def update_shop(session: Session, data: ShopUpdate) -> Shop:
     shop = get_shop(session)
     for field, value in data.model_dump().items():

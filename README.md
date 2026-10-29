@@ -120,6 +120,8 @@ Entre com Google e abra http://localhost:3000/admin: um e-mail da lista vê “A
 
 **Vitrine.** Sem login, abra http://localhost:3000 numa largura de 360px: o hero com a chamada "Agendar horário", os serviços com preço e duração, a equipe (com a inicial no lugar da foto, até a S3.10) e o horário de funcionamento. O endereço e os contatos aparecem quando a administração os preenche em `/admin/cadastros/barbearia`. `/servicos` e `/barbeiros` listam tudo. Inative um serviço ou um barbeiro na administração e recarregue: ele some da vitrine. O "Agendar" leva a `/agendar`, que só existe a partir da S3.08. Detalhes na [spec da vitrine](docs/specs/vitrine.md).
 
+**Horários disponíveis.** Depois de `docker compose exec api alembic upgrade head`, consulte os horários livres de um barbeiro para um serviço, sem login: `curl "http://localhost:8000/public/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"` (use uma data entre hoje e 30 dias à frente). A resposta traz os inícios de 30 em 30 minutos que cabem no expediente, com pelo menos 1 hora de antecedência e sem cruzar agendamentos ativos, no fuso de São Paulo. O banco recusa dois agendamentos ativos sobrepostos do mesmo barbeiro, mesmo com reservas simultâneas, e um barbeiro com agendamentos marcados não pode ser inativado. Detalhes na [spec de disponibilidade](docs/specs/disponibilidade.md).
+
 A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
 
 As verificações rodam nos próprios containers:
