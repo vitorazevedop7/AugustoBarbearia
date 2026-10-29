@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. Autenticação e módulos de domínio entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. Autenticação e módulos de domínio entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -72,6 +72,7 @@ api/
 │   ├── health.py             # router e schema de GET /health
 │   ├── db.py                 # engine, sessão, base declarativa
 │   ├── errors.py             # erro de domínio → {code, message} (0008)
+│   ├── export_openapi.py     # python -m app.export_openapi: OpenAPI em JSON, sem servidor
 │   ├── auth/                 # validação do JWT, dependências current_user / require_admin
 │   ├── modules/              # um pacote por área do domínio
 │   │   ├── shop/             # Barbearia + horário de funcionamento
@@ -125,6 +126,7 @@ Os prefixos deixam a permissão explícita (RN-70):
 web/
 ├── package.json / pnpm-lock.yaml
 ├── Dockerfile
+├── scripts/gen-api.mjs         # `pnpm gen:api`: OpenAPI da API → src/lib/api/schema.d.ts
 └── src/
     ├── app/
     │   ├── (publico)/              # vitrine: /, /entrar, /servicos, /barbeiros, /privacidade
@@ -142,11 +144,13 @@ web/
     │       ├── client.ts           # openapi-fetch com o Bearer JWT
     │       └── schema.d.ts         # GERADO por `pnpm gen:api`, não editar
     └── components/
+        ├── api-status.tsx          # status de GET /health na página inicial, só em desenvolvimento
         └── ui/                     # componentes do design system (docs/design/design-system.md)
 ```
 
 ### Regras do front
 
+- O web chama a API só pelo `createApiClient()` de `lib/api/client.ts`, tipado pelo `schema.d.ts` gerado ([contrato-openapi.md](specs/contrato-openapi.md)). Mudou um schema da API, rode `pnpm gen:api` no mesmo PR; o job `contract` do CI confere.
 - **Server Components** buscam dados pela API. **Server Actions** fazem as mutações chamando a API. O navegador nunca chama a API diretamente.
 - **Nenhuma regra de negócio no front.** Validação no front é só para a experiência do usuário; quem decide é a API, e o front mostra o `message` do erro que a API devolve.
 - O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware ou layout). Mesmo assim, a API valida tudo de novo.

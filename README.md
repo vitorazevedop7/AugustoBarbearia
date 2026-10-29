@@ -41,6 +41,8 @@ uv run ruff format --check .
 uv run pyright
 ```
 
+Para exportar o contrato OpenAPI sem subir o servidor (usado pelo `pnpm gen:api` e pelo CI): `uv run python -m app.export_openapi /tmp/openapi.json`. Sem o argumento, o JSON vai para a saída padrão.
+
 Para formatar: `uv run ruff format .`. O Pyright verifica `app/` em modo strict. Os testes usam o cliente HTTP do FastAPI e um banco Postgres separado, criado pelas fixtures.
 
 Para testar a imagem, na raiz do repositório:
@@ -63,6 +65,15 @@ pnpm dev
 ```
 
 Qualidade: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`. O build baixa Inter e Playfair Display do Google Fonts e gera a saída standalone.
+
+Os tipos da API ficam em `src/lib/api/schema.d.ts`, gerado e versionado ([ADR 0008](docs/decisoes/0008-contrato-openapi.md)). Mudou um schema da API? Regenere no mesmo PR:
+
+```bash
+pnpm gen:api                       # lê $API_INTERNAL_URL/openapi.json (padrão http://localhost:8000)
+pnpm gen:api /tmp/openapi.json     # ou um arquivo exportado pela API
+```
+
+O web chama a API só pelo servidor, com `createApiClient()` de `src/lib/api/client.ts`, que usa `API_INTERNAL_URL`. Fora do compose, defina `API_INTERNAL_URL=http://localhost:8000` em `web/.env.local`.
 
 Para testar a imagem de produção, execute na raiz:
 
@@ -100,19 +111,23 @@ As verificações rodam nos próprios containers:
 docker compose exec api uv run pytest
 docker compose exec api sh -c "uv run ruff check . && uv run pyright"
 docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
+docker compose exec web pnpm gen:api   # regenera os tipos a partir da API do compose
 ```
+
+Em desenvolvimento, a página inicial mostra o status da API (`GET /health`) numa faixa discreta antes do rodapé.
 
 Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`, rode `docker compose up --build -V` para reconstruir as imagens e recriar os volumes de dependências. `docker compose down` para tudo; `docker compose down -v` também apaga os dados do banco.
 
-O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). A geração dos tipos para o cliente web tem tarefa própria da Fase 0.
+O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente).
 
 ## CI
 
 Todo PR, e todo push na `main`, roda o workflow [CI](.github/workflows/ci.yml) no GitHub Actions:
 - **`api`:** `ruff check`, `ruff format --check`, `pyright`, `alembic upgrade head` e `pytest`, contra um PostgreSQL 17;
-- **`web`:** `lint`, `typecheck`, `test` e `build`.
+- **`web`:** `lint`, `typecheck`, `test` e `build`;
+- **`contract`:** exporta o OpenAPI da API, roda `pnpm gen:api` e falha se o `schema.d.ts` commitado estiver desatualizado.
 
-Num PR, cada job só roda quando a pasta dele mudou. O job que não precisa rodar aparece como pulado e conta como aprovado. Na `main`, os dois sempre rodam. PR com CI vermelho não é mergeado. Detalhes na [spec](docs/specs/ci.md).
+Num PR, cada job só roda quando a pasta dele mudou (o `contract` roda se `api/` ou `web/` mudou). O job que não precisa rodar aparece como pulado e conta como aprovado. Na `main`, todos sempre rodam. PR com CI vermelho não é mergeado. Detalhes na [spec](docs/specs/ci.md).
 
 ## Documentação
 

@@ -11,7 +11,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-A página inicial fica em http://localhost:3000. Nesta etapa não há dependência de API ou banco.
+A página inicial fica em http://localhost:3000. Em desenvolvimento, ela mostra o status da API (`GET /health`) numa faixa antes do rodapé; sem a API no ar, a faixa mostra "inacessível" e o resto da página funciona. Fora do compose, defina `API_INTERNAL_URL=http://localhost:8000` (por exemplo, em `web/.env.local`).
 
 ## Qualidade e produção
 
@@ -41,8 +41,10 @@ A imagem final usa o build standalone e usuário não-root. O build precisa de a
 - `src/app/api/auth/[...all]`: handler do Better Auth (callback do Google, `/api/auth/token`, `/api/auth/jwks`).
 - `src/app/(publico)/entrar`: página de login, que também mostra os erros do Google.
 - `src/lib/auth.ts`, `auth-jwt.ts`, `auth-actions.ts` e `session.ts`: login com Google, o JWT para a API, as Server Actions de entrar e sair e a sessão atual ([spec](../docs/specs/login-google.md)). As tabelas do Better Auth são criadas com `pnpm auth:migrate`.
-- `src/lib/api/token.ts`: `getApiToken()`, o JWT da sessão atual para chamar a API. O cliente HTTP e o contrato gerado chegam na #29.
-- `src/components`: cabeçalho, rodapé e `RevealObserver` (entrada dos elementos com `data-reveal` ao rolar).
+- `src/lib/api/token.ts`: `getApiToken()`, o JWT da sessão atual para chamar a API.
+- `src/lib/api/client.ts`: `createApiClient({ token })`, o cliente openapi-fetch tipado que chama `API_INTERNAL_URL`. Os tipos ficam em `src/lib/api/schema.d.ts`, gerado por `pnpm gen:api` e versionado; não edite à mão ([spec](../docs/specs/contrato-openapi.md)).
+- `scripts/gen-api.mjs`: o `pnpm gen:api [arquivo-ou-url]`. Sem argumento, lê `$API_INTERNAL_URL/openapi.json` (padrão `http://localhost:8000`).
+- `src/components`: cabeçalho, rodapé, `RevealObserver` (entrada dos elementos com `data-reveal` ao rolar) e `ApiStatus` (status de `GET /health` na página inicial, só em desenvolvimento).
 - `src/app/design-system`: página `/design-system`, que renderiza os tokens e os componentes. Fica fora do menu e dos buscadores.
 - `src/components/ui`: componentes do [design system](../docs/design/design-system.md) (`Button`, `ButtonLink`, `TextField`, `SelectField`, `ChoiceChip`, `Badge`, `StatusBadge`, `Alert`, `EmptyState`, `Ornament`, `SectionHeading`).
 - `src/app/globals.css`: tokens CSS, escala `text-display-*`, `shadow-card`, a animação `rise` e o mapeamento do tema Tailwind. Componentes usam `bg-brand`, `text-ink`, `font-heading` e `font-sans`, sem cores literais. A linguagem visual está em [identidade-visual.md](../docs/design/identidade-visual.md).
