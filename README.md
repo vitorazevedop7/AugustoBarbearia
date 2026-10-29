@@ -106,6 +106,14 @@ Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`,
 
 O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). A geração dos tipos para o cliente web tem tarefa própria da Fase 0.
 
+## CI
+
+Todo PR, e todo push na `main`, roda o workflow [CI](.github/workflows/ci.yml) no GitHub Actions:
+- **`api`:** `ruff check`, `ruff format --check`, `pyright`, `alembic upgrade head` e `pytest`, contra um PostgreSQL 17;
+- **`web`:** `lint`, `typecheck`, `test` e `build`.
+
+Num PR, cada job só roda quando a pasta dele mudou. O job que não precisa rodar aparece como pulado e conta como aprovado. Na `main`, os dois sempre rodam. PR com CI vermelho não é mergeado. Detalhes na [spec](docs/specs/ci.md).
+
 ## Documentação
 
 Tudo está em [`docs/`](docs/). Para começar, leia a [visão do produto](docs/produto/visao.md), as [regras de negócio](docs/dominio/regras.md) e a [arquitetura](docs/arquitetura.md). Agentes de IA começam pelo [CLAUDE.md](CLAUDE.md).
