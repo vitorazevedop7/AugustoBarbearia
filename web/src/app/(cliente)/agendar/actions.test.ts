@@ -27,6 +27,11 @@ const appointment = {
   ends_at: "2026-11-03T10:45:00-03:00",
   price: "35.00",
   duration_minutes: 45,
+  canceled_at: null,
+  canceled_by: null,
+  change_deadline: "2026-11-03T08:00:00-03:00",
+  can_cancel: true,
+  can_reschedule: true,
 };
 
 function form(phone?: string) {

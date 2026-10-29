@@ -124,7 +124,7 @@ Estados: `loading.tsx` com esqueleto; falha de leitura da API mostra um `Alert` 
 
 O "Trocar" de uma escolha leva à etapa dela, sem ela e sem as que dependem dela (trocar o barbeiro volta para `/agendar`; trocar o dia mantém o barbeiro e o serviço). Voltar pelo navegador faz o mesmo, porque cada etapa tem a própria URL.
 
-As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`web/src/components/booking/`), que recebem a lista da API e uma função `hrefFor` com o destino de cada opção. A remarcação (S3.09) pode reaproveitá-los com outros destinos.
+As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`web/src/components/booking/`), que recebem a lista da API e uma função `hrefFor` com o destino de cada opção. A remarcação (S3.09) os reaproveita com outros destinos.
 
 ## API
 | Método | Caminho | Quem | O que faz |
@@ -139,7 +139,7 @@ As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`w
 
 ## Fora do escopo desta spec
 - **E-mail de confirmação (RN-50):** Sprint 4.
-- **"Meus agendamentos", cancelar e remarcar (RN-14, RN-15):** S3.09 (#58). Até lá, o link "Ver meus agendamentos" responde 404.
+- **"Meus agendamentos", cancelar e remarcar (RN-14, RN-15):** S3.09 (#58), em [meus-agendamentos.md](meus-agendamentos.md).
 - Agendamento pela administração (RN-20, RN-21) e a opção "qualquer barbeiro".
 - Calendário mensal e "próximo horário livre" no card do barbeiro.
 - Página `/barbeiros/[slug]`.
@@ -151,4 +151,4 @@ Escolhas desta implementação que nenhuma RN decide, a confirmar:
 - **Cada escolha é um link** que avança na hora, sem botão "Continuar" nem barra fixa no rodapé. Os horários são links com a cara do `ChoiceChip`, não `radio`.
 - **RN-11 conta o agendamento em andamento** (`ends_at` depois de agora), como a RN-60. Um `SCHEDULED` que já terminou e espera a conclusão não conta.
 - **Códigos 409** para telefone ausente (`PHONE_REQUIRED`) e limite (`APPOINTMENT_LIMIT_REACHED`): são conflitos com o estado do cadastro, não erros de formato.
-- **O resumo aparece no lugar do formulário,** na mesma URL. Recarregar a página mostra a confirmação de novo, e um segundo envio é recusado pela API (o horário já é dele). A S3.09 pode passar a levar para "Meus agendamentos" depois de confirmar.
+- **O resumo aparece no lugar do formulário,** na mesma URL. Recarregar a página mostra a confirmação de novo, e um segundo envio é recusado pela API (o horário já é dele). A S3.09 manteve esse resumo, com o link para "Meus agendamentos".

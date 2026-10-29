@@ -1,4 +1,4 @@
-import { BookingMain } from "./booking-frame";
+import { BookingMain } from "@/components/booking/booking-frame";
 
 export default function BookingLoading() {
   return (

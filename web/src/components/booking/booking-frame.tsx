@@ -10,7 +10,10 @@ export const STEP_TITLES: Record<BookingStep, string> = {
   confirmar: "Confirme o agendamento",
 };
 
-/** Moldura das etapas do agendamento, compartilhada com o carregamento. */
+/**
+ * Moldura das etapas do agendamento e da remarcação (S3.09), compartilhada
+ * com o carregamento.
+ */
 export function BookingMain({
   children,
   busy = false,
@@ -30,25 +33,25 @@ export function BookingMain({
   );
 }
 
-/** "Etapa 2 de 5 · Serviço" acima do título da etapa, sem barra de progresso. */
-export function BookingHeader({
-  step,
+/** A posição da etapa num fluxo: "Etapa 2 de 4 · Dia". */
+export type StepProgress = { number: number; total: number; label: string };
+
+/** "Etapa 2 de 5 · Serviço" acima do título, sem barra de progresso. */
+export function StepHeader({
+  progress,
   title,
   headingRef,
 }: {
   /** Sem etapa (ex.: depois de confirmar), só o título aparece. */
-  step?: BookingStep;
-  title?: string;
+  progress?: StepProgress;
+  title: string;
   headingRef?: Ref<HTMLHeadingElement>;
 }) {
-  const index = BOOKING_STEPS.findIndex((item) => item.step === step);
-  const heading = title ?? (step ? STEP_TITLES[step] : "");
   return (
     <header>
-      {index >= 0 ? (
+      {progress ? (
         <p className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
-          Etapa {index + 1} de {BOOKING_STEPS.length} ·{" "}
-          {BOOKING_STEPS[index].label}
+          Etapa {progress.number} de {progress.total} · {progress.label}
         </p>
       ) : null}
       <h1
@@ -56,9 +59,37 @@ export function BookingHeader({
         tabIndex={-1}
         className="mt-2 font-heading text-display-3 font-bold text-ink focus:outline-none"
       >
-        {heading}
+        {title}
       </h1>
     </header>
+  );
+}
+
+/** O cabeçalho das etapas de `/agendar`. */
+export function BookingHeader({
+  step,
+  title,
+  headingRef,
+}: {
+  step?: BookingStep;
+  title?: string;
+  headingRef?: Ref<HTMLHeadingElement>;
+}) {
+  const index = BOOKING_STEPS.findIndex((item) => item.step === step);
+  return (
+    <StepHeader
+      progress={
+        index >= 0
+          ? {
+              number: index + 1,
+              total: BOOKING_STEPS.length,
+              label: BOOKING_STEPS[index].label,
+            }
+          : undefined
+      }
+      title={title ?? (step ? STEP_TITLES[step] : "")}
+      headingRef={headingRef}
+    />
   );
 }
 

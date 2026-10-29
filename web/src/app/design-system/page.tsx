@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { ContactNotice } from "@/components/booking/contact-notice";
 import { DayPicker } from "@/components/booking/day-picker";
 import { TimePicker } from "@/components/booking/time-picker";
 import { Alert } from "@/components/ui/alert";
@@ -349,6 +350,9 @@ export default function DesignSystemPage() {
             <Alert
               tone="danger"
               title="Esse horário acabou de ser reservado. Escolha outro."
+            />
+            <ContactNotice
+              shop={{ whatsapp: "75999990000", instagram: "augustobarbearia" }}
             />
           </div>
           <div className="mt-8 max-w-2xl">

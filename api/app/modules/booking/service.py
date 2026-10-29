@@ -1,10 +1,10 @@
-"""Regras do agendamento pelo cliente (RN-05 a RN-13, RN-16).
+"""Regras do agendamento pelo cliente (RN-05 a RN-16, RN-31 a RN-33).
 
-Listar, cancelar e remarcar os próprios agendamentos (S3.09) entram aqui.
+Criar (S3.08), listar, cancelar e remarcar (S3.09) os próprios agendamentos.
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import DBAPIError
@@ -15,9 +15,17 @@ from app.modules.appointments.models import (
     Appointment,
     AppointmentSource,
     AppointmentStatus,
+    CanceledBy,
 )
 from app.modules.appointments.service import is_slot_conflict
-from app.modules.availability.service import ensure_slot_available, slot_unavailable
+from app.modules.availability.service import (
+    Rescheduling,
+    ensure_slot_available,
+    list_available_days,
+    list_available_slots,
+    slot_unavailable,
+)
+from app.modules.availability.slots import TimeRange
 from app.modules.barbers.models import Barber
 from app.modules.barbers.service import get_barber
 from app.modules.catalog.models import Service
@@ -26,6 +34,9 @@ from app.modules.customers.models import Customer
 
 # RN-11: no máximo 2 agendamentos ativos no futuro por cliente.
 MAX_ACTIVE_APPOINTMENTS = 2
+
+# RN-14: o cliente cancela ou remarca até 2 horas antes do início.
+CHANGE_NOTICE = timedelta(hours=2)
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,3 +149,256 @@ def create_customer_appointment(
             raise slot_unavailable() from error
         raise
     return CustomerAppointment(appointment=appointment, barber=barber, service=service)
+
+
+# Listar, cancelar e remarcar (S3.09).
+
+
+def change_deadline(appointment: Appointment) -> datetime | None:
+    """RN-14: até quando o cliente pode cancelar ou remarcar. Só o agendamento
+    ativo (RN-31) tem prazo."""
+    if appointment.status != AppointmentStatus.SCHEDULED:
+        return None
+    return appointment.starts_at - CHANGE_NOTICE
+
+
+def can_change(appointment: Appointment, now: datetime) -> bool:
+    """RN-14 e RN-31: ativo e com pelo menos 2 horas até o início. O limite é
+    inclusivo: exatamente 2 horas antes ainda pode."""
+    deadline = change_deadline(appointment)
+    return deadline is not None and now <= deadline
+
+
+def _with_relations(session: Session, appointment: Appointment) -> CustomerAppointment:
+    return CustomerAppointment(
+        appointment=appointment,
+        barber=get_barber(session, appointment.barber_id),
+        service=get_service(session, appointment.service_id),
+    )
+
+
+def list_customer_appointments(
+    session: Session, customer_id: int, now: datetime
+) -> tuple[list[CustomerAppointment], list[CustomerAppointment]]:
+    """RN-16: só os agendamentos do próprio cliente, em próximos e histórico.
+
+    Próximos são os `SCHEDULED` que ainda não terminaram (o mesmo "ativo no
+    futuro" da RN-11), do mais próximo ao mais distante. O histórico tem todos
+    os outros, do mais recente ao mais antigo.
+    """
+    rows = session.execute(
+        select(Appointment, Barber, Service)
+        .join(Barber, Barber.id == Appointment.barber_id)
+        .join(Service, Service.id == Appointment.service_id)
+        .where(Appointment.customer_id == customer_id)
+        .order_by(Appointment.starts_at, Appointment.id)
+    ).all()
+    upcoming: list[CustomerAppointment] = []
+    history: list[CustomerAppointment] = []
+    for appointment, barber, service in rows:
+        item = CustomerAppointment(
+            appointment=appointment, barber=barber, service=service
+        )
+        is_upcoming = (
+            appointment.status == AppointmentStatus.SCHEDULED
+            and appointment.ends_at > now
+        )
+        (upcoming if is_upcoming else history).append(item)
+    history.reverse()
+    return upcoming, history
+
+
+def _owned_appointment(
+    session: Session, customer_id: int, appointment_id: int, *, lock: bool = False
+) -> Appointment:
+    """RN-16: o agendamento só é encontrado pelo próprio cliente. O de outro
+    cliente responde como inexistente, para não revelar que ele existe.
+
+    Com `lock`, trava a linha até o fim da transação e relê o status: dois
+    pedidos do mesmo agendamento (cancelar e remarcar, por exemplo) passam um
+    depois do outro.
+    """
+    query = select(Appointment).where(
+        Appointment.id == appointment_id, Appointment.customer_id == customer_id
+    )
+    if lock:
+        query = query.with_for_update().execution_options(populate_existing=True)
+    appointment = session.scalars(query).one_or_none()
+    if appointment is None:
+        raise DomainError(
+            code="APPOINTMENT_NOT_FOUND",
+            message="Agendamento não encontrado.",
+            status_code=404,
+        )
+    return appointment
+
+
+def get_customer_appointment(
+    session: Session, customer_id: int, appointment_id: int
+) -> CustomerAppointment:
+    return _with_relations(
+        session, _owned_appointment(session, customer_id, appointment_id)
+    )
+
+
+def _ensure_changeable(appointment: Appointment, now: datetime) -> None:
+    """RN-31: só o agendamento ativo muda; RN-14: até 2 horas antes."""
+    if appointment.status != AppointmentStatus.SCHEDULED:
+        raise DomainError(
+            code="APPOINTMENT_NOT_ACTIVE",
+            message="Este agendamento não está mais ativo.",
+            status_code=409,
+        )
+    if not can_change(appointment, now):
+        raise DomainError(
+            code="CHANGE_DEADLINE_PASSED",
+            message=(
+                "Faltam menos de 2 horas para o seu horário. "
+                "Para cancelar ou remarcar, fale com a barbearia."
+            ),
+            status_code=409,
+        )
+
+
+def cancel_customer_appointment(
+    session: Session, customer_id: int, appointment_id: int, now: datetime
+) -> CustomerAppointment:
+    """O cliente cancela o próprio agendamento (RN-14, RN-16, RN-31).
+
+    Registra quando foi e que foi o cliente (RN-33). A vaga fica livre na hora
+    (RN-32): a exclusion constraint da RN-08 só considera `SCHEDULED`.
+    """
+    appointment = _owned_appointment(session, customer_id, appointment_id, lock=True)
+    _ensure_changeable(appointment, now)
+    appointment.status = AppointmentStatus.CANCELED
+    appointment.canceled_at = now
+    appointment.canceled_by = CanceledBy.CUSTOMER
+    session.commit()
+    return _with_relations(session, appointment)
+
+
+def _rescheduling(appointment: Appointment) -> Rescheduling:
+    return Rescheduling(
+        appointment_id=appointment.id,
+        barber_id=appointment.barber_id,
+        starts_at=appointment.starts_at,
+        duration=timedelta(minutes=appointment.duration_minutes),
+    )
+
+
+def reschedule_customer_appointment(
+    session: Session,
+    customer_id: int,
+    appointment_id: int,
+    *,
+    starts_at: datetime,
+    barber_id: int | None,
+    now: datetime,
+) -> CustomerAppointment:
+    """O cliente remarca o próprio agendamento (RN-14, RN-15, RN-31), numa
+    transação:
+
+    1. trava o agendamento e confere o status e o prazo, sobre o horário atual;
+    2. sem `barber_id`, o barbeiro continua o mesmo; o serviço nunca muda;
+    3. RN-05 a RN-07: o novo início é um dos horários oferecidos para o serviço
+       com o barbeiro, com a duração congelada (RN-13). O próprio agendamento
+       não ocupa a agenda, então o novo horário pode cruzar o atual;
+    4. atualiza a mesma linha: o preço e a duração continuam os da criação;
+    5. RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco
+       recusa e o agendamento continua no horário antigo.
+    """
+    appointment = _owned_appointment(session, customer_id, appointment_id, lock=True)
+    _ensure_changeable(appointment, now)
+    new_barber_id = appointment.barber_id if barber_id is None else barber_id
+    if new_barber_id == appointment.barber_id and starts_at == appointment.starts_at:
+        raise DomainError(
+            code="SAME_SLOT",
+            message="Este já é o horário do seu agendamento. Escolha outro.",
+            status_code=409,
+        )
+    ensure_slot_available(
+        session,
+        barber_id=new_barber_id,
+        service_id=appointment.service_id,
+        starts_at=starts_at,
+        now=now,
+        rescheduling=_rescheduling(appointment),
+    )
+    appointment.barber_id = new_barber_id
+    appointment.starts_at = starts_at
+    appointment.ends_at = starts_at + timedelta(minutes=appointment.duration_minutes)
+    try:
+        session.commit()
+    except DBAPIError as error:
+        session.rollback()
+        if is_slot_conflict(error):
+            raise slot_unavailable() from error
+        raise
+    return _with_relations(session, appointment)
+
+
+@dataclass(frozen=True, slots=True)
+class RescheduleTarget:
+    """O que a remarcação consulta: o barbeiro escolhido e o serviço."""
+
+    barber_id: int
+    service_id: int
+    rescheduling: Rescheduling
+
+
+def _reschedule_target(
+    session: Session,
+    customer_id: int,
+    appointment_id: int,
+    barber_id: int | None,
+    now: datetime,
+) -> RescheduleTarget:
+    appointment = _owned_appointment(session, customer_id, appointment_id)
+    _ensure_changeable(appointment, now)
+    return RescheduleTarget(
+        barber_id=appointment.barber_id if barber_id is None else barber_id,
+        service_id=appointment.service_id,
+        rescheduling=_rescheduling(appointment),
+    )
+
+
+def reschedule_days(
+    session: Session,
+    customer_id: int,
+    appointment_id: int,
+    *,
+    barber_id: int | None,
+    now: datetime,
+) -> tuple[RescheduleTarget, list[date]]:
+    """Os dias com horário para remarcar (RN-05 a RN-07, RN-15)."""
+    target = _reschedule_target(session, customer_id, appointment_id, barber_id, now)
+    days = list_available_days(
+        session,
+        barber_id=target.barber_id,
+        service_id=target.service_id,
+        now=now,
+        rescheduling=target.rescheduling,
+    )
+    return target, days
+
+
+def reschedule_slots(
+    session: Session,
+    customer_id: int,
+    appointment_id: int,
+    *,
+    barber_id: int | None,
+    day: date,
+    now: datetime,
+) -> tuple[RescheduleTarget, list[TimeRange]]:
+    """Os horários de `day` para remarcar (RN-05 a RN-07, RN-15)."""
+    target = _reschedule_target(session, customer_id, appointment_id, barber_id, now)
+    slots = list_available_slots(
+        session,
+        barber_id=target.barber_id,
+        service_id=target.service_id,
+        day=day,
+        now=now,
+        rescheduling=target.rescheduling,
+    )
+    return target, slots
