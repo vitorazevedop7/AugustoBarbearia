@@ -73,7 +73,7 @@ pnpm gen:api                       # lê $API_INTERNAL_URL/openapi.json (padrão
 pnpm gen:api /tmp/openapi.json     # ou um arquivo exportado pela API
 ```
 
-O web chama a API só pelo servidor, com `createApiClient()` de `src/lib/api/client.ts`, que usa `API_INTERNAL_URL`. Fora do compose, defina `API_INTERNAL_URL=http://localhost:8000` em `web/.env.local`.
+O web chama a API só pelo servidor, com `createApiClient()` de `src/lib/api/client.ts`, que usa `API_INTERNAL_URL` e obtém automaticamente o JWT da sessão com `getApiToken()` em cada requisição. Sem sessão, a chamada segue sem Bearer, permitindo rotas públicas. Fora do compose, defina `API_INTERNAL_URL=http://localhost:8000` em `web/.env.local`.
 
 Para testar a imagem de produção, execute na raiz:
 
@@ -102,6 +102,15 @@ docker compose exec web pnpm auth:migrate
 ```
 
 Para o login funcionar, preencha no `.env` o `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) e as credenciais OAuth do Google (`GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`), com `http://localhost:3000/api/auth/callback/google` como URI de redirecionamento autorizado. Depois, `docker compose up -d web` aplica as variáveis.
+
+**Acesso à administração.** Preencha `ADMIN_EMAILS` no `.env` com os e-mails Google autorizados, separados por vírgulas. A API compara os e-mails sem distinguir maiúsculas/minúsculas e ignora espaços nas extremidades. Mantenha `AUTH_ISSUER` e `AUTH_AUDIENCE` iguais no web e na API; `AUTH_JWKS_URL` aponta para `http://web:3000/api/auth/jwks` dentro do Compose (fora dele, `http://localhost:3000/api/auth/jwks`). Aplique a configuração:
+
+```bash
+docker compose up -d api web
+docker compose exec api uv run pytest tests/test_auth.py
+```
+
+Entre com Google e abra http://localhost:3000/admin: um e-mail da lista vê “Acesso permitido”; outra conta é redirecionada para `/`. Sem sessão, o destino é `/entrar?voltar=/admin`. Se a sessão existe, mas a API rejeita o JWT (ex.: JWKS indisponível), a página mostra um aviso sem entrar em ciclo de redirecionamentos. `GET /me` retorna `sub`, `email`, `name` e `role` (`admin` ou `customer`) do usuário autenticado, ainda sem cadastro de cliente; `GET /admin/ping` retorna `{ "status": "ok" }` apenas para administradores. Ambos recebem Bearer JWT e recusam credenciais inválidas com 401; a rota administrativa retorna 403 para clientes. Os testes de auth geram chaves locais e simulam JWKS, sem depender de Google ou do web. Detalhes na [spec de autenticação](docs/specs/autenticacao-api.md).
 
 A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
 

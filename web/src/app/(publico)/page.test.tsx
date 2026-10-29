@@ -4,6 +4,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import HomePage from "./page";
 
+// O componente de servidor que consulta a API tem sua própria suíte.
+vi.mock("@/components/api-status", () => ({ ApiStatus: () => null }));
+
 vi.mock("@/lib/auth-actions", () => ({
   signInWithGoogle: vi.fn(),
   signOut: vi.fn(),
