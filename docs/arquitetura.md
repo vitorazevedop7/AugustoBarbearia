@@ -82,7 +82,7 @@ api/
 │   │   ├── customers/        # Cliente, vínculo com a conta e current_customer (dependencies.py)
 │   │   ├── availability/     # horários disponíveis (RN-05): slots.py (puro), service.py e a rota pública; bloqueios na Sprint 4
 │   │   ├── appointments/     # agendamento, exclusion constraint (RN-08) e ciclo de vida (RN-10 a RN-33)
-│   │   ├── booking/          # rotas /me/appointments do cliente: criar (RN-10 a RN-13); listar, cancelar e remarcar na S3.09
+│   │   ├── booking/          # rotas /me/appointments do cliente: criar (RN-10 a RN-13), listar, cancelar e remarcar (RN-14 a RN-16)
 │   │   ├── payments/         # conclusão, pagamento e relatório (RN-40 a RN-44)
 │   │   └── notifications/    # registro e envio de e-mail, templates (RN-50 a RN-54)
 │   └── jobs/
@@ -138,6 +138,11 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `GET /public/availability?barber_id=&service_id=&date=` | Qualquer um | Horários de início disponíveis do barbeiro para o serviço na data local, com o fim de cada atendimento, no fuso de São Paulo (RN-05 a RN-07). Barbeiro ou serviço inexistente responde 404 ([disponibilidade.md](specs/disponibilidade.md)) |
 | `GET /public/availability/days?barber_id=&service_id=` | Qualquer um | Datas da janela do cliente (hoje até hoje + 30 dias, RN-07) com pelo menos um horário disponível, com a mesma conta da rota acima ([agendamento-cliente.md](specs/agendamento-cliente.md)) |
 | `POST /me/appointments` | Cliente (`current_customer`) | Cria o agendamento `SCHEDULED`/`ONLINE` com o preço e a duração do serviço (RN-12, RN-13). Exige telefone (`409 PHONE_REQUIRED`, RN-10), no máximo 2 ativos no futuro (`409 APPOINTMENT_LIMIT_REACHED`, RN-11) e um horário disponível (`409 SLOT_UNAVAILABLE`, RN-05 a RN-08) |
+| `GET /me/appointments` | Cliente (`current_customer`) | Os agendamentos do próprio cliente em `upcoming` (`SCHEDULED` que não terminaram, do mais próximo) e `history` (o resto, do mais recente), cada um com `can_cancel`, `can_reschedule` e `change_deadline` calculados pela API (RN-14, RN-16) ([meus-agendamentos.md](specs/meus-agendamentos.md)) |
+| `GET /me/appointments/{id}` | Cliente (`current_customer`) | Um agendamento do próprio cliente; o de outro cliente responde `404 APPOINTMENT_NOT_FOUND`, igual ao inexistente (RN-16) |
+| `POST /me/appointments/{id}/cancel` | Cliente (`current_customer`) | Cancela até 2 horas antes (`409 CHANGE_DEADLINE_PASSED`, RN-14), só se ativo (`409 APPOINTMENT_NOT_ACTIVE`, RN-31), registrando `canceled_at` e `canceled_by = CUSTOMER` (RN-33) |
+| `POST /me/appointments/{id}/reschedule` | Cliente (`current_customer`) | Muda `starts_at` e, opcionalmente, `barber_id`, nunca o serviço (RN-15), com o mesmo prazo e status do cancelamento. O novo horário segue RN-05 a RN-08 com a duração congelada (RN-13); o mesmo horário responde `409 SAME_SLOT` |
+| `GET /me/appointments/{id}/availability/days?barber_id=`, `GET /me/appointments/{id}/availability?barber_id=&date=` | Cliente (`current_customer`) | Dias e horários para remarcar, nos formatos das rotas públicas: ignoram o próprio agendamento, usam a duração congelada e não oferecem o horário atual |
 
 As rotas `/me` do cliente recebem o `Customer` pela dependência `current_customer` (`app/modules/customers/dependencies.py`), que sempre parte do `sub` do token, nunca de um id na requisição. A tabela `customers` guarda o `sub` em `auth_user_id`, sem FK para a tabela `user` do Better Auth ([perfil-cliente.md](specs/perfil-cliente.md)).
 
@@ -173,7 +178,7 @@ web/
         ├── api-status.tsx          # status de GET /health na página inicial, só em desenvolvimento
         ├── site-header.tsx / site-nav.tsx / site-footer.tsx  # cabeçalho com navegação e "Agendar"; rodapé com dados da API
         ├── vitrine/                # seções da vitrine: listas de serviços e barbeiros, horário e contato, topo e esqueleto
-        ├── booking/                # DayPicker e TimePicker do agendamento (reaproveitáveis na remarcação)
+        ├── booking/                # agendamento e remarcação: DayPicker, TimePicker, BarberStep/ServiceStep, a moldura das etapas e o ContactNotice (contato quando o prazo passou)
         └── ui/                     # componentes do design system (docs/design/design-system.md)
 ```
 
@@ -183,7 +188,7 @@ web/
 - O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. As rotas `/public` da vitrine usam `createPublicApiClient()`, que nunca envia token nem consulta a sessão; `lib/api/public.ts` junta essas leituras com o `cache` do React, para o rodapé e a página dividirem a mesma chamada. O layout de `/admin` consulta `/admin/ping` sem cache antes de qualquer página da área: 200 mostra a navegação e a página, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
 - **Server Components** buscam dados pela API. **Server Actions** fazem as mutações chamando a API. O navegador nunca chama a API diretamente.
 - **Nenhuma regra de negócio no front.** Validação no front é só para a experiência do usuário; quem decide é a API, e o front mostra o `message` do erro que a API devolve.
-- O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware, layout ou na própria página). `/perfil` confere a sessão antes de chamar a API e leva ao login com `voltar=/perfil`; a administração (403) vai para `/admin`. Em `/agendar`, as etapas de escolha só leem rotas `/public` e não exigem login; a confirmação (com `hora` na URL) confere a sessão e leva ao login com `voltar=` a URL completa da confirmação. Mesmo assim, a API valida tudo de novo.
+- O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware, layout ou na própria página). `/perfil` confere a sessão antes de chamar a API e leva ao login com `voltar=/perfil`; a administração (403) vai para `/admin`. Em `/agendar`, as etapas de escolha só leem rotas `/public` e não exigem login; a confirmação (com `hora` na URL) confere a sessão e leva ao login com `voltar=` a URL completa da confirmação. `/meus-agendamentos` e as telas de cancelar e remarcar conferem a sessão antes de chamar a API e levam ao login com `voltar=` a própria URL; a administração (403) vai para `/admin`. Mesmo assim, a API valida tudo de novo.
 - Mobile first: toda tela precisa funcionar bem em 360px de largura.
 
 ## Ambientes

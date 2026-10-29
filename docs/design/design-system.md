@@ -109,7 +109,9 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `ServiceCard`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
-| Card de agendamento, tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
+| `ContactNotice` | `components/booking/contact-notice.tsx` | Pronto (aviso de prazo vencido com os contatos da barbearia, RN-14) |
+| Card de agendamento do cliente | `app/(cliente)/meus-agendamentos/appointment-card.tsx` | Pronto (só em "Meus agendamentos"; a agenda da administração terá o seu) |
+| Tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
 
 ### Botão
 
@@ -211,10 +213,20 @@ A implementação está na [spec do agendamento](../specs/agendamento-cliente.md
 - **Cada escolha é um link:** um toque avança, sem botão "Continuar" e sem barra fixa no rodapé. Funciona sem JS.
 - Barbeiro em cards com a foto (2 colunas no celular); serviço em cards com duração e preço (uma coluna). Dia com `DayPicker`: só os dias com horário, agrupados por mês, 3 por linha no celular. Horário com `TimePicker`: chips-link com a cara do `ChoiceChip`, agrupados em Manhã e Tarde, 3 por linha no celular. O `ChoiceChip` (`radio`) continua para formulários, como a forma de pagamento.
 - A confirmação mostra o resumo completo, o aviso das 2h (D6) num `Alert` `info`, o campo Telefone quando o perfil não tem, e o botão "Confirmar agendamento". Depois de confirmar, a mesma página mostra "Horário confirmado", o resumo e "Ver meus agendamentos".
+- **Remarcação** ([spec](../specs/meus-agendamentos.md)): o mesmo padrão em 4 etapas (barbeiro → dia → horário → confirmar), com o horário atual no topo do resumo. Entra pelo dia, com o barbeiro atual já escolhido; o "Trocar" do barbeiro volta à etapa de barbeiro.
+
+### Meus agendamentos
+
+- Um cartão por agendamento, em "Próximos" e "Histórico": serviço (`h3`), `StatusBadge`, dia, horário, barbeiro e valor. Um `SCHEDULED` que já passou mostra o `Badge` `muted` "Aguardando registro".
+- As ações "Remarcar" (`outline`, `sm`) e "Cancelar" (`danger`, `sm`) aparecem só quando a API diz que pode (`can_reschedule`, `can_cancel`), com o prazo por extenso acima. O nome acessível inclui a data ("Cancelar o horário de terça-feira, 3 de novembro de 2026").
+- Sem as ações, o próximo horário mostra o `ContactNotice`: o aviso das 2 horas em `warning`, com os links de contato.
+- Depois de cancelar ou remarcar, a lista mostra um `Alert` `success` ("Agendamento cancelado.").
 
 ### Confirmação destrutiva
 
 Cancelar um agendamento, marcar falta ou excluir um cadastro abre um diálogo (`<dialog>` nativo) que diz o que vai acontecer e tem dois botões: o `danger` com o verbo ("Cancelar agendamento") e um `ghost` "Voltar". O foco começa no "Voltar".
+
+Na área do cliente, que precisa funcionar sem JS, a confirmação é uma **página** com o mesmo conteúdo: o resumo do que vai mudar, o `ghost` "Voltar" e o `danger` "Cancelar agendamento", nessa ordem (o "Voltar" vem primeiro no Tab). É o caso de `/meus-agendamentos/[id]/cancelar`.
 
 ### Carregamento
 

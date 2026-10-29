@@ -18,7 +18,7 @@ import {
   BookingHeader,
   ChoiceSummary,
   type SummaryItem,
-} from "./booking-frame";
+} from "@/components/booking/booking-frame";
 import {
   MY_APPOINTMENTS_PATH,
   type BookedAppointment,

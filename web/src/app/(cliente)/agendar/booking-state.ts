@@ -11,8 +11,8 @@ export type ConfirmState = {
   appointment?: BookedAppointment;
 };
 
-/** Onde o cliente acompanha os horários. A página entra na S3.09 (#58). */
-export const MY_APPOINTMENTS_PATH = "/meus-agendamentos";
+/** Onde o cliente acompanha, cancela e remarca os horários (S3.09). */
+export { MY_APPOINTMENTS_PATH } from "../meus-agendamentos/appointments-state";
 
 export const confirmUnavailableMessage =
   "Não foi possível confirmar agora. Tente novamente em instantes.";

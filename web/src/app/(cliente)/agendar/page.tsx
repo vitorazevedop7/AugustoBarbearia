@@ -36,11 +36,11 @@ import {
   BookingMain,
   ChoiceSummary,
   type SummaryItem,
-} from "./booking-frame";
+} from "@/components/booking/booking-frame";
 import { loadUnavailableMessage } from "./booking-state";
 import { ConfirmBooking } from "./confirm-booking";
 import { barbersFor, resolveSelection, servicesFor } from "./selection";
-import { BarberStep, ServiceStep } from "./steps";
+import { BarberStep, ServiceStep } from "@/components/booking/steps";
 
 export const metadata: Metadata = {
   title: "Agendar — Augusto Barbearia",
