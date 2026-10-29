@@ -250,6 +250,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/availability/days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Available Days
+         * @description Dias da janela do cliente com pelo menos um horário livre (RN-05 a RN-07).
+         */
+        get: operations["get_available_days_public_availability_days_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Appointment
+         * @description Agenda um horário para o cliente do token (RN-05 a RN-13).
+         */
+        post: operations["create_appointment_me_appointments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -263,6 +303,41 @@ export interface components {
              */
             status: "ok";
         };
+        /** AppointmentBarber */
+        AppointmentBarber: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /**
+         * AppointmentCreate
+         * @description O cliente vem do token (RN-16): o corpo não aceita `customer_id`.
+         */
+        AppointmentCreate: {
+            /** Barber Id */
+            barber_id: number;
+            /** Service Id */
+            service_id: number;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+        };
+        /** AppointmentService */
+        AppointmentService: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /**
+         * AppointmentStatus
+         * @description RN-30. Só `SCHEDULED` é ativo e ocupa a agenda (RN-08).
+         * @enum {string}
+         */
+        AppointmentStatus: "SCHEDULED" | "COMPLETED" | "CANCELED" | "NO_SHOW";
         /** AvailabilityResponse */
         AvailabilityResponse: {
             /** Barber Id */
@@ -276,6 +351,15 @@ export interface components {
             date: string;
             /** Slots */
             slots: components["schemas"]["AvailableSlot"][];
+        };
+        /** AvailableDaysResponse */
+        AvailableDaysResponse: {
+            /** Barber Id */
+            barber_id: number;
+            /** Service Id */
+            service_id: number;
+            /** Days */
+            days: string[];
         };
         /**
          * AvailableSlot
@@ -341,6 +425,32 @@ export interface components {
             opens_at?: string | null;
             /** Closes At */
             closes_at?: string | null;
+        };
+        /**
+         * CustomerAppointmentResponse
+         * @description Agendamento do próprio cliente. Início e fim no fuso de São Paulo
+         *     (`-03:00`, RN-01); preço e duração congelados na criação (RN-13).
+         */
+        CustomerAppointmentResponse: {
+            /** Id */
+            id: number;
+            status: components["schemas"]["AppointmentStatus"];
+            barber: components["schemas"]["AppointmentBarber"];
+            service: components["schemas"]["AppointmentService"];
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Price */
+            price: string;
+            /** Duration Minutes */
+            duration_minutes: number;
         };
         /** CustomerProfile */
         CustomerProfile: {
@@ -1620,6 +1730,134 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_available_days_public_availability_days_get: {
+        parameters: {
+            query: {
+                barber_id: number;
+                service_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailableDaysResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_appointment_me_appointments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppointmentCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerAppointmentResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

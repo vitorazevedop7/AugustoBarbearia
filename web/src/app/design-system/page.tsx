@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { DayPicker } from "@/components/booking/day-picker";
+import { TimePicker } from "@/components/booking/time-picker";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { BarberCard } from "@/components/ui/barber-card";
@@ -60,6 +62,7 @@ const sections = [
   { id: "botoes", title: "Botões" },
   { id: "campos", title: "Campos" },
   { id: "horarios", title: "Chips de horário" },
+  { id: "agendamento", title: "Dia e horário" },
   { id: "caixas", title: "Caixas de seleção" },
   { id: "status", title: "Badges" },
   { id: "avisos", title: "Avisos" },
@@ -281,6 +284,26 @@ export default function DesignSystemPage() {
               </fieldset>
             ))}
           </form>
+        </Showcase>
+
+        <Showcase id="agendamento" title="Dia e horário">
+          <div className="grid max-w-3xl gap-10">
+            <DayPicker
+              days={["2026-11-27", "2026-11-28", "2026-11-30", "2026-12-01"]}
+              hrefFor={() => "#agendamento"}
+              headingLevel="h3"
+            />
+            <TimePicker
+              slots={["09:00", "09:30", "11:30", "14:00", "14:30"].map(
+                (time) => ({
+                  starts_at: `2026-11-27T${time}:00-03:00`,
+                  ends_at: `2026-11-27T${time}:00-03:00`,
+                }),
+              )}
+              hrefFor={() => "#agendamento"}
+              headingLevel="h3"
+            />
+          </div>
         </Showcase>
 
         <Showcase id="caixas" title="Caixas de seleção">

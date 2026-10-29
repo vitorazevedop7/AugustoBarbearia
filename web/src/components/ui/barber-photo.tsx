@@ -12,12 +12,15 @@ export function BarberPhoto({
   photoPath,
   sizes,
   zoom = false,
+  decorative = false,
   className = "",
 }: {
   name: string;
   photoPath: string | null;
   sizes: string;
   zoom?: boolean;
+  /** A foto só enfeita um link que já tem o nome (ex.: o card do agendamento). */
+  decorative?: boolean;
   className?: string;
 }) {
   const zoomClasses = zoom
@@ -30,7 +33,7 @@ export function BarberPhoto({
       {photoPath ? (
         <Image
           src={photoPath}
-          alt={`Foto de ${name}`}
+          alt={decorative ? "" : `Foto de ${name}`}
           fill
           sizes={sizes}
           className={`object-cover ${zoomClasses}`}

@@ -10,7 +10,11 @@ from app.clock import utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
 from app.modules.availability import service
-from app.modules.availability.schemas import AvailabilityResponse, AvailableSlot
+from app.modules.availability.schemas import (
+    AvailabilityResponse,
+    AvailableDaysResponse,
+    AvailableSlot,
+)
 
 router = APIRouter(tags=["Disponibilidade"])
 
@@ -39,3 +43,21 @@ def get_availability(
         date=day,
         slots=[AvailableSlot(starts_at=slot.start, ends_at=slot.end) for slot in slots],
     )
+
+
+@router.get(
+    "/public/availability/days",
+    response_model=AvailableDaysResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+def get_available_days(
+    barber_id: int,
+    service_id: int,
+    session: Annotated[Session, Depends(get_session)],
+    now: Annotated[dt.datetime, Depends(utc_now)],
+) -> AvailableDaysResponse:
+    """Dias da janela do cliente com pelo menos um horário livre (RN-05 a RN-07)."""
+    days = service.list_available_days(
+        session, barber_id=barber_id, service_id=service_id, now=now
+    )
+    return AvailableDaysResponse(barber_id=barber_id, service_id=service_id, days=days)
