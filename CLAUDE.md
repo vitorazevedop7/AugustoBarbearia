@@ -44,16 +44,27 @@ pnpm start
 
 Na raiz, `docker build -t augusto-web ./web` e `docker run --rm -p 3000:3000 augusto-web` constroem e iniciam a imagem standalone com usuário não-root. O build baixa Inter e Playfair Display e inclui os assets na saída standalone.
 
-### Próximas entregas da Fase 0
+### Sistema completo — disponível a partir da S2.04
 
-Os comandos abaixo estarão disponíveis após suas issues: Compose (#26), banco/Alembic (#27) e geração do cliente tipado. Consulte o README antes de executá-los.
+O caminho oficial de desenvolvimento (ADR 0004). Sobe `db` (PostgreSQL 17), `api` (`:8000`) e `web` (`:3000`) com hot reload.
 
 ```bash
-docker compose up
-docker compose exec api alembic upgrade head
-docker compose exec api alembic revision --autogenerate -m "msg"
+cp .env.example .env              # uma vez; preencha o que a tarefa pedir
+docker compose up                 # sobe db + api + web
+docker compose up --build -V      # depois de mudar dependências (lockfiles)
 docker compose exec api uv run pytest
 docker compose exec api sh -c "uv run ruff check . && uv run pyright"
+docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
+docker compose down               # para tudo; `down -v` apaga também o banco
+```
+
+### Próximas entregas da Fase 0
+
+Os comandos abaixo estarão disponíveis após suas issues: banco/Alembic (#27) e geração do cliente tipado (#29). Consulte o README antes de executá-los.
+
+```bash
+docker compose exec api alembic upgrade head
+docker compose exec api alembic revision --autogenerate -m "msg"
 cd web && pnpm gen:api
 ```
 

@@ -13,7 +13,7 @@ Next.js (web) · FastAPI (api) · PostgreSQL · Docker · Railway. Detalhes e mo
 
 ## Rodando localmente
 
-A fundação é entregue em duas issues independentes: API na S2.02 (#24) e web na S2.03 (#25). Os comandos de cada serviço ficam disponíveis após a respectiva entrega estar integrada.
+O caminho recomendado é o [sistema completo](#sistema-completo-recomendado) com Docker Compose. Também dá para rodar a API ou o web direto na máquina, como abaixo.
 
 ### API
 
@@ -70,9 +70,32 @@ docker build -t augusto-web ./web
 docker run --rm -p 3000:3000 augusto-web
 ```
 
-### Sistema completo
+### Sistema completo (recomendado)
 
-O Docker Compose com PostgreSQL, API e web será entregue na S2.04 (#26). Banco, migrações, autenticação e geração dos tipos para o cliente web têm tarefas próprias da Fase 0.
+Pré-requisito: Docker com o Compose v2. Na raiz do repositório:
+
+```bash
+cp .env.example .env
+docker compose up
+```
+
+- Web: http://localhost:3000
+- API: http://localhost:8000/health e http://localhost:8000/docs
+- PostgreSQL 17: `localhost:5432` (só na própria máquina), com usuário, senha e banco do `.env`
+
+A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
+
+As verificações rodam nos próprios containers:
+
+```bash
+docker compose exec api uv run pytest
+docker compose exec api sh -c "uv run ruff check . && uv run pyright"
+docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
+```
+
+Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`, rode `docker compose up --build -V` para reconstruir as imagens e recriar os volumes de dependências. `docker compose down` para tudo; `docker compose down -v` também apaga os dados do banco.
+
+O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). Banco, migrações, autenticação e geração dos tipos para o cliente web têm tarefas próprias da Fase 0.
 
 ## Documentação
 
