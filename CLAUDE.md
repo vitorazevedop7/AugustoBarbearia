@@ -70,9 +70,15 @@ docker compose exec api alembic check
 
 Os testes criam o banco `<banco da DATABASE_URL>_test` no mesmo servidor e aplicam migrações uma vez por sessão. Cada teste usa uma transação externa com rollback, inclusive quando o service faz commit. O usuário de desenvolvimento precisa de permissão `CREATEDB`. Importe novos modelos em `api/alembic/env.py` antes de gerar migrações.
 
-### Próximas entregas da Fase 0
+### Contrato OpenAPI — S2.07
 
-A geração do cliente tipado estará disponível após #29: `cd web && pnpm gen:api`.
+Mudou um schema da API? Regenere os tipos do web no mesmo PR (ADR 0008). O job `contract` do CI falha se `web/src/lib/api/schema.d.ts` estiver desatualizado.
+
+```bash
+docker compose exec web pnpm gen:api                         # lê http://api:8000/openapi.json
+(cd api && uv run python -m app.export_openapi /tmp/openapi.json)  # exporta sem subir o servidor
+(cd web && pnpm gen:api /tmp/openapi.json)                     # gera a partir do arquivo exportado
+```
 
 ## Mapa da documentação
 
@@ -95,7 +101,7 @@ A geração do cliente tipado estará disponível após #29: `cd web && pnpm gen
 2. **Uma issue por vez**, dentro do escopo dela. Se aparecer trabalho extra, abra outra issue em vez de expandir esta.
 3. **Branch** `tipo/<n>-descricao` (ex.: `feat/23-agendamento-cliente`). **PR** com `Closes #n`, seguindo o template. Merge por rebase.
    - O **CI** (`.github/workflows/ci.yml`) roda os mesmos comandos de qualidade da API e do web em todo PR. **PR com CI vermelho não é mergeado** (ADR 0007). Rode as verificações antes de abrir o PR.
-   - O GitHub **não bloqueia** o merge: no plano gratuito, repositório privado não tem proteção de branch (#46). Antes de mergear, confira com `gh pr checks <n>` que `changes` está `pass` e que `api` e `web` estão `pass` ou `skipping`. Se o `changes` falhar, `api` e `web` também aparecem como `skipping` sem ter rodado nada.
+   - O GitHub **não bloqueia** o merge: no plano gratuito, repositório privado não tem proteção de branch (#46). Antes de mergear, confira com `gh pr checks <n>` que `changes` está `pass` e que `api`, `web` e `contract` estão `pass` ou `skipping`. Se o `changes` falhar, os outros também aparecem como `skipping` sem ter rodado nada.
 4. **Documentação no mesmo PR:** mudou o comportamento → atualize `regras.md`, a spec, `modelo.md` (se mudou entidade ou relacionamento) ou `arquitetura.md`. Documentação desatualizada é bug.
 5. **ADRs aceitos não são editados.** Se uma decisão precisa mudar, pare e pergunte ao humano. A mudança vira um ADR novo que substitui o anterior.
 6. **Dúvida de produto** (algo que nenhuma RN ou spec responde): pergunte em vez de inventar. Se a resposta virar regra, ela entra em `regras.md`.

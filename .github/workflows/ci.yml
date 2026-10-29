@@ -112,3 +112,48 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+  # Regenera os tipos do web a partir da API e falha se o schema.d.ts commitado
+  # estiver diferente (ADR 0008, docs/specs/contrato-openapi.md).
+  contract:
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      # A exportação exige a variável preenchida, mas não conecta ao banco.
+      DATABASE_URL: postgresql://contract:contract@localhost:5432/contract
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.13.6"
+          working-directory: api
+          enable-cache: true
+          cache-dependency-glob: api/uv.lock
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: web/.node-version
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: uv sync --locked --no-dev
+        working-directory: api
+      # Sem --no-dev aqui também, o `uv run` reinstalaria o grupo dev.
+      - run: uv run --locked --no-dev python -m app.export_openapi "$RUNNER_TEMP/openapi.json"
+        working-directory: api
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm gen:api "$RUNNER_TEMP/openapi.json"
+        working-directory: web
+      - name: Confere se os tipos commitados estão atualizados
+        run: |
+          if [ -n "$(git status --porcelain -- web/src/lib/api/schema.d.ts)" ]; then
+            git diff -- web/src/lib/api/schema.d.ts
+            echo "::error file=web/src/lib/api/schema.d.ts::Os tipos da API estão desatualizados. Rode \`pnpm gen:api\` em web/ e commite o schema.d.ts."
+            exit 1
+          fi

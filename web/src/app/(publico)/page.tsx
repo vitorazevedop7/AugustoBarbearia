@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { Suspense, type CSSProperties } from "react";
+import { ApiStatus, ApiStatusBar } from "@/components/api-status";
 import { ButtonLink } from "@/components/ui/button";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -81,6 +82,14 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
+
+      {process.env.NODE_ENV === "development" && (
+        <Suspense
+          fallback={<ApiStatusBar tone="pending" label="verificando…" />}
+        >
+          <ApiStatus />
+        </Suspense>
+      )}
     </main>
   );
 }
