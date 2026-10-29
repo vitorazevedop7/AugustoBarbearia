@@ -56,7 +56,7 @@ Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
 
 ## API (`/api`)
 
-O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
+O esqueleto da S2.02 está implementado em [esqueleto-api.md](specs/esqueleto-api.md): criação da app, settings, handlers de erro e healthcheck tipado. A fundação do banco da S2.05 está em [banco-api.md](specs/banco-api.md): engine SQLAlchemy 2 com Psycopg 3, sessão por requisição, Alembic e testes no Postgres. O contrato com o web está em [contrato-openapi.md](specs/contrato-openapi.md): `app/export_openapi.py` exporta o OpenAPI sem subir o servidor. A autenticação da S2.09 está em [autenticacao-api.md](specs/autenticacao-api.md): validação JWT, dependências de acesso e rotas de prova. O primeiro módulo de domínio é `shop` (S3.02), em [barbearia-horarios.md](specs/barbearia-horarios.md): barbearia e horário de funcionamento. O módulo `customers` (S3.06), em [perfil-cliente.md](specs/perfil-cliente.md), cuida do cliente e do vínculo com a conta Google. Os demais módulos entram nas issues seguintes. `app/health.py` verifica a conexão com `SELECT 1` e retorna 503 se indisponível. As pastas abaixo mostram a estrutura alvo.
 
 ### Estrutura de pastas
 
@@ -78,7 +78,7 @@ api/
 │   │   ├── shop/             # Barbearia + horário de funcionamento
 │   │   ├── barbers/          # Barbeiro, Barbeiro–Serviço
 │   │   ├── catalog/          # Serviço (o nome evita confusão com service.py)
-│   │   ├── customers/        # Cliente e vínculo com a conta
+│   │   ├── customers/        # Cliente, vínculo com a conta e current_customer (dependencies.py)
 │   │   ├── availability/     # cálculo de horários disponíveis (RN-05) e bloqueios
 │   │   ├── appointments/     # agendamento e ciclo de vida (RN-10 a RN-33)
 │   │   ├── payments/         # conclusão, pagamento e relatório (RN-40 a RN-44)
@@ -96,6 +96,7 @@ Cada módulo segue o mesmo formato:
 | `schemas.py` | Modelos Pydantic de entrada e saída. Geram o OpenAPI ([0008](decisoes/0008-contrato-openapi.md)) |
 | `service.py` | **Regras de negócio** e transações. Cita as `RN-xx` em comentários e docstrings |
 | `models.py` | Tabelas SQLAlchemy |
+| `dependencies.py` | Opcional: dependências FastAPI que outros módulos reutilizam (ex.: `current_customer`) |
 
 ### Onde cada tipo de regra mora
 
@@ -105,7 +106,7 @@ Cada módulo segue o mesmo formato:
 | Regra de negócio | `service.py` | Prazo de 2h para cancelar (RN-14), limite de 2 agendamentos (RN-11) |
 | Cálculo puro | Função sem I/O em `availability/` | Grade e slots (RN-04, RN-05), testável sem banco |
 | Invariante crítica | Constraint no banco | Sem sobreposição (RN-08) |
-| Permissão | Dependência de auth no `router.py` | `require_admin` nas rotas `/admin` (RN-70) |
+| Permissão | Dependência de auth no `router.py` | `require_admin` nas rotas `/admin`, `require_customer` no perfil (RN-70) |
 
 ### Grupos de rotas
 
@@ -118,9 +119,18 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `/admin` | Administração | Agenda, agendamento manual, bloqueios, conclusão, falta, cadastros, relatório |
 | `/health` | Railway | Healthcheck |
 
-Na fundação (S2.09), `GET /me` aceita qualquer identidade autenticada e retorna `sub`, `email`, `name` e `role`, sem criar ou consultar clientes. `GET /admin/ping` exige `require_admin` e retorna `{ "status": "ok" }`. As rotas de domínio aplicam as permissões da RN-70: `GET /public/shop` é aberta, e `PUT /admin/shop` e `PUT /admin/business-hours` exigem `require_admin`.
+| Rota | Quem acessa | O que faz |
+|---|---|---|
+| `GET /me` | Qualquer identidade autenticada | `sub`, `email`, `name`, `role` e `has_phone`. Para o cliente, resolve o cadastro (cria ou vincula, RN-23); para a administração, `has_phone` é `false` e nenhum cliente é criado (RN-71) |
+| `GET /me/profile` | Cliente (`require_customer`) | Nome, e-mail e telefone do próprio cadastro (RN-16) |
+| `PATCH /me/profile` | Cliente (`require_customer`) | Altera nome e telefone; campo ausente ou `null` fica como está (RN-62) |
+| `GET /admin/ping` | Administração (`require_admin`) | `{ "status": "ok" }`, rota de prova da S2.09 |
+| `GET /public/shop` | Qualquer um | Dados da barbearia e horário de funcionamento ([barbearia-horarios.md](specs/barbearia-horarios.md)) |
+| `PUT /admin/shop`, `PUT /admin/business-hours` | Administração (`require_admin`) | Alteram os dados da barbearia e o horário de funcionamento |
 
-`app/auth/` valida apenas JWT EdDSA com chave Ed25519 do `AUTH_JWKS_URL`, exigindo identidade, emissor, audiência e expiração. As chaves são cacheadas por até 5 minutos e um `kid` desconhecido provoca nova busca, com timeout de 5 segundos. `current_user` responde 401 com `WWW-Authenticate: Bearer` quando não há credencial válida; `require_admin` responde 403 para clientes, sempre no contrato `{code, message}`. O papel vem exclusivamente de `ADMIN_EMAILS`: a lista separada por vírgulas ignora espaços nas extremidades e diferenças de caixa. Um papel enviado no token não concede permissão. Falhas de JWKS negam o acesso.
+As rotas `/me` do cliente recebem o `Customer` pela dependência `current_customer` (`app/modules/customers/dependencies.py`), que sempre parte do `sub` do token, nunca de um id na requisição. A tabela `customers` guarda o `sub` em `auth_user_id`, sem FK para a tabela `user` do Better Auth ([perfil-cliente.md](specs/perfil-cliente.md)).
+
+`app/auth/` valida apenas JWT EdDSA com chave Ed25519 do `AUTH_JWKS_URL`, exigindo identidade, emissor, audiência e expiração. As chaves são cacheadas por até 5 minutos e um `kid` desconhecido provoca nova busca, com timeout de 5 segundos. `current_user` responde 401 com `WWW-Authenticate: Bearer` quando não há credencial válida; `require_admin` responde 403 para clientes e `require_customer` responde 403 para a administração, sempre no contrato `{code, message}`. O papel vem exclusivamente de `ADMIN_EMAILS`: a lista separada por vírgulas ignora espaços nas extremidades e diferenças de caixa. Um papel enviado no token não concede permissão. Falhas de JWKS negam o acesso.
 
 ## Web (`/web`)
 
@@ -158,7 +168,7 @@ web/
 - O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. O layout de `/admin` consulta `/admin/ping` sem cache antes de qualquer página da área: 200 mostra a navegação e a página, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
 - **Server Components** buscam dados pela API. **Server Actions** fazem as mutações chamando a API. O navegador nunca chama a API diretamente.
 - **Nenhuma regra de negócio no front.** Validação no front é só para a experiência do usuário; quem decide é a API, e o front mostra o `message` do erro que a API devolve.
-- O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware ou layout). Mesmo assim, a API valida tudo de novo.
+- O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware, layout ou na própria página). `/perfil` confere a sessão antes de chamar a API e leva ao login com `voltar=/perfil`; a administração (403) vai para `/admin`. Mesmo assim, a API valida tudo de novo.
 - Mobile first: toda tela precisa funcionar bem em 360px de largura.
 
 ## Ambientes

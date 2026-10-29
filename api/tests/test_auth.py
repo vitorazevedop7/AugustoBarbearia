@@ -1,7 +1,5 @@
 import base64
 import json
-import time
-from collections.abc import Iterator
 from io import BytesIO
 from unittest.mock import MagicMock
 from urllib.error import URLError
@@ -16,93 +14,7 @@ from pytest import MonkeyPatch
 
 from app.auth.service import get_token_verifier
 from app.config import get_settings
-from app.main import create_app
-
-ISSUER = "https://web.test"
-AUDIENCE = "augusto-api-test"
-JWKS_URL = "https://web.test/api/auth/jwks"
-
-
-def public_jwk(key: Ed25519PrivateKey, kid: str = "current") -> dict[str, str]:
-    return {
-        "kty": "OKP",
-        "crv": "Ed25519",
-        "alg": "EdDSA",
-        "use": "sig",
-        "kid": kid,
-        "x": base64.urlsafe_b64encode(key.public_key().public_bytes_raw())
-        .rstrip(b"=")
-        .decode(),
-    }
-
-
-@pytest.fixture
-def private_key() -> Ed25519PrivateKey:
-    return Ed25519PrivateKey.generate()
-
-
-@pytest.fixture
-def jwks_payload(private_key: Ed25519PrivateKey) -> dict[str, object]:
-    return {"keys": [public_jwk(private_key)]}
-
-
-@pytest.fixture
-def jwks_http(monkeypatch: MonkeyPatch, jwks_payload: dict[str, object]) -> MagicMock:
-    open_mock = MagicMock(
-        side_effect=lambda *_args, **_kwargs: BytesIO(json.dumps(jwks_payload).encode())
-    )
-    opener = MagicMock()
-    opener.open = open_mock
-    monkeypatch.setattr(
-        "jwt.jwks_client.urllib.request.build_opener", lambda *_: opener
-    )
-    return open_mock
-
-
-@pytest.fixture
-def auth_client(monkeypatch: MonkeyPatch, jwks_http: MagicMock) -> Iterator[TestClient]:
-    monkeypatch.setenv("AUTH_JWKS_URL", JWKS_URL)
-    monkeypatch.setenv("AUTH_ISSUER", ISSUER)
-    monkeypatch.setenv("AUTH_AUDIENCE", AUDIENCE)
-    monkeypatch.setenv("ADMIN_EMAILS", " admin@example.com , OTHER@example.com, ,")
-    get_settings.cache_clear()
-    get_token_verifier.cache_clear()
-    try:
-        with TestClient(create_app()) as client:
-            yield client
-    finally:
-        get_token_verifier.cache_clear()
-        get_settings.cache_clear()
-
-
-def claims(**overrides: object) -> dict[str, object]:
-    return {
-        "iss": ISSUER,
-        "aud": AUDIENCE,
-        "iat": int(time.time()),
-        "exp": int(time.time()) + 900,
-        "sub": "google-user-123",
-        "email": "customer@example.com",
-        "name": "Cliente Teste",
-        **overrides,
-    }
-
-
-def token(
-    private_key: Ed25519PrivateKey,
-    payload: dict[str, object] | None = None,
-    kid: str = "current",
-) -> str:
-    return jwt.encode(
-        claims() if payload is None else payload,
-        private_key,
-        algorithm="EdDSA",
-        headers={"kid": kid},
-    )
-
-
-def bearer(value: str) -> dict[str, str]:
-    return {"Authorization": f"Bearer {value}"}
+from tests.jwt_tokens import JWKS_URL, bearer, claims, public_jwk, token
 
 
 def assert_unauthorized(response: Response) -> None:
@@ -114,7 +26,7 @@ def assert_unauthorized(response: Response) -> None:
     }
 
 
-def test_rn71_token_valido_resolve_cliente_sem_banco(
+def test_rn71_token_valido_resolve_cliente(
     auth_client: TestClient, private_key: Ed25519PrivateKey
 ) -> None:
     response = auth_client.get("/me", headers=bearer(token(private_key)))
@@ -124,6 +36,7 @@ def test_rn71_token_valido_resolve_cliente_sem_banco(
         "email": "customer@example.com",
         "name": "Cliente Teste",
         "role": "customer",
+        "has_phone": False,
     }
 
 
@@ -386,6 +299,6 @@ def test_rn71_openapi_documenta_bearer_identidade_e_erros(
         assert operation["security"] == [{"HTTPBearer": []}]
         assert "401" in operation["responses"]
     assert "403" in spec["paths"]["/admin/ping"]["get"]["responses"]
-    user = spec["components"]["schemas"]["CurrentUser"]
-    assert set(user["required"]) == {"sub", "email", "name", "role"}
+    user = spec["components"]["schemas"]["Me"]
+    assert set(user["required"]) == {"sub", "email", "name", "role", "has_phone"}
     assert user["properties"]["role"]["enum"] == ["admin", "customer"]

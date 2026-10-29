@@ -1,19 +1,14 @@
-"""Rotas de prova; vínculo com Customer será implementado na Fase 1."""
+"""Rota de prova da administração; `/me` fica em `modules/customers`."""
 
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from app.auth.dependencies import current_user, require_admin
+from app.auth.dependencies import require_admin
 from app.auth.schemas import AdminPingResponse, CurrentUser
 from app.errors import ErrorResponse
 
 router = APIRouter(tags=["auth"], responses={401: {"model": ErrorResponse}})
-
-
-@router.get("/me", response_model=CurrentUser)
-def me(user: Annotated[CurrentUser, Depends(current_user)]) -> CurrentUser:
-    return user
 
 
 @router.get(

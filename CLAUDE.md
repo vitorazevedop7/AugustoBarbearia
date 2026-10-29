@@ -89,7 +89,16 @@ docker compose up -d api web                         # aplica mudanças nas vari
 docker compose exec api uv run pytest tests/test_auth.py
 ```
 
-Os testes de auth usam chaves Ed25519 locais e JWKS simulado, sem web/Google. Após entrar com Google, `/admin` mostra “Acesso permitido” apenas para contas em `ADMIN_EMAILS`; outras voltam para `/`. A API expõe `GET /me` (identidade e papel, sem tabela de clientes) e `GET /admin/ping` (administradores). O cliente web envia o Bearer de `getApiToken()` automaticamente por requisição. A [spec](docs/specs/autenticacao-api.md) documenta validação, erros e rotação de chaves.
+Os testes de auth usam chaves Ed25519 locais e JWKS simulado, sem web/Google. Após entrar com Google, `/admin` mostra “Acesso permitido” apenas para contas em `ADMIN_EMAILS`; outras voltam para `/`. A API expõe `GET /me` (identidade, papel e se o cliente tem telefone) e `GET /admin/ping` (administradores). O cliente web envia o Bearer de `getApiToken()` automaticamente por requisição. A [spec](docs/specs/autenticacao-api.md) documenta validação, erros e rotação de chaves.
+
+### Perfil do cliente — S3.06
+
+```bash
+docker compose exec api alembic upgrade head          # cria a tabela customers
+docker compose exec api uv run pytest tests/test_customers.py
+```
+
+O primeiro acesso autenticado de um cliente cria o `Customer` ou o vincula pelo e-mail (RN-23). Com uma conta fora de `ADMIN_EMAILS`, `/perfil` mostra nome, e-mail e telefone e salva por Server Action; a administração é levada para `/admin`. Novas rotas do cliente usam a dependência `current_customer` de `app/modules/customers/dependencies.py`. A [spec](docs/specs/perfil-cliente.md) documenta o vínculo e o formato do telefone.
 
 ## Mapa da documentação
 
