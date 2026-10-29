@@ -98,7 +98,7 @@
 - **Serviço:** cards com nome, duração e preço em pílula. O card escolhido ganha um check, e uma barra fixa no rodapé mostra o total.
 - **Horário:** uma faixa de 6 dias que abre um calendário mensal. Os horários são chips em 3 colunas no celular, sem barra de progresso.
 
-**Proposta para o nosso fluxo** (serviço → barbeiro → dia → horário → confirmar):
+**Proposta para o nosso fluxo** (serviço → barbeiro → dia → horário → confirmar). A ordem final é barbeiro → serviço (D11), e o que foi implementado está na [spec do agendamento](../specs/agendamento-cliente.md):
 - serviço em uma coluna no celular;
 - barbeiros filtrados pelo serviço;
 - faixa de 7 dias com acesso ao mês, numa janela de 30 dias;

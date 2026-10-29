@@ -9,6 +9,7 @@ from app.health import router as health_router
 from app.modules.availability.router import router as availability_router
 from app.modules.barbers.router import public_router as public_barbers_router
 from app.modules.barbers.router import router as barbers_router
+from app.modules.booking.router import router as booking_router
 from app.modules.catalog.router import public_router as public_catalog_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.customers.router import router as customers_router
@@ -31,6 +32,7 @@ def create_app() -> FastAPI:
     application.include_router(public_barbers_router)
     application.include_router(public_catalog_router)
     application.include_router(availability_router)
+    application.include_router(booking_router)
     return application
 
 

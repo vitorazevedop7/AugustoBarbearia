@@ -122,7 +122,9 @@ flowchart LR
 
 Estados: `loading.tsx` com esqueleto; falha de leitura da API mostra um `Alert` `danger` com "Não foi possível carregar os horários. Tente novamente em instantes." e o resto da página continua; erro da Server Action mostra o `message` da API.
 
-Ao voltar para uma etapa já respondida (pelo "Trocar" ou pelo navegador), a opção escolhida antes aparece marcada (`aria-current`).
+O "Trocar" de uma escolha leva à etapa dela, sem ela e sem as que dependem dela (trocar o barbeiro volta para `/agendar`; trocar o dia mantém o barbeiro e o serviço). Voltar pelo navegador faz o mesmo, porque cada etapa tem a própria URL.
+
+As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`web/src/components/booking/`), que recebem a lista da API e uma função `hrefFor` com o destino de cada opção. A remarcação (S3.09) pode reaproveitá-los com outros destinos.
 
 ## API
 | Método | Caminho | Quem | O que faz |

@@ -20,3 +20,11 @@ class AvailabilityResponse(BaseModel):
     date: dt.date
     # Em ordem; vazia quando o dia não tem horário.
     slots: list[AvailableSlot]
+
+
+class AvailableDaysResponse(BaseModel):
+    barber_id: int
+    service_id: int
+    # Datas locais de São Paulo, em ordem, de hoje até o fim da janela (RN-07),
+    # só as que têm pelo menos um horário disponível.
+    days: list[dt.date]

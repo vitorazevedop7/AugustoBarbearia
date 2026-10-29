@@ -108,7 +108,8 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Ornament`, `SectionHeading` | `ornament.tsx`, `section-heading.tsx` | Pronto |
 | `ServiceCard`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
-| Faixa de dias, card de agendamento, tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
+| `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
+| Card de agendamento, tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
 
 ### Botão
 
@@ -203,11 +204,13 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 Proposta detalhada em [referencia-beard-x.md](referencia-beard-x.md#fluxo-de-agendamento-squire). As regras visuais:
 
-- Uma etapa por tela: serviço → barbeiro → dia → horário → confirmar. O estado fica na URL (`?servico=&barbeiro=&data=&hora=`), então "voltar" do navegador funciona.
-- No topo, a etapa atual por extenso ("Etapa 2 de 5 · Barbeiro"), sem barra de progresso.
-- Serviço e barbeiro em cards selecionáveis (uma coluna no celular). Dia numa faixa de 7 dias. Horário em `ChoiceChip`, agrupado em Manhã e Tarde.
-- No celular, uma barra fixa no rodapé resume o que já foi escolhido e leva à próxima etapa.
-- A confirmação mostra o resumo completo, o aviso das 2h (D6) num `Alert` `info` e o botão "Confirmar agendamento".
+A implementação está na [spec do agendamento](../specs/agendamento-cliente.md).
+
+- Uma etapa por tela: barbeiro → serviço → dia → horário → confirmar (D11). O estado fica na URL (`?barbeiro=&servico=&data=&hora=`), então "voltar" do navegador funciona.
+- No topo, a etapa atual por extenso ("Etapa 2 de 5 · Serviço"), sem barra de progresso. Abaixo, as escolhas já feitas, cada uma com o link "Trocar".
+- **Cada escolha é um link:** um toque avança, sem botão "Continuar" e sem barra fixa no rodapé. Funciona sem JS.
+- Barbeiro em cards com a foto (2 colunas no celular); serviço em cards com duração e preço (uma coluna). Dia com `DayPicker`: só os dias com horário, agrupados por mês, 3 por linha no celular. Horário com `TimePicker`: chips-link com a cara do `ChoiceChip`, agrupados em Manhã e Tarde, 3 por linha no celular. O `ChoiceChip` (`radio`) continua para formulários, como a forma de pagamento.
+- A confirmação mostra o resumo completo, o aviso das 2h (D6) num `Alert` `info`, o campo Telefone quando o perfil não tem, e o botão "Confirmar agendamento". Depois de confirmar, a mesma página mostra "Horário confirmado", o resumo e "Ver meus agendamentos".
 
 ### Confirmação destrutiva
 

@@ -335,3 +335,93 @@ def test_rn01_horario_especifico_exige_fuso(
             starts_at=datetime(2026, 11, 3, 10),
             now=NOW,
         )
+
+
+def available_days(public: TestClient, barber: int, service: int) -> list[str]:
+    response = public.get(
+        "/public/availability/days",
+        params={"barber_id": barber, "service_id": service},
+    )
+    assert response.status_code == 200, response.json()
+    body = response.json()
+    assert body["barber_id"] == barber
+    assert body["service_id"] == service
+    return body["days"]
+
+
+def test_rn07_dias_com_horario_vao_de_hoje_ate_30_dias_sem_domingo(
+    public: TestClient, edvaldo: int, corte: int
+) -> None:
+    days = available_days(public, edvaldo, corte)
+
+    # Hoje é segunda, 2/11, às 8h: hoje ainda tem horário. A janela vai até
+    # 2/12 (dia 30); os 4 domingos do caminho ficam de fora.
+    assert days[0] == "2026-11-02"
+    assert days[-1] == "2026-12-02"
+    assert "2026-11-08" not in days
+    assert len(days) == 31 - 4
+    assert days == sorted(days)
+
+
+def test_rn06_hoje_sai_da_lista_quando_nao_resta_horario(
+    public: TestClient, clock: Clock, edvaldo: int, corte: int
+) -> None:
+    clock.now = local(2026, 11, 2, 18, 1)
+
+    days = available_days(public, edvaldo, corte)
+
+    assert days[0] == "2026-11-03"
+    assert days[-1] == "2026-12-02"
+
+
+def test_rn05_dia_lotado_sai_da_lista(
+    public: TestClient, db_session: Session, edvaldo: int, corte: int
+) -> None:
+    # Sábado, 7/11, das 9h às 14h: um agendamento ocupa o dia inteiro.
+    make_appointment(
+        db_session,
+        barber=edvaldo,
+        starts_at=local(2026, 11, 7, 9),
+        duration_minutes=300,
+    )
+
+    days = available_days(public, edvaldo, corte)
+
+    assert "2026-11-07" not in days
+    assert "2026-11-06" in days
+
+
+def test_rn05_lista_de_dias_usa_a_mesma_conta_dos_horarios(
+    public: TestClient, db_session: Session, edvaldo: int, corte_e_barba: int
+) -> None:
+    make_appointment(db_session, barber=edvaldo, starts_at=local(2026, 11, 3, 10))
+
+    for day in available_days(public, edvaldo, corte_e_barba):
+        assert availability(public, edvaldo, corte_e_barba, day)["slots"], day
+
+
+def test_rn05_item5_sem_oferta_a_lista_de_dias_e_vazia(
+    public: TestClient, db_session: Session, edvaldo: int, corte: int
+) -> None:
+    barber = db_session.get(Barber, edvaldo)
+    assert barber is not None
+    barber.active = False
+    db_session.flush()
+
+    assert available_days(public, edvaldo, corte) == []
+
+
+@pytest.mark.parametrize(
+    ("which", "code"),
+    [("barber", "BARBER_NOT_FOUND"), ("service", "SERVICE_NOT_FOUND")],
+)
+def test_lista_de_dias_com_barbeiro_ou_servico_inexistente(
+    public: TestClient, edvaldo: int, corte: int, which: str, code: str
+) -> None:
+    params = {"barber_id": edvaldo, "service_id": corte}
+    params[f"{which}_id"] = 999999
+
+    response = public.get("/public/availability/days", params=params)
+
+    assert response.status_code == 404
+    assert response.json()["code"] == code
