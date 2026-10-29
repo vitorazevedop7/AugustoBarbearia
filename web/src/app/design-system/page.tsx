@@ -5,7 +5,7 @@ import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { EmptyState } from "@/components/ui/empty-state";
-import { SelectField, TextField } from "@/components/ui/field";
+import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
 
@@ -213,6 +213,14 @@ export default function DesignSystemPage() {
               label="Observação"
               optional
               placeholder="Ex.: prefiro máquina 2 nas laterais"
+            />
+            <TextAreaField
+              name="ds-apresentacao"
+              label="Apresentação"
+              optional
+              maxLength={400}
+              hint="Até 400 caracteres."
+              defaultValue="Barbeiro há 15 anos, especialista em corte clássico e barba na navalha."
             />
             <SelectField
               name="ds-pagamento"

@@ -125,3 +125,36 @@ export function SelectField({
     </FieldShell>
   );
 }
+
+type TextAreaFieldProps = Omit<ComponentProps<"textarea">, "name"> &
+  FieldMeta & { name: string };
+
+/** Texto de várias linhas, como a apresentação da barbearia ou do barbeiro. */
+export function TextAreaField({
+  label,
+  hint,
+  error,
+  optional,
+  id,
+  name,
+  rows = 4,
+  className = "",
+  ...props
+}: TextAreaFieldProps) {
+  const fieldId = id ?? name;
+  const meta = { label, hint, error, optional };
+  return (
+    <FieldShell id={fieldId} {...meta}>
+      <textarea
+        id={fieldId}
+        name={name}
+        rows={rows}
+        required={!optional}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy(fieldId, meta)}
+        className={`${control} resize-y ${className}`}
+        {...props}
+      />
+    </FieldShell>
+  );
+}
