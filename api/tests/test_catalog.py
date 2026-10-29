@@ -1,10 +1,14 @@
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+
+from alembic import command
 
 OWNERS = ["Edvaldo", "Lauro", "Manoel"]
 
@@ -396,3 +400,30 @@ def test_rn70_so_administracao_acessa_os_servicos(
     assert as_customer.status_code == 403
     assert anonymous.status_code == 401
     assert admin.get("/admin/services").json() == before
+
+
+def test_rn63_migracao_liga_os_proprietarios_mesmo_renomeados(
+    db_session: Session,
+) -> None:
+    # A administração já edita barbeiros antes da 0005 rodar em produção.
+    config = Config(str(Path(__file__).parents[1] / "alembic.ini"))
+    config.attributes["connection"] = db_session.connection()
+    command.downgrade(config, "0004")
+    owner_ids = db_session.scalars(text("SELECT id FROM barbers ORDER BY id")).all()
+    db_session.execute(text("UPDATE barbers SET name = name || ' Augusto'"))
+    db_session.execute(text("INSERT INTO barbers (name) VALUES ('Novo')"))
+
+    command.upgrade(config, "0005")
+
+    linked = db_session.execute(
+        text(
+            "SELECT services.name, barber_services.barber_id FROM barber_services"
+            " JOIN services ON services.id = barber_services.service_id"
+            " ORDER BY services.name, barber_services.barber_id"
+        )
+    ).all()
+    assert [tuple(row) for row in linked] == [
+        (service, barber_id)
+        for service in ("Corte + Barba", "Corte Simples")
+        for barber_id in owner_ids
+    ]
