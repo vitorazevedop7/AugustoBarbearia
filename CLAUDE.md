@@ -67,7 +67,8 @@ cd web && pnpm gen:api
 | `docs/dominio/modelo.md` | For criar ou mudar entidades. Tem o glossário PT↔código |
 | `docs/arquitetura.md` | For decidir onde um código mora, as camadas, as rotas e as variáveis de ambiente |
 | `docs/decisoes/*.md` | For questionar uma escolha técnica. Os ADRs explicam o porquê |
-| `docs/design/identidade-visual.md` | For criar ou alterar qualquer tela (tokens de cor, fontes, tom) |
+| `docs/design/identidade-visual.md` | For mexer na marca (logo, tokens de cor, fontes, tom, movimento) |
+| `docs/design/design-system.md` | For criar ou alterar qualquer tela (componentes, padrões, checklist de acessibilidade) |
 | `docs/specs/<feature>.md` | For implementar uma funcionalidade. É o contrato dela |
 | `docs/cliente/registro.md` | For precisar saber de onde veio um fato ou uma decisão de produto (D0–D8) |
 
