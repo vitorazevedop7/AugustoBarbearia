@@ -25,8 +25,8 @@ erDiagram
 | **Barbearia** | O registro único com os dados do negócio: nome, endereço, contato e textos da vitrine |
 | **Horário de funcionamento** | Abertura e fechamento (ou "fechado") para cada dia da semana. Vale para todos os barbeiros (RN-02) |
 | **Barbeiro** | Profissional cadastrado, com foto e apresentação. **Não faz login** (D2). Pode estar ativo ou inativo (RN-60). Não é excluído: quem sai é inativado e o cadastro continua para o histórico. A foto é o caminho de um arquivo estático do web, sem upload no MVP (D10) |
-| **Serviço** | O que é oferecido, com preço e duração. Pode estar ativo ou inativo (RN-61) |
-| **Barbeiro–Serviço** | Quais barbeiros realizam quais serviços (N:N) |
+| **Serviço** | O que é oferecido, com preço e duração. Pode estar ativo ou inativo (RN-61). Não é excluído: o que sai é inativado e o cadastro continua para o histórico |
+| **Barbeiro–Serviço** | Quais barbeiros realizam quais serviços (N:N). Todo serviço tem pelo menos um barbeiro; um barbeiro inativo pode continuar ligado, mas não é oferecido (RN-05, RN-61) |
 | **Bloqueio** | Intervalo em que um barbeiro não atende: almoço, folga, compromisso (RN-03) |
 | **Cliente** | Pessoa atendida. Pode ter conta Google (agenda online) ou não (cadastrada pela administração) (RN-62, RN-20). O e-mail, quando existe, é único entre os clientes |
 | **Conta Google** | A identidade de login. Ou está vinculada a um cliente, ou pertence a um e-mail da lista de administração (RN-71) |

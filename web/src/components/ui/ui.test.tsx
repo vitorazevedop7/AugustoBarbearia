@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { Alert } from "./alert";
 import { StatusBadge } from "./badge";
 import { Button } from "./button";
+import { Checkbox } from "./checkbox";
 import { ChoiceChip } from "./choice-chip";
 import { TextAreaField, TextField } from "./field";
 
@@ -64,6 +65,15 @@ describe("ChoiceChip", () => {
       "value",
       "14:30",
     );
+  });
+});
+
+describe("Checkbox", () => {
+  it("é um checkbox nativo com o rótulo como nome acessível", () => {
+    render(<Checkbox name="barbeiro-2" label="Lauro" defaultChecked />);
+    const checkbox = screen.getByRole("checkbox", { name: "Lauro" });
+    expect(checkbox).toBeChecked();
+    expect(checkbox).toHaveAttribute("name", "barbeiro-2");
   });
 });
 

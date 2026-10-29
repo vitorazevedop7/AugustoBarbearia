@@ -101,6 +101,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Button`, `ButtonLink` | `button.tsx` | Pronto |
 | `TextField`, `TextAreaField`, `SelectField` | `field.tsx` | Pronto |
 | `ChoiceChip` | `choice-chip.tsx` | Pronto |
+| `Checkbox` | `checkbox.tsx` | Pronto |
 | `Badge`, `StatusBadge` | `badge.tsx` | Pronto |
 | `Alert` | `alert.tsx` | Pronto |
 | `EmptyState` | `empty-state.tsx` | Pronto |
@@ -141,6 +142,13 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 - Agrupe os chips num `<fieldset>` com `<legend>` ("Manhã", "Tarde"). A grade tem 3 colunas no celular e 6 no desktop.
 - **Estados:** livre (borda `ink-muted`), escolhido (`brand`), foco (contorno) e indisponível (riscado). Prefira **não mostrar** um horário indisponível; o riscado é para quando o contexto pede, como na remarcação.
 - Por ser `radio`, funciona sem JS e com as setas do teclado.
+
+### Caixa de seleção
+
+- **`Checkbox`** é um `checkbox` nativo para escolher **várias** opções de uma lista curta, como os barbeiros que realizam um serviço.
+- Agrupe as caixas num `<fieldset>` com `<legend>` ("Quem realiza"), uma por linha. A dica do grupo fica abaixo da última caixa, ligada ao `fieldset` por `aria-describedby`.
+- O rótulo envolve a caixa, então o texto inteiro é clicável, e a linha tem 44px de altura.
+- **Estados:** desmarcada (borda `ink-muted`), marcada (`brand` com o visto em `surface`), foco (contorno) e desativada (fundo `paper`, texto `ink-muted`).
 
 ### Badge
 

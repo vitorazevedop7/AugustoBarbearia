@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
@@ -57,6 +58,7 @@ const sections = [
   { id: "botoes", title: "Botões" },
   { id: "campos", title: "Campos" },
   { id: "horarios", title: "Chips de horário" },
+  { id: "caixas", title: "Caixas de seleção" },
   { id: "status", title: "Badges" },
   { id: "avisos", title: "Avisos" },
   { id: "titulos", title: "Títulos de seção" },
@@ -275,6 +277,23 @@ export default function DesignSystemPage() {
                 </div>
               </fieldset>
             ))}
+          </form>
+        </Showcase>
+
+        <Showcase id="caixas" title="Caixas de seleção">
+          <form className="max-w-xl">
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-semibold text-ink">
+                Quem realiza
+              </legend>
+              <Checkbox name="ds-barbeiro-1" label="Edvaldo" defaultChecked />
+              <Checkbox name="ds-barbeiro-2" label="Lauro" />
+              <Checkbox
+                name="ds-barbeiro-3"
+                label="Manoel (inativo)"
+                disabled
+              />
+            </fieldset>
           </form>
         </Showcase>
 
