@@ -27,6 +27,9 @@ Esta fundação não implementa regras de negócio. Respeita a separação web/A
 **CA-2b — Movimento acessível**
 - **Dado** um navegador sem JavaScript, ou com `prefers-reduced-motion: reduce`, **quando** acesso `/`, **então** todo o conteúdo aparece sem animação e nada fica escondido.
 
+**CA-2c — Design system**
+- **Dado** o web instalado, **quando** acesso `/design-system`, **então** vejo os tokens de cor, a tipografia e todos os componentes de `src/components/ui` em seus estados, a página não é indexada (`noindex`) e não há link para ela no site.
+
 **CA-3 — Qualidade e build**
 - **Dado** Node.js e pnpm compatíveis, **quando** instalo com o lockfile e executo `lint`, `typecheck`, `test` e `build`, **então** todos passam e o build gera `.next/standalone/server.js`.
 
@@ -34,7 +37,7 @@ Esta fundação não implementa regras de negócio. Respeita a separação web/A
 - **Dado** Docker disponível, **quando** construo e executo a imagem, **então** a aplicação responde na porta 3000 com usuário não-root.
 
 ## Fluxo e telas
-Uma página pública estática, renderizada no servidor, com cabeçalho, conteúdo “Em construção” e rodapé. Não há carregamento assíncrono nem chamadas de API nesta etapa. As pastas `(cliente)` e `admin` ficam reservadas, sem páginas ou proteção fictícias. A validação inclui um teste de renderização da página, os comandos de qualidade e a inspeção visual em 360px.
+Uma página pública estática, renderizada no servidor, com cabeçalho, conteúdo “Em construção” e rodapé. A página interna `/design-system` mostra os tokens e os componentes do [design system](../design/design-system.md). Não há carregamento assíncrono nem chamadas de API nesta etapa. As pastas `(cliente)` e `admin` ficam reservadas, sem páginas ou proteção fictícias. A validação inclui um teste de renderização da página, os comandos de qualidade e a inspeção visual em 360px.
 
 Direção visual: a linguagem da referência [Beard X](../design/referencia-beard-x.md) adaptada à [identidade visual](../design/identidade-visual.md), com formas quadradas, faixas escuras e claras, o ornamento de bigode acima dos títulos e botões em caixa alta. Conteúdo: cabeçalho, hero “Em construção”, “O que vem por aí” (agendamento online, lembrete por e-mail, remarcação até 2h antes) e rodapé com o horário de funcionamento. Interações: foco visível, hover de 300ms, cascata curta no hero e entrada única dos cards ao rolar, tudo respeitando `prefers-reduced-motion`.
 

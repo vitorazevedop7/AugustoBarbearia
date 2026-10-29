@@ -130,6 +130,7 @@ web/
     │   ├── (publico)/              # vitrine: /, /servicos, /barbeiros, /privacidade
     │   ├── (cliente)/              # exige login: /agendar, /meus-agendamentos, /perfil
     │   ├── admin/                  # exige admin: /admin/agenda, /admin/clientes, /admin/cadastros, /admin/relatorio
+    │   ├── design-system/          # vitrine dos componentes, fora do menu e dos buscadores
     │   └── api/auth/[...all]/      # handler do Better Auth
     ├── lib/
     │   ├── auth.ts                 # configuração do Better Auth (Google + plugin JWT)
@@ -137,7 +138,7 @@ web/
     │       ├── client.ts           # openapi-fetch com o Bearer JWT
     │       └── schema.d.ts         # GERADO por `pnpm gen:api`, não editar
     └── components/
-        └── ui/                     # componentes base da identidade visual
+        └── ui/                     # componentes do design system (docs/design/design-system.md)
 ```
 
 ### Regras do front
