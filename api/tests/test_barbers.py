@@ -14,7 +14,7 @@ def create(admin: TestClient, **changes: object) -> dict[str, object]:
     return response.json()
 
 
-def test_rn63_proprietarios_ja_cadastrados_com_foto_placeholder(
+def test_rn63_proprietarios_ja_cadastrados(
     admin: TestClient,
 ) -> None:
     response = admin.get("/admin/barbers")
@@ -26,7 +26,7 @@ def test_rn63_proprietarios_ja_cadastrados_com_foto_placeholder(
     ] == [
         {
             "name": name,
-            "photo_path": f"/images/barbeiros/{name.lower()}.jpg",
+            "photo_path": None,
             "bio": None,
             "active": True,
         }
