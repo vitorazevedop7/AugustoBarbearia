@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -50,7 +51,14 @@ export default async function SignInPage({
         </form>
         <p className="mt-6 text-sm text-ink-muted">
           Do Google recebemos só o seu nome, e-mail e foto, usados apenas para o
-          seu atendimento.
+          seu atendimento. Saiba mais na{" "}
+          <Link
+            href="/privacidade"
+            className="font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-out hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
+          >
+            Política de privacidade
+          </Link>
+          .
         </p>
       </div>
     </main>
