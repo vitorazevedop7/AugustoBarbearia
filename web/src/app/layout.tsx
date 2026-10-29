@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { RevealObserver } from "@/components/reveal-observer";
 import { SiteHeader } from "@/components/site-header";
+import { getCurrentSession } from "@/lib/session";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,9 +25,10 @@ export const metadata: Metadata = {
   description: "O site da Augusto Barbearia está em construção.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getCurrentSession();
   return (
     <html
       lang="pt-BR"
@@ -40,7 +42,7 @@ export default function RootLayout({
         >
           Pular para o conteúdo
         </a>
-        <SiteHeader />
+        <SiteHeader user={session ? { name: session.user.name } : null} />
         {children}
         <SiteFooter />
         <RevealObserver />

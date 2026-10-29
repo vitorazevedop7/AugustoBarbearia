@@ -1,14 +1,19 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import HomePage from "./page";
+
+vi.mock("@/lib/auth-actions", () => ({
+  signInWithGoogle: vi.fn(),
+  signOut: vi.fn(),
+}));
 
 describe("página inicial", () => {
   it("identifica a barbearia e mostra o estado em construção", () => {
     render(
       <>
-        <SiteHeader />
+        <SiteHeader user={null} />
         <HomePage />
         <SiteFooter />
       </>,

@@ -84,6 +84,14 @@ docker compose up
 - API: http://localhost:8000/health e http://localhost:8000/docs
 - PostgreSQL 17: `localhost:5432` (só na própria máquina), com usuário, senha e banco do `.env`
 
+**Login com Google.** Na primeira vez, e quando o Better Auth for atualizado, crie as tabelas de autenticação:
+
+```bash
+docker compose exec web pnpm auth:migrate
+```
+
+Para o login funcionar, preencha no `.env` o `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) e as credenciais OAuth do Google (`GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`), com `http://localhost:3000/api/auth/callback/google` como URI de redirecionamento autorizado. Depois, `docker compose up -d web` aplica as variáveis.
+
 A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
 
 As verificações rodam nos próprios containers:
@@ -96,7 +104,7 @@ docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
 
 Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`, rode `docker compose up --build -V` para reconstruir as imagens e recriar os volumes de dependências. `docker compose down` para tudo; `docker compose down -v` também apaga os dados do banco.
 
-O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). Autenticação e geração dos tipos para o cliente web têm tarefas próprias da Fase 0.
+O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente). A geração dos tipos para o cliente web tem tarefa própria da Fase 0.
 
 ## Documentação
 

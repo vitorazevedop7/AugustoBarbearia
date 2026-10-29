@@ -56,6 +56,7 @@ docker compose up --build -V      # depois de mudar dependências (lockfiles)
 docker compose exec api uv run pytest
 docker compose exec api sh -c "uv run ruff check . && uv run pyright"
 docker compose exec web sh -c "pnpm lint && pnpm typecheck && pnpm test"
+docker compose exec web pnpm auth:migrate   # cria/atualiza as tabelas do Better Auth (não é o Alembic)
 docker compose down               # para tudo; `down -v` apaga também o banco
 ```
 
