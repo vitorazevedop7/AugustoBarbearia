@@ -169,10 +169,11 @@ Não há ambiente de homologação no MVP. Até a demonstração, o sistema só 
 
 ## Variáveis de ambiente
 
-Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas variáveis da Railway. `api/.env.example` lista a configuração opcional já usada pelo esqueleto; o `.env.example` da raiz com as integrações será entregue com o Compose (#26).
+Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas variáveis da Railway. O `.env.example` da raiz lista todas e alimenta o `docker compose`, que entrega a cada serviço só as variáveis dele. `api/.env.example` cobre a configuração opcional para rodar a API fora do compose.
 
 | Variável | Serviço | Para quê |
 |---|---|---|
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | db | Só no desenvolvimento: credenciais do Postgres do compose |
 | `APP_NAME` | api | Opcional: título do OpenAPI; padrão "Augusto Barbearia API" |
 | `DATABASE_URL` | api, jobs, web | Conexão com o PostgreSQL |
 | `ADMIN_EMAILS` | api | Lista de e-mails da administração (RN-71) |

@@ -6,6 +6,12 @@ RUN npm install --global pnpm@10.34.9
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
+# Desenvolvimento (docker compose): `next dev` com o código vindo por volume.
+# node_modules e .next ficam em volumes anônimos, fora do código montado.
+FROM dependencies AS dev
+EXPOSE 3000
+CMD ["pnpm", "dev"]
+
 FROM dependencies AS builder
 COPY . .
 RUN pnpm build
