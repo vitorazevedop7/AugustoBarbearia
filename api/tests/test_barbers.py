@@ -35,7 +35,7 @@ def test_rn63_proprietarios_ja_cadastrados(
     ] == [
         {
             "name": name,
-            "photo_path": None,
+            "photo_path": f"/images/barbeiros/{name.lower()}.jpg",
             "bio": None,
             "active": True,
         }

@@ -166,7 +166,14 @@ def test_rn70_visitante_ve_os_barbeiros_sem_login(client: TestClient) -> None:
     assert [
         {key: value for key, value in barber.items() if key != "id"}
         for barber in response.json()
-    ] == [{"name": name, "photo_path": None, "bio": None} for name in OWNERS]
+    ] == [
+        {
+            "name": name,
+            "photo_path": f"/images/barbeiros/{name.lower()}.jpg",
+            "bio": None,
+        }
+        for name in OWNERS
+    ]
 
 
 def test_rn60_barbeiro_publico_traz_foto_e_apresentacao(

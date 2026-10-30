@@ -103,11 +103,11 @@ O primeiro acesso autenticado de um cliente cria o `Customer` ou o vincula pelo 
 ### Cadastro de barbeiros — S3.03
 
 ```bash
-docker compose exec api alembic upgrade head          # cria a tabela barbers com Edvaldo, Lauro e Manoel, ainda sem foto
+docker compose exec api alembic upgrade head          # cria barbers e preenche fotos placeholder dos proprietários sem foto
 docker compose exec api uv run pytest tests/test_barbers.py
 ```
 
-A administração cria, edita, inativa e reativa barbeiros em `/admin/cadastros/barbeiros` (`GET`/`POST /admin/barbers`, `GET`/`PATCH /admin/barbers/{id}`). A foto é o caminho de um arquivo em `web/public/images/barbeiros/`, sem upload; as fotos fictícias dos proprietários (D10) entram na S3.10 (#63). Nos testes da API, as fixtures `admin` e `customer` do `conftest.py` dão um cliente HTTP já autenticado. A [spec](docs/specs/cadastro-barbeiros.md) documenta as validações; a trava da RN-60 (agendamentos futuros) entrou na S3.07.
+A administração cria, edita, inativa e reativa barbeiros em `/admin/cadastros/barbeiros` (`GET`/`POST /admin/barbers`, `GET`/`PATCH /admin/barbers/{id}`). A foto é o caminho de um arquivo em `web/public/images/barbeiros/`, sem upload; as fotos fictícias dos proprietários (D10) estão incluídas desde a S3.10 (#63), com migração que preserva fotos já definidas pela administração. Nos testes da API, as fixtures `admin` e `customer` do `conftest.py` dão um cliente HTTP já autenticado. A [spec](docs/specs/cadastro-barbeiros.md) documenta as validações; a trava da RN-60 (agendamentos futuros) entrou na S3.07.
 
 ### Cadastro de serviços — S3.04
 
