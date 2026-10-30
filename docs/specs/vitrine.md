@@ -1,6 +1,6 @@
 # Spec — Vitrine pública
 
-- **Issue:** #54 (S3.05)
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre")
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -85,6 +85,12 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - **Quando** o visitante abre a vitrine
 - **Então** a seção mostra um `EmptyState` ("Nenhum serviço disponível no momento") ou um `Alert` `danger` ("Não foi possível carregar os serviços. Tente novamente em instantes."), e o resto da página continua funcionando.
 
+**CA-11 — Fotos do hero e do "Sobre" (D12)**
+- **Dado** um visitante em `/`, no celular (360px) ou no desktop
+- **Quando** a página carrega
+- **Então** o hero mostra a foto decorativa com overlay `bg-ink/70`, mantendo o texto e os botões legíveis, sem rolagem horizontal; a imagem tem preload e prioridade alta, por ser o LCP.
+- Com `about` preenchido, o "Sobre" mostra a foto 3:2 com `alt` descritivo, acima do texto no celular e ao lado dele no desktop. Sem `about`, a seção inteira, incluindo a foto, não aparece.
+
 ## Fluxo e telas
 Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Cada uma tem um esqueleto de carregamento (`loading.tsx`).
 
@@ -92,8 +98,8 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
   - No desktop (a partir de 1024px), tudo fica numa linha. O link da página atual tem `aria-current="page"`.
   - No celular, um botão "Menu" abre um painel com os links, o botão "Agendar" na largura toda e o login. O painel é um `<details>` nativo: abre e fecha sem JS. Com JS, ele fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link. O painel não cobre a tela inteira, então a rolagem não é travada.
 - **`/`:**
-  1. **Hero** (faixa `ink`): ornamento, o nome da barbearia como `h1`, a frase de destaque (ou um texto genérico sobre agendar pelo celular), "Agendar horário" (primário) e "Ver serviços" (`outline-light`).
-  2. **Sobre** (só se o texto "sobre" estiver preenchido).
+  1. **Hero** (foto de fundo com overlay `ink/70`): ornamento, o nome da barbearia como `h1`, a frase de destaque (ou um texto genérico sobre agendar pelo celular), "Agendar horário" (primário) e "Ver serviços" (`outline-light`). A cascata de entrada continua apenas no conteúdo sobre a foto.
+  2. **Sobre** (só se o texto "sobre" estiver preenchido): foto 3:2 acima do texto no celular e ao lado dele no desktop, sem texto sobreposto à imagem.
   3. **Serviços:** até 4 serviços, em cards com nome, duração, preço, descrição, quem realiza e "Agendar". Embaixo, "Ver todos os serviços".
   4. **Equipe:** os barbeiros ativos em cards com foto 4:5 (ou a inicial), nome, apresentação e "Agendar com <nome>". Embaixo, "Conhecer a equipe".
   5. **Horário e contato** (faixa `ink`, âncora `#contato`): o horário de funcionamento por dia, agrupando os dias iguais ("Segunda a sexta · 10h às 19h", "Domingo · Fechado"); o endereço com "Como chegar" (busca no Google Maps); e os contatos preenchidos (WhatsApp, telefone, Instagram, e-mail). Sem endereço nem contato, só o horário aparece. Fecha com "Agendar horário".
@@ -108,7 +114,13 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
 ### Fotos
 - Foto do barbeiro com `next/image`, proporção fixa 4:5 e zoom de 1,05 no hover, dentro da moldura.
 - Os três proprietários têm fotos fictícias como placeholder desde a S3.10 (#63, D10). Um barbeiro sem foto mostra no card o mesmo quadro neutro com a inicial da administração. O componente `BarberPhoto` passou para `components/ui/` e é usado pelos dois lados.
-- A vitrine não usa foto no hero nem nos serviços (P10).
+- O hero da página inicial e o "Sobre a barbearia" usam fotos fictícias geradas por IA (#72, D12), até a substituição pelas fotos reais (P10). Elas combinam com as fotos dos barbeiros e com a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo. Não retratam a Augusto Barbearia nem os proprietários e não vêm de banco de imagem.
+- Os caminhos são constantes no código, sem cadastro, upload ou troca pela administração:
+  - `web/public/images/vitrine/hero.jpg`: interior de barbearia tradicional (cadeira, espelho e bancada), JPEG 16:9 de pelo menos 2400×1350, com até 400 KB. O assunto fica centralizado para preservar o foco no recorte vertical do celular.
+  - `web/public/images/vitrine/sobre.jpg`: detalhe do trabalho (mãos, navalha ou tesoura), JPEG 3:2 de pelo menos 1800×1200, com até 400 KB.
+- **Hero:** `next/image` com `fill`, `object-cover`, `sizes="100vw"`, `preload` e `fetchPriority="high"`, porque é o LCP. A foto é decorativa (`alt=""`), com brilho reduzido (`brightness-75`) e overlay `bg-ink/70` para preservar o contraste AA de `text-surface` e `text-on-ink-muted`, inclusive sobre os pontos claros da foto. A foto e o overlay não entram na cascata de animação do conteúdo.
+- **Sobre:** `next/image` em moldura 3:2 com `overflow-hidden`, `alt` descritivo e zoom de 1,05 no hover, respeitando `prefers-reduced-motion`, como nas fotos de card. A imagem acompanha a condição do texto: a seção inteira só aparece quando `about` estiver preenchido. No desktop, foto e texto ficam lado a lado; no celular, a foto vem acima. O texto fica fora da foto, seguindo o Beard X.
+- Os cards de serviço continuam sem foto, e os heros de `/servicos` e `/barbeiros` continuam como faixas escuras. Galeria, depoimentos e faixa de Instagram aguardam material real.
 
 ## API
 | Método | Caminho | Quem | O que faz |
