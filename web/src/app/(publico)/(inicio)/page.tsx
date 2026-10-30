@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ApiStatus, ApiStatusBar } from "@/components/api-status";
+import { RevealObserver } from "@/components/reveal-observer";
 import { Alert } from "@/components/ui/alert";
 import { ButtonLink } from "@/components/ui/button";
 import { Ornament } from "@/components/ui/ornament";
@@ -118,6 +119,7 @@ export default async function HomePage() {
       </section>
 
       <ContactSection shop={shop} />
+      <RevealObserver />
 
       {process.env.NODE_ENV === "development" && (
         <Suspense

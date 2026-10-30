@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { RevealObserver } from "@/components/reveal-observer";
 import { BarberList } from "@/components/vitrine/catalog";
 import { PageHero } from "@/components/vitrine/page-hero";
 import { getPublicBarbers } from "@/lib/api/public";
@@ -23,6 +24,7 @@ export default async function BarbersPage() {
           <BarberList barbers={barbers} headingLevel="h2" />
         </div>
       </div>
+      <RevealObserver />
     </main>
   );
 }

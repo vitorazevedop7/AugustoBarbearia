@@ -79,7 +79,7 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), adap
 - Tudo dura **300ms** (hover) ou **500ms** (entradas), com `ease-out`.
 - **Hover:** botões trocam de cor e sobem 2px. Fotos em cards dão um zoom de 1,05 dentro da moldura.
 - **Hero:** o conteúdo sobe e aparece em cascata ao carregar, com delays de 0, 80, 160 e 240ms. É só CSS, e o cabeçalho nunca anima.
-- **Entrada ao rolar:** elementos com `data-reveal` sobem 24px e aparecem uma única vez (componente `RevealObserver`). Só o que está abaixo da dobra começa escondido.
+- **Entrada ao rolar:** elementos com `data-reveal` sobem 24px e aparecem uma única vez (componente `RevealObserver`). Só o que está abaixo da dobra começa escondido. A página que usa `data-reveal` monta o próprio `RevealObserver`; no layout, ele mexeria nos elementos antes de a página hidratar.
 - **Regras:**
   - Todo movimento respeita `prefers-reduced-motion`.
   - Nenhum conteúdo depende de JavaScript para aparecer.

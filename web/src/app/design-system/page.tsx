@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { ContactNotice } from "@/components/booking/contact-notice";
 import { DayPicker } from "@/components/booking/day-picker";
 import { TimePicker } from "@/components/booking/time-picker";
+import { RevealObserver } from "@/components/reveal-observer";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
 import { BarberCard } from "@/components/ui/barber-card";
@@ -437,6 +438,7 @@ export default function DesignSystemPage() {
           </article>
         </Showcase>
       </div>
+      <RevealObserver />
     </main>
   );
 }

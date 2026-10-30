@@ -1,16 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 /**
  * Anima a entrada dos elementos com `data-reveal` uma única vez.
  * Só esconde o que está abaixo da dobra na montagem: sem JS, sem suporte a
  * IntersectionObserver ou com pedido de menos movimento, tudo fica visível.
+ *
+ * Fica na própria página, não no layout: a página chega por streaming (tem
+ * `loading.tsx`), e só depois que ela hidrata o efeito pode trocar o
+ * `data-reveal` sem divergir do HTML do servidor (#69).
  */
 export function RevealObserver() {
-  const pathname = usePathname();
-
   useEffect(() => {
     if (
       typeof IntersectionObserver === "undefined" ||
@@ -39,7 +40,7 @@ export function RevealObserver() {
     }
 
     return () => observer.disconnect();
-  }, [pathname]);
+  }, []);
 
   return null;
 }
