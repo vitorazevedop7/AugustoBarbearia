@@ -90,7 +90,7 @@ As regras completas estão em [identidade-visual.md](identidade-visual.md#movime
 
 - **Ícones:** SVG inline próprio, traço de 2px em `currentColor`, tamanho de 16, 20 ou 24px (`size-4`, `size-5`, `size-6`), com `aria-hidden="true"` quando há texto ao lado. Não adotamos biblioteca de ícones por enquanto.
 - **Fotos:** sempre `next/image`, com `alt` descritivo e proporção fixa (4:5 para barbeiro, 3:2 para serviço e galeria). O hover dá zoom de 1,05 dentro de uma moldura com `overflow-hidden`. Texto sobre foto exige um overlay `bg-ink/70`.
-- Ainda não há fotos reais (pendência P10). Até lá, os barbeiros vão usar **fotos fictícias geradas por IA** como placeholder (D10), em `web/public/images/barbeiros/`, que entram na S3.10 (#63). Elas não retratam os proprietários e são trocadas quando as fotos reais chegarem. Fora isso, as telas funcionam sem foto (o barbeiro sem foto mostra um quadro neutro com a inicial), e nenhuma foto de banco de imagem entra no lugar.
+- Ainda não há fotos reais (pendência P10). Até lá, os três proprietários usam **fotos fictícias geradas por IA** como placeholder (D10), em JPEG 4:5: `web/public/images/barbeiros/edvaldo.jpg`, `lauro.jpg` e `manoel.jpg` (S3.10, #63). Elas não retratam os proprietários e são trocadas quando as fotos reais chegarem. Fora isso, as telas funcionam sem foto (o barbeiro sem foto mostra um quadro neutro com a inicial), e nenhuma foto de banco de imagem entra no lugar.
 
 ## Componentes
 
