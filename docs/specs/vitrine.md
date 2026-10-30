@@ -107,7 +107,7 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
 
 ### Fotos
 - Foto do barbeiro com `next/image`, proporção fixa 4:5 e zoom de 1,05 no hover, dentro da moldura.
-- Os barbeiros ainda não têm foto (as fotos placeholder entram na S3.10, #63). Sem foto, o card mostra o mesmo quadro neutro com a inicial da administração. O componente `BarberPhoto` passou para `components/ui/` e é usado pelos dois lados.
+- Os três proprietários têm fotos fictícias como placeholder desde a S3.10 (#63, D10). Um barbeiro sem foto mostra no card o mesmo quadro neutro com a inicial da administração. O componente `BarberPhoto` passou para `components/ui/` e é usado pelos dois lados.
 - A vitrine não usa foto no hero nem nos serviços (P10).
 
 ## API
@@ -123,7 +123,7 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
 
 ## Fora do escopo desta spec
 - O fluxo de agendamento (`/agendar`): S3.08 (#57).
-- As fotos placeholder dos barbeiros: S3.10 (#63).
+- As fotos placeholder dos barbeiros: entregues na S3.10 (#63).
 - Página própria de cada barbeiro (`/barbeiros/[slug]`) e "próximo horário livre" no card: decisões pendentes da referência, ficam para quando o agendamento existir.
 - Página de contato com FAQ (cancelamento até 2h antes, D6), galeria, depoimentos e Instagram embutido: não há material real ainda.
 - Serviço em destaque escolhido pela administração: não há campo para isso. A página inicial mostra os primeiros 4 serviços, na ordem da API.

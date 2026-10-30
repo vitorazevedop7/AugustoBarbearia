@@ -35,7 +35,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
-    # RN-63: os três proprietários. As fotos placeholder (D10) entram na S3.10 e
+    # RN-63: os três proprietários. As fotos placeholder (D10) entram pela 0007 e
     # a apresentação é preenchida pela administração.
     op.bulk_insert(barbers, [{"name": name} for name in ("Edvaldo", "Lauro", "Manoel")])
 
