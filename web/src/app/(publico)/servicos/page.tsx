@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { RevealObserver } from "@/components/reveal-observer";
 import { ServiceList } from "@/components/vitrine/catalog";
 import { PageHero } from "@/components/vitrine/page-hero";
 import { getPublicServices } from "@/lib/api/public";
@@ -23,6 +24,7 @@ export default async function ServicesPage() {
           <ServiceList services={services} headingLevel="h2" />
         </div>
       </div>
+      <RevealObserver />
     </main>
   );
 }

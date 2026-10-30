@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
-import { RevealObserver } from "@/components/reveal-observer";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentSession } from "@/lib/session";
 import "./globals.css";
@@ -46,7 +45,6 @@ export default async function RootLayout({
         <SiteHeader user={session ? { name: session.user.name } : null} />
         {children}
         <SiteFooter />
-        <RevealObserver />
       </body>
     </html>
   );
