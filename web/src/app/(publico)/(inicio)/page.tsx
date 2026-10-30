@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Suspense } from "react";
 import { ApiStatus, ApiStatusBar } from "@/components/api-status";
 import { RevealObserver } from "@/components/reveal-observer";
@@ -25,6 +26,8 @@ import { BOOKING_PATH } from "@/lib/booking";
 const FEATURED_SERVICES = 4;
 
 const SHOP_NAME = "Augusto Barbearia";
+const HERO_PHOTO_PATH = "/images/vitrine/hero.jpg";
+const ABOUT_PHOTO_PATH = "/images/vitrine/sobre.jpg";
 
 /** Vitrine (S3.05): só dados do sistema, com textos genéricos onde faltam. */
 export default async function HomePage() {
@@ -43,17 +46,33 @@ export default async function HomePage() {
           aria-labelledby="sobre-titulo"
           className="px-4 py-20 sm:px-6 lg:px-8 lg:py-32"
         >
-          <div data-reveal className="mx-auto max-w-2xl text-center">
-            <Ornament />
-            <h2
-              id="sobre-titulo"
-              className="mt-6 font-heading text-display-2 font-bold text-ink"
+          <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div
+              data-reveal
+              className="group relative aspect-[3/2] overflow-hidden bg-line"
             >
-              Sobre a barbearia
-            </h2>
-            <p className="mt-6 text-base leading-relaxed whitespace-pre-line text-ink-muted sm:text-lg">
-              {shop.about}
-            </p>
+              <Image
+                src={ABOUT_PHOTO_PATH}
+                alt="Mãos de barbeiro com tesoura durante um corte de cabelo"
+                fill
+                sizes="(min-width: 1344px) 608px, (min-width: 1024px) calc((100vw - 8rem) / 2), (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)"
+                className="object-cover transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+              />
+            </div>
+            <div data-reveal className="min-w-0 text-center lg:text-left">
+              <div className="flex justify-center lg:justify-start">
+                <Ornament align="start" />
+              </div>
+              <h2
+                id="sobre-titulo"
+                className="mt-6 font-heading text-display-2 font-bold text-ink"
+              >
+                Sobre a barbearia
+              </h2>
+              <p className="mt-6 text-base leading-relaxed whitespace-pre-line text-ink-muted sm:text-lg">
+                {shop.about}
+              </p>
+            </div>
           </div>
         </section>
       ) : null}
@@ -134,8 +153,18 @@ export default async function HomePage() {
 
 function Hero({ shop }: { shop: PublicShop | null }) {
   return (
-    <section className="bg-ink px-4 py-24 text-center sm:px-6 lg:py-36">
-      <div className="mx-auto max-w-3xl">
+    <section className="relative isolate overflow-hidden bg-ink px-4 py-24 text-center sm:px-6 lg:py-36">
+      <Image
+        src={HERO_PHOTO_PATH}
+        alt=""
+        fill
+        sizes="100vw"
+        preload
+        fetchPriority="high"
+        className="object-cover brightness-75"
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-ink/70" />
+      <div className="relative mx-auto max-w-3xl">
         <div className="motion-safe:animate-rise">
           <Ornament tone="dark" />
         </div>

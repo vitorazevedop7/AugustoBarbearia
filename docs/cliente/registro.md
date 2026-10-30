@@ -44,7 +44,7 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 | P7 | Nome oficial: "Augusto" ou "Augustus" Barbearia | 2026-10-08 | Vitor | Resolvida: decisão D1 (2026-10-08) | — |
 | P8 | Quem é o ponto de contato principal e quem administra o sistema | 2026-10-08 | Vitor | Parcial: a administração é feita pela equipe da barbearia (D2); o ponto de contato fica para a apresentação | — |
 | P9 | Lista real de serviços, com preço e duração | 2026-10-08 | Proprietários | Apresentação. Até lá, o sistema usa os serviços do projeto acadêmico | — |
-| P10 | Fotos da barbearia e dos barbeiros para a vitrine (a referência visual depende de fotos no hero e nos cards da equipe) | 2026-10-28 | Proprietários | Apresentação. Até lá, os barbeiros usam fotos fictícias como placeholder (D10) e o restante da vitrine funciona sem fotos | #63 |
+| P10 | Fotos da barbearia e dos barbeiros para a vitrine (hero, "Sobre" e cards da equipe) | 2026-10-28 | Proprietários | Apresentação. Até lá, os barbeiros (D10), o hero e o "Sobre" (D12) usam fotos fictícias geradas por IA como placeholder, a substituir pelas reais | #63, #72 |
 
 ## Entradas
 
@@ -128,3 +128,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Canal:** —
 - **Fatos e decisões:**
   - **D11.** No agendamento pelo cliente, a ordem é **barbeiro → serviço → dia → horário → confirmar**. O cliente escolhe primeiro com quem quer ser atendido, e a tela de serviço mostra só os serviços que aquele barbeiro realiza. Isso substitui a ordem serviço → barbeiro do [roadmap](../produto/roadmap.md) e da proposta de fluxo em `referencia-beard-x.md`. Detalhes na [spec do agendamento](../specs/agendamento-cliente.md).
+
+### 2026-10-29 — Fotos placeholder do hero e do "Sobre"
+- **Com:** registro interno. Decisão do Vitor como product owner (issue #72)
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D12.** A D10, de 2026-10-29, passa a abranger também o fundo do hero da página inicial e a foto ao lado do "Sobre a barbearia". Enquanto as fotos reais não chegam (P10), esses espaços usam **fotos fictícias geradas por IA**, em proporção 16:9 para o hero e 3:2 para o "Sobre". Elas **não retratam a Augusto Barbearia nem os proprietários**, não vêm de banco de imagem e serão substituídas pelas fotos reais. As imagens seguem a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo.

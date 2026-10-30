@@ -55,6 +55,32 @@ describe("página inicial (vitrine)", () => {
     expect(
       screen.queryByRole("region", { name: "Sobre a barbearia" }),
     ).toBeNull();
+    expect(
+      screen.queryByRole("img", {
+        name: "Mãos de barbeiro com tesoura durante um corte de cabelo",
+      }),
+    ).toBeNull();
+  });
+
+  it("mostra a foto decorativa do hero com prioridade e overlay para o texto", async () => {
+    render(await HomePage());
+
+    const hero = screen
+      .getByRole("heading", { level: 1, name: "Augusto Barbearia" })
+      .closest("section")!;
+    const photo = within(hero).getByRole("presentation");
+    expect(photo).toHaveAttribute("alt", "");
+    expect(decodeURIComponent(photo.getAttribute("src")!)).toContain(
+      "/images/vitrine/hero.jpg",
+    );
+    expect(photo).toHaveAttribute("data-nimg", "fill");
+    expect(photo).toHaveAttribute("sizes", "100vw");
+    expect(photo).toHaveAttribute("fetchpriority", "high");
+    expect(photo).not.toHaveAttribute("loading", "lazy");
+    expect(hero.querySelector(".bg-ink\\/70")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
   });
 
   it("usa a frase de destaque e o texto sobre da administração", async () => {
@@ -70,6 +96,13 @@ describe("página inicial (vitrine)", () => {
     expect(section("Sobre a barbearia")).toHaveTextContent(
       "Texto sobre cadastrado.",
     );
+    const photo = within(section("Sobre a barbearia")).getByRole("img", {
+      name: "Mãos de barbeiro com tesoura durante um corte de cabelo",
+    });
+    expect(decodeURIComponent(photo.getAttribute("src")!)).toContain(
+      "/images/vitrine/sobre.jpg",
+    );
+    expect(photo).toHaveAttribute("loading", "lazy");
   });
 
   it("RN-61: mostra até 4 serviços, com preço, duração e o link para todos", async () => {
