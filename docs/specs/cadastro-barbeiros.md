@@ -1,11 +1,11 @@
 # Spec — Cadastro de barbeiros
 
-- **Issue:** #52 (S3.03)
+- **Issues:** #52 (S3.03), #63 (S3.10 — fotos placeholder)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
 ## Contexto
-A vitrine mostra a equipe, e o agendamento precisa saber com quem o cliente vai ser atendido. Esta funcionalidade guarda os barbeiros no banco e deixa a administração criar, editar, inativar e reativar cada um pelo celular, sem deploy (O1, operação simples). O sistema já nasce com os três proprietários (RN-63). Enquanto as fotos reais não chegam (P10), eles vão usar fotos fictícias como placeholder (D10), que entram na S3.10 (#63).
+A vitrine mostra a equipe, e o agendamento precisa saber com quem o cliente vai ser atendido. Esta funcionalidade guarda os barbeiros no banco e deixa a administração criar, editar, inativar e reativar cada um pelo celular, sem deploy (O1, operação simples). O sistema já nasce com os três proprietários (RN-63). Enquanto as fotos reais não chegam (P10), eles usam fotos fictícias como placeholder (D10), entregues na S3.10 (#63).
 
 ## Quem usa
 Administração. A vitrine e o agendamento leem os barbeiros ativos nas próximas issues.
@@ -30,14 +30,14 @@ Administração. A vitrine e o agendamento leem os barbeiros ativos nas próxima
   - `created_at` e `updated_at`, em `timestamptz`.
 - Não há exclusão: um barbeiro que sai é inativado, para preservar o histórico de agendamentos que virá nas próximas issues.
 - O nome não é único. Nenhuma regra impede dois barbeiros com o mesmo nome.
-- A migração cria os três proprietários (RN-63): Edvaldo, Lauro e Manoel, ativos, sem foto e sem apresentação.
+- As migrações criam os três proprietários (RN-63): Edvaldo, Lauro e Manoel, ativos, com fotos placeholder e sem apresentação.
   - A apresentação começa vazia porque o repositório não tem textos dos proprietários. A administração a preenche pela tela.
-  - Até as fotos placeholder entrarem (S3.10, #63), a tela mostra a inicial do nome no lugar da foto.
+  - Barbeiros sem foto continuam mostrando a inicial do nome no lugar da foto.
 
 ### Fotos placeholder (D10) — S3.10 (#63)
 - São três fotos fictícias de barbeiro, geradas por IA, em proporção 4:5. Elas **não retratam os proprietários**.
-- Vão ficar em `web/public/images/barbeiros/`, em JPEG: `edvaldo.jpg`, `lauro.jpg` e `manoel.jpg`.
-- Uma migração de dados da S3.10 preenche esses caminhos nos três proprietários que ainda estiverem sem foto.
+- Estão em `web/public/images/barbeiros/`, em JPEG: `edvaldo.jpg`, `lauro.jpg` e `manoel.jpg`.
+- A migração de dados da S3.10 preenche `/images/barbeiros/edvaldo.jpg`, `/images/barbeiros/lauro.jpg` e `/images/barbeiros/manoel.jpg` nos respectivos proprietários originais que ainda estiverem sem foto (`photo_path` nulo). Fotos já definidas pela administração são preservadas; outros barbeiros não são alterados.
 - Quando as fotos reais chegarem (P10), elas substituem os arquivos com o mesmo nome, ou a administração troca o caminho na tela.
 
 ## Critérios de aceite
@@ -45,7 +45,7 @@ Administração. A vitrine e o agendamento leem os barbeiros ativos nas próxima
 **CA-1 — Dados iniciais (RN-63)**
 - **Dado** um banco recém-migrado
 - **Quando** a administração chama `GET /admin/barbers`
-- **Então** recebe Edvaldo, Lauro e Manoel, ativos, sem foto e sem apresentação.
+- **Então** recebe Edvaldo, Lauro e Manoel, ativos, sem apresentação e com `photo_path` igual a `/images/barbeiros/edvaldo.jpg`, `/images/barbeiros/lauro.jpg` e `/images/barbeiros/manoel.jpg`, respectivamente.
 
 **CA-2 — Criar barbeiro (RN-60)**
 - **Dado** a administração autenticada
@@ -82,6 +82,16 @@ Administração. A vitrine e o agendamento leem os barbeiros ativos nas próxima
 - **Quando** cria, edita ou inativa um barbeiro
 - **Então** volta para a lista com um `Alert` de sucesso e vê a situação atualizada. Se a API recusar, o formulário mostra o `message` dela num `Alert` `danger` e mantém o que foi digitado.
 
+**CA-9 — Preservar fotos existentes (RN-63)**
+- **Dado** um banco anterior à S3.10, com uma foto já definida pela administração para um dos proprietários
+- **Quando** a migração das fotos placeholder é aplicada
+- **Então** essa foto permanece, e apenas os proprietários originais sem foto recebem o caminho placeholder.
+
+**CA-10 — Fotos no celular (D10)**
+- **Dado** um banco recém-migrado e a administração em `/admin/cadastros/barbeiros`, numa tela de 360px
+- **Quando** a lista é exibida
+- **Então** os três proprietários aparecem com seus retratos fictícios em 4:5, sem rolagem horizontal.
+
 ## Fluxo e telas
 - **`/admin/cadastros`** ganha o atalho "Barbeiros".
 - **`/admin/cadastros/barbeiros`:** lista de todos os barbeiros, os ativos primeiro e depois por nome.
@@ -113,8 +123,6 @@ O barbeiro trafega como `{ id, name, photo_path, bio, active }`.
 - A vitrine e a rota pública com os barbeiros ativos: S3.05 (#54).
 - Quais serviços cada barbeiro realiza (`BarberService`): S3.04 (#53).
 - Excluir barbeiro.
-- As fotos placeholder dos proprietários: S3.10 (#63).
 
 ## Dúvidas em aberto
 - Fotos reais e textos de apresentação dos proprietários: pendência P10, resolvida na apresentação.
-- Fotos placeholder: o Vitor gera as três imagens na S3.10 (#63).
