@@ -1,19 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import { AccountPlaceholder, HeaderAccount } from "@/components/header-account";
 import { SiteNav } from "@/components/site-nav";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { MobileMenu } from "@/components/ui/mobile-menu";
-import { signInWithGoogle, signOut } from "@/lib/auth-actions";
 import { BOOKING_PATH } from "@/lib/booking";
-
-export type HeaderUser = { name: string };
 
 /**
  * Cabeçalho fixo, com a navegação da vitrine e a chamada para agendar.
- * No desktop fica tudo numa linha; no celular, num menu. Recebe o usuário
- * logado do layout (ou `null`).
+ * No desktop fica tudo numa linha; no celular, num menu. Só a conta depende
+ * do usuário, e ela chega à parte, num `Suspense` com o mesmo tamanho.
  */
-export function SiteHeader({ user }: { user: HeaderUser | null }) {
+export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -31,7 +30,13 @@ export function SiteHeader({ user }: { user: HeaderUser | null }) {
         <div className="hidden items-center gap-8 lg:flex">
           <SiteNav layout="row" />
           <div className="flex items-center gap-3">
-            <Account user={user} />
+            {/* Largura fixa: cabe "Entrar com Google" ou o nome (até 120px) e
+                "Sair", e a troca do fallback não move a navegação. */}
+            <div className="flex w-52 justify-end">
+              <Suspense fallback={<AccountPlaceholder />}>
+                <HeaderAccount />
+              </Suspense>
+            </div>
             <ButtonLink href={BOOKING_PATH} size="sm">
               Agendar
             </ButtonLink>
@@ -45,56 +50,13 @@ export function SiteHeader({ user }: { user: HeaderUser | null }) {
               Agendar horário
             </ButtonLink>
             <div className="mt-4">
-              <Account user={user} stacked />
+              <Suspense fallback={<AccountPlaceholder />}>
+                <HeaderAccount stacked />
+              </Suspense>
             </div>
           </div>
         </MobileMenu>
       </div>
     </header>
   );
-}
-
-/** Entrar com Google ou, para quem está logado, o primeiro nome e "Sair". */
-function Account({
-  user,
-  stacked = false,
-}: {
-  user: HeaderUser | null;
-  stacked?: boolean;
-}) {
-  if (user) {
-    return (
-      <form
-        action={signOut}
-        className={
-          stacked
-            ? "flex items-center justify-between gap-2"
-            : "flex items-center gap-2"
-        }
-      >
-        <p className="max-w-40 truncate text-sm text-ink-muted">
-          Olá, {firstName(user.name)}
-        </p>
-        <Button type="submit" variant="ghost" size="sm" className="px-3">
-          Sair
-        </Button>
-      </form>
-    );
-  }
-  return (
-    <form action={signInWithGoogle}>
-      <Button
-        type="submit"
-        variant="outline"
-        size="sm"
-        className={stacked ? "w-full" : ""}
-      >
-        Entrar com Google
-      </Button>
-    </form>
-  );
-}
-
-function firstName(name: string) {
-  return name.trim().split(/\s+/)[0] || name;
 }

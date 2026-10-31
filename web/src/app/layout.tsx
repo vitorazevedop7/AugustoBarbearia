@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getCurrentSession } from "@/lib/session";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,10 +24,9 @@ export const metadata: Metadata = {
     "Serviços com preço e duração, barbeiros, endereço, horário de funcionamento e contato da Augusto Barbearia. Agende seu horário pelo site.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getCurrentSession();
   return (
     <html
       lang="pt-BR"
@@ -42,7 +40,7 @@ export default async function RootLayout({
         >
           Pular para o conteúdo
         </a>
-        <SiteHeader user={session ? { name: session.user.name } : null} />
+        <SiteHeader />
         {children}
         <SiteFooter />
       </body>
