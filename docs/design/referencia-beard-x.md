@@ -96,7 +96,7 @@
 | Hero de tela inteira | Manter, só no desktop | Foto fixa no desktop e rolando junto no celular (#77) |
 | Cabeçalho dentro do hero | Manter | Transparente sobre o hero, com o logo no círculo claro; vira faixa escura fixa quando a página rola (#77) |
 | Hover de botão | Manter | Troca de cor e sobe 3px em 300ms `ease` |
-| Zoom de foto em card | Manter | `scale(1.1)` dentro de uma moldura com `overflow: hidden` |
+| Zoom de foto em card | Manter | `scale(1.1)` dentro de uma moldura com `overflow: hidden` (#79) |
 | Menu mobile | Manter | Painel escuro que desce em 400ms `ease`; `aria-expanded`, fecha com Esc e trava o scroll |
 | Ornamentos flutuantes | Manter, próprios | 2 ou 3 SVGs leves e `aria-hidden`, atrás do conteúdo (#79) |
 | FAQ | Manter | `<details>` nativo |
@@ -121,13 +121,14 @@ Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz
 | Cabeçalho | Dentro do hero, transparente, não fixo, 130px | Desde a #77: escuro, 80px; transparente sobre o hero e faixa `ink` fixa ao rolar; sem JS, não fixo, como o Beard X | #77 |
 | Menu do celular | Painel escuro que desce em 400ms | Igual desde a #77, travando a rolagem da página | #77 |
 | Entrada ao rolar | 3 presets; "sobe" 10% da altura, `ease`, atrasos de 0,2 a 0,6s; título anima inteiro | Igual desde a #78: `rise` (10% da altura), `fade` e `zoom`, 500ms `ease`, atraso padrão de 200ms; título anima inteiro e as grades têm cascata de 200ms | #78 |
-| Serviços | Um card único com grade de 2 colunas | 4 cards separados | #79 |
-| Equipe | Texto sobre a foto; cards em degraus de 0, 75 e 145px | Texto abaixo da foto | #79 |
-| Ornamentos e números | SVGs flutuantes nas bordas; 2 números na seção Sobre | Sem ornamentos nem números | #79 |
+| Serviços | Um card único com grade de 2 colunas | Igual desde a #79, na home e em `/servicos`: card `surface` com 24×48px de padding no celular e 64×102px no desktop; cada item tem também duração, quem realiza e "Agendar" | #79 |
+| Equipe | Texto sobre a foto; cards em degraus de 0, 75 e 145px | Igual desde a #79: foto 6:7 com o nome sobre um bloco escuro que cresce com o texto (contraste AA), degraus só a partir de 1024px e zoom de 1,1 no hover; "Agendar com <nome>" abaixo da foto | #79 |
+| Ornamentos | SVGs flutuantes nas bordas (110–180 KB cada) | Desde a #79: navalha, tesoura e pente em traço próprio, com menos de 1 KB cada, atrás do conteúdo e só a partir de 1024px | #79 |
+| Números | 2 números na seção Sobre | Sem números: não há dado real (pergunta aberta na [spec da vitrine](../specs/vitrine.md#dúvidas-em-aberto)) | — |
 | Páginas internas | Faixa escura parcial que fotos e cards atravessam | `/servicos` e `/barbeiros` sem a faixa | #80 |
 | Fluxo do cliente e administração | — (vem do Squire) | Títulos, botões e espaçamento do padrão antigo | #80 |
 
-Os números do Beard X (a seção Sobre com 2 números) só entram na nossa vitrine se houver dado real. Isso é pergunta de produto, na #79.
+Os números do Beard X (a seção Sobre com 2 números) só entram na nossa vitrine se houver dado real. A #79 deixou a faixa de fora e registrou a pergunta na spec da vitrine.
 
 ## Fluxo de agendamento (Squire)
 

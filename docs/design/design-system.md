@@ -73,7 +73,8 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 | Texto corrido e formulários | até `max-w-2xl` (672px) |
 | Seção da vitrine | `py-section`: 88, 100 (`sm`), 160 (`md`) e 240px (`lg`) |
 | Card | `p-6 sm:p-8` (vitrine: até `lg:p-10`) |
-| Grade de cards | `gap-6` |
+| Card único de serviços | `px-6 py-12`, `sm:px-10 sm:py-16`, `lg:px-16 lg:py-25.5` (24×48px no celular e 64×102px no desktop, como o Beard X); itens com `gap-x-16 gap-y-12` |
+| Grade de cards | `gap-6` (barbeiros: `lg:gap-7`, os 28px do Beard X) |
 | Campos de um formulário | `gap-6` entre campos, `gap-2` dentro do campo |
 | Ornamento → título | `mt-6` (24px) |
 
@@ -93,7 +94,7 @@ As regras completas estão em [identidade-visual.md](identidade-visual.md#movime
 ### Ícones e imagens
 
 - **Ícones:** SVG inline próprio, traço de 2px em `currentColor`, tamanho de 16, 20 ou 24px (`size-4`, `size-5`, `size-6`), com `aria-hidden="true"` quando há texto ao lado. Não adotamos biblioteca de ícones por enquanto.
-- **Fotos:** sempre `next/image`, com `alt` descritivo (ou `alt=""` se decorativas) e proporção fixa: 4:5 para barbeiro, 3:2 para o "Sobre" e galeria, e 16:9 para o arquivo de fundo do hero da página inicial, recortado com `object-cover` conforme a tela. O hover das fotos em moldura dá zoom de 1,05 com `overflow-hidden`, respeitando `prefers-reduced-motion`. Texto sobre foto exige um overlay `bg-ink/70`. No hero, a foto é decorativa, usa `fill`, `sizes="100vw"`, `preload` e `fetchPriority="high"` (o `priority` está obsoleto desde o Next 16); a cascata de entrada fica só no conteúdo. O hero da página inicial tem `min-h-svh`; no desktop, a foto fica numa camada `lg:fixed` recortada pelo `[clip-path:inset(0)]` do hero, e no celular rola junto.
+- **Fotos:** sempre `next/image`, com `alt` descritivo (ou `alt=""` se decorativas) e proporção fixa: 6:7 para o card de barbeiro da vitrine (4:5 na administração e no agendamento), 3:2 para o "Sobre" e galeria, e 16:9 para o arquivo de fundo do hero da página inicial, recortado com `object-cover` conforme a tela. O hover das fotos em moldura dá zoom de 1,1 com `overflow-hidden`, em 300ms `ease`, respeitando `prefers-reduced-motion`. Texto sobre foto exige um fundo escuro atrás do próprio texto: `bg-ink/70` no hero e o bloco `ink/80`–`ink/90` do `BarberCard`. No hero, a foto é decorativa, usa `fill`, `sizes="100vw"`, `preload` e `fetchPriority="high"` (o `priority` está obsoleto desde o Next 16); a cascata de entrada fica só no conteúdo. O hero da página inicial tem `min-h-svh`; no desktop, a foto fica numa camada `lg:fixed` recortada pelo `[clip-path:inset(0)]` do hero, e no celular rola junto.
 - Ainda não há fotos reais (pendência P10). Até lá, os três proprietários usam **fotos fictícias geradas por IA** como placeholder (D10), em JPEG 4:5: `web/public/images/barbeiros/edvaldo.jpg`, `lauro.jpg` e `manoel.jpg` (S3.10, #63). A D12 estende essa escolha ao hero e ao "Sobre" da página inicial (#72): `web/public/images/vitrine/hero.jpg` (16:9, pelo menos 2400×1350) e `sobre.jpg` (3:2, pelo menos 1800×1200), com até 400 KB cada. As imagens seguem a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo. Elas não retratam a Augusto Barbearia nem os proprietários, não vêm de banco de imagem e serão substituídas pelas fotos reais. O barbeiro sem foto continua mostrando um quadro neutro com a inicial. O "Sobre" só mostra sua foto quando o texto estiver preenchido: acima no celular e ao lado no desktop, com o texto fora da imagem. Cards de serviço e heros internos continuam sem foto; galeria, depoimentos e Instagram aguardam material real.
 
 ## Componentes
@@ -110,7 +111,8 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Alert` | `alert.tsx` | Pronto |
 | `EmptyState` | `empty-state.tsx` | Pronto |
 | `Ornament`, `SectionHeading` | `ornament.tsx`, `section-heading.tsx` | Pronto |
-| `ServiceCard`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
+| `FloatingOrnament` | `floating-ornament.tsx` | Pronto (navalha, tesoura e pente nas bordas das seções, S4.06) |
+| `ServiceCard`, `ServiceItem`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
@@ -181,11 +183,16 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 ### Cards da vitrine
 
-- **`ServiceCard`:** nome e preço em `text-display-3` (o preço em `brand`, `tabular-nums`), duração, descrição opcional, "Com <barbeiros>" e o botão "Agendar" (`outline`, `sm`), com o nome do serviço no nome acessível ("Agendar Corte Simples"). Preço e duração levam um prefixo só para leitor de tela ("Preço:", "Duração:").
-- **`BarberCard`:** a foto 4:5 em cima, e o nome (`text-display-3`), a apresentação (`text-body`) e "Agendar com <nome>" embaixo. O texto não fica sobre a foto, para o card funcionar igual com e sem foto.
-- **`BarberPhoto`:** a moldura 4:5 com `next/image`. Sem foto, mostra a inicial do nome (decorativa, `aria-hidden`), num tamanho que acompanha a largura da moldura. Com `zoom`, a foto cresce 5% no hover do card.
-- Os dois cards recebem o nível do título: `h3` dentro de uma seção com título (página inicial) e `h2` numa página que só tem o `h1` antes (`/servicos`, `/barbeiros`).
-- Em grade: serviços em 1 coluna no celular e 2 a partir de `md`; barbeiros em 1, 2 (`sm`) e 3 (`lg`).
+- **`ServiceCard`:** o card branco único dos serviços (S4.06, #79), como o do Beard X: `bg-surface`, `shadow-card` e muito respiro. Recebe a grade de itens (uma `ul` de 1 coluna no celular e 2 a partir de `md`). A página inicial e `/servicos` usam o mesmo card.
+- **`ServiceItem`:** um serviço dentro do card. Nome (Barlow 900, caixa alta) e preço em `text-display-4` na mesma linha, sobre um fio `line` (o preço em `brand`, `tabular-nums`); depois a duração, a descrição opcional, "Com <barbeiros>" e o botão "Agendar" (`outline`, `sm`), com o nome do serviço no nome acessível ("Agendar Corte Simples"). Preço e duração levam um prefixo só para leitor de tela ("Preço:", "Duração:").
+- **`BarberCard`:** a foto 6:7 com o nome (`text-display-3`, `surface`) e a primeira linha da apresentação (`on-ink-muted`, cortada em uma linha) sobre ela, e "Agendar com <nome>" abaixo (S4.06, #79).
+  - O texto fica num bloco `ink/80`–`ink/90` colado à base da foto, com uma faixa de 64px acima que esmaece até a foto. O bloco cresce com o texto, então o contraste passa no AA sobre qualquer foto e com qualquer nome; sem foto, a inicial fica à vista acima dele.
+  - Com `fullBio` (`/barbeiros`), a apresentação sai da foto e aparece inteira abaixo dela.
+  - O hover do card dá zoom de 1,1 na foto, dentro da moldura.
+- **`BarberPhoto`:** a moldura com `next/image`, em 4:5 (padrão, na administração e no agendamento) ou 6:7 (`ratio="6/7"`, no card da vitrine). Sem foto, mostra a inicial do nome (decorativa, `aria-hidden`), num tamanho que acompanha a largura da moldura. Com `zoom`, a foto cresce 10% no hover do card, em 300ms `ease`.
+- `ServiceItem` e `BarberCard` recebem o nível do título: `h3` dentro de uma seção com título (página inicial) e `h2` numa página que só tem o `h1` antes (`/servicos`, `/barbeiros`).
+- Em grade: barbeiros em 1, 2 (`sm`) e 3 (`lg`) colunas. No `lg`, os cards descem em degraus de 0, 75 e 145px (margem, e não `transform`, que a entrada ao rolar usa) e a grade tem `items-start`, para cada card manter a própria altura. No celular e no tablet, não há degrau.
+- Cada item das grades entra com `data-reveal="rise"` e a cascata de `--reveal-index`/`--reveal-cols`.
 
 ### Cabeçalho
 
@@ -215,6 +222,13 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 - **`Ornament`** é o bigode entre duas linhas, sempre `aria-hidden`. Só na vitrine e no estado vazio.
 - **`SectionHeading`** junta o ornamento, o título `h2` e o texto de apoio, alinhado ao centro ou à esquerda, com tom claro ou escuro.
+- **`FloatingOrnament`** (S4.06, #79) é um desenho grande de traço próprio, que flutua na borda de uma seção da vitrine, como os do Beard X: `razor` (navalha), `scissors` (tesoura) ou `comb` (pente).
+  - Só traço de 2px em `currentColor`, `text-ink/10` sobre `paper` e `surface`, com menos de 1 KB cada. Nada vem do template.
+  - É decoração: `aria-hidden`, `pointer-events-none` e `data-reveal="fade"`. Fica atrás do conteúdo com `-z-10`.
+  - A seção que o recebe precisa de `relative isolate overflow-hidden`: o `isolate` põe o `-z-10` entre o fundo e o conteúdo, e o `overflow-hidden` recorta o que passa da borda, sem rolagem horizontal.
+  - Posição e tamanho vêm por `className`, sem `transform` (a entrada ao rolar o usa).
+  - Só aparece a partir do `lg`: no celular e no tablet, o texto ocupa a largura toda e não sobra borda para decorar.
+  - Na página inicial: navalha no "Sobre", tesoura nos serviços e pente na equipe. Uma seção, um ornamento.
 
 ## Padrões
 

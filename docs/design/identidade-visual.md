@@ -72,7 +72,7 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medi
 
 - **Formas quadradas:** botões, cards e campos não têm arredondamento. A exceção é o círculo claro que segura o logo em fundo escuro.
 - **Faixas escuras e claras:** o hero e o rodapé ficam em `ink`; as seções, em `paper`, com cards em `surface`.
-- **Ornamento:** um bigode entre duas linhas, em `brand` (`brand-on-dark` sobre o escuro), fica 24px acima dos títulos de seção, no lugar de um texto pequeno. Ornamentos SVG maiores, próprios e decorativos, flutuam nas bordas das seções, atrás do conteúdo (S4.06, #79).
+- **Ornamento:** um bigode entre duas linhas, em `brand` (`brand-on-dark` sobre o escuro), fica 24px acima dos títulos de seção, no lugar de um texto pequeno. Ornamentos SVG maiores flutuam nas bordas das seções da página inicial, atrás do conteúdo (S4.06, #79): navalha, tesoura e pente, só em traço, em `ink` a 10% e a partir de 1024px. São desenhos próprios, sem nada do template.
 - **Hero:** ocupa a tela inteira (`min-h-svh`), com overlay preto de 70%. No desktop, a foto fica fixa enquanto a página rola; no celular, ela rola junto (S4.04, #77). A foto fixa é uma camada `fixed` recortada pelo `clip-path` do hero, e não `background-attachment: fixed`, que o Safari ignora.
 - **Elevação mínima:** uma única sombra, `shadow-card` (`0 2px 12px` a 8%), nos cards claros.
 - **Botões:** primário em `brand` com texto branco, contorno em `ink` e contorno claro sobre o escuro. Caixa alta e anel de foco visível. A altura é de **84px a partir do `md`** e 60px abaixo dele, com largura total no celular; o tamanho `sm` (44px) fica para a administração, o cabeçalho e os cards.
@@ -84,12 +84,12 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medi
 
 ## Movimento
 
-Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76), o menu do celular (#77) e a entrada ao rolar (#78) já estão alinhados; o resto vem nas tarefas seguintes.
+Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76), o menu do celular (#77), a entrada ao rolar (#78) e o zoom de foto (#79) já estão alinhados.
 
 | | Em uso | Alvo (Beard X) |
 |---|---|---|
 | Hover de botão | Troca de cor e sobe 3px, 300ms `ease` (`ease-standard`) | Troca de cor e sobe 3px, 300ms `ease` |
-| Zoom de foto em card | 1,05 | 1,1, dentro de uma moldura com `overflow: hidden` |
+| Zoom de foto em card | 1,1, dentro da moldura com `overflow: hidden`, 300ms `ease` (S4.06) | 1,1, dentro de uma moldura com `overflow: hidden` |
 | Entrada ao rolar | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms, cascata de 200ms nas grades | Igual |
 | Menu do celular | Painel escuro que desce em 400ms `ease` (S4.04) | Igual |
 
