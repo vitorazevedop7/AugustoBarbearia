@@ -120,7 +120,7 @@ Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz
 | Hero | Altura de tela inteira; foto fixa no desktop | 576px de altura; foto rola junto | #77 |
 | Cabeçalho | Dentro do hero, transparente, não fixo, 130px | Branco, fixo, 73px | #77 |
 | Menu do celular | Painel escuro que desce em 400ms | Painel claro (`surface`), sem animação de descida | #77 |
-| Entrada ao rolar | 3 presets; "sobe" 10% da altura, `ease`, atrasos de 0,2 a 0,6s; título anima inteiro | Um preset: 24px fixos, `ease-out` | #78 |
+| Entrada ao rolar | 3 presets; "sobe" 10% da altura, `ease`, atrasos de 0,2 a 0,6s; título anima inteiro | Igual desde a #78: `rise` (10% da altura), `fade` e `zoom`, 500ms `ease`, atraso padrão de 200ms; título anima inteiro e as grades têm cascata de 200ms | #78 |
 | Serviços | Um card único com grade de 2 colunas | 4 cards separados | #79 |
 | Equipe | Texto sobre a foto; cards em degraus de 0, 75 e 145px | Texto abaixo da foto | #79 |
 | Ornamentos e números | SVGs flutuantes nas bordas; 2 números na seção Sobre | Sem ornamentos nem números | #79 |

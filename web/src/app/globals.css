@@ -88,12 +88,14 @@
 
   --shadow-card: 0 2px 12px rgb(16 16 16 / 0.08);
 
-  --animate-rise: rise 500ms ease-out both;
+  /* Cascata do hero ao carregar: sobe 10% da altura do próprio elemento,
+     como o preset `rise` da entrada ao rolar (500ms `ease`). */
+  --animate-rise: rise 500ms ease both;
 
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(10%);
     }
   }
 }
@@ -109,17 +111,35 @@ body {
 }
 
 /* Entrada ao rolar: só esconde o que o RevealObserver marcou como pendente
-   (abaixo da dobra, com JS ativo). Sem JS ou com menos movimento, nada some. */
+   (abaixo da dobra, com JS ativo). Sem JS ou com menos movimento, nada some.
+   O preset vem de `data-reveal` (`rise`, `fade` ou `zoom`; qualquer outro valor,
+   inclusive o `data-reveal` sem valor, vale `rise`).
+   O atraso é `--reveal-delay` (200ms por padrão) mais, nas grades, um degrau de
+   200ms por coluna: `--reveal-index` é a posição do card e `--reveal-cols` o
+   número de colunas da grade no breakpoint. A transição fica só no `done`:
+   esconder é instantâneo, e o elemento entra com o ritmo do preset. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-reveal] {
+  [data-reveal-state="done"] {
     transition:
-      opacity 500ms ease-out,
-      transform 500ms ease-out;
-    transition-delay: var(--reveal-delay, 0ms);
+      opacity 500ms ease,
+      transform 500ms ease;
+    transition-delay: 200ms;
+    transition-delay: calc(
+      var(--reveal-delay, 200ms) +
+        mod(var(--reveal-index, 0), var(--reveal-cols, 1)) * 200ms
+    );
   }
 
-  [data-reveal="pending"] {
+  [data-reveal-state="pending"] {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(10%);
+  }
+
+  [data-reveal-state="pending"][data-reveal="fade"] {
+    transform: none;
+  }
+
+  [data-reveal-state="pending"][data-reveal="zoom"] {
+    transform: scale(0.92);
   }
 }

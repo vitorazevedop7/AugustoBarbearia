@@ -88,7 +88,7 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 
 ### Movimento
 
-As regras completas estão em [identidade-visual.md](identidade-visual.md#movimento). Em resumo: 300ms no hover, 500ms nas entradas. O botão já usa `ease` (`ease-standard`), como o Beard X; o resto ainda usa `ease-out` até a S4.05 (#78). Tudo respeita `prefers-reduced-motion`, e a área logada não tem entrada animada.
+As regras completas estão em [identidade-visual.md](identidade-visual.md#movimento). Em resumo: 300ms no hover, 500ms nas entradas. O botão e as entradas usam `ease` (`ease-standard`), como o Beard X. A entrada ao rolar tem três presets em `data-reveal` (`rise`, `fade`, `zoom`; ver a identidade visual) e o `RevealObserver` fica na página que usa o atributo. Tudo respeita `prefers-reduced-motion`, e a área logada não tem entrada animada.
 
 ### Ícones e imagens
 

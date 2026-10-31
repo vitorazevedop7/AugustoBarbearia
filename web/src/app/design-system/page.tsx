@@ -430,7 +430,7 @@ export default function DesignSystemPage() {
 
         <Showcase id="composicao" title="Composição">
           <article
-            data-reveal
+            data-reveal="rise"
             className="max-w-md bg-surface p-6 shadow-card sm:p-8"
           >
             <div className="flex items-start justify-between gap-4">
