@@ -12,9 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
+import { FloatingOrnament } from "@/components/ui/floating-ornament";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { ServiceCard } from "@/components/ui/service-card";
+import { ServiceCard, ServiceItem } from "@/components/ui/service-card";
 
 /** Vitrine viva do design system (docs/design/design-system.md). Fora da navegação e dos buscadores. */
 export const metadata: Metadata = {
@@ -71,6 +72,7 @@ const sections = [
   { id: "avisos", title: "Avisos" },
   { id: "titulos", title: "Títulos de seção" },
   { id: "cards", title: "Cards da vitrine" },
+  { id: "ornamentos", title: "Ornamentos" },
   { id: "composicao", title: "Composição" },
 ];
 
@@ -408,28 +410,87 @@ export default function DesignSystemPage() {
         </Showcase>
 
         <Showcase id="cards" title="Cards da vitrine">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <ServiceCard
-              name="Corte + barba"
-              description="Descrição opcional do serviço (exemplo)."
-              price="70.00"
-              durationMinutes={50}
-              barbers={["Barbeiro 1", "Barbeiro 2"]}
-              href="#cards"
-            />
-            <BarberCard
-              name="Barbeiro 1"
-              photoPath={null}
-              bio="Sem foto, o card mostra a inicial do nome (exemplo)."
-              href="#cards"
-              sizes="(min-width: 1024px) 400px, 100vw"
-            />
-          </div>
+          <ServiceCard>
+            <ul className="grid gap-x-16 gap-y-12 md:grid-cols-2">
+              <li>
+                <ServiceItem
+                  name="Corte + barba"
+                  description="Descrição opcional do serviço (exemplo)."
+                  price="70.00"
+                  durationMinutes={50}
+                  barbers={["Barbeiro 1", "Barbeiro 2"]}
+                  href="#cards"
+                />
+              </li>
+              <li>
+                <ServiceItem
+                  name="Corte simples"
+                  description={null}
+                  price="45.00"
+                  durationMinutes={30}
+                  barbers={["Barbeiro 1"]}
+                  href="#cards"
+                />
+              </li>
+            </ul>
+          </ServiceCard>
+          <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:items-start lg:gap-7">
+            <li>
+              <BarberCard
+                name="Barbeiro 1"
+                photoPath="/images/barbeiros/lauro.jpg"
+                bio="Primeira linha da apresentação, sobre a foto (exemplo)."
+                href="#cards"
+                sizes="(min-width: 1024px) 428px, (min-width: 640px) 50vw, 100vw"
+              />
+            </li>
+            <li className="lg:mt-[75px]">
+              <BarberCard
+                name="Barbeiro 2"
+                photoPath={null}
+                bio="Sem foto, o card mostra a inicial do nome (exemplo)."
+                href="#cards"
+                sizes="(min-width: 1024px) 428px, (min-width: 640px) 50vw, 100vw"
+              />
+            </li>
+            <li className="lg:mt-[145px]">
+              <BarberCard
+                name="Barbeiro 3"
+                photoPath="/images/barbeiros/manoel.jpg"
+                bio="Com fullBio, a apresentação sai da foto e aparece inteira aqui, abaixo dela (exemplo)."
+                href="#cards"
+                sizes="(min-width: 1024px) 428px, (min-width: 640px) 50vw, 100vw"
+                fullBio
+              />
+            </li>
+          </ul>
           <p className="mt-6 max-w-2xl text-sm text-ink-muted">
             O cabeçalho desta página é a faixa escura das páginas internas. O
             menu do celular está nele: reduza a janela para menos de 1024px e
             abra-o para ver o painel escuro descer.
           </p>
+        </Showcase>
+
+        <Showcase id="ornamentos" title="Ornamentos">
+          <p className="max-w-2xl text-body text-ink-muted">
+            Navalha, tesoura e pente: traço próprio, decorativo, atrás do
+            conteúdo e só a partir de 1024px. Aqui, em tamanho real numa faixa
+            recortada.
+          </p>
+          <div className="relative isolate mt-8 h-96 overflow-hidden bg-surface shadow-card">
+            <FloatingOrnament
+              shape="razor"
+              className="top-8 -left-16 w-[26rem]"
+            />
+            <FloatingOrnament
+              shape="scissors"
+              className="top-6 left-1/2 h-80"
+            />
+            <FloatingOrnament
+              shape="comb"
+              className="-right-10 bottom-10 w-80"
+            />
+          </div>
         </Showcase>
 
         <Showcase id="composicao" title="Composição">

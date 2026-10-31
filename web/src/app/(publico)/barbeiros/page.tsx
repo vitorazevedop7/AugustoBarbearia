@@ -21,7 +21,7 @@ export default async function BarbersPage() {
       />
       <div className="px-4 py-section sm:px-6 lg:px-8">
         <div className="mx-auto max-w-site">
-          <BarberList barbers={barbers} headingLevel="h2" />
+          <BarberList barbers={barbers} headingLevel="h2" fullBio />
         </div>
       </div>
       <RevealObserver />

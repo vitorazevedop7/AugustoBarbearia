@@ -7,7 +7,8 @@ import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { ChoiceChip } from "./choice-chip";
 import { TextAreaField, TextField } from "./field";
-import { ServiceCard } from "./service-card";
+import { FloatingOrnament } from "./floating-ornament";
+import { ServiceCard, ServiceItem } from "./service-card";
 
 describe("Button", () => {
   it("trava e marca como ocupado enquanto a ação está pendente", () => {
@@ -104,9 +105,45 @@ describe("Alert", () => {
 });
 
 describe("ServiceCard", () => {
+  it("é um card branco único com os serviços em grade", () => {
+    render(
+      <ServiceCard>
+        <ul>
+          <li>
+            <ServiceItem
+              name="Corte Simples"
+              description={null}
+              price="25.00"
+              durationMinutes={30}
+              barbers={[]}
+              href="/agendar?servico=1"
+            />
+          </li>
+          <li>
+            <ServiceItem
+              name="Barba"
+              description={null}
+              price="20.00"
+              durationMinutes={30}
+              barbers={[]}
+              href="/agendar?servico=3"
+            />
+          </li>
+        </ul>
+      </ServiceCard>,
+    );
+    const card = screen.getByRole("list").parentElement!;
+    expect(card).toHaveClass("bg-surface", "shadow-card");
+    expect(screen.getAllByRole("article")).toHaveLength(2);
+    // Sem quem realiza, a linha "Com" não aparece.
+    expect(card).not.toHaveTextContent("Com");
+  });
+});
+
+describe("ServiceItem", () => {
   it("mostra preço, duração e quem realiza, com o link para agendar", () => {
     render(
-      <ServiceCard
+      <ServiceItem
         name="Corte + Barba"
         description="Com toalha quente."
         price="35.00"
@@ -115,14 +152,16 @@ describe("ServiceCard", () => {
         href="/agendar?servico=2"
       />,
     );
-    const card = screen.getByRole("article");
-    expect(
-      screen.getByRole("heading", { level: 3, name: "Corte + Barba" }),
-    ).toBeVisible();
-    expect(card).toHaveTextContent("Preço: R$ 35,00");
-    expect(card).toHaveTextContent("Duração: 45 min");
-    expect(card).toHaveTextContent("Com toalha quente.");
-    expect(card).toHaveTextContent("Com Edvaldo e Lauro");
+    const item = screen.getByRole("article");
+    const heading = screen.getByRole("heading", {
+      level: 3,
+      name: "Corte + Barba",
+    });
+    expect(heading).toHaveClass("font-heading", "font-black", "uppercase");
+    expect(item).toHaveTextContent("Preço: R$ 35,00");
+    expect(item).toHaveTextContent("Duração: 45 min");
+    expect(item).toHaveTextContent("Com toalha quente.");
+    expect(item).toHaveTextContent("Com Edvaldo e Lauro");
     expect(
       screen.getByRole("link", { name: "Agendar Corte + Barba" }),
     ).toHaveAttribute("href", "/agendar?servico=2");
@@ -130,25 +169,52 @@ describe("ServiceCard", () => {
 });
 
 describe("BarberCard", () => {
-  it("usa a foto 4:5 com texto alternativo", () => {
+  it("põe o nome e a primeira linha da apresentação sobre a foto 6:7", () => {
     render(
       <BarberCard
         name="Lauro"
         photoPath="/images/barbeiros/lauro.jpg"
-        bio="Apresentação."
+        bio={"Primeira linha.\nSegunda linha."}
         href="/agendar?barbeiro=2"
         sizes="100vw"
         headingLevel="h2"
       />,
     );
     const photo = screen.getByRole("img", { name: "Foto de Lauro" });
-    expect(photo.parentElement).toHaveClass("aspect-[4/5]", "overflow-hidden");
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Lauro" }),
-    ).toBeVisible();
+    expect(photo.parentElement).toHaveClass("aspect-[6/7]", "overflow-hidden");
+    // Zoom de 1,1 no hover, dentro da moldura, sem movimento se pedido.
+    expect(photo).toHaveClass(
+      "group-hover:scale-110",
+      "duration-300",
+      "motion-reduce:group-hover:scale-100",
+    );
+    const heading = screen.getByRole("heading", { level: 2, name: "Lauro" });
+    expect(heading).toHaveClass("text-surface");
+    // O texto fica num bloco escuro (ink/80 a ink/90) sobre a foto: contraste AA.
+    expect(heading.parentElement).toHaveClass("from-ink/90", "to-ink/80");
+    expect(heading.parentElement).toHaveTextContent("Primeira linha.");
+    expect(screen.queryByText(/Segunda linha/)).toBeNull();
     expect(
       screen.getByRole("link", { name: "Agendar com Lauro" }),
     ).toHaveAttribute("href", "/agendar?barbeiro=2");
+  });
+
+  it("com fullBio, mostra a apresentação inteira abaixo da foto", () => {
+    render(
+      <BarberCard
+        name="Lauro"
+        photoPath="/images/barbeiros/lauro.jpg"
+        bio={"Primeira linha.\nSegunda linha."}
+        href="/agendar?barbeiro=2"
+        sizes="100vw"
+        fullBio
+      />,
+    );
+    const heading = screen.getByRole("heading", { level: 3, name: "Lauro" });
+    expect(heading.parentElement).not.toHaveTextContent("Primeira linha.");
+    expect(screen.getByText(/Segunda linha/)).toHaveTextContent(
+      "Primeira linha. Segunda linha.",
+    );
   });
 
   it("mostra a inicial, sem imagem, quando não há foto", () => {
@@ -164,4 +230,25 @@ describe("BarberCard", () => {
     expect(screen.queryByRole("img")).toBeNull();
     expect(screen.getByText("M")).toHaveAttribute("aria-hidden", "true");
   });
+});
+
+describe("FloatingOrnament", () => {
+  it.each(["razor", "scissors", "comb"] as const)(
+    "%s é decorativo, atrás do conteúdo e entra com fade",
+    (shape) => {
+      const { container } = render(<FloatingOrnament shape={shape} />);
+      const svg = container.querySelector("svg")!;
+      expect(svg).toHaveAttribute("aria-hidden", "true");
+      expect(svg).toHaveAttribute("data-reveal", "fade");
+      expect(svg).toHaveClass(
+        "pointer-events-none",
+        "absolute",
+        "-z-10",
+        "hidden",
+        "lg:block",
+      );
+      // Leve: só traço, poucos bytes.
+      expect(svg.outerHTML.length).toBeLessThan(2048);
+    },
+  );
 });
