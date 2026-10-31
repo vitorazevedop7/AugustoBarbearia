@@ -2,7 +2,7 @@
 
 > Este documento cuida da **marca**: logo, cores, fontes, tom, linguagem e movimento. Os componentes e os padrões de tela estão no [design system](design-system.md).
 
-> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). O movimento muda na S4.05 (#78), e o cabeçalho e o hero, na S4.04 (#77).
+> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). A entrada ao rolar entrou na S4.05 (#78), e o cabeçalho e o hero, na S4.04 (#77).
 
 > **Status:** proposta para o MVP. As cores e o logo vieram do projeto acadêmico, que usou o material entregue pela barbearia ("cores baseadas no cartão"). O logo em vetor e a confirmação da paleta são as pendências P1 e P2 em [registro.md](../cliente/registro.md). O protótipo aprovado no Figma ainda não está acessível (P6).
 
@@ -81,21 +81,25 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medi
 
 ## Movimento
 
-Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X, que a S4.05 (#78) aplica. O hover de botão já foi alinhado na S4.03 (#76).
+Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76) e a entrada ao rolar (#78) já estão alinhados; o resto vem nas tarefas seguintes.
 
 | | Em uso | Alvo (Beard X) |
 |---|---|---|
 | Hover de botão | Troca de cor e sobe 3px, 300ms `ease` (`ease-standard`) | Troca de cor e sobe 3px, 300ms `ease` |
 | Zoom de foto em card | 1,05 | 1,1, dentro de uma moldura com `overflow: hidden` |
-| Entrada ao rolar | Um preset: sobe 24px fixos e aparece, 500ms `ease-out` | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms |
+| Entrada ao rolar | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms, cascata de 200ms nas grades | Igual |
 | Menu do celular | Abre sem animação | Painel escuro que desce em 400ms `ease` |
 
-- **Presets de entrada** (componente `RevealObserver`, uma única vez por elemento):
-  - `rise`: sobe **10% da altura do elemento** e aparece;
-  - `fade`: só aparece;
-  - `zoom`: vai de 0,92 a 1 de escala enquanto aparece;
-  - o atraso é definido por atributo, de 0,2 a 0,6s. O bloco de título (ornamento, título e texto) anima como uma unidade, e as grades entram em cascata de 200ms.
-- **Hero:** o conteúdo sobe e aparece em cascata ao carregar, com delays de 0, 80, 160 e 240ms hoje. É só CSS, e a cascata não esconde nada antes do JS. A S4.05 alinha o ritmo ao do preset. O cabeçalho nunca anima.
+- **Presets de entrada** (componente `RevealObserver`, uma única vez por elemento). O preset é o valor de `data-reveal`:
+  - `data-reveal="rise"`: sobe **10% da altura do elemento** (`translateY(10%)`) e aparece. Também vale para `data-reveal` sem valor;
+  - `data-reveal="fade"`: só aparece;
+  - `data-reveal="zoom"`: vai de 0,92 a 1 de escala enquanto aparece;
+  - todos duram 500ms com `ease`. O atraso padrão é de 200ms; `data-reveal-delay="400"` (em ms) troca o atraso daquele elemento (o observer grava `--reveal-delay`);
+  - o estado vai em outro atributo, `data-reveal-state` (`pending` ou `done`), que só o observer escreve. O servidor nunca o renderiza;
+  - a transição só existe no `done`: esconder é instantâneo e fica abaixo da dobra, e o elemento entra com o ritmo do preset;
+  - o bloco de título (`SectionHeading`: ornamento, título e texto) anima como uma unidade, com um `data-reveal="rise"` em volta;
+  - nas grades (`catalog.tsx`), cada card recebe `--reveal-index` e a `ul` define `--reveal-cols` por breakpoint; o CSS soma 200ms por coluna ao atraso, e a cascata fica de 200, 400 e 600ms numa grade de 3 colunas. No celular, com 1 coluna, não há degrau.
+- **Hero:** o conteúdo sobe e aparece em cascata ao carregar (`animate-rise`), com o mesmo ritmo do preset `rise`: 10% da altura do elemento, 500ms `ease`. Os delays ficam na marcação (0, 80, 160 e 240ms hoje; o Beard X usa degraus de 200ms, ajuste que cabe à #79). É só CSS, e a cascata não esconde nada antes do JS. O cabeçalho nunca anima.
 - **Escondido só abaixo da dobra:** só o que está abaixo da dobra começa escondido. A página que usa `data-reveal` monta o próprio `RevealObserver`; no layout, ele mexeria nos elementos antes de a página hidratar.
 - **Rolagem:** a nativa do navegador. No desktop, a foto do hero fica fixa com CSS, sem parallax por script.
 - **Regras:**

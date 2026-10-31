@@ -6,9 +6,12 @@ import { ServiceCard } from "@/components/ui/service-card";
 import type { PublicBarber, PublicService } from "@/lib/api/public";
 import { bookingHref } from "@/lib/booking";
 
-/** Atraso da entrada ao rolar, em cascata pelos cards de uma grade. */
-function revealDelay(index: number): CSSProperties {
-  return { "--reveal-delay": `${(index % 3) * 100}ms` } as CSSProperties;
+/**
+ * Posição do card na grade, para a cascata da entrada ao rolar: o CSS soma
+ * 200ms por coluna (`--reveal-cols`, que a `ul` ajusta por breakpoint).
+ */
+function revealIndex(index: number): CSSProperties {
+  return { "--reveal-index": index } as CSSProperties;
 }
 
 /**
@@ -41,9 +44,9 @@ export function ServiceList({
     );
   }
   return (
-    <ul className="grid gap-6 md:grid-cols-2">
+    <ul className="grid gap-6 [--reveal-cols:1] md:grid-cols-2 md:[--reveal-cols:2]">
       {services.slice(0, limit).map((service, index) => (
-        <li key={service.id} data-reveal style={revealDelay(index)}>
+        <li key={service.id} data-reveal="rise" style={revealIndex(index)}>
           <ServiceCard
             name={service.name}
             description={service.description}
@@ -86,9 +89,9 @@ export function BarberList({
     );
   }
   return (
-    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="grid gap-6 [--reveal-cols:1] sm:grid-cols-2 sm:[--reveal-cols:2] lg:grid-cols-3 lg:[--reveal-cols:3]">
       {barbers.map((barber, index) => (
-        <li key={barber.id} data-reveal style={revealDelay(index)}>
+        <li key={barber.id} data-reveal="rise" style={revealIndex(index)}>
           <BarberCard
             name={barber.name}
             photoPath={barber.photo_path}

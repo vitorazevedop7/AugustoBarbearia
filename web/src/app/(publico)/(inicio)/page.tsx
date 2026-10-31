@@ -48,7 +48,7 @@ export default async function HomePage() {
         >
           <div className="mx-auto grid max-w-site items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div
-              data-reveal
+              data-reveal="zoom"
               className="group relative aspect-[3/2] overflow-hidden bg-line"
             >
               <Image
@@ -59,7 +59,10 @@ export default async function HomePage() {
                 className="object-cover transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />
             </div>
-            <div data-reveal className="min-w-0 text-center lg:text-left">
+            <div
+              data-reveal="rise"
+              className="min-w-0 text-center lg:text-left"
+            >
               <div className="flex justify-center lg:justify-start">
                 <Ornament align="start" />
               </div>
@@ -83,7 +86,7 @@ export default async function HomePage() {
         className={`scroll-mt-20 px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : ""}`}
       >
         <div className="mx-auto max-w-site">
-          <div data-reveal>
+          <div data-reveal="rise">
             <SectionHeading
               id="servicos-titulo"
               title="Serviços"
@@ -113,7 +116,7 @@ export default async function HomePage() {
         className={`scroll-mt-20 px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
       >
         <div className="mx-auto max-w-site">
-          <div data-reveal>
+          <div data-reveal="rise">
             <SectionHeading
               id="equipe-titulo"
               title="Nossa equipe"
@@ -202,7 +205,7 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
       className="scroll-mt-20 bg-ink px-4 py-section sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-site">
-        <div data-reveal>
+        <div data-reveal="rise">
           <SectionHeading
             id="contato-titulo"
             tone="dark"
@@ -213,7 +216,7 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
         <div className="mx-auto mt-12 max-w-4xl lg:mt-16">
           {shop ? (
             <div
-              data-reveal
+              data-reveal="rise"
               className={`grid gap-10 ${withContact ? "md:grid-cols-2" : "mx-auto max-w-md"}`}
             >
               <div>
