@@ -4,6 +4,7 @@ import { ApiStatus, ApiStatusBar } from "@/components/api-status";
 import { RevealObserver } from "@/components/reveal-observer";
 import { Alert } from "@/components/ui/alert";
 import { ButtonLink } from "@/components/ui/button";
+import { FloatingOrnament } from "@/components/ui/floating-ornament";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { BarberList, ServiceList } from "@/components/vitrine/catalog";
@@ -44,8 +45,12 @@ export default async function HomePage() {
       {shop?.about ? (
         <section
           aria-labelledby="sobre-titulo"
-          className="px-4 py-section sm:px-6 lg:px-8"
+          className="relative isolate overflow-hidden px-4 py-section sm:px-6 lg:px-8"
         >
+          <FloatingOrnament
+            shape="razor"
+            className="top-24 -right-24 w-[26rem] xl:w-[32rem]"
+          />
           <div className="mx-auto grid max-w-site items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div
               data-reveal="zoom"
@@ -56,7 +61,7 @@ export default async function HomePage() {
                 alt="Mãos de barbeiro com tesoura durante um corte de cabelo"
                 fill
                 sizes="(min-width: 1344px) 608px, (min-width: 1024px) calc((100vw - 8rem) / 2), (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)"
-                className="object-cover transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                className="object-cover transition-transform duration-300 ease-standard group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />
             </div>
             <div
@@ -83,8 +88,12 @@ export default async function HomePage() {
       <section
         id="servicos"
         aria-labelledby="servicos-titulo"
-        className={`scroll-mt-20 px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : ""}`}
+        className={`relative isolate scroll-mt-20 overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : ""}`}
       >
+        <FloatingOrnament
+          shape="scissors"
+          className="top-20 -left-10 h-80 xl:left-6 xl:h-96"
+        />
         <div className="mx-auto max-w-site">
           <div data-reveal="rise">
             <SectionHeading
@@ -113,8 +122,12 @@ export default async function HomePage() {
       <section
         id="equipe"
         aria-labelledby="equipe-titulo"
-        className={`scroll-mt-20 px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
+        className={`relative isolate scroll-mt-20 overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
       >
+        <FloatingOrnament
+          shape="comb"
+          className="top-28 -right-16 w-80 xl:right-0 xl:w-[26rem]"
+        />
         <div className="mx-auto max-w-site">
           <div data-reveal="rise">
             <SectionHeading

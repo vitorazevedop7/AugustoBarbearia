@@ -132,6 +132,14 @@ describe("página inicial (vitrine)", () => {
     expect(
       within(servicos).getByRole("link", { name: "Ver todos os serviços" }),
     ).toHaveAttribute("href", "/servicos");
+    // Um card branco único, com a grade de 1 coluna no celular e 2 no `md`.
+    const grid = within(servicos).getByRole("list");
+    expect(grid).toHaveClass("md:grid-cols-2");
+    expect(grid.parentElement).toHaveClass("bg-surface", "shadow-card");
+    expect(within(grid).getAllByRole("listitem")[1]).toHaveAttribute(
+      "data-reveal",
+      "rise",
+    );
   });
 
   it("RN-60: mostra a equipe com a inicial no lugar da foto que falta", async () => {
@@ -148,6 +156,29 @@ describe("página inicial (vitrine)", () => {
     expect(
       within(equipe).getByRole("link", { name: "Conhecer a equipe" }),
     ).toHaveAttribute("href", "/barbeiros");
+    // Degraus de 0, 75 e 145px só no desktop.
+    const [first, second, third] = within(equipe).getAllByRole("listitem");
+    expect(first.className).not.toContain("mt-");
+    expect(second).toHaveClass("lg:mt-[75px]");
+    expect(third).toHaveClass("lg:mt-[145px]");
+  });
+
+  it("decora as bordas das seções com ornamentos atrás do conteúdo", async () => {
+    vi.mocked(getPublicShop).mockResolvedValue({
+      ...shop,
+      about: "Texto sobre cadastrado.",
+    });
+
+    render(await HomePage());
+
+    for (const name of ["Sobre a barbearia", "Serviços", "Nossa equipe"]) {
+      const region = section(name);
+      // A seção recorta o ornamento (sem rolagem horizontal) e o põe atrás.
+      expect(region).toHaveClass("relative", "isolate", "overflow-hidden");
+      const ornament = region.querySelector("svg[data-reveal='fade']");
+      expect(ornament).toHaveAttribute("aria-hidden", "true");
+      expect(ornament).toHaveClass("-z-10", "pointer-events-none");
+    }
   });
 
   it("RN-02: mostra o horário de funcionamento sem contato preenchido", async () => {

@@ -7,13 +7,13 @@ import BarbersPage from "./page";
 vi.mock("@/lib/api/public", () => ({ getPublicBarbers: vi.fn() }));
 
 describe("página de barbeiros — RN-60", () => {
-  it("mostra cada barbeiro com foto 4:5, apresentação e o link para agendar com ele", async () => {
+  it("mostra cada barbeiro com foto 6:7, a apresentação inteira e o link para agendar com ele", async () => {
     vi.mocked(getPublicBarbers).mockResolvedValue([
       {
         id: 7,
         name: "Bruno",
         photo_path: "/images/barbeiros/bruno.jpg",
-        bio: "Apresentação cadastrada.",
+        bio: "Apresentação cadastrada.\nCom uma segunda linha.",
       },
       ...barbers,
     ]);
@@ -32,9 +32,11 @@ describe("página de barbeiros — RN-60", () => {
       "Foto de Bruno",
     );
     expect(within(bruno).getByRole("img").parentElement).toHaveClass(
-      "aspect-[4/5]",
+      "aspect-[6/7]",
     );
-    expect(bruno).toHaveTextContent("Apresentação cadastrada.");
+    expect(bruno).toHaveTextContent(
+      "Apresentação cadastrada. Com uma segunda linha.",
+    );
     expect(
       within(bruno).getByRole("link", { name: "Agendar com Bruno" }),
     ).toHaveAttribute("href", "/agendar?barbeiro=7");
