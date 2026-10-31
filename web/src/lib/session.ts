@@ -1,11 +1,13 @@
 import { headers } from "next/headers";
+import { cache } from "react";
 import { auth } from "@/lib/auth";
 
 /**
  * Sessão atual para Server Components. Se o banco estiver fora do ar, trata o
- * visitante como não logado em vez de derrubar a página.
+ * visitante como não logado em vez de derrubar a página. O `cache` do React
+ * faz o cabeçalho e a página dividirem a mesma leitura na requisição.
  */
-export async function getCurrentSession() {
+export const getCurrentSession = cache(async () => {
   // Fora do try: o `headers()` sinaliza ao Next que a rota é dinâmica.
   const requestHeaders = await headers();
   try {
@@ -14,7 +16,7 @@ export async function getCurrentSession() {
     console.error("Falha ao ler a sessão do Better Auth", error);
     return null;
   }
-}
+});
 
 /** Só aceita caminhos internos (`/algo`), para o login nunca levar a outro site. */
 export function safeRedirectPath(value: unknown): string {
