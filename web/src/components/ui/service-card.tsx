@@ -29,10 +29,10 @@ export function ServiceCard({
   return (
     <article className="flex h-full flex-col bg-surface p-6 shadow-card sm:p-8">
       <div className="flex items-start justify-between gap-4">
-        <Heading className="font-heading text-xl font-bold text-ink">
+        <Heading className="font-heading text-display-3 font-black uppercase text-ink">
           {name}
         </Heading>
-        <p className="shrink-0 font-heading text-xl font-bold text-brand tabular-nums">
+        <p className="shrink-0 font-heading text-display-3 font-black text-brand tabular-nums">
           <span className="sr-only">Preço: </span>
           {formatPrice(price)}
         </p>
@@ -42,7 +42,7 @@ export function ServiceCard({
         {formatDuration(durationMinutes)}
       </p>
       {description ? (
-        <p className="mt-4 leading-relaxed text-ink-muted">{description}</p>
+        <p className="mt-4 text-body text-ink-muted">{description}</p>
       ) : null}
       {barbers.length > 0 ? (
         <p className="mt-4 text-sm text-ink-muted">Com {formatList(barbers)}</p>

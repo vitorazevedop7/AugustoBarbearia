@@ -41,7 +41,7 @@ export function BarberPhoto({
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-full items-center justify-center font-heading text-[38cqw] leading-none font-bold text-ink-muted"
+          className="flex size-full items-center justify-center font-heading text-[38cqw] leading-none font-black text-ink-muted"
         >
           {name.trim().charAt(0).toUpperCase()}
         </span>

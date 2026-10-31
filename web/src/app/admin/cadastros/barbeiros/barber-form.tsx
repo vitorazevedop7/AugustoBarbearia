@@ -72,10 +72,15 @@ export function BarberForm({ barber }: { barber?: Barber }) {
         </SelectField>
       ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <Button type="submit" pending={pending} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          size="sm"
+          pending={pending}
+          className="w-full sm:w-auto"
+        >
           Salvar barbeiro
         </Button>
-        <ButtonLink href={BARBERS_PATH} variant="ghost">
+        <ButtonLink href={BARBERS_PATH} variant="ghost" size="sm">
           Voltar para a lista
         </ButtonLink>
       </div>

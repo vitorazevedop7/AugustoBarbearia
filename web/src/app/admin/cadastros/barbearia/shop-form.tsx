@@ -91,7 +91,12 @@ export function ShopForm({ shop }: { shop: ShopUpdate }) {
         defaultValue={value("email")}
       />
       <div>
-        <Button type="submit" pending={pending} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          size="sm"
+          pending={pending}
+          className="w-full sm:w-auto"
+        >
           Salvar dados
         </Button>
       </div>

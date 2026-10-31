@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Barlow, Inter } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -11,10 +11,10 @@ const inter = Inter({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const barlow = Barlow({
   subsets: ["latin"],
-  weight: ["700"],
-  variable: "--font-playfair",
+  weight: ["600", "900"],
+  variable: "--font-barlow",
   display: "swap",
 });
 
@@ -31,7 +31,7 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} ${playfair.variable} motion-safe:scroll-smooth`}
+      className={`${inter.variable} ${barlow.variable} motion-safe:scroll-smooth`}
     >
       <body className="flex min-h-dvh flex-col font-sans antialiased">
         <a

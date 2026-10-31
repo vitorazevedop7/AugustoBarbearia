@@ -44,9 +44,9 @@ export default async function HomePage() {
       {shop?.about ? (
         <section
           aria-labelledby="sobre-titulo"
-          className="px-4 py-20 sm:px-6 lg:px-8 lg:py-32"
+          className="px-4 py-section sm:px-6 lg:px-8"
         >
-          <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="mx-auto grid max-w-site items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div
               data-reveal
               className="group relative aspect-[3/2] overflow-hidden bg-line"
@@ -65,11 +65,11 @@ export default async function HomePage() {
               </div>
               <h2
                 id="sobre-titulo"
-                className="mt-6 font-heading text-display-2 font-bold text-ink"
+                className="mt-6 font-heading text-display-2 font-black uppercase text-ink"
               >
                 Sobre a barbearia
               </h2>
-              <p className="mt-6 text-base leading-relaxed whitespace-pre-line text-ink-muted sm:text-lg">
+              <p className="mt-6 text-body whitespace-pre-line text-ink-muted">
                 {shop.about}
               </p>
             </div>
@@ -80,9 +80,9 @@ export default async function HomePage() {
       <section
         id="servicos"
         aria-labelledby="servicos-titulo"
-        className={`scroll-mt-20 px-4 py-20 sm:px-6 lg:px-8 lg:py-32 ${shop?.about ? "bg-surface" : ""}`}
+        className={`scroll-mt-20 px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : ""}`}
       >
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-site">
           <div data-reveal>
             <SectionHeading
               id="servicos-titulo"
@@ -110,9 +110,9 @@ export default async function HomePage() {
       <section
         id="equipe"
         aria-labelledby="equipe-titulo"
-        className={`scroll-mt-20 px-4 py-20 sm:px-6 lg:px-8 lg:py-32 ${shop?.about ? "" : "bg-surface"}`}
+        className={`scroll-mt-20 px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
       >
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-site">
           <div data-reveal>
             <SectionHeading
               id="equipe-titulo"
@@ -168,10 +168,10 @@ function Hero({ shop }: { shop: PublicShop | null }) {
         <div className="motion-safe:animate-rise">
           <Ornament tone="dark" />
         </div>
-        <h1 className="mt-6 font-heading text-display-1 font-bold text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
+        <h1 className="mt-6 font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
           {shop?.name ?? SHOP_NAME}
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-on-ink-muted sm:text-lg motion-safe:animate-rise motion-safe:[animation-delay:160ms]">
+        <p className="mx-auto mt-6 max-w-xl text-body text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:160ms]">
           {shop?.tagline ??
             "Escolha o serviço, o barbeiro e o horário pelo celular, sem precisar ligar."}
         </p>
@@ -199,9 +199,9 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
     <section
       id="contato"
       aria-labelledby="contato-titulo"
-      className="scroll-mt-20 bg-ink px-4 py-20 sm:px-6 lg:px-8 lg:py-32"
+      className="scroll-mt-20 bg-ink px-4 py-section sm:px-6 lg:px-8"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-site">
         <div data-reveal>
           <SectionHeading
             id="contato-titulo"

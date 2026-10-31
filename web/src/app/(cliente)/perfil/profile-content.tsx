@@ -15,7 +15,7 @@ export function ProfileContent({
       aria-busy={busy || undefined}
       className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6 lg:py-12"
     >
-      <h1 className="font-heading text-display-3 font-bold text-ink">
+      <h1 className="font-heading text-display-3 font-black uppercase text-ink">
         Meu perfil
       </h1>
       <p className="mt-3 text-ink-muted">

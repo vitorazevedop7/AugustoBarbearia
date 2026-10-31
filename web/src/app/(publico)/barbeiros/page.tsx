@@ -19,8 +19,8 @@ export default async function BarbersPage() {
         title="Barbeiros"
         description="Conheça a equipe e escolha com quem você quer ser atendido."
       />
-      <div className="px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
-        <div className="mx-auto max-w-7xl">
+      <div className="px-4 py-section sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-site">
           <BarberList barbers={barbers} headingLevel="h2" />
         </div>
       </div>

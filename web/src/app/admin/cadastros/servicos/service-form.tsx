@@ -127,10 +127,15 @@ export function ServiceForm({
         </SelectField>
       ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <Button type="submit" pending={pending} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          size="sm"
+          pending={pending}
+          className="w-full sm:w-auto"
+        >
           Salvar serviço
         </Button>
-        <ButtonLink href={SERVICES_PATH} variant="ghost">
+        <ButtonLink href={SERVICES_PATH} variant="ghost" size="sm">
           Voltar para a lista
         </ButtonLink>
       </div>

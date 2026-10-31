@@ -21,7 +21,11 @@ const description =
 
 function NewServiceLink() {
   return (
-    <ButtonLink href={`${SERVICES_PATH}/novo`} className="w-full sm:w-auto">
+    <ButtonLink
+      href={`${SERVICES_PATH}/novo`}
+      size="sm"
+      className="w-full sm:w-auto"
+    >
       Novo serviço
     </ButtonLink>
   );

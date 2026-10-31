@@ -44,7 +44,7 @@ export function DayPicker({
                     </span>
                     <span
                       aria-hidden="true"
-                      className="font-heading text-2xl leading-tight font-bold tabular-nums"
+                      className="font-heading text-2xl leading-tight font-semibold tabular-nums"
                     >
                       {day}
                     </span>

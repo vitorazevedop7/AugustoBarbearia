@@ -53,7 +53,10 @@ export function AppointmentCard({
       className="flex flex-col gap-4 bg-surface p-5 shadow-card sm:p-6"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h3 id={titleId} className="font-heading text-xl font-bold text-ink">
+        <h3
+          id={titleId}
+          className="font-heading text-display-4 font-black uppercase text-ink"
+        >
           {appointment.service.name}
         </h3>
         {appointment.status === "SCHEDULED" && !upcoming ? (

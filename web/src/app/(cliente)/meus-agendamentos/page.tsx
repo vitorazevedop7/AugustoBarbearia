@@ -67,7 +67,7 @@ export default async function MyAppointmentsPage({
           <section aria-labelledby="proximos">
             <h2
               id="proximos"
-              className="font-heading text-2xl font-bold text-ink"
+              className="font-heading text-display-4 font-black uppercase text-ink"
             >
               Próximos
             </h2>
@@ -93,7 +93,7 @@ export default async function MyAppointmentsPage({
             <section aria-labelledby="historico">
               <h2
                 id="historico"
-                className="font-heading text-2xl font-bold text-ink"
+                className="font-heading text-display-4 font-black uppercase text-ink"
               >
                 Histórico
               </h2>

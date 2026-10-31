@@ -61,6 +61,7 @@ const colors = [
 const sections = [
   { id: "cores", title: "Cores" },
   { id: "tipografia", title: "Tipografia" },
+  { id: "ritmo", title: "Ritmo" },
   { id: "botoes", title: "Botões" },
   { id: "campos", title: "Campos" },
   { id: "horarios", title: "Chips de horário" },
@@ -90,7 +91,7 @@ function Showcase({
     >
       <h2
         id={`${id}-title`}
-        className="font-heading text-display-3 font-bold text-ink"
+        className="font-heading text-display-3 font-black text-ink uppercase"
       >
         {title}
       </h2>
@@ -103,12 +104,12 @@ export default function DesignSystemPage() {
   return (
     <main id="main-content" tabIndex={-1} className="flex-1">
       <section className="bg-ink px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-site">
           <Ornament align="start" tone="dark" />
-          <h1 className="mt-6 font-heading text-display-1 font-bold text-surface">
+          <h1 className="mt-6 font-heading text-display-1 font-black text-surface uppercase">
             Design system
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-on-ink-muted sm:text-lg">
+          <p className="mt-4 max-w-2xl text-body text-on-ink-muted">
             Tokens e componentes da Augusto Barbearia, renderizados com o mesmo
             código das telas. As regras de uso estão em
             docs/design/design-system.md.
@@ -130,7 +131,7 @@ export default function DesignSystemPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-site px-4 sm:px-6 lg:px-8">
         <Showcase id="cores" title="Cores">
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {colors.map(({ token, swatch, use }) => (
@@ -149,30 +150,44 @@ export default function DesignSystemPage() {
 
         <Showcase id="tipografia" title="Tipografia">
           <div className="space-y-6">
-            <p className="font-heading text-display-1 font-bold">
+            <p className="font-heading text-display-1 font-black uppercase">
               Display 1 · hero
             </p>
-            <p className="font-heading text-display-2 font-bold">
+            <p className="font-heading text-display-2 font-black uppercase">
               Display 2 · título de seção
             </p>
-            <p className="font-heading text-display-3 font-bold">
-              Display 3 · destaque
+            <p className="font-heading text-display-3 font-black uppercase">
+              Display 3 · nome em card
             </p>
-            <p className="font-heading text-xl font-bold">
-              Título de card · Playfair 20px
+            <p className="font-heading text-display-4 font-black uppercase">
+              Display 4 · título pequeno de bloco
+            </p>
+            <p className="font-heading text-2xl font-semibold uppercase">
+              Barlow 600 · números e títulos menores
             </p>
             <p className="text-2xl font-semibold">
               Título da área logada · Inter 600
             </p>
-            <p className="max-w-2xl text-base leading-relaxed text-ink">
-              Corpo · Inter 16px. Frases curtas, tratando o cliente por você:
-              escolha o serviço, o barbeiro e o horário que preferir.
+            <p className="max-w-2xl text-body text-ink">
+              Corpo da vitrine · Inter 16px no celular e 18px a partir de 768px.
+              Frases curtas, tratando o cliente por você: escolha o serviço, o
+              barbeiro e o horário que preferir.
             </p>
             <p className="text-sm text-ink-muted">
               Apoio · Inter 14px em ink-muted
             </p>
             <p className="text-xs font-semibold tracking-[0.08em] uppercase">
               Rótulo em caixa alta · Inter 600, 0,08em
+            </p>
+          </div>
+        </Showcase>
+
+        <Showcase id="ritmo" title="Ritmo">
+          <div className="border border-dashed border-ink-muted px-4 py-section text-center">
+            <p className="font-mono text-sm text-ink">py-section</p>
+            <p className="mt-2 text-sm text-ink-muted">
+              Padding vertical das seções da vitrine: 88, 100, 160 e 240px, do
+              celular ao desktop. O conteúdo vai até 1340px (max-w-site).
             </p>
           </div>
         </Showcase>
@@ -198,6 +213,11 @@ export default function DesignSystemPage() {
             </ButtonLink>
             <ButtonLink href="#botoes">Primário no escuro</ButtonLink>
           </div>
+          <p className="mt-6 max-w-2xl text-sm text-ink-muted">
+            O tamanho padrão tem 60px de altura no celular e 84px a partir de
+            768px; o pequeno (sm), com 44px, fica para a administração, o
+            cabeçalho e os cards.
+          </p>
         </Showcase>
 
         <Showcase id="campos" title="Campos">
@@ -418,7 +438,7 @@ export default function DesignSystemPage() {
                 <p className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
                   Ter, 3 de nov · 14:30
                 </p>
-                <h3 className="mt-2 font-heading text-xl font-bold text-ink">
+                <h3 className="mt-2 font-heading text-display-4 font-black text-ink uppercase">
                   Corte + barba
                 </h3>
                 <p className="mt-1 text-sm text-ink-muted">

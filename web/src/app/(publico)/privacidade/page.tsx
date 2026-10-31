@@ -24,10 +24,10 @@ export default function PrivacyPolicyPage() {
     >
       <article className="mx-auto max-w-2xl">
         <Ornament align="start" />
-        <h1 className="mt-6 font-heading text-display-2 font-bold text-ink">
+        <h1 className="mt-6 font-heading text-display-2 font-black uppercase text-ink">
           Política de privacidade
         </h1>
-        <p className="mt-4 text-base leading-relaxed text-ink-muted sm:text-lg">
+        <p className="mt-4 text-body text-ink-muted">
           Esta página explica, como pede a Lei Geral de Proteção de Dados
           (LGPD), quais dados pessoais a Augusto Barbearia guarda, para que eles
           servem e como pedir a exclusão.
@@ -40,7 +40,10 @@ export default function PrivacyPolicyPage() {
           aria-labelledby="resumo"
           className="mt-10 bg-surface p-6 shadow-card sm:p-8"
         >
-          <h2 id="resumo" className="font-heading text-xl font-bold text-ink">
+          <h2
+            id="resumo"
+            className="font-heading text-display-4 font-black uppercase text-ink"
+          >
             Em resumo
           </h2>
           <ul className="mt-4 list-disc space-y-2 pl-5 leading-relaxed marker:text-brand">
@@ -166,12 +169,13 @@ function PolicySection({
       aria-labelledby={id}
       className="mt-12 border-t border-line pt-10 sm:mt-16"
     >
-      <h2 id={id} className="font-heading text-display-3 font-bold text-ink">
+      <h2
+        id={id}
+        className="font-heading text-display-3 font-black uppercase text-ink"
+      >
         {title}
       </h2>
-      <div className="mt-4 space-y-4 text-base leading-relaxed sm:text-lg">
-        {children}
-      </div>
+      <div className="mt-4 space-y-4 text-body">{children}</div>
     </section>
   );
 }

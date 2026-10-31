@@ -20,7 +20,11 @@ const description = "Quem aparece na vitrine e recebe agendamentos.";
 
 function NewBarberLink() {
   return (
-    <ButtonLink href={`${BARBERS_PATH}/novo`} className="w-full sm:w-auto">
+    <ButtonLink
+      href={`${BARBERS_PATH}/novo`}
+      size="sm"
+      className="w-full sm:w-auto"
+    >
       Novo barbeiro
     </ButtonLink>
   );

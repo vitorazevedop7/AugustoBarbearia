@@ -80,7 +80,12 @@ export function BusinessHoursForm({ days }: { days: BusinessHoursDay[] }) {
         );
       })}
       <div>
-        <Button type="submit" pending={pending} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          size="sm"
+          pending={pending}
+          className="w-full sm:w-auto"
+        >
           Salvar horário
         </Button>
       </div>
