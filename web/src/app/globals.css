@@ -16,6 +16,32 @@
   --success: #1e7f4f;
   --warning: #9a5b00;
   --danger: #b42318;
+
+  /* Ritmo da vitrine (Beard X): o valor muda com a tela, e o tema o expõe
+     como `text-body` e `py-section`. */
+  --body-size: 1rem;
+  --body-leading: 1.5;
+  --section-y: 5.5rem;
+}
+
+@media (width >= 40rem) {
+  :root {
+    --section-y: 6.25rem;
+  }
+}
+
+@media (width >= 48rem) {
+  :root {
+    --body-size: 1.125rem;
+    --body-leading: 1.667;
+    --section-y: 10rem;
+  }
+}
+
+@media (width >= 64rem) {
+  :root {
+    --section-y: 15rem;
+  }
 }
 
 @theme inline {
@@ -34,17 +60,31 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-playfair);
+  --font-heading: var(--font-barlow);
+  /* Corpo da vitrine: 16px com entrelinha 1,5 no celular; 18px com 1,667 a partir do `md`. */
+  --text-body: var(--body-size);
+  --text-body--line-height: var(--body-leading);
+  /* Padding vertical das seções da vitrine: 88, 100, 160 e 240px. */
+  --spacing-section: var(--section-y);
 }
 
 @theme {
-  /* Títulos da vitrine: crescem com a tela, do celular ao desktop. */
-  --text-display-1: clamp(2.5rem, 1.75rem + 3.75vw, 4.5rem);
-  --text-display-1--line-height: 1.08;
-  --text-display-2: clamp(2rem, 1.6rem + 2vw, 3rem);
-  --text-display-2--line-height: 1.15;
-  --text-display-3: clamp(1.5rem, 1.3rem + 1vw, 2rem);
-  --text-display-3--line-height: 1.25;
+  /* Títulos da vitrine (Barlow 900, caixa alta): crescem com a tela de 360
+     a 1280px. Os extremos e as entrelinhas são os medidos no Beard X. */
+  --text-display-1: clamp(2rem, 0.533rem + 6.522vw, 5.75rem);
+  --text-display-1--line-height: 1.065;
+  --text-display-2: clamp(1.75rem, 1.065rem + 3.043vw, 3.5rem);
+  --text-display-2--line-height: 1.196;
+  --text-display-3: clamp(1.5rem, 1.157rem + 1.522vw, 2.375rem);
+  --text-display-3--line-height: 1.368;
+  --text-display-4: clamp(1.25rem, 1.152rem + 0.435vw, 1.5rem);
+  --text-display-4--line-height: 1.583;
+
+  /* Container da vitrine: até 1340px de conteúdo. */
+  --container-site: 83.75rem;
+
+  /* Curva dos hovers da referência: 300ms `ease`. */
+  --ease-standard: ease;
 
   --shadow-card: 0 2px 12px rgb(16 16 16 / 0.08);
 

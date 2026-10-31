@@ -17,17 +17,17 @@ export function SectionHeading({
 }) {
   const centered = align === "center";
   return (
-    <div className={`max-w-2xl ${centered ? "mx-auto text-center" : ""}`}>
+    <div className={`max-w-3xl ${centered ? "mx-auto text-center" : ""}`}>
       <Ornament align={align} tone={tone} />
       <h2
         id={id}
-        className={`mt-6 font-heading text-display-2 font-bold ${tone === "dark" ? "text-surface" : "text-ink"}`}
+        className={`mt-6 font-heading text-display-2 font-black uppercase ${tone === "dark" ? "text-surface" : "text-ink"}`}
       >
         {title}
       </h2>
       {description ? (
         <p
-          className={`mt-4 text-base leading-relaxed sm:text-lg ${tone === "dark" ? "text-on-ink-muted" : "text-ink-muted"}`}
+          className={`mt-4 text-body ${tone === "dark" ? "text-on-ink-muted" : "text-ink-muted"}`}
         >
           {description}
         </p>

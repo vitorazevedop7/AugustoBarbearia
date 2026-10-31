@@ -14,7 +14,9 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center border border-dashed border-ink-muted px-6 py-12 text-center">
       <Ornament />
-      <p className="mt-6 font-heading text-xl font-bold text-ink">{title}</p>
+      <p className="mt-6 font-heading text-display-4 font-black uppercase text-ink">
+        {title}
+      </p>
       {description ? (
         <p className="mt-2 max-w-sm text-ink-muted">{description}</p>
       ) : null}

@@ -23,7 +23,7 @@ export async function SiteFooter() {
           <span className="grid size-16 shrink-0 place-items-center rounded-full bg-surface">
             <Image src="/logo.png" alt="" width={48} height={48} />
           </span>
-          <p className="font-heading text-display-3 font-bold">
+          <p className="font-heading text-display-3 font-black uppercase">
             {shop?.name ?? "Augusto Barbearia"}
           </p>
         </div>

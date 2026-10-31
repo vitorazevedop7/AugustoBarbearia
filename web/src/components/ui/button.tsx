@@ -5,10 +5,10 @@ type Variant = "primary" | "outline" | "outline-light" | "danger" | "ghost";
 type Size = "md" | "sm";
 
 const base =
-  "inline-flex items-center justify-center gap-2 border-2 font-sans font-semibold tracking-[0.08em] uppercase transition-[background-color,border-color,color,transform] duration-300 ease-out focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none";
+  "inline-flex items-center justify-center gap-2 border-2 text-center font-heading font-black uppercase transition-[background-color,border-color,color,transform] duration-300 ease-standard focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none";
 
-/** Sobe 2px no hover; o `ghost` não sobe porque não tem caixa. */
-const lift = "hover:-translate-y-0.5 motion-reduce:hover:translate-y-0";
+/** Sobe 3px no hover; o `ghost` não sobe porque não tem caixa. */
+const lift = "hover:-translate-y-0.75 motion-reduce:hover:translate-y-0";
 
 const variants: Record<Variant, string> = {
   primary: `${lift} border-brand bg-brand text-surface hover:border-brand-strong hover:bg-brand-strong focus-visible:outline-brand`,
@@ -19,9 +19,13 @@ const variants: Record<Variant, string> = {
     "border-transparent text-ink underline-offset-4 hover:underline focus-visible:outline-ink",
 };
 
+/**
+ * `md` segue o Beard X: 60px de altura no celular e 84px a partir do `md`.
+ * `sm` é o compacto da administração, do cabeçalho e dos cards.
+ */
 const sizes: Record<Size, string> = {
-  md: "min-h-14 px-7 py-4 text-sm",
-  sm: "min-h-11 px-5 py-2.5 text-xs",
+  md: "min-h-15 px-6 py-4 text-base leading-5 md:min-h-21 md:text-lg",
+  sm: "min-h-11 px-5 py-2.5 text-sm leading-5",
 };
 
 export function buttonClasses({

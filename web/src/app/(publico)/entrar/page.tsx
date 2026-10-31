@@ -28,7 +28,7 @@ export default async function SignInPage({
     >
       <div className="mx-auto w-full max-w-md bg-surface p-6 text-center shadow-card sm:p-10">
         <Ornament />
-        <h1 className="mt-6 font-heading text-display-3 font-bold text-ink">
+        <h1 className="mt-6 font-heading text-display-3 font-black uppercase text-ink">
           Entrar
         </h1>
         <p className="mt-3 text-ink-muted">

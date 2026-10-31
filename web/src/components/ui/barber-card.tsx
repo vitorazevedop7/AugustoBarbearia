@@ -26,11 +26,11 @@ export function BarberCard({
     <article className="group flex h-full flex-col bg-surface shadow-card">
       <BarberPhoto name={name} photoPath={photoPath} sizes={sizes} zoom />
       <div className="flex flex-1 flex-col p-6 sm:p-8">
-        <Heading className="font-heading text-xl font-bold text-ink">
+        <Heading className="font-heading text-display-3 font-black uppercase text-ink">
           {name}
         </Heading>
         {bio ? (
-          <p className="mt-3 leading-relaxed whitespace-pre-line text-ink-muted">
+          <p className="mt-3 text-body whitespace-pre-line text-ink-muted">
             {bio}
           </p>
         ) : null}
