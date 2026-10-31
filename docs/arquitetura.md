@@ -172,12 +172,14 @@ web/
     │   └── api/
     │       ├── token.ts            # getApiToken(): JWT da sessão atual
     │       ├── client.ts           # openapi-fetch com o Bearer JWT; createPublicApiClient() sem token
-    │       ├── public.ts           # leituras das rotas /public para a vitrine e o rodapé
+    │       ├── public.ts           # leituras das rotas /public para a vitrine e o rodapé, com cache por tag
+    │       ├── public-tags.ts      # tags desse cache, invalidadas pelas Server Actions da administração
     │       └── schema.d.ts         # GERADO por `pnpm gen:api`, não editar
     └── components/
         ├── api-status.tsx          # status de GET /health na página inicial, só em desenvolvimento
         ├── site-header.tsx / site-nav.tsx / site-footer.tsx  # cabeçalho com navegação e "Agendar"; rodapé com dados da API
-        ├── vitrine/                # seções da vitrine: listas de serviços e barbeiros, horário e contato, topo e esqueleto
+        ├── header-account.tsx      # login ou "Olá, <nome>" do cabeçalho: a única parte que lê a sessão, num Suspense
+        ├── vitrine/                # seções da vitrine: listas de serviços e barbeiros, horário e contato e topo
         ├── booking/                # agendamento e remarcação: DayPicker, TimePicker, BarberStep/ServiceStep, a moldura das etapas e o ContactNotice (contato quando o prazo passou)
         └── ui/                     # componentes do design system (docs/design/design-system.md)
 ```
@@ -186,6 +188,8 @@ web/
 
 - O web chama a API só pelo `createApiClient()` de `lib/api/client.ts`, tipado pelo `schema.d.ts` gerado ([contrato-openapi.md](specs/contrato-openapi.md)). Mudou um schema da API, rode `pnpm gen:api` no mesmo PR; o job `contract` do CI confere.
 - O cliente é exclusivo do servidor e obtém `getApiToken()` por requisição, enviando Bearer quando existe sessão. As rotas `/public` da vitrine usam `createPublicApiClient()`, que nunca envia token nem consulta a sessão; `lib/api/public.ts` junta essas leituras com o `cache` do React, para o rodapé e a página dividirem a mesma chamada. O layout de `/admin` consulta `/admin/ping` sem cache antes de qualquer página da área: 200 mostra a navegação e a página, 401 sem sessão leva ao login com destino de volta, 403 leva à página inicial. Falhas de infraestrutura ou JWT rejeitado apesar de sessão existente mostram um aviso de indisponibilidade, evitando um ciclo de redirecionamentos. A lista de administradores fica somente na API.
+- **Cache da vitrine (S4.02).** As leituras de `/public/shop`, `/public/services` e `/public/barbers` ficam no cache de dados do Next (`unstable_cache`), no servidor do web, com uma tag cada (`lib/api/public-tags.ts`) e validade de 5 minutos como rede de segurança. As Server Actions da administração que mudam barbeiros, serviços e dados da barbearia chamam `updateTag` com as tags afetadas depois do sucesso na API, para a RN-60 e a RN-61 valerem na próxima visita. Uma falha da API não entra no cache. A disponibilidade e tudo o que depende do usuário continuam sem cache. Como a API não existe no `next build`, as leituras chamam `connection()` e as páginas renderizam na requisição, a partir do cache, sem pré-renderização no build. O cache é local ao processo do web: com mais de uma instância, cada uma teria o seu, e a invalidação precisaria de um `cacheHandler` compartilhado. Se o projeto adotar `cacheComponents`, `unstable_cache` dá lugar a `'use cache'` com `cacheTag`. Detalhes na [spec da vitrine](specs/vitrine.md#carregamento-e-cache).
+- **Sessão no layout.** O layout raiz não lê a sessão. No cabeçalho, só `HeaderAccount` a lê, dentro de um `Suspense` com fallback do mesmo tamanho: o servidor envia a página sem esperar a sessão, que chega na mesma resposta. Sem `cacheComponents`, a leitura ainda torna a rota dinâmica; o `Suspense` tira a sessão do caminho crítico, não da requisição. `getCurrentSession()` usa o `cache` do React, então o cabeçalho e a página dividem a mesma leitura.
 - **Server Components** buscam dados pela API. **Server Actions** fazem as mutações chamando a API. O navegador nunca chama a API diretamente.
 - **Nenhuma regra de negócio no front.** Validação no front é só para a experiência do usuário; quem decide é a API, e o front mostra o `message` do erro que a API devolve.
 - O acesso às rotas `(cliente)` e `admin` é checado no servidor (middleware, layout ou na própria página). `/perfil` confere a sessão antes de chamar a API e leva ao login com `voltar=/perfil`; a administração (403) vai para `/admin`. Em `/agendar`, as etapas de escolha só leem rotas `/public` e não exigem login; a confirmação (com `hora` na URL) confere a sessão e leva ao login com `voltar=` a URL completa da confirmação. `/meus-agendamentos` e as telas de cancelar e remarcar conferem a sessão antes de chamar a API e levam ao login com `voltar=` a própria URL; a administração (403) vai para `/admin`. Mesmo assim, a API valida tudo de novo.
