@@ -102,7 +102,7 @@ Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida
   - a transição só existe no `done`: esconder é instantâneo e fica abaixo da dobra, e o elemento entra com o ritmo do preset;
   - o bloco de título (`SectionHeading`: ornamento, título e texto) anima como uma unidade, com um `data-reveal="rise"` em volta;
   - nas grades (`catalog.tsx`), cada card recebe `--reveal-index` e a `ul` define `--reveal-cols` por breakpoint; o CSS soma 200ms por coluna ao atraso, e a cascata fica de 200, 400 e 600ms numa grade de 3 colunas. No celular, com 1 coluna, não há degrau.
-- **Hero:** o conteúdo sobe e aparece em cascata ao carregar (`animate-rise`), com o mesmo ritmo do preset `rise`: 10% da altura do elemento, 500ms `ease`. Os delays ficam na marcação (0, 80, 160 e 240ms hoje; o Beard X usa degraus de 200ms, ajuste que cabe à #79). É só CSS, e a cascata não esconde nada antes do JS. O cabeçalho nunca se move: ao rolar, só troca de cor.
+- **Hero:** o conteúdo sobe e aparece em cascata ao carregar (`animate-rise`), com o mesmo ritmo do preset `rise`: 10% da altura do elemento, 500ms `ease`. Os delays ficam na marcação, em degraus de 200ms como no Beard X: ornamento em 0, título em 200ms, texto em 400ms e botões em 600ms. É só CSS, e a cascata não esconde nada antes do JS. O cabeçalho nunca se move: ao rolar, só troca de cor.
 - **Escondido só abaixo da dobra:** só o que está abaixo da dobra começa escondido. A página que usa `data-reveal` monta o próprio `RevealObserver`; no layout, ele mexeria nos elementos antes de a página hidratar.
 - **Rolagem:** a nativa do navegador. No desktop, a foto do hero fica fixa com CSS, sem parallax por script.
 - **Regras:**

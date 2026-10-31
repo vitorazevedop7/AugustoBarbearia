@@ -180,14 +180,14 @@ function Hero({ shop }: { shop: PublicShop | null }) {
         <div className="motion-safe:animate-rise">
           <Ornament tone="dark" />
         </div>
-        <h1 className="mt-6 font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
+        <h1 className="mt-6 font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:200ms]">
           {shop?.name ?? SHOP_NAME}
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-body text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:160ms]">
+        <p className="mx-auto mt-6 max-w-xl text-body text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:400ms]">
           {shop?.tagline ??
             "Escolha o serviço, o barbeiro e o horário pelo celular, sem precisar ligar."}
         </p>
-        <div className="mt-10 flex flex-col gap-3 motion-safe:animate-rise motion-safe:[animation-delay:240ms] sm:flex-row sm:justify-center">
+        <div className="mt-10 flex flex-col gap-3 motion-safe:animate-rise motion-safe:[animation-delay:600ms] sm:flex-row sm:justify-center">
           <ButtonLink href={BOOKING_PATH} className="w-full sm:w-auto">
             Agendar horário
           </ButtonLink>
