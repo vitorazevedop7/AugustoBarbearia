@@ -277,7 +277,7 @@ As três escolhas abaixo foram feitas na adaptação do Beard X e valem até que
 
 | Tema | Escolha atual | Alternativa |
 |---|---|---|
-| Fonte dos títulos | Playfair Display 700, que conversa com o "A" serifado do logo | Uma sans condensada em caixa alta, como a Barlow do Beard X |
+| Fonte dos títulos | **Decidido em 2026-10-31:** Barlow 900 em caixa alta, como o Beard X ([identidade-visual.md](identidade-visual.md#tipografia)). Este documento e o código mudam na S4.03 (#76); até lá valem a Playfair Display 700 e a escala `text-display-*` atuais | Playfair Display 700, que conversava com o "A" serifado do logo |
 | Cor de acento | O vermelho da marca, que substitui o champanhe do Beard X | Um segundo acento quente para detalhes |
 | Breakpoints | Padrões do Tailwind | Os do Webflow (479/767/991) |
 
