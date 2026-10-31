@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createApiClient } from "@/lib/api/client";
+import { PUBLIC_TAGS } from "@/lib/api/public-tags";
 import {
   apiMessage,
   failedState,
@@ -27,6 +28,7 @@ export async function createBarber(
   } catch {
     return failedState(formData, saveUnavailableMessage);
   }
+  refreshVitrine();
   // redirect lança uma exceção do Next e precisa ficar fora do catch de rede.
   revalidatePath(BARBERS_PATH);
   redirect(`${BARBERS_PATH}?aviso=cadastrado`);
@@ -49,8 +51,18 @@ export async function updateBarber(
   } catch {
     return failedState(formData, saveUnavailableMessage);
   }
+  refreshVitrine();
   // redirect lança uma exceção do Next e precisa ficar fora do catch de rede.
   revalidatePath(BARBERS_PATH);
   revalidatePath(`${BARBERS_PATH}/${barberId}`);
   redirect(`${BARBERS_PATH}?aviso=atualizado`);
+}
+
+/**
+ * A vitrine mostra a equipe e, em cada serviço, quem o realiza: mudar um
+ * barbeiro muda as duas leituras (RN-60).
+ */
+function refreshVitrine() {
+  updateTag(PUBLIC_TAGS.barbers);
+  updateTag(PUBLIC_TAGS.services);
 }

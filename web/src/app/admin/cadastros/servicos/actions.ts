@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { createApiClient } from "@/lib/api/client";
+import { PUBLIC_TAGS } from "@/lib/api/public-tags";
 import {
   apiMessage,
   failedState,
@@ -27,6 +28,8 @@ export async function createService(
   } catch {
     return failedState(formData, saveUnavailableMessage);
   }
+  // A vitrine só lista serviços ativos (RN-61): a mudança vale no próximo carregamento.
+  updateTag(PUBLIC_TAGS.services);
   // redirect lança uma exceção do Next e precisa ficar fora do catch de rede.
   revalidatePath(SERVICES_PATH);
   redirect(`${SERVICES_PATH}?aviso=cadastrado`);
@@ -49,6 +52,8 @@ export async function updateService(
   } catch {
     return failedState(formData, saveUnavailableMessage);
   }
+  // A vitrine só lista serviços ativos (RN-61): a mudança vale no próximo carregamento.
+  updateTag(PUBLIC_TAGS.services);
   // redirect lança uma exceção do Next e precisa ficar fora do catch de rede.
   revalidatePath(SERVICES_PATH);
   revalidatePath(`${SERVICES_PATH}/${serviceId}`);
