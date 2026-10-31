@@ -1,7 +1,7 @@
 # Referência visual: Beard X
 
 > **O que é:** o reverse engineering do front-end que escolhemos como referência para a vitrine. Serve de base para o design system da Augusto Barbearia.
-> **Status:** análise de 2026-10-28. A adaptação para a nossa identidade está em [identidade-visual.md](identidade-visual.md).
+> **Status:** análise de 2026-10-28, corrigida e completada com medições ao vivo (CSS real, dados das interações do Webflow e medições em 375 e 1440px) em 2026-10-31. A adaptação para a nossa identidade está em [identidade-visual.md](identidade-visual.md).
 
 ## Origem e licença
 
@@ -12,15 +12,15 @@
 ## O "sistema" do Beard X em 10 padrões
 
 1. **Três cores fazem tudo:** quase-preto `#121212`, creme `#F8F5EF` no fundo e um único acento champanhe `#DEC7A6`, com `#C09B6B` para o hover. O branco alterna seções e serve de fundo para cards.
-2. **Títulos enormes:** Barlow 900 em caixa alta, com 92px no hero e 56px nas seções. O corpo é General Sans 18px, com entrelinha de 1,67.
+2. **Títulos enormes:** Barlow 900 em caixa alta, com 92px no hero e 56px nas seções. O corpo é General Sans 18px, com entrelinha de 1,667.
 3. **Tudo é quadrado:** raio 0 em botões, cards, campos e imagens.
-4. **Botões grandes:** cerca de 80px de altura, em caixa alta. O hover troca a cor e sobe 3px.
-5. **Ornamento de bigode no lugar do texto pequeno acima do título:** um SVG pequeno no acento, sozinho ou entre duas linhas de 56×2px, sempre 24px acima do título.
+4. **Botões grandes:** 84px de altura, em caixa alta, e largura total no celular. O hover troca a cor e sobe 3px.
+5. **Ornamento de bigode no lugar do texto pequeno acima do título:** um SVG pequeno no acento, sozinho ou entre duas linhas de 56×2px, sempre 24px acima do título. Além dele, ornamentos SVG maiores flutuam nas bordas das seções, atrás do conteúdo.
 6. **Muito respiro:** as seções têm 240px de padding vertical no desktop (88px no celular). O container vai até 1340px, e os blocos de título ficam em até ~800px.
-7. **Faixas escuras e claras alternadas:** hero e rodapé escuros; seções em creme e branco; nas páginas internas, uma faixa escura parcial que cards e fotos atravessam.
+7. **Faixas escuras e claras alternadas:** hero e rodapé escuros; seções em creme e branco; nas páginas internas, uma faixa escura parcial que cards e fotos atravessam. O hero da home ocupa a tela inteira, e o cabeçalho fica dentro dele.
 8. **Formulários com só a linha de baixo,** sobre fundo escuro. O foco pinta a linha com o acento.
 9. **Quase nenhuma elevação:** uma única sombra suave (`0 2px 12px` a 8%) em cards brancos.
-10. **Movimento discreto:** tudo em 300ms `ease`. As seções sobem e aparecem uma vez ao entrar na tela.
+10. **Movimento discreto:** os hovers duram 300ms `ease`. Os blocos sobem, aparecem ou dão um leve zoom uma vez ao entrar na tela, em 500ms `ease`.
 
 ## Tokens e layout (valores de referência)
 
@@ -30,8 +30,12 @@
 | Container | máx. 1340px; padding lateral de 16, 20 e 24px |
 | Padding vertical de seção | 88, 100, 160 e 240px (do celular ao desktop) |
 | Gap de grid | 28px (padrão) |
-| Escala de títulos | display-1 32→92px · display-2 28→56px · display-3 24→38px · display-4 20→24px |
-| Corpo | 16px no celular e 18px no desktop, entrelinha 1,67 |
+| Escala de títulos (medida) | display-1 **92 / 64 / 40 / 32px** · display-2 **56 / 34 / 28px**, do desktop ao celular |
+| Escala de títulos (análise anterior, não remedida) | display-3 24→38px · display-4 20→24px |
+| Corpo | 18px com entrelinha 1,667 no desktop; 16px no celular |
+| Botão | 84px de altura no desktop; largura total no celular |
+| Hero | altura de tela inteira; overlay preto a 70%; foto com `background-attachment: fixed` no desktop e desligado no celular |
+| Cabeçalho | dentro do hero, transparente e **não fixo**: 130px de altura no desktop. Nas páginas internas, uma faixa escura de 130px |
 | Raio | 0 (as exceções são o botão circular e o acordeão) |
 | Sombra | `0 2px 12px rgba(16,16,16,.08)` |
 | Transição | 300ms `ease` em todas as 63 transições do CSS |
@@ -42,13 +46,13 @@
 
 | Página | Sequência de seções |
 |---|---|
-| Home (11 blocos) | hero com foto e overlay → sobre com 2 números → **serviços** (um card branco com grade de 2 colunas) → galeria → vídeo → diferenciais → produtos → depoimentos (slider) → Instagram → rodapé com newsletter |
-| Sobre | hero com faixa escura parcial → história → números → **equipe** (3 cards em degraus) → Instagram |
+| Home (11 blocos) | hero de tela inteira com foto e overlay → sobre com 2 números → **serviços** (um card branco com grade de 2 colunas) → galeria → vídeo → diferenciais → produtos → depoimentos (slider) → Instagram → rodapé com newsletter |
+| Sobre | hero com faixa escura parcial → história → números → **equipe** (3 cards em degraus de 0, 75 e 145px, com o texto sobre a foto) → Instagram |
 | Serviços | hero escuro → o mesmo card de serviços |
 | Barbeiro | hero em 2 colunas (foto · nome, cargo, bio, redes) |
 | Contato | telefone e e-mail com ícone → formulário → unidades (endereço, horário, telefones) → FAQ em acordeão |
 
-**No celular:** tudo vira uma coluna, os botões ocupam a largura toda, o menu vira hambúrguer (com o botão de agendar dentro do painel) e os sliders mostram bolinhas.
+**No celular:** tudo vira uma coluna, os botões ocupam a largura toda, a foto do hero rola junto com a página (sem fundo fixo), o menu vira hambúrguer (com o botão de agendar dentro do painel) e os sliders mostram bolinhas.
 
 ### Mapeamento para o nosso MVP
 
@@ -65,15 +69,22 @@
 
 ## Movimento e imagens
 
-**Como o Beard X faz:**
-- As animações estão no Webflow Interactions (273 eventos, 51 animações). Na prática, são dois presets de entrada ao rolar ("sobe e aparece" e "aparece"), com 500ms, delays de 0,2 a 0,6s e disparo uma vez só.
+**Como o Beard X faz** (valores medidos):
+- As animações estão no Webflow Interactions (273 eventos, 51 animações). Na prática, são **três presets de entrada ao rolar**, disparados uma vez só:
+  - **sobe:** o elemento sobe e aparece, deslocando **10% da altura dele mesmo** (não um valor fixo em pixels), em 500ms com `ease`;
+  - **aparece:** só a opacidade, em 500ms;
+  - **zoom:** a escala vai de 0,92 a 1 enquanto aparece.
+- Os atrasos vão de 0,2 a 0,6s. O **bloco de título** (ornamento, título e texto) anima inteiro, como uma unidade, e as grades entram em cascata.
 - O hero entra em cascata: fundo, selo, título, texto e botões, de 200 em 200ms.
-- Os hovers duram 300ms: os botões sobem 3px, e as fotos de equipe e galeria dão zoom de 1,1 dentro de uma moldura.
-- O cabeçalho não é fixo e fica transparente sobre o hero. No celular, o painel do menu desce em 400ms.
-- As imagens são JPG com `srcset`, mas quase nenhuma tem `loading="lazy"` nem dimensões. O overlay do hero é preto a 70%, e há ornamentos de navalha e pincel com 110–180 KB cada.
+- Os hovers duram 300ms `ease`: os botões sobem 3px, e as fotos de equipe e galeria dão zoom de 1,1 dentro de uma moldura.
+- O hero tem altura de tela inteira. No desktop, a foto fica fixa (`background-attachment: fixed`) enquanto a página rola sobre ela; no celular esse efeito é desligado.
+- O cabeçalho **não é fixo**. Fica dentro do hero, transparente, com 130px no desktop. Quem rola a página deixa o cabeçalho para trás.
+- Os ornamentos SVG flutuam nas bordas das seções, atrás do conteúdo, e aparecem com fade. É decoração: nada depende deles.
+- No celular, o painel escuro do menu desce em 400ms com `ease`. A rolagem é a nativa do navegador, sem biblioteca de scroll suave.
+- A carga entrega o HTML completo de uma vez. As imagens são JPG com `srcset`, mas quase nenhuma tem `loading="lazy"` nem dimensões. O overlay do hero é preto a 70%, e os ornamentos de navalha e pincel pesam 110–180 KB cada.
 
 **Problemas que não vamos copiar:**
-- Cerca de 31 elementos da home começam invisíveis no HTML, inclusive o cabeçalho. Se o JS falhar, a página fica vazia.
+- **34 elementos da home começam com `opacity: 0` no HTML.** Se o JS falhar, ou até ele rodar, parte da página fica invisível.
 - As animações ignoram `prefers-reduced-motion`.
 - O JS é pesado: jQuery, um pacote de e-commerce e Lottie.
 
@@ -81,15 +92,43 @@
 
 | Efeito | Decisão | Como |
 |---|---|---|
-| Cascata do hero | Manter, mais curta | Só CSS, com delays de 0 a 240ms. O cabeçalho não anima |
-| Entrada ao rolar | Manter um preset | `IntersectionObserver` pequeno. Só esconde o que está abaixo da dobra, e só com JS ativo e sem pedido de menos movimento |
-| Hover de botão | Manter | Troca de cor e sobe 2px em 300ms |
-| Zoom de foto em card | Manter, mais sutil | `scale(1.05)` dentro de uma moldura com `overflow: hidden` |
-| Menu mobile | Manter | `aria-expanded`, fecha com Esc e trava o scroll |
+| Cascata do hero | Manter, no mesmo ritmo | Só CSS, sem esconder o conteúdo antes do JS (#78) |
+| Entrada ao rolar | Manter os três presets | `IntersectionObserver` pequeno, com `rise` (10% da altura), `fade` e `zoom` (0,92 a 1), 500ms `ease` e atraso por atributo. Só esconde o que está abaixo da dobra, e só com JS ativo e sem pedido de menos movimento (#78) |
+| Hero de tela inteira | Manter, só no desktop | Foto fixa no desktop e rolando junto no celular (#77) |
+| Cabeçalho dentro do hero | Manter | Transparente sobre o hero, com o logo no círculo claro; vira faixa escura fixa ao passar do hero (#77) |
+| Hover de botão | Manter | Troca de cor e sobe 3px em 300ms `ease` |
+| Zoom de foto em card | Manter | `scale(1.1)` dentro de uma moldura com `overflow: hidden` |
+| Menu mobile | Manter | Painel escuro que desce em 400ms `ease`; `aria-expanded`, fecha com Esc e trava o scroll |
+| Ornamentos flutuantes | Manter, próprios | 2 ou 3 SVGs leves e `aria-hidden`, atrás do conteúdo (#79) |
 | FAQ | Manter | `<details>` nativo |
 | Depoimentos | Se houver material | Carrossel com CSS scroll-snap, sem autoplay |
-| Parallax, marquee, lightbox, loader, dropdown, Lottie | Cortar | — |
+| Parallax por script, marquee, lightbox, loader, dropdown, Lottie | Cortar | O fundo fixo do hero é só CSS |
 | Imagens | Melhorar | `next/image` (AVIF/WebP, dimensões, lazy), overlay em `div` e ornamentos em SVG próprio leve |
+
+## Diferenças entre a nossa vitrine e a referência
+
+Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença.
+
+| Tema | Beard X | Nossa vitrine hoje | Resolve |
+|---|---|---|---|
+| Carga | HTML completo de uma vez | A home pinta primeiro o esqueleto de `loading.tsx` e depois troca pelo conteúdo | #75 |
+| Sessão e renderização | Página entregue inteira, sem depender de login | O `RootLayout` lê a sessão e deixa todas as páginas dinâmicas | #75 |
+| Fonte dos títulos | Barlow 900, caixa alta | Playfair Display 700, sem caixa alta | #76 |
+| Escala dos títulos | display-1 92/64/40/32px · display-2 56/34/28px | display-1 de 40 a 72px · display-2 de 32 a 48px | #76 |
+| Corpo | 18px, entrelinha 1,667 (16px no celular) | 16px, entrelinha 1,5 | #76 |
+| Respiro das seções | 240px no desktop, 88px no celular | 128px no desktop, 80px no celular | #76 |
+| Botão | 84px de altura; largura total no celular | 56px de altura | #76 |
+| Hero | Altura de tela inteira; foto fixa no desktop | 576px de altura; foto rola junto | #77 |
+| Cabeçalho | Dentro do hero, transparente, não fixo, 130px | Branco, fixo, 73px | #77 |
+| Menu do celular | Painel escuro que desce em 400ms | Painel claro (`surface`), sem animação de descida | #77 |
+| Entrada ao rolar | 3 presets; "sobe" 10% da altura, `ease`, atrasos de 0,2 a 0,6s; título anima inteiro | Um preset: 24px fixos, `ease-out` | #78 |
+| Serviços | Um card único com grade de 2 colunas | 4 cards separados | #79 |
+| Equipe | Texto sobre a foto; cards em degraus de 0, 75 e 145px | Texto abaixo da foto | #79 |
+| Ornamentos e números | SVGs flutuantes nas bordas; 2 números na seção Sobre | Sem ornamentos nem números | #79 |
+| Páginas internas | Faixa escura parcial que fotos e cards atravessam | `/servicos` e `/barbeiros` sem a faixa | #80 |
+| Fluxo do cliente e administração | — (vem do Squire) | Títulos, botões e espaçamento do padrão antigo | #80 |
+
+Os números do Beard X (a seção Sobre com 2 números) só entram na nossa vitrine se houver dado real. Isso é pergunta de produto, na #79.
 
 ## Fluxo de agendamento (Squire)
 
