@@ -6,8 +6,10 @@ import { useEffect, useRef, type MouseEvent, type ReactNode } from "react";
 /**
  * Menu do celular: um `<details>` nativo, que abre e fecha mesmo sem JS. Com
  * JS, fecha com Esc (devolvendo o foco ao botão), ao navegar e ao escolher um
- * link. O painel desce logo abaixo do cabeçalho (o pai precisa ser `relative`)
- * e some a partir de 1024px, onde a navegação fica na linha do cabeçalho.
+ * link. O painel escuro desce de trás do cabeçalho (o pai precisa estar
+ * posicionado), ocupa o resto da tela e some a partir de 1024px, onde a
+ * navegação fica na linha do cabeçalho. Enquanto ele está aberto, o
+ * `globals.css` trava a rolagem da página pelo `data-mobile-menu`, sem JS.
  */
 export function MobileMenu({
   label = "Menu",
@@ -45,8 +47,8 @@ export function MobileMenu({
   }
 
   return (
-    <details ref={details} className="group lg:hidden">
-      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border-2 border-ink px-4 text-xs font-semibold tracking-[0.08em] text-ink uppercase transition-colors duration-300 ease-out hover:bg-ink hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
+    <details ref={details} data-mobile-menu className="group lg:hidden">
+      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border-2 border-surface px-4 text-xs font-semibold tracking-[0.08em] text-surface uppercase transition-colors duration-300 ease-standard hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
@@ -68,11 +70,16 @@ export function MobileMenu({
         </svg>
         {label}
       </summary>
-      <div
-        onClick={closeOnLink}
-        className="absolute inset-x-0 top-full max-h-[calc(100dvh-100%)] overflow-y-auto border-b border-line bg-surface shadow-card"
-      >
-        {children}
+      {/* A moldura recorta o painel enquanto ele desce: nada passa por cima
+          do cabeçalho. A animação só vale com o menu aberto, para recomeçar
+          a cada abertura. */}
+      <div className="absolute inset-x-0 top-full h-[calc(100dvh-100%)] overflow-hidden">
+        <div
+          onClick={closeOnLink}
+          className="h-full overflow-y-auto overscroll-contain border-t border-line-on-ink bg-ink text-surface motion-safe:group-open:animate-menu-down"
+        >
+          {children}
+        </div>
       </div>
     </details>
   );

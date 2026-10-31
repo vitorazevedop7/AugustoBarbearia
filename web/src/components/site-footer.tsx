@@ -16,8 +16,8 @@ import { getPublicShop } from "@/lib/api/public";
 export async function SiteFooter() {
   const shop = await getPublicShop();
   return (
-    <footer className="bg-ink text-surface">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] lg:px-8 lg:py-20">
+    <footer className="bg-ink px-4 text-surface sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-site gap-10 py-14 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] lg:py-20">
         <div className="flex items-center gap-4 self-start">
           {/* O logo tem traços pretos: no fundo escuro ele fica num círculo claro. */}
           <span className="grid size-16 shrink-0 place-items-center rounded-full bg-surface">
@@ -45,8 +45,8 @@ export async function SiteFooter() {
           </div>
         ) : null}
       </div>
-      <div className="border-t border-line-on-ink">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-2 px-4 py-4 text-sm text-on-ink-muted sm:flex-row sm:justify-between sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-site border-t border-line-on-ink">
+        <div className="flex flex-col items-center gap-2 py-4 text-sm text-on-ink-muted sm:flex-row sm:justify-between">
           <p>
             © {new Date().getFullYear()} {shop?.name ?? "Augusto Barbearia"}
           </p>

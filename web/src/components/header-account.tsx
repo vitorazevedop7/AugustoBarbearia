@@ -27,7 +27,7 @@ export function AccountPlaceholder() {
   return <div aria-hidden="true" className="h-11 w-full" />;
 }
 
-/** Entrar com Google ou, para quem está logado, o primeiro nome e "Sair". */
+/** Entrar com Google ou, para quem está logado, o primeiro nome e "Sair", sobre o cabeçalho escuro. */
 export function Account({
   user,
   stacked = false,
@@ -45,10 +45,10 @@ export function Account({
             : "flex items-center gap-2"
         }
       >
-        <p className="max-w-30 truncate text-sm text-ink-muted">
+        <p className="max-w-30 truncate text-sm text-on-ink-muted">
           Olá, {firstName(user.name)}
         </p>
-        <Button type="submit" variant="ghost" size="sm" className="px-3">
+        <Button type="submit" variant="ghost-light" size="sm" className="px-3">
           Sair
         </Button>
       </form>
@@ -58,7 +58,7 @@ export function Account({
     <form action={signInWithGoogle}>
       <Button
         type="submit"
-        variant="outline"
+        variant="outline-light"
         size="sm"
         className={stacked ? "w-full" : ""}
       >

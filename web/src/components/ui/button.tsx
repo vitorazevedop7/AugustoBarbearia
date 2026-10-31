@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-type Variant = "primary" | "outline" | "outline-light" | "danger" | "ghost";
+type Variant =
+  "primary" | "outline" | "outline-light" | "danger" | "ghost" | "ghost-light";
 type Size = "md" | "sm";
 
 const base =
   "inline-flex items-center justify-center gap-2 border-2 text-center font-heading font-black uppercase transition-[background-color,border-color,color,transform] duration-300 ease-standard focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none";
 
-/** Sobe 3px no hover; o `ghost` não sobe porque não tem caixa. */
+/** Sobe 3px no hover; o `ghost` (e o `ghost-light`) não sobe porque não tem caixa. */
 const lift = "hover:-translate-y-0.75 motion-reduce:hover:translate-y-0";
 
 const variants: Record<Variant, string> = {
@@ -17,6 +18,8 @@ const variants: Record<Variant, string> = {
   danger: `${lift} border-danger text-danger hover:bg-danger hover:text-surface focus-visible:outline-danger`,
   ghost:
     "border-transparent text-ink underline-offset-4 hover:underline focus-visible:outline-ink",
+  "ghost-light":
+    "border-transparent text-surface underline-offset-4 hover:underline focus-visible:outline-surface",
 };
 
 /**

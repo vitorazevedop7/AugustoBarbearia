@@ -2,27 +2,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AccountPlaceholder, HeaderAccount } from "@/components/header-account";
+import { HeaderFrame } from "@/components/header-frame";
 import { SiteNav } from "@/components/site-nav";
 import { ButtonLink } from "@/components/ui/button";
 import { MobileMenu } from "@/components/ui/mobile-menu";
 import { BOOKING_PATH } from "@/lib/booking";
 
 /**
- * Cabeçalho fixo, com a navegação da vitrine e a chamada para agendar.
- * No desktop fica tudo numa linha; no celular, num menu. Só a conta depende
- * do usuário, e ela chega à parte, num `Suspense` com o mesmo tamanho.
+ * Cabeçalho escuro, com a navegação da vitrine e a chamada para agendar.
+ * Na página inicial, ele fica transparente sobre o hero e vira uma faixa
+ * escura fixa quando a página rola (`HeaderFrame`). No desktop fica tudo numa linha;
+ * no celular, num menu. Só a conta depende do usuário, e ela chega à parte,
+ * num `Suspense` com o mesmo tamanho.
  */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+    <HeaderFrame>
+      <div className="mx-auto flex h-20 max-w-site items-center justify-between gap-4">
         <Link
           href="/"
           aria-label="Augusto Barbearia — página inicial"
-          className="flex min-w-0 items-center gap-3 transition-transform duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+          className="flex min-w-0 items-center gap-3 transition-transform duration-300 ease-standard hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         >
-          <Image src="/logo.png" alt="" width={48} height={48} preload />
-          <span className="font-heading text-lg leading-tight font-bold text-ink sm:text-xl">
+          {/* O logo tem traços pretos: no escuro, ele fica num círculo claro
+              até chegar a versão negativa (P1). */}
+          <span className="grid size-14 shrink-0 place-items-center rounded-full bg-surface">
+            <Image src="/logo.png" alt="" width={44} height={44} preload />
+          </span>
+          <span className="font-heading text-lg leading-tight font-black text-surface uppercase sm:text-xl">
             Augusto Barbearia
           </span>
         </Link>
@@ -44,9 +51,9 @@ export function SiteHeader() {
         </div>
 
         <MobileMenu>
-          <div className="px-4 pt-2 pb-6 sm:px-6">
+          <div className="px-4 pt-2 pb-8 sm:px-6">
             <SiteNav layout="column" />
-            <ButtonLink href={BOOKING_PATH} className="mt-6 w-full">
+            <ButtonLink href={BOOKING_PATH} className="mt-8 w-full">
               Agendar horário
             </ButtonLink>
             <div className="mt-4">
@@ -57,6 +64,6 @@ export function SiteHeader() {
           </div>
         </MobileMenu>
       </div>
-    </header>
+    </HeaderFrame>
   );
 }
