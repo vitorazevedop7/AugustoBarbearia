@@ -19,12 +19,12 @@ O mesmo sistema tem dois ritmos:
 | | Vitrine (`(publico)`) | Área logada (`(cliente)` e `admin`) |
 |---|---|---|
 | Objetivo | Encantar e levar a agendar | Concluir a tarefa rápido |
-| Títulos | Playfair, escala `text-display-*`, ornamento acima | Inter 600 (`text-2xl`/`text-xl`), sem ornamento |
-| Respiro | Seções de 80px (celular) a 128px (desktop) | Blocos de 24 a 48px |
+| Títulos | Barlow 900 em caixa alta, escala `text-display-*`, ornamento acima | Administração: Inter 600 (`text-2xl`/`text-xl`), sem ornamento |
+| Respiro | Seções `py-section`, de 88px (celular) a 240px (desktop) | Blocos de 24 a 48px |
 | Fundos | Faixas `ink` e `paper` alternadas | `paper` com cards em `surface` |
 | Movimento | Cascata no hero e entrada ao rolar | Só hover e foco. Nada entra animado |
 
-O fluxo de agendamento (`/agendar`) é da área logada, mas pode usar Playfair no título de cada etapa para manter a cara da vitrine.
+O fluxo de agendamento (`/agendar`) e as telas do cliente (`/meus-agendamentos`, `/perfil`) são da área logada, mas usam Barlow em caixa alta nos títulos para manter a cara da vitrine. O espaçamento delas é revisto na S4.07 (#80).
 
 ## Fundamentos
 
@@ -47,12 +47,14 @@ Os valores e o contraste estão em [identidade-visual.md](identidade-visual.md#c
 
 | Estilo | Classes | Uso |
 |---|---|---|
-| Display 1 | `font-heading text-display-1 font-bold` | Título do hero (um por página) |
-| Display 2 | `font-heading text-display-2 font-bold` | Título de seção da vitrine |
-| Display 3 | `font-heading text-display-3 font-bold` | Números de destaque, títulos de bloco |
-| Título de card | `font-heading text-xl font-bold` | Nome do serviço, do barbeiro, do agendamento |
-| Título da área logada | `text-2xl font-semibold` | Título da página em `(cliente)` e `admin` |
-| Corpo | `text-base leading-relaxed` | Texto corrido. Na vitrine, `sm:text-lg` |
+| Display 1 | `font-heading text-display-1 font-black uppercase` | Título do hero e das páginas internas (um por página) |
+| Display 2 | `font-heading text-display-2 font-black uppercase` | Título de seção da vitrine |
+| Display 3 | `font-heading text-display-3 font-black uppercase` | Nome nos cards da vitrine, preço do serviço, título das telas do cliente |
+| Display 4 | `font-heading text-display-4 font-black uppercase` | Títulos pequenos de bloco, estado vazio, cards da área do cliente |
+| Número menor | `font-heading font-semibold` | O dia no `DayPicker` (Barlow 600) |
+| Título da administração | `text-2xl font-semibold` | Título da página em `admin` (Inter) |
+| Corpo da vitrine | `text-body` | Texto corrido da vitrine: 16px/1,5 no celular, 18px/1,667 a partir do `md` |
+| Corpo da área logada | `text-base leading-relaxed` | Texto corrido em `(cliente)` e `admin` |
 | Apoio | `text-sm text-ink-muted` | Dicas, metadados, legendas |
 | Rótulo | `text-xs font-semibold uppercase tracking-[0.08em]` | Botões, badges, legendas de grupo, data acima de título |
 
@@ -65,9 +67,11 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 
 | Onde | Valor |
 |---|---|
-| Container | `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8` (até 1280px) |
+| Container da vitrine | `mx-auto max-w-site`, dentro de `px-4 sm:px-6 lg:px-8` (até 1340px) |
+| Container da área logada, cabeçalho e rodapé | `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8` (até 1280px; cabeçalho e rodapé mudam na #77) |
+| Bloco de título de seção | até `max-w-3xl` (768px) |
 | Texto corrido e formulários | até `max-w-2xl` (672px) |
-| Seção da vitrine | `py-20 lg:py-32` |
+| Seção da vitrine | `py-section`: 88, 100 (`sm`), 160 (`md`) e 240px (`lg`) |
 | Card | `p-6 sm:p-8` (vitrine: até `lg:p-10`) |
 | Grade de cards | `gap-6` |
 | Campos de um formulário | `gap-6` entre campos, `gap-2` dentro do campo |
@@ -84,7 +88,7 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 
 ### Movimento
 
-As regras completas estão em [identidade-visual.md](identidade-visual.md#movimento). Em resumo: 300ms no hover, 500ms nas entradas, sempre `ease-out`. Tudo respeita `prefers-reduced-motion`, e a área logada não tem entrada animada.
+As regras completas estão em [identidade-visual.md](identidade-visual.md#movimento). Em resumo: 300ms no hover, 500ms nas entradas. O botão já usa `ease` (`ease-standard`), como o Beard X; o resto ainda usa `ease-out` até a S4.05 (#78). Tudo respeita `prefers-reduced-motion`, e a área logada não tem entrada animada.
 
 ### Ícones e imagens
 
@@ -126,8 +130,9 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `danger` | Ação destrutiva: "Cancelar agendamento", "Marcar falta". Sempre pede confirmação |
 | `ghost` | Ação de baixa ênfase: "Voltar", "Limpar filtro" |
 
-- **Tamanhos:** `md` (56px, padrão) e `sm` (44px, dentro de cards e tabelas).
-- **Estados:** hover troca a cor e sobe 2px (o `ghost` sublinha), foco com contorno, `disabled` a 50% e `pending` (trava o botão, mostra um indicador girando e marca `aria-busy`). Use `pending` enquanto uma Server Action roda, com o `useFormStatus` do React.
+- **Texto:** Barlow 900 em caixa alta (18px no `md` a partir de 768px; 16px abaixo; 14px no `sm`).
+- **Tamanhos:** `md` (padrão: 60px no celular e 84px a partir do `md`, como o Beard X) e `sm` (44px: administração, cabeçalho, cards e tabelas). Na administração, todos os botões são `sm`.
+- **Estados:** hover troca a cor e sobe 3px em 300ms `ease` (o `ghost` sublinha), foco com contorno, `disabled` a 50% e `pending` (trava o botão, mostra um indicador girando e marca `aria-busy`). Use `pending` enquanto uma Server Action roda, com o `useFormStatus` do React.
 - **No celular,** o botão principal de um formulário ou etapa ocupa a largura toda (`w-full sm:w-auto`).
 - **Texto:** verbo no infinitivo e o objeto, curto. "Agendar horário", não "Clique aqui".
 
@@ -174,8 +179,8 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 ### Cards da vitrine
 
-- **`ServiceCard`:** nome, preço (`brand`, `tabular-nums`), duração, descrição opcional, "Com <barbeiros>" e o botão "Agendar" (`outline`, `sm`), com o nome do serviço no nome acessível ("Agendar Corte Simples"). Preço e duração levam um prefixo só para leitor de tela ("Preço:", "Duração:").
-- **`BarberCard`:** a foto 4:5 em cima, e o nome, a apresentação e "Agendar com <nome>" embaixo. O texto não fica sobre a foto, para o card funcionar igual com e sem foto.
+- **`ServiceCard`:** nome e preço em `text-display-3` (o preço em `brand`, `tabular-nums`), duração, descrição opcional, "Com <barbeiros>" e o botão "Agendar" (`outline`, `sm`), com o nome do serviço no nome acessível ("Agendar Corte Simples"). Preço e duração levam um prefixo só para leitor de tela ("Preço:", "Duração:").
+- **`BarberCard`:** a foto 4:5 em cima, e o nome (`text-display-3`), a apresentação (`text-body`) e "Agendar com <nome>" embaixo. O texto não fica sobre a foto, para o card funcionar igual com e sem foto.
 - **`BarberPhoto`:** a moldura 4:5 com `next/image`. Sem foto, mostra a inicial do nome (decorativa, `aria-hidden`), num tamanho que acompanha a largura da moldura. Com `zoom`, a foto cresce 5% no hover do card.
 - Os dois cards recebem o nível do título: `h3` dentro de uma seção com título (página inicial) e `h2` numa página que só tem o `h1` antes (`/servicos`, `/barbeiros`).
 - Em grade: serviços em 1 coluna no celular e 2 a partir de `md`; barbeiros em 1, 2 (`sm`) e 3 (`lg`).
@@ -248,7 +253,7 @@ Tudo formatado com `Intl`, em `pt-BR` e no fuso `America/Sao_Paulo` (RN-01):
 
 ### Área administrativa
 
-- Densidade maior: `text-sm` em tabelas, botões `sm`, títulos em Inter.
+- Densidade maior: `text-sm` em tabelas, botões `sm` (inclusive o "Salvar" dos formulários), títulos em Inter.
 - Tabelas viram lista de cards no celular. A agenda do dia é a primeira tela, organizada por barbeiro.
 - O status sempre com `StatusBadge`. Valores em reais alinhados à direita, com `tabular-nums`.
 
@@ -278,7 +283,7 @@ As três escolhas abaixo foram feitas na adaptação do Beard X e valem até que
 
 | Tema | Escolha atual | Alternativa |
 |---|---|---|
-| Fonte dos títulos | **Decidido em 2026-10-31:** Barlow 900 em caixa alta, como o Beard X ([identidade-visual.md](identidade-visual.md#tipografia)). Este documento e o código mudam na S4.03 (#76); até lá valem a Playfair Display 700 e a escala `text-display-*` atuais | Playfair Display 700, que conversava com o "A" serifado do logo |
+| Fonte dos títulos | **Decidido em 2026-10-31 e em uso desde a S4.03 (#76):** Barlow 900 em caixa alta, como o Beard X ([identidade-visual.md](identidade-visual.md#tipografia)) | Playfair Display 700, que conversava com o "A" serifado do logo |
 | Cor de acento | O vermelho da marca, que substitui o champanhe do Beard X | Um segundo acento quente para detalhes |
 | Breakpoints | Padrões do Tailwind | Os do Webflow (479/767/991) |
 

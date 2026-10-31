@@ -2,7 +2,7 @@
 
 > Este documento cuida da **marca**: logo, cores, fontes, tom, linguagem e movimento. Os componentes e os padrões de tela estão no [design system](design-system.md).
 
-> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. Este documento já descreve a decisão, mas **os tokens e o código só mudam na S4.03 (#76)**; o movimento, na S4.05 (#78), e o cabeçalho e o hero, na S4.04 (#77). Até lá, o código ainda usa Playfair Display 700, `text-display-1` de 40 a 72px, `text-display-2` de 32 a 48px, `text-display-3` de 24 a 32px e o corpo de 16px; a seção Tipografia já descreve o alvo.
+> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). O movimento muda na S4.05 (#78), e o cabeçalho e o hero, na S4.04 (#77).
 
 > **Status:** proposta para o MVP. As cores e o logo vieram do projeto acadêmico, que usou o material entregue pela barbearia ("cores baseadas no cartão"). O logo em vetor e a confirmação da paleta são as pendências P1 e P2 em [registro.md](../cliente/registro.md). O protótipo aprovado no Figma ainda não está acessível (P6).
 
@@ -45,20 +45,19 @@ A paleta tem preto, branco e vermelho. O vermelho vivo do logo (`#FF3131`) **nã
 | Títulos da vitrine | **Barlow** (Google Fonts), 900 em **caixa alta** (600 para títulos menores) | Títulos do hero e das seções, nomes em cards e números. Substitui a Playfair Display, que ficava com 700 e sem caixa alta |
 | Texto e interface | **Inter** (Google Fonts), 400/500/600 | Todo o resto: formulários, tabelas, botões de apoio, administração |
 
-- O corpo da vitrine tem **18px com entrelinha de 1,667** a partir do `md` e 16px no celular. Na administração, o texto segue a escala padrão do Tailwind, com base de 16px.
-- Os títulos da vitrine usam uma escala própria, que cresce com a tela (`clamp`). Os valores vêm da medição do Beard X:
+- O corpo da vitrine (`text-body`) tem **18px com entrelinha de 1,667** a partir do `md` e 16px com entrelinha de 1,5 no celular. Na administração, o texto segue a escala padrão do Tailwind, com base de 16px.
+- Os títulos da vitrine usam uma escala própria, que cresce com a tela (`clamp`) de 360 a 1280px. Os extremos e as entrelinhas vêm do CSS do Beard X, que salta de tamanho nos breakpoints dele (479, 767 e 991px); nós crescemos de forma contínua entre os mesmos extremos:
 
-| Token | Celular → desktop | Uso |
-|---|---|---|
-| `text-display-1` | 32 → 92px (40 e 64px nos tamanhos intermediários) | Título do hero |
-| `text-display-2` | 28 → 56px (34px no intermediário) | Título de seção |
-| `text-display-3` | 24 → 38px | Nomes em cards, destaques e números |
-| `text-display-4` | 20 → 24px | Títulos pequenos de bloco |
+| Token | Em uso: celular → desktop | Entrelinha | Beard X (do celular ao desktop) | Uso |
+|---|---|---|---|---|
+| `text-display-1` | 32 → 92px (≈ 59px em 768px) | 1,065 | 32 / 40 / 64 / 92px | Título do hero e das páginas internas |
+| `text-display-2` | 28 → 56px (≈ 40px em 768px) | 1,196 | 28 / 34 / 56px | Título de seção |
+| `text-display-3` | 24 → 38px (≈ 30px em 768px) | 1,368 | 24 / 26 / 32 / 38px | Nomes nos cards da vitrine e preço do serviço; título das telas do cliente |
+| `text-display-4` | 20 → 24px | 1,583 | 20 / 22 / 24px | Títulos pequenos de bloco, estado vazio e cards da área do cliente |
 
-- Os títulos são sempre em **caixa alta**. Em 360px, confira a quebra de linha: palavra longa não pode estourar a tela.
-- Botões em Barlow 900 em caixa alta. Rótulos e textos pequenos em destaque usam Inter 600 em caixa alta com espaçamento de 0,08em.
+- Os títulos são sempre em **caixa alta** (`uppercase`), em Barlow 900 (`font-black`). Barlow 600 (`font-semibold`) fica para números menores, como o dia no `DayPicker`. Em 360px, confira a quebra de linha: palavra longa não pode estourar a tela.
+- Botões em Barlow 900 em caixa alta, com o espaçamento normal da fonte. Rótulos e textos pequenos em destaque usam Inter 600 em caixa alta com espaçamento de 0,08em.
 - Na administração, os títulos continuam em Inter: lá a prioridade é densidade e leitura rápida.
-- A `display-3` e a `display-4` vêm da análise anterior do Beard X e não foram medidas de novo. A S4.03 confirma os valores.
 
 ## Tom
 
@@ -76,17 +75,17 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medi
 - **Ornamento:** um bigode entre duas linhas, em `brand` (`brand-on-dark` sobre o escuro), fica 24px acima dos títulos de seção, no lugar de um texto pequeno. Ornamentos SVG maiores, próprios e decorativos, flutuam nas bordas das seções, atrás do conteúdo (S4.06, #79).
 - **Hero:** ocupa a tela inteira, com overlay preto de 70%. No desktop, a foto fica fixa enquanto a página rola; no celular, ela rola junto (S4.04, #77).
 - **Elevação mínima:** uma única sombra, `shadow-card` (`0 2px 12px` a 8%), nos cards claros.
-- **Botões:** primário em `brand` com texto branco, contorno em `ink` e contorno claro sobre o escuro. Caixa alta e anel de foco visível. Hoje a altura mínima é de 56px; na S4.03 (#76) passa a **84px no desktop**, com largura total no celular.
+- **Botões:** primário em `brand` com texto branco, contorno em `ink` e contorno claro sobre o escuro. Caixa alta e anel de foco visível. A altura é de **84px a partir do `md`** e 60px abaixo dele, com largura total no celular; o tamanho `sm` (44px) fica para a administração, o cabeçalho e os cards.
 - **Cabeçalho:** hoje é claro e fixo no topo (`sticky`), porque o logo só funciona sobre fundo claro e o botão de agendar precisa ficar sempre à mão. Na S4.04 (#77) ele passa a ficar transparente dentro do hero, com o logo no círculo claro, e vira uma faixa escura fixa ao rolar além do hero.
-- **Respiro:** hoje as seções têm 80px de padding vertical no celular e 128px no desktop, com conteúdo em até 1280px. Na S4.03 (#76) passam a 88px no celular e 240px no desktop, com container de até 1340px.
+- **Respiro:** as seções da vitrine (`py-section`) têm 88px de padding vertical no celular, 100px a partir do `sm`, 160px a partir do `md` e 240px a partir do `lg`, com conteúdo em até 1340px (`max-w-site`). O cabeçalho, o rodapé e a administração ainda usam 1280px; o cabeçalho e o rodapé se alinham na S4.04 (#77).
 
 ## Movimento
 
-Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X, que a S4.05 (#78) e a S4.03 (#76) aplicam.
+Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X, que a S4.05 (#78) aplica. O hover de botão já foi alinhado na S4.03 (#76).
 
 | | Em uso | Alvo (Beard X) |
 |---|---|---|
-| Hover de botão | Troca de cor e sobe 2px, 300ms `ease-out` | Troca de cor e sobe 3px, 300ms `ease` |
+| Hover de botão | Troca de cor e sobe 3px, 300ms `ease` (`ease-standard`) | Troca de cor e sobe 3px, 300ms `ease` |
 | Zoom de foto em card | 1,05 | 1,1, dentro de uma moldura com `overflow: hidden` |
 | Entrada ao rolar | Um preset: sobe 24px fixos e aparece, 500ms `ease-out` | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms |
 | Menu do celular | Abre sem animação | Painel escuro que desce em 400ms `ease` |
@@ -127,7 +126,18 @@ No Next.js, as cores viram variáveis CSS mapeadas no tema do Tailwind:
 }
 ```
 
-O componente usa sempre o token (`bg-brand`, `text-ink`, `text-display-2`, `shadow-card`), nunca o hex direto. Os tokens estão em `web/src/app/globals.css`.
+Além das cores, `globals.css` define os tokens de ritmo e tipografia da vitrine:
+
+| Classe | Token | Valor |
+|---|---|---|
+| `font-heading` | `--font-heading` | Barlow (600 e 900), pela variável `--font-barlow` do `next/font` |
+| `text-display-1` a `text-display-4` | `--text-display-*` | `clamp` de 360 a 1280px, com a entrelinha medida |
+| `text-body` | `--body-size`, `--body-leading` | 16px/1,5; 18px/1,667 a partir do `md` |
+| `py-section` | `--section-y` | 88, 100, 160 e 240px (base, `sm`, `md`, `lg`) |
+| `max-w-site` | `--container-site` | 1340px |
+| `ease-standard` | `--ease-standard` | `ease` |
+
+O componente usa sempre o token (`bg-brand`, `text-ink`, `text-display-2`, `py-section`, `shadow-card`), nunca o hex direto. Os tokens estão em `web/src/app/globals.css`.
 
 ## Telas
 

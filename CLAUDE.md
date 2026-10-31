@@ -43,7 +43,7 @@ pnpm build
 pnpm start
 ```
 
-Na raiz, `docker build -t augusto-web ./web` e `docker run --rm -p 3000:3000 augusto-web` constroem e iniciam a imagem standalone com usuário não-root. O build baixa Inter e Playfair Display e inclui os assets na saída standalone.
+Na raiz, `docker build -t augusto-web ./web` e `docker run --rm -p 3000:3000 augusto-web` constroem e iniciam a imagem standalone com usuário não-root. O build baixa Inter e Barlow e inclui os assets na saída standalone.
 
 ### Sistema completo — disponível a partir da S2.04
 

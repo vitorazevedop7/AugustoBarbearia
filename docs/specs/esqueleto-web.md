@@ -22,7 +22,7 @@ Esta fundação não implementa regras de negócio. Respeita a separação web/A
 - **Dado** o web instalado, **quando** acesso `/`, **então** vejo o cabeçalho claro e fixo com logo e nome, um hero escuro com o título “Em construção”, a seção “O que vem por aí” com três novidades e o rodapé com o horário de funcionamento.
 
 **CA-2 — Identidade e acessibilidade**
-- **Dado** um viewport de 360px, **quando** acesso `/`, **então** todo o conteúdo cabe sem rolagem horizontal, o logo fica sobre fundo claro, os títulos usam Playfair Display e a interface usa Inter, com as cores vindas dos tokens documentados.
+- **Dado** um viewport de 360px, **quando** acesso `/`, **então** todo o conteúdo cabe sem rolagem horizontal, o logo fica sobre fundo claro, os títulos usam Barlow (Playfair Display até a S4.03) e a interface usa Inter, com as cores vindas dos tokens documentados.
 
 **CA-2b — Movimento acessível**
 - **Dado** um navegador sem JavaScript, ou com `prefers-reduced-motion: reduce`, **quando** acesso `/`, **então** todo o conteúdo aparece sem animação e nada fica escondido.
