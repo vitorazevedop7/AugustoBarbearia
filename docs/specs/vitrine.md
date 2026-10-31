@@ -1,6 +1,6 @@
 # Spec — Vitrine pública
 
-- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre")
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -92,9 +92,10 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - Com `about` preenchido, o "Sobre" mostra a foto 3:2 com `alt` descritivo, acima do texto no celular e ao lado dele no desktop. Sem `about`, a seção inteira, incluindo a foto, não aparece.
 
 ## Fluxo e telas
-Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Cada uma tem um esqueleto de carregamento (`loading.tsx`).
+Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Elas chegam inteiras, sem esqueleto de carregamento (ver [Carregamento e cache](#carregamento-e-cache)).
 
 - **Cabeçalho (todas as páginas):** logo, links para Serviços, Barbeiros e Contato (`/#contato`), o login e o botão "Agendar".
+  - O login (ou "Olá, <nome>" e "Sair") é a única parte que depende do usuário. Ela chega à parte, num `Suspense` com um espaço reservado do mesmo tamanho, para a página não esperar a sessão.
   - No desktop (a partir de 1024px), tudo fica numa linha. O link da página atual tem `aria-current="page"`.
   - No celular, um botão "Menu" abre um painel com os links, o botão "Agendar" na largura toda e o login. O painel é um `<details>` nativo: abre e fecha sem JS. Com JS, ele fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link. O painel não cobre a tela inteira, então a rolagem não é travada.
 - **`/`:**
@@ -106,6 +107,21 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
 - **`/servicos`:** faixa `ink` com o título e o texto de apoio, e depois todos os serviços nos mesmos cards.
 - **`/barbeiros`:** faixa `ink` com o título, e depois todos os barbeiros nos mesmos cards.
 - **Rodapé (todas as páginas):** passa a ler o horário de funcionamento e o contato de `GET /public/shop`, no lugar do horário fixo no código. Se a API falhar, o rodapé mostra só o nome e os links.
+
+### Carregamento e cache
+Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesmo (S4.02, #75):
+
+- **Sem esqueleto.** `/`, `/servicos` e `/barbeiros` não têm `loading.tsx`. O servidor só responde quando o conteúdo está pronto, então a primeira pintura já é o hero e as seções finais, sem troca de layout. Isso só é rápido porque os dados vêm do cache (abaixo).
+- **Sessão fora do caminho crítico.** O layout raiz não lê a sessão. Só a conta do cabeçalho (`HeaderAccount`) a lê, dentro de um `Suspense` cujo fallback tem a mesma altura dos botões. O servidor envia a página sem esperar a sessão, e a conta chega logo depois, na mesma resposta. No desktop, a conta fica numa caixa de largura fixa, e trocar o fallback pelo login ou pelo nome não move a navegação.
+- **Cache dos dados.** `getPublicShop`, `getPublicServices` e `getPublicBarbers` (`web/src/lib/api/public.ts`) guardam a resposta da API no cache de dados do Next, no servidor do web, com uma tag por leitura (`public-shop`, `public-services`, `public-barbers`). Os horários livres (`/public/availability`) não entram no cache, porque mudam a cada agendamento.
+- **Invalidação (RN-60, RN-61).** As Server Actions da administração chamam `updateTag` depois que a API confirma a mudança, e a próxima visita já busca os dados novos:
+  - barbeiro criado ou editado (inclusive inativado ou reativado): `public-barbers` e `public-services`, porque cada serviço lista quem o realiza e some quando fica sem barbeiro ativo;
+  - serviço criado ou editado: `public-services`;
+  - dados ou horário de funcionamento da barbearia: `public-shop`, que também alimenta o rodapé.
+- **Rede de segurança.** Cada leitura vale por até 5 minutos. Depois disso, a próxima visita ainda recebe a cópia guardada, e o web busca a nova em segundo plano. Isso cobre mudanças que não passam pelas Server Actions (migração, banco alterado à mão).
+- **Falha não fica no cache.** Se a API não responder, a seção mostra o aviso de sempre, e a próxima visita tenta de novo.
+- **Renderização na requisição.** A API roda em outro serviço e não existe durante o `next build`. Por isso, as páginas não são pré-renderizadas no build (o que gravaria uma vitrine com os avisos de falha), e sim montadas a cada visita a partir do cache. O `connection()` nas leituras deixa isso explícito. No `next build`, as rotas aparecem como dinâmicas (`ƒ`). A sessão também é lida na requisição, mas dentro do `Suspense`: o servidor envia a página sem esperar por ela.
+- **Página estática, se um dia fizer falta.** Só com o `cacheComponents` do Next (pré-renderização parcial) e com a API acessível no build. Sem as duas coisas, o ganho seria pequeno: o que a página espera hoje é a leitura do cache, que leva milissegundos.
 
 ### Chamada para agendar
 - Todo "Agendar" leva a `/agendar`, que é implementada na S3.08 (#57). O card do serviço leva a `/agendar?servico=<id>` e o do barbeiro a `/agendar?barbeiro=<id>`, seguindo a proposta de guardar o estado do fluxo na URL ([referencia-beard-x.md](../design/referencia-beard-x.md#fluxo-de-agendamento-squire)).

@@ -231,6 +231,7 @@ Na área do cliente, que precisa funcionar sem JS, a confirmação é uma **pág
 ### Carregamento
 
 - Páginas que buscam dados mostram um esqueleto (`loading.tsx`) com blocos `bg-line` no formato do conteúdo. O pulso só acontece com `motion-safe`.
+- Exceção: a vitrine (`/`, `/servicos`, `/barbeiros`) não tem esqueleto. Ela lê os dados do cache e chega inteira, sem troca de layout ([vitrine.md](../specs/vitrine.md#carregamento-e-cache)).
 - Nunca uma tela branca com indicador girando no meio.
 
 ### Datas, horas e dinheiro
