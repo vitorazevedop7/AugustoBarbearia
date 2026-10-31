@@ -1,6 +1,6 @@
 # Spec — Vitrine pública
 
-- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto)
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -91,15 +91,23 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - **Então** o hero mostra a foto decorativa com overlay `bg-ink/70`, mantendo o texto e os botões legíveis, sem rolagem horizontal; a imagem tem preload e prioridade alta, por ser o LCP.
 - Com `about` preenchido, o "Sobre" mostra a foto 3:2 com `alt` descritivo, acima do texto no celular e ao lado dele no desktop. Sem `about`, a seção inteira, incluindo a foto, não aparece.
 
+**CA-12 — Hero de tela inteira e cabeçalho integrado (#77)**
+- **Dado** um visitante em `/`, em 360px, 768px ou 1440px
+- **Quando** a página carrega e ele rola
+- **Então** o hero ocupa a altura da tela, sem rolagem horizontal, com o título sem quebrar palavra e os botões na largura toda em 360px; a foto fica parada só a partir de 1024px; o cabeçalho começa transparente sobre o hero e vira uma faixa escura fixa ao rolar.
+- Sem JS, o cabeçalho e o menu funcionam; com `prefers-reduced-motion`, nada se move além da rolagem.
+
 ## Fluxo e telas
 Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Elas chegam inteiras, sem esqueleto de carregamento (ver [Carregamento e cache](#carregamento-e-cache)).
 
-- **Cabeçalho (todas as páginas):** logo, links para Serviços, Barbeiros e Contato (`/#contato`), o login e o botão "Agendar".
+- **Cabeçalho (todas as páginas):** logo, links para Serviços, Barbeiros e Contato (`/#contato`), o login e o botão "Agendar", sempre em fundo escuro (S4.04, #77).
+  - Em `/`, fica transparente sobre o hero, como no Beard X. Quando a página rola, vira uma faixa `ink` fixa, para o "Agendar" continuar à mão. Sem JS, ele fica no topo do hero e rola com a página: nunca fica transparente sobre fundo claro.
+  - Nas outras páginas, é uma faixa `ink` presa no topo. Em `/servicos` e `/barbeiros`, ela continua na faixa escura do título.
   - O login (ou "Olá, <nome>" e "Sair") é a única parte que depende do usuário. Ela chega à parte, num `Suspense` com um espaço reservado do mesmo tamanho, para a página não esperar a sessão.
   - No desktop (a partir de 1024px), tudo fica numa linha. O link da página atual tem `aria-current="page"`.
-  - No celular, um botão "Menu" abre um painel com os links, o botão "Agendar" na largura toda e o login. O painel é um `<details>` nativo: abre e fecha sem JS. Com JS, ele fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link. O painel não cobre a tela inteira, então a rolagem não é travada.
+  - No celular, um botão "Menu" abre um painel escuro com os links, o botão "Agendar horário" na largura toda e o login. O painel desce de trás do cabeçalho em 400ms (sem animação com `prefers-reduced-motion`), ocupa o resto da tela e trava a rolagem da página. É um `<details>` nativo: abre, fecha e trava a rolagem sem JS. Com JS, ele também fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link.
 - **`/`:**
-  1. **Hero** (foto de fundo com overlay `ink/70`): ornamento, o nome da barbearia como `h1`, a frase de destaque (ou um texto genérico sobre agendar pelo celular), "Agendar horário" (primário) e "Ver serviços" (`outline-light`). A cascata de entrada continua apenas no conteúdo sobre a foto.
+  1. **Hero** de tela inteira (foto de fundo com overlay `ink/70`, cabeçalho por cima; no desktop, a foto fica parada enquanto a página rola): ornamento, o nome da barbearia como `h1`, a frase de destaque (ou um texto genérico sobre agendar pelo celular), "Agendar horário" (primário) e "Ver serviços" (`outline-light`). A cascata de entrada continua apenas no conteúdo sobre a foto.
   2. **Sobre** (só se o texto "sobre" estiver preenchido): foto 3:2 acima do texto no celular e ao lado dele no desktop, sem texto sobreposto à imagem.
   3. **Serviços:** até 4 serviços, em cards com nome, duração, preço, descrição, quem realiza e "Agendar". Embaixo, "Ver todos os serviços".
   4. **Equipe:** os barbeiros ativos em cards com foto 4:5 (ou a inicial), nome, apresentação e "Agendar com <nome>". Embaixo, "Conhecer a equipe".
@@ -134,7 +142,7 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
 - Os caminhos são constantes no código, sem cadastro, upload ou troca pela administração:
   - `web/public/images/vitrine/hero.jpg`: interior de barbearia tradicional (cadeira, espelho e bancada), JPEG 16:9 de pelo menos 2400×1350, com até 400 KB. O assunto fica centralizado para preservar o foco no recorte vertical do celular.
   - `web/public/images/vitrine/sobre.jpg`: detalhe do trabalho (mãos, navalha ou tesoura), JPEG 3:2 de pelo menos 1800×1200, com até 400 KB.
-- **Hero:** `next/image` com `fill`, `object-cover`, `sizes="100vw"`, `preload` e `fetchPriority="high"`, porque é o LCP. A foto é decorativa (`alt=""`), com brilho reduzido (`brightness-75`) e overlay `bg-ink/70` para preservar o contraste AA de `text-surface` e `text-on-ink-muted`, inclusive sobre os pontos claros da foto. A foto e o overlay não entram na cascata de animação do conteúdo.
+- **Hero:** `next/image` com `fill`, `object-cover`, `sizes="100vw"`, `preload` e `fetchPriority="high"`, porque é o LCP. A partir de 1024px, a imagem fica numa camada `fixed`, que o `clip-path: inset(0)` do hero recorta: ela fica parada enquanto o resto da página rola. É a técnica que funciona no Safari, que ignora `background-attachment: fixed`. No celular, a camada é comum e rola junto. A foto é decorativa (`alt=""`), com brilho reduzido (`brightness-75`) e overlay `bg-ink/70` para preservar o contraste AA de `text-surface` e `text-on-ink-muted`, inclusive sobre os pontos claros da foto. A foto e o overlay não entram na cascata de animação do conteúdo.
 - **Sobre:** `next/image` em moldura 3:2 com `overflow-hidden`, `alt` descritivo e zoom de 1,05 no hover, respeitando `prefers-reduced-motion`, como nas fotos de card. A imagem acompanha a condição do texto: a seção inteira só aparece quando `about` estiver preenchido. No desktop, foto e texto ficam lado a lado; no celular, a foto vem acima. O texto fica fora da foto, seguindo o Beard X.
 - Os cards de serviço continuam sem foto, e os heros de `/servicos` e `/barbeiros` continuam como faixas escuras. Galeria, depoimentos e faixa de Instagram aguardam material real.
 
