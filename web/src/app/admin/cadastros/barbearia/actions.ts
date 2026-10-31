@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createApiClient } from "@/lib/api/client";
+import { PUBLIC_TAGS } from "@/lib/api/public-tags";
 import {
   apiMessage,
   type FormState,
@@ -34,6 +35,8 @@ export async function saveShop(
       values: formValues(formData),
     };
   }
+  // O nome, o "sobre", o endereço e o contato aparecem na vitrine e no rodapé.
+  updateTag(PUBLIC_TAGS.shop);
   revalidatePath(PATH);
   return { status: "success", message: "Dados da barbearia salvos." };
 }
@@ -68,6 +71,8 @@ export async function saveBusinessHours(
       values: formValues(formData),
     };
   }
+  // O horário de funcionamento (RN-02) aparece na vitrine e no rodapé.
+  updateTag(PUBLIC_TAGS.shop);
   revalidatePath(PATH);
   return { status: "success", message: "Horário de funcionamento salvo." };
 }

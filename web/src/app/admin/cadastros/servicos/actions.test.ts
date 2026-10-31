@@ -1,10 +1,11 @@
+import { updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApiClient } from "@/lib/api/client";
 import { createService, updateService } from "./actions";
 
 vi.mock("@/lib/api/client", () => ({ createApiClient: vi.fn() }));
-vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), updateTag: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 
 const POST = vi.fn();
@@ -29,6 +30,7 @@ describe("ações do cadastro de serviços — RN-61", () => {
   beforeEach(() => {
     POST.mockReset();
     PATCH.mockReset();
+    vi.mocked(updateTag).mockReset();
     vi.mocked(createApiClient).mockReturnValue({ POST, PATCH } as never);
     vi.mocked(redirect)
       .mockReset()
@@ -71,6 +73,8 @@ describe("ações do cadastro de serviços — RN-61", () => {
         active: false,
       },
     });
+    // Sai da vitrine no próximo carregamento.
+    expect(vi.mocked(updateTag).mock.calls).toEqual([["public-services"]]);
   });
 
   it("mostra o message da API e mantém o que foi digitado", async () => {
@@ -108,6 +112,7 @@ describe("ações do cadastro de serviços — RN-61", () => {
       message: "Não foi possível salvar agora. Tente novamente em instantes.",
       values: fields,
     });
+    expect(updateTag).not.toHaveBeenCalled();
     expect(redirect).not.toHaveBeenCalled();
   });
 });
