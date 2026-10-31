@@ -62,7 +62,7 @@ describe("página inicial (vitrine)", () => {
     ).toBeNull();
   });
 
-  it("mostra a foto decorativa do hero com prioridade e overlay para o texto", async () => {
+  it("mostra o hero de tela inteira com a foto decorativa, prioridade e overlay", async () => {
     render(await HomePage());
 
     const hero = screen
@@ -77,6 +77,9 @@ describe("página inicial (vitrine)", () => {
     expect(photo).toHaveAttribute("sizes", "100vw");
     expect(photo).toHaveAttribute("fetchpriority", "high");
     expect(photo).not.toHaveAttribute("loading", "lazy");
+    // Tela inteira; no desktop, a camada da foto fica fixa e o hero a recorta.
+    expect(hero).toHaveClass("min-h-svh", "[clip-path:inset(0)]");
+    expect(photo.parentElement).toHaveClass("absolute", "lg:fixed");
     expect(hero.querySelector(".bg-ink\\/70")).toHaveAttribute(
       "aria-hidden",
       "true",

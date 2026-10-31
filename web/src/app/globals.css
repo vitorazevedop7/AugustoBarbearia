@@ -105,6 +105,24 @@ body {
   color: var(--ink);
 }
 
+/* Menu do celular (MobileMenu): o painel desce de trás do cabeçalho em
+   400ms `ease`. Aberto, ele trava a rolagem da página, mesmo sem JS. */
+@theme {
+  --animate-menu-down: menu-down 400ms ease both;
+
+  @keyframes menu-down {
+    from {
+      transform: translateY(-100%);
+    }
+  }
+}
+
+@media (width < 64rem) {
+  html:has([data-mobile-menu][open]) {
+    overflow: hidden;
+  }
+}
+
 ::selection {
   background: var(--brand);
   color: var(--surface);

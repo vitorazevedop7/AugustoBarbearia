@@ -212,6 +212,9 @@ export default function DesignSystemPage() {
               Sobre o escuro
             </ButtonLink>
             <ButtonLink href="#botoes">Primário no escuro</ButtonLink>
+            <Button variant="ghost-light" size="sm">
+              Sair
+            </Button>
           </div>
           <p className="mt-6 max-w-2xl text-sm text-ink-muted">
             O tamanho padrão tem 60px de altura no celular e 84px a partir de
@@ -423,8 +426,9 @@ export default function DesignSystemPage() {
             />
           </div>
           <p className="mt-6 max-w-2xl text-sm text-ink-muted">
-            O menu do celular está no cabeçalho desta página: reduza a janela
-            para menos de 1024px para vê-lo.
+            O cabeçalho desta página é a faixa escura das páginas internas. O
+            menu do celular está nele: reduza a janela para menos de 1024px e
+            abra-o para ver o painel escuro descer.
           </p>
         </Showcase>
 

@@ -154,20 +154,29 @@ export default async function HomePage() {
   );
 }
 
+/**
+ * Hero de tela inteira, com o cabeçalho transparente por cima (`HeaderFrame`).
+ * No desktop, a foto fica numa camada fixa na tela, e o `clip-path` do hero a
+ * recorta: ela fica parada enquanto a página rola, o que o
+ * `background-attachment: fixed` não garante no Safari. No celular, a camada
+ * é comum e rola junto.
+ */
 function Hero({ shop }: { shop: PublicShop | null }) {
   return (
-    <section className="relative isolate overflow-hidden bg-ink px-4 py-24 text-center sm:px-6 lg:py-36">
-      <Image
-        src={HERO_PHOTO_PATH}
-        alt=""
-        fill
-        sizes="100vw"
-        preload
-        fetchPriority="high"
-        className="object-cover brightness-75"
-      />
+    <section className="relative isolate flex min-h-svh items-center justify-center bg-ink px-4 pt-32 pb-20 text-center [clip-path:inset(0)] sm:px-6 lg:pt-36 lg:pb-28">
+      <div className="absolute inset-0 lg:fixed">
+        <Image
+          src={HERO_PHOTO_PATH}
+          alt=""
+          fill
+          sizes="100vw"
+          preload
+          fetchPriority="high"
+          className="object-cover brightness-75"
+        />
+      </div>
       <div aria-hidden="true" className="absolute inset-0 bg-ink/70" />
-      <div className="relative mx-auto max-w-3xl">
+      <div className="relative mx-auto w-full max-w-3xl">
         <div className="motion-safe:animate-rise">
           <Ornament tone="dark" />
         </div>
