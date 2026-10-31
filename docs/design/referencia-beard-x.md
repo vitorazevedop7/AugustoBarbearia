@@ -30,10 +30,9 @@
 | Container | máx. 1340px; padding lateral de 16, 20 e 24px |
 | Padding vertical de seção | 88, 100, 160 e 240px (do celular ao desktop) |
 | Gap de grid | 28px (padrão) |
-| Escala de títulos (medida) | display-1 **92 / 64 / 40 / 32px** · display-2 **56 / 34 / 28px**, do desktop ao celular |
-| Escala de títulos (análise anterior, não remedida) | display-3 24→38px · display-4 20→24px |
+| Escala de títulos (medida no CSS) | display-1 **92 / 64 / 40 / 32px** · display-2 **56 / 34 / 28px** · display-3 **38 / 32 / 26 / 24px** · display-4 **24 / 22 / 20px**, do desktop ao celular. Entrelinhas de 1,065, 1,196, 1,368 e 1,583 |
 | Corpo | 18px com entrelinha 1,667 no desktop; 16px no celular |
-| Botão | 84px de altura no desktop; largura total no celular |
+| Botão | Barlow 900 em caixa alta, 18px; 84px de altura a partir de 768px, 64px abaixo dele e 60px com largura total abaixo de 480px |
 | Hero | altura de tela inteira; overlay preto a 70%; foto com `background-attachment: fixed` no desktop e desligado no celular |
 | Cabeçalho | dentro do hero, transparente e **não fixo**: 130px de altura no desktop. Nas páginas internas, uma faixa escura de 130px |
 | Raio | 0 (as exceções são o botão circular e o acordeão) |
@@ -107,17 +106,17 @@
 
 ## Diferenças entre a nossa vitrine e a referência
 
-Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença.
+Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença; as linhas já resolvidas dizem como ficou.
 
 | Tema | Beard X | Nossa vitrine hoje | Resolve |
 |---|---|---|---|
 | Carga | HTML completo de uma vez | A home pinta primeiro o esqueleto de `loading.tsx` e depois troca pelo conteúdo | #75 |
 | Sessão e renderização | Página entregue inteira, sem depender de login | O `RootLayout` lê a sessão e deixa todas as páginas dinâmicas | #75 |
-| Fonte dos títulos | Barlow 900, caixa alta | Playfair Display 700, sem caixa alta | #76 |
-| Escala dos títulos | display-1 92/64/40/32px · display-2 56/34/28px | display-1 de 40 a 72px · display-2 de 32 a 48px | #76 |
-| Corpo | 18px, entrelinha 1,667 (16px no celular) | 16px, entrelinha 1,5 | #76 |
-| Respiro das seções | 240px no desktop, 88px no celular | 128px no desktop, 80px no celular | #76 |
-| Botão | 84px de altura; largura total no celular | 56px de altura | #76 |
+| Fonte dos títulos | Barlow 900, caixa alta | Igual desde a #76 | #76 |
+| Escala dos títulos | display-1 92/64/40/32px · display-2 56/34/28px | Desde a #76, `clamp` contínuo com os mesmos extremos (display-1 de 32 a 92px, display-2 de 28 a 56px) | #76 |
+| Corpo | 18px, entrelinha 1,667 (16px no celular) | Igual desde a #76 (`text-body`) | #76 |
+| Respiro das seções | 240px no desktop, 88px no celular | Igual desde a #76 (`py-section`); container de 1340px (`max-w-site`) | #76 |
+| Botão | 84px de altura; largura total no celular | Igual desde a #76: 84px a partir do `md`, 60px abaixo | #76 |
 | Hero | Altura de tela inteira; foto fixa no desktop | 576px de altura; foto rola junto | #77 |
 | Cabeçalho | Dentro do hero, transparente, não fixo, 130px | Branco, fixo, 73px | #77 |
 | Menu do celular | Painel escuro que desce em 400ms | Painel claro (`surface`), sem animação de descida | #77 |

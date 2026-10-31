@@ -64,7 +64,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Qualidade: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`. O build baixa Inter e Playfair Display do Google Fonts e gera a saída standalone.
+Qualidade: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`. O build baixa Inter e Barlow do Google Fonts e gera a saída standalone.
 
 Os tipos da API ficam em `src/lib/api/schema.d.ts`, gerado e versionado ([ADR 0008](docs/decisoes/0008-contrato-openapi.md)). Mudou um schema da API? Regenere no mesmo PR:
 
