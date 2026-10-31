@@ -2,7 +2,7 @@
 
 > Este documento cuida da **marca**: logo, cores, fontes, tom, linguagem e movimento. Os componentes e os padrões de tela estão no [design system](design-system.md).
 
-> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). A entrada ao rolar entrou na S4.05 (#78), e o cabeçalho e o hero, na S4.04 (#77).
+> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). O cabeçalho e o hero entraram na S4.04 (#77), e a entrada ao rolar, na S4.05 (#78).
 
 > **Status:** proposta para o MVP. As cores e o logo vieram do projeto acadêmico, que usou o material entregue pela barbearia ("cores baseadas no cartão"). O logo em vetor e a confirmação da paleta são as pendências P1 e P2 em [registro.md](../cliente/registro.md). O protótipo aprovado no Figma ainda não está acessível (P6).
 
@@ -73,22 +73,25 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medi
 - **Formas quadradas:** botões, cards e campos não têm arredondamento. A exceção é o círculo claro que segura o logo em fundo escuro.
 - **Faixas escuras e claras:** o hero e o rodapé ficam em `ink`; as seções, em `paper`, com cards em `surface`.
 - **Ornamento:** um bigode entre duas linhas, em `brand` (`brand-on-dark` sobre o escuro), fica 24px acima dos títulos de seção, no lugar de um texto pequeno. Ornamentos SVG maiores, próprios e decorativos, flutuam nas bordas das seções, atrás do conteúdo (S4.06, #79).
-- **Hero:** ocupa a tela inteira, com overlay preto de 70%. No desktop, a foto fica fixa enquanto a página rola; no celular, ela rola junto (S4.04, #77).
+- **Hero:** ocupa a tela inteira (`min-h-svh`), com overlay preto de 70%. No desktop, a foto fica fixa enquanto a página rola; no celular, ela rola junto (S4.04, #77). A foto fixa é uma camada `fixed` recortada pelo `clip-path` do hero, e não `background-attachment: fixed`, que o Safari ignora.
 - **Elevação mínima:** uma única sombra, `shadow-card` (`0 2px 12px` a 8%), nos cards claros.
 - **Botões:** primário em `brand` com texto branco, contorno em `ink` e contorno claro sobre o escuro. Caixa alta e anel de foco visível. A altura é de **84px a partir do `md`** e 60px abaixo dele, com largura total no celular; o tamanho `sm` (44px) fica para a administração, o cabeçalho e os cards.
-- **Cabeçalho:** hoje é claro e fixo no topo (`sticky`), porque o logo só funciona sobre fundo claro e o botão de agendar precisa ficar sempre à mão. Na S4.04 (#77) ele passa a ficar transparente dentro do hero, com o logo no círculo claro, e vira uma faixa escura fixa ao rolar além do hero.
-- **Respiro:** as seções da vitrine (`py-section`) têm 88px de padding vertical no celular, 100px a partir do `sm`, 160px a partir do `md` e 240px a partir do `lg`, com conteúdo em até 1340px (`max-w-site`). O cabeçalho, o rodapé e a administração ainda usam 1280px; o cabeçalho e o rodapé se alinham na S4.04 (#77).
+- **Cabeçalho** (S4.04, #77): sempre escuro, com o logo no círculo claro, o nome em Barlow 900 em caixa alta e 80px de altura.
+  - Na página inicial, fica transparente sobre o hero. Quando a página rola, vira uma faixa `ink` fixa (a cor troca em 300ms `ease`), para o "Agendar" continuar à mão. Ele escurece logo no começo da rolagem, e não só depois do hero: transparente e fixo, ele cobriria o título e os botões do hero que passam por baixo dele.
+  - Sem JS, o cabeçalho da página inicial fica no topo do hero e rola com a página, como no Beard X. Ele nunca fica transparente sobre fundo claro.
+  - Nas outras páginas, é uma faixa `ink` presa no topo (`sticky`), contínua com a faixa escura do `PageHero`. As telas do cliente e da administração usam a mesma faixa: ela combina com o rodapé escuro e não disputa com o conteúdo claro.
+- **Respiro:** as seções da vitrine (`py-section`) têm 88px de padding vertical no celular, 100px a partir do `sm`, 160px a partir do `md` e 240px a partir do `lg`, com conteúdo em até 1340px (`max-w-site`). O cabeçalho e o rodapé seguem o mesmo container desde a S4.04 (#77); a administração continua com 1280px.
 
 ## Movimento
 
-Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76) e a entrada ao rolar (#78) já estão alinhados; o resto vem nas tarefas seguintes.
+Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76), o menu do celular (#77) e a entrada ao rolar (#78) já estão alinhados; o resto vem nas tarefas seguintes.
 
 | | Em uso | Alvo (Beard X) |
 |---|---|---|
 | Hover de botão | Troca de cor e sobe 3px, 300ms `ease` (`ease-standard`) | Troca de cor e sobe 3px, 300ms `ease` |
 | Zoom de foto em card | 1,05 | 1,1, dentro de uma moldura com `overflow: hidden` |
 | Entrada ao rolar | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms, cascata de 200ms nas grades | Igual |
-| Menu do celular | Abre sem animação | Painel escuro que desce em 400ms `ease` |
+| Menu do celular | Painel escuro que desce em 400ms `ease` (S4.04) | Igual |
 
 - **Presets de entrada** (componente `RevealObserver`, uma única vez por elemento). O preset é o valor de `data-reveal`:
   - `data-reveal="rise"`: sobe **10% da altura do elemento** (`translateY(10%)`) e aparece. Também vale para `data-reveal` sem valor;
@@ -99,7 +102,7 @@ Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida
   - a transição só existe no `done`: esconder é instantâneo e fica abaixo da dobra, e o elemento entra com o ritmo do preset;
   - o bloco de título (`SectionHeading`: ornamento, título e texto) anima como uma unidade, com um `data-reveal="rise"` em volta;
   - nas grades (`catalog.tsx`), cada card recebe `--reveal-index` e a `ul` define `--reveal-cols` por breakpoint; o CSS soma 200ms por coluna ao atraso, e a cascata fica de 200, 400 e 600ms numa grade de 3 colunas. No celular, com 1 coluna, não há degrau.
-- **Hero:** o conteúdo sobe e aparece em cascata ao carregar (`animate-rise`), com o mesmo ritmo do preset `rise`: 10% da altura do elemento, 500ms `ease`. Os delays ficam na marcação (0, 80, 160 e 240ms hoje; o Beard X usa degraus de 200ms, ajuste que cabe à #79). É só CSS, e a cascata não esconde nada antes do JS. O cabeçalho nunca anima.
+- **Hero:** o conteúdo sobe e aparece em cascata ao carregar (`animate-rise`), com o mesmo ritmo do preset `rise`: 10% da altura do elemento, 500ms `ease`. Os delays ficam na marcação (0, 80, 160 e 240ms hoje; o Beard X usa degraus de 200ms, ajuste que cabe à #79). É só CSS, e a cascata não esconde nada antes do JS. O cabeçalho nunca se move: ao rolar, só troca de cor.
 - **Escondido só abaixo da dobra:** só o que está abaixo da dobra começa escondido. A página que usa `data-reveal` monta o próprio `RevealObserver`; no layout, ele mexeria nos elementos antes de a página hidratar.
 - **Rolagem:** a nativa do navegador. No desktop, a foto do hero fica fixa com CSS, sem parallax por script.
 - **Regras:**

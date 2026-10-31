@@ -67,8 +67,8 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 
 | Onde | Valor |
 |---|---|
-| Container da vitrine | `mx-auto max-w-site`, dentro de `px-4 sm:px-6 lg:px-8` (até 1340px) |
-| Container da área logada, cabeçalho e rodapé | `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8` (até 1280px; cabeçalho e rodapé mudam na #77) |
+| Container da vitrine, do cabeçalho e do rodapé | `mx-auto max-w-site`, dentro de `px-4 sm:px-6 lg:px-8` (até 1340px) |
+| Container da administração | `mx-auto max-w-7xl px-4 sm:px-6 lg:px-8` (até 1280px) |
 | Bloco de título de seção | até `max-w-3xl` (768px) |
 | Texto corrido e formulários | até `max-w-2xl` (672px) |
 | Seção da vitrine | `py-section`: 88, 100 (`sm`), 160 (`md`) e 240px (`lg`) |
@@ -93,7 +93,7 @@ As regras completas estão em [identidade-visual.md](identidade-visual.md#movime
 ### Ícones e imagens
 
 - **Ícones:** SVG inline próprio, traço de 2px em `currentColor`, tamanho de 16, 20 ou 24px (`size-4`, `size-5`, `size-6`), com `aria-hidden="true"` quando há texto ao lado. Não adotamos biblioteca de ícones por enquanto.
-- **Fotos:** sempre `next/image`, com `alt` descritivo (ou `alt=""` se decorativas) e proporção fixa: 4:5 para barbeiro, 3:2 para o "Sobre" e galeria, e 16:9 para o arquivo de fundo do hero da página inicial, recortado com `object-cover` conforme a tela. O hover das fotos em moldura dá zoom de 1,05 com `overflow-hidden`, respeitando `prefers-reduced-motion`. Texto sobre foto exige um overlay `bg-ink/70`. No hero, a foto é decorativa, usa `fill`, `sizes="100vw"`, `preload` e `fetchPriority="high"` (o `priority` está obsoleto desde o Next 16); a cascata de entrada fica só no conteúdo.
+- **Fotos:** sempre `next/image`, com `alt` descritivo (ou `alt=""` se decorativas) e proporção fixa: 4:5 para barbeiro, 3:2 para o "Sobre" e galeria, e 16:9 para o arquivo de fundo do hero da página inicial, recortado com `object-cover` conforme a tela. O hover das fotos em moldura dá zoom de 1,05 com `overflow-hidden`, respeitando `prefers-reduced-motion`. Texto sobre foto exige um overlay `bg-ink/70`. No hero, a foto é decorativa, usa `fill`, `sizes="100vw"`, `preload` e `fetchPriority="high"` (o `priority` está obsoleto desde o Next 16); a cascata de entrada fica só no conteúdo. O hero da página inicial tem `min-h-svh`; no desktop, a foto fica numa camada `lg:fixed` recortada pelo `[clip-path:inset(0)]` do hero, e no celular rola junto.
 - Ainda não há fotos reais (pendência P10). Até lá, os três proprietários usam **fotos fictícias geradas por IA** como placeholder (D10), em JPEG 4:5: `web/public/images/barbeiros/edvaldo.jpg`, `lauro.jpg` e `manoel.jpg` (S3.10, #63). A D12 estende essa escolha ao hero e ao "Sobre" da página inicial (#72): `web/public/images/vitrine/hero.jpg` (16:9, pelo menos 2400×1350) e `sobre.jpg` (3:2, pelo menos 1800×1200), com até 400 KB cada. As imagens seguem a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo. Elas não retratam a Augusto Barbearia nem os proprietários, não vêm de banco de imagem e serão substituídas pelas fotos reais. O barbeiro sem foto continua mostrando um quadro neutro com a inicial. O "Sobre" só mostra sua foto quando o texto estiver preenchido: acima no celular e ao lado no desktop, com o texto fora da imagem. Cards de serviço e heros internos continuam sem foto; galeria, depoimentos e Instagram aguardam material real.
 
 ## Componentes
@@ -112,6 +112,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Ornament`, `SectionHeading` | `ornament.tsx`, `section-heading.tsx` | Pronto |
 | `ServiceCard`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
+| `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
 | `ContactNotice` | `components/booking/contact-notice.tsx` | Pronto (aviso de prazo vencido com os contatos da barbearia, RN-14) |
 | Card de agendamento do cliente | `app/(cliente)/meus-agendamentos/appointment-card.tsx` | Pronto (só em "Meus agendamentos"; a agenda da administração terá o seu) |
@@ -129,6 +130,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `outline-light` | Botão secundário sobre faixa `ink`. O `primary` também pode ficar no `ink` quando é a ação principal da faixa ("Agendar horário" no hero): a borda `brand` tem 3,3:1 sobre `ink`, e o texto, 5,8:1 sobre `brand` |
 | `danger` | Ação destrutiva: "Cancelar agendamento", "Marcar falta". Sempre pede confirmação |
 | `ghost` | Ação de baixa ênfase: "Voltar", "Limpar filtro" |
+| `ghost-light` | O `ghost` sobre faixa `ink`: o "Sair" do cabeçalho |
 
 - **Texto:** Barlow 900 em caixa alta (18px no `md` a partir de 768px; 16px abaixo; 14px no `sm`).
 - **Tamanhos:** `md` (padrão: 60px no celular e 84px a partir do `md`, como o Beard X) e `sm` (44px: administração, cabeçalho, cards e tabelas). Na administração, todos os botões são `sm`.
@@ -185,11 +187,28 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 - Os dois cards recebem o nível do título: `h3` dentro de uma seção com título (página inicial) e `h2` numa página que só tem o `h1` antes (`/servicos`, `/barbeiros`).
 - Em grade: serviços em 1 coluna no celular e 2 a partir de `md`; barbeiros em 1, 2 (`sm`) e 3 (`lg`).
 
+### Cabeçalho
+
+- **`SiteHeader`** fica no layout raiz e é sempre escuro: o logo no círculo `surface` (o PNG só funciona sobre o claro, P1), o nome em Barlow 900, a navegação em `surface` com o traço `brand` na página atual, a conta (`outline-light` e `ghost-light`) e o "Agendar" (`primary`, `sm`). Tem 80px de altura e segue o container da vitrine.
+- **`HeaderFrame`** decide o modo pela página e pela rolagem (`data-mode`):
+
+| Modo | Onde | Como fica |
+|---|---|---|
+| `hero` | Página inicial, sem JS (o HTML do servidor) | Transparente no topo do hero e rola com a página, como no Beard X |
+| `floating` | Página inicial, com JS, no topo | Fixo e transparente sobre o hero |
+| `pinned` | Página inicial, assim que a página rola | Faixa `ink` fixa; a cor troca em 300ms `ease` |
+| `bar` | Todas as outras páginas | Faixa `ink` presa no topo (`sticky`), contínua com o `PageHero` |
+
+- **Sem JS, o padrão seguro é o modo `hero`:** o cabeçalho só fica transparente sobre o hero, que é escuro, e nunca sobre fundo claro. O que o JS acrescenta é só a faixa fixa ao rolar.
+- O cabeçalho escurece logo que a página rola, e não depois do hero: transparente e fixo, ele cobriria o título e os botões do hero que passam por baixo.
+- As telas do cliente (`/agendar`, `/meus-agendamentos`, `/perfil`, `/entrar`) e a administração usam a mesma faixa escura. Ela combina com o rodapé escuro, e o conteúdo claro começa logo abaixo dela; não há variante clara.
+
 ### Menu do celular
 
-- **`MobileMenu`** é um `<details>` nativo com o botão "Menu" (ícone e texto). Abaixo de 1024px, ele guarda a navegação, o "Agendar horário" na largura toda e o login; a partir de 1024px, tudo fica na linha do cabeçalho.
+- **`MobileMenu`** é um `<details>` nativo com o botão "Menu" (ícone e texto, contorno claro). Abaixo de 1024px, ele guarda a navegação, o "Agendar horário" na largura toda e o login; a partir de 1024px, tudo fica na linha do cabeçalho.
 - Funciona sem JS. Com JS, fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link.
-- O painel desce logo abaixo do cabeçalho, sem cobrir a tela inteira, então a rolagem não é travada.
+- O painel é escuro (`ink`) e desce de trás do cabeçalho em 400ms `ease` (`animate-menu-down`), recortado por uma moldura com `overflow-hidden`. Ele ocupa o resto da tela e rola sozinho se o conteúdo não couber. A animação só vale com o menu aberto, para recomeçar a cada abertura; com `prefers-reduced-motion`, ele abre sem animação.
+- Aberto, ele trava a rolagem da página pelo CSS (`html:has([data-mobile-menu][open])`, abaixo de 1024px), então isso também funciona sem JS. Sobre o hero, o cabeçalho escurece junto com o painel.
 - O link da página atual tem `aria-current="page"` e um traço em `brand`.
 
 ### Ornamento e título de seção

@@ -178,6 +178,7 @@ web/
     └── components/
         ├── api-status.tsx          # status de GET /health na página inicial, só em desenvolvimento
         ├── site-header.tsx / site-nav.tsx / site-footer.tsx  # cabeçalho com navegação e "Agendar"; rodapé com dados da API
+        ├── header-frame.tsx        # modo do cabeçalho: transparente sobre o hero da página inicial, faixa escura ao rolar e nas outras páginas
         ├── header-account.tsx      # login ou "Olá, <nome>" do cabeçalho: a única parte que lê a sessão, num Suspense
         ├── vitrine/                # seções da vitrine: listas de serviços e barbeiros, horário e contato e topo
         ├── booking/                # agendamento e remarcação: DayPicker, TimePicker, BarberStep/ServiceStep, a moldura das etapas e o ContactNotice (contato quando o prazo passou)

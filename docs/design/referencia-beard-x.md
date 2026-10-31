@@ -94,7 +94,7 @@
 | Cascata do hero | Manter, no mesmo ritmo | Só CSS, sem esconder o conteúdo antes do JS (#78) |
 | Entrada ao rolar | Manter os três presets | `IntersectionObserver` pequeno, com `rise` (10% da altura), `fade` e `zoom` (0,92 a 1), 500ms `ease` e atraso por atributo. Só esconde o que está abaixo da dobra, e só com JS ativo e sem pedido de menos movimento (#78) |
 | Hero de tela inteira | Manter, só no desktop | Foto fixa no desktop e rolando junto no celular (#77) |
-| Cabeçalho dentro do hero | Manter | Transparente sobre o hero, com o logo no círculo claro; vira faixa escura fixa ao passar do hero (#77) |
+| Cabeçalho dentro do hero | Manter | Transparente sobre o hero, com o logo no círculo claro; vira faixa escura fixa quando a página rola (#77) |
 | Hover de botão | Manter | Troca de cor e sobe 3px em 300ms `ease` |
 | Zoom de foto em card | Manter | `scale(1.1)` dentro de uma moldura com `overflow: hidden` |
 | Menu mobile | Manter | Painel escuro que desce em 400ms `ease`; `aria-expanded`, fecha com Esc e trava o scroll |
@@ -117,9 +117,9 @@ Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz
 | Corpo | 18px, entrelinha 1,667 (16px no celular) | Igual desde a #76 (`text-body`) | #76 |
 | Respiro das seções | 240px no desktop, 88px no celular | Igual desde a #76 (`py-section`); container de 1340px (`max-w-site`) | #76 |
 | Botão | 84px de altura; largura total no celular | Igual desde a #76: 84px a partir do `md`, 60px abaixo | #76 |
-| Hero | Altura de tela inteira; foto fixa no desktop | 576px de altura; foto rola junto | #77 |
-| Cabeçalho | Dentro do hero, transparente, não fixo, 130px | Branco, fixo, 73px | #77 |
-| Menu do celular | Painel escuro que desce em 400ms | Painel claro (`surface`), sem animação de descida | #77 |
+| Hero | Altura de tela inteira; foto fixa no desktop | Igual desde a #77 (`min-h-svh`); a foto fixa no desktop é uma camada `fixed` recortada por `clip-path` | #77 |
+| Cabeçalho | Dentro do hero, transparente, não fixo, 130px | Desde a #77: escuro, 80px; transparente sobre o hero e faixa `ink` fixa ao rolar; sem JS, não fixo, como o Beard X | #77 |
+| Menu do celular | Painel escuro que desce em 400ms | Igual desde a #77, travando a rolagem da página | #77 |
 | Entrada ao rolar | 3 presets; "sobe" 10% da altura, `ease`, atrasos de 0,2 a 0,6s; título anima inteiro | Igual desde a #78: `rise` (10% da altura), `fade` e `zoom`, 500ms `ease`, atraso padrão de 200ms; título anima inteiro e as grades têm cascata de 200ms | #78 |
 | Serviços | Um card único com grade de 2 colunas | 4 cards separados | #79 |
 | Equipe | Texto sobre a foto; cards em degraus de 0, 75 e 145px | Texto abaixo da foto | #79 |
