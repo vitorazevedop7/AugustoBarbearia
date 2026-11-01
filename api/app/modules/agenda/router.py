@@ -20,6 +20,7 @@ from app.modules.agenda.schemas import (
     AgendaService,
 )
 from app.modules.barbers.models import Barber
+from app.modules.payments.schemas import PaymentResponse
 
 router = APIRouter(
     prefix="/admin/appointments",
@@ -64,6 +65,13 @@ def to_response(entry: service.AgendaEntry) -> AdminAppointmentResponse:
         duration_minutes=appointment.duration_minutes,
         canceled_at=_local(appointment.canceled_at),
         canceled_by=appointment.canceled_by,
+        closed_at=_local(appointment.closed_at),
+        closed_by=appointment.closed_by,
+        payment=(
+            PaymentResponse(amount=entry.payment.amount, method=entry.payment.method)
+            if entry.payment is not None
+            else None
+        ),
     )
 
 

@@ -178,6 +178,15 @@ docker compose exec api uv run pytest tests/test_notifications.py
 
 Agendar, remarcar e cancelar pelo site mandam e-mail ao cliente (RN-50, RN-52). Sem `RESEND_API_KEY`, o e-mail aparece no log da API (`docker compose logs api`); com a chave, `EMAIL_FROM` é obrigatório. O módulo `app/modules/notifications/` expõe `notify(session, appointment, kind)`, que registra `PENDING` na transação da ação, e a `Outbox` (`OutboxDep` nas rotas), que o service chama **depois** do commit com `send_after_commit`; o envio (`send_notification`) marca `SENT` ou `FAILED` e nunca desfaz a ação (RN-54). Fora de requisição (job do lembrete), chame `send_notification(session, id, get_email_sender())` depois do commit. Nos testes, um fixture `autouse` zera `RESEND_API_KEY`, e as rotas recebem um remetente falso por `dependency_overrides[get_email_sender]`. A [spec](docs/specs/notificacoes-email.md) documenta os templates e a configuração do Resend.
 
+### Conclusão do atendimento — S5.06
+
+```bash
+docker compose exec api alembic upgrade head          # cria payments e closed_at/closed_by em appointments
+docker compose exec api uv run pytest tests/test_payments.py
+```
+
+No detalhe da agenda (`/admin/agenda/[id]`), abaixo do cartão, a administração conclui o atendimento com o valor (já preenchido com o preço congelado) e uma das quatro formas de pagamento em botões grandes, marca a falta (com confirmação, é definitivo) e, no concluído, vê o pagamento e usa "Corrigir". Na API, o módulo `app/modules/payments/` tem `POST /admin/appointments/{id}/complete`, `POST .../no-show` e `PATCH .../payment`; as três travam a linha (`FOR UPDATE`), recebem `utc_now` por `Depends` e devolvem o `AdminAppointmentResponse` da agenda, que ganhou `payment`, `closed_at` e `closed_by` (e-mail da administração, RN-33). A constraint `ck_appointments_closing` mantém o status coerente com esses campos; nas fixtures de teste, `make_appointment` já preenche o fechamento de `COMPLETED` e `NO_SHOW`. A tela fica em `web/src/app/admin/agenda/conclusao/` (Server Actions com `bind` do id e da agenda), fora de `AppointmentDetail`. A [spec](docs/specs/conclusao-atendimento.md) documenta as regras, os códigos de erro e as decisões a confirmar.
+
 ### Lembrete por e-mail — S5.08
 
 ```bash

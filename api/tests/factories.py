@@ -57,6 +57,8 @@ def make_appointment(
     service = service or service_by_name(session, "Corte + Barba")
     customer = customer or make_customer(session)
     canceled = status == AppointmentStatus.CANCELED
+    # RN-33: concluído e falta sempre trazem quando e quem.
+    closed = status in (AppointmentStatus.COMPLETED, AppointmentStatus.NO_SHOW)
     appointment = Appointment(
         customer_id=customer.id,
         barber_id=barber,
@@ -69,6 +71,8 @@ def make_appointment(
         source=AppointmentSource.ONLINE,
         canceled_at=starts_at - timedelta(days=1) if canceled else None,
         canceled_by=CanceledBy.CUSTOMER if canceled else None,
+        closed_at=starts_at + timedelta(minutes=duration_minutes) if closed else None,
+        closed_by="admin@example.com" if closed else None,
     )
     session.add(appointment)
     session.flush()

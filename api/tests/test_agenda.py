@@ -292,6 +292,9 @@ def test_detalhe_do_agendamento(
         # A fábrica cancela um dia antes do início, pelo cliente (RN-33).
         "canceled_at": "2026-11-02T14:30:00-03:00",
         "canceled_by": "CUSTOMER",
+        "closed_at": None,
+        "closed_by": None,
+        "payment": None,
     }
     listed = agenda(admin, start="2026-11-03", end="2026-11-03")
     assert listed["appointments"] == [response.json()]

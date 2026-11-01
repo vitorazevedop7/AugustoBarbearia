@@ -6,6 +6,11 @@ import AgendaAppointmentPage from "./page";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/api/client", () => ({ createApiClient: vi.fn() }));
+vi.mock("../conclusao/actions", () => ({
+  completeAppointment: vi.fn(),
+  markNoShow: vi.fn(),
+  correctPayment: vi.fn(),
+}));
 
 const GET = vi.fn();
 
@@ -68,6 +73,46 @@ describe("detalhe do agendamento — /admin/agenda/[id]", () => {
       "href",
       "/admin/agenda?data=2026-11-05&visao=semana&barbeiro=1",
     );
+  });
+
+  it("oferece concluir ou marcar falta quando o início já passou (S5.06)", async () => {
+    vi.setSystemTime(new Date("2026-11-03T14:00:00Z"));
+    GET.mockResolvedValue({
+      data: adminAppointment(),
+      response: { status: 200 },
+    });
+
+    await renderPage("7", { data: "2026-11-03", aviso: "concluido" });
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Atendimento concluído.",
+    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Concluir atendimento" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Valor cobrado (R$)")).toHaveValue("35,00");
+    expect(screen.getByText("Marcar falta")).toBeInTheDocument();
+  });
+
+  it("mostra o pagamento do concluído (RN-40)", async () => {
+    GET.mockResolvedValue({
+      data: adminAppointment({
+        status: "COMPLETED",
+        payment: { amount: "30.00", method: "PIX" },
+        closed_at: "2026-11-03T10:50:00-03:00",
+        closed_by: "dono@barbearia.example.com",
+      }),
+      response: { status: 200 },
+    });
+
+    await renderPage("7");
+
+    expect(screen.getAllByText("Concluído").length).toBeGreaterThan(0);
+    expect(screen.getByText("R$ 30,00")).toBeInTheDocument();
+    expect(screen.getByText("Forma").nextElementSibling).toHaveTextContent(
+      "Pix",
+    );
+    expect(screen.getByText("Corrigir")).toBeInTheDocument();
   });
 
   it("diz quem cancelou e quando (RN-33)", async () => {

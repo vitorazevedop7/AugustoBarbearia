@@ -40,7 +40,7 @@ erDiagram
 - O cliente sem conta tem telefone desde o cadastro; o cliente com conta informa o telefone no perfil, e só agenda depois disso (RN-10).
 - A conta fica nas tabelas do Better Auth, e o cliente nas tabelas de domínio. Por isso o vínculo não tem chave estrangeira entre os dois donos de schema (ADR 0002).
 | **Agendamento** | Um horário reservado de um cliente com um barbeiro para um serviço. Guarda o preço e a duração "congelados" (RN-13) e a origem (online ou administração) |
-| **Pagamento** | O registro da conclusão: o valor cobrado e a forma de pagamento (RN-40). Existe só para agendamentos concluídos |
+| **Pagamento** | O registro da conclusão: o valor cobrado e a forma de pagamento (RN-40). Existe só para agendamentos concluídos, no máximo um por agendamento; a administração pode corrigi-lo sem mudar o status (RN-41) |
 | **Notificação** | Registro de cada e-mail enviado ou que falhou: confirmação, lembrete, remarcação, cancelamento (RN-50 a RN-54) |
 
 ### Conceitos que não são armazenados
@@ -90,6 +90,7 @@ Os documentos usam os termos em português. **No código, os identificadores sã
 | Status `FALTOU` | `NO_SHOW` | O cliente não compareceu |
 | Origem do agendamento | `source`: `ONLINE` / `ADMIN` | Quem criou o agendamento |
 | Quem cancelou | `canceled_by`: `CUSTOMER` / `ADMIN` | Registrado junto com `canceled_at` no cancelamento (RN-33) |
+| Quem concluiu ou marcou falta | `closed_by` (e-mail da administração) e `closed_at` | Registrados no `Appointment` quando ele vira `COMPLETED` ou `NO_SHOW` (RN-33) |
 | Pagamento | `Payment` | Valor cobrado e forma de pagamento na conclusão |
 | Forma de pagamento | `PaymentMethod`: `CASH`, `PIX`, `DEBIT`, `CREDIT` | Dinheiro, Pix, débito, crédito |
 | Notificação | `Notification` | Registro de envio de e-mail |

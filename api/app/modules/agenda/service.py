@@ -1,8 +1,9 @@
 """Regras da agenda da administração (RN-01, RN-02, RN-30, RN-70).
 
 Só leitura: os agendamentos de um período, com a moldura de cada dia, e o
-detalhe de um agendamento. Bloqueios, agendamento manual e conclusão entram
-nas próximas issues (S5.04 a S5.06).
+detalhe de um agendamento, com o pagamento quando concluído. Bloqueios e
+agendamento manual entram nas próximas issues (S5.04 e S5.05); a conclusão
+mora em `payments` (S5.06).
 """
 
 from collections.abc import Sequence
@@ -19,6 +20,7 @@ from app.modules.barbers.models import Barber
 from app.modules.barbers.service import get_barber, list_active_barbers
 from app.modules.catalog.models import Service
 from app.modules.customers.models import Customer
+from app.modules.payments.models import Payment
 from app.modules.shop.service import list_business_hours
 
 # O tamanho da visão da semana: o período pedido tem no máximo 7 dias.
@@ -27,12 +29,14 @@ MAX_PERIOD_DAYS = 7
 
 @dataclass(frozen=True, slots=True)
 class AgendaEntry:
-    """O agendamento com o cliente, o barbeiro e o serviço, para a resposta."""
+    """O agendamento com o cliente, o barbeiro, o serviço e, se concluído, o
+    pagamento (RN-40), para a resposta."""
 
     appointment: Appointment
     customer: Customer
     barber: Barber
     service: Service
+    payment: Payment | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,12 +104,15 @@ def _days(session: Session, start: date, end: date) -> list[AgendaDay]:
     return days
 
 
-def _entries_query() -> Select[tuple[Appointment, Customer, Barber, Service]]:
+def _entries_query() -> Select[tuple[Appointment, Customer, Barber, Service, Payment]]:
+    # O pagamento é uma junção externa: só o atendimento concluído tem (RN-40);
+    # nos outros a coluna vem `None`, o que o `Select` tipado não expressa.
     return (
-        select(Appointment, Customer, Barber, Service)
+        select(Appointment, Customer, Barber, Service, Payment)
         .join(Customer, Customer.id == Appointment.customer_id)
         .join(Barber, Barber.id == Appointment.barber_id)
         .join(Service, Service.id == Appointment.service_id)
+        .outerjoin(Payment, Payment.appointment_id == Appointment.id)
     )
 
 
@@ -142,9 +149,13 @@ def list_agenda(
     ).all()
     entries = [
         AgendaEntry(
-            appointment=appointment, customer=customer, barber=barber, service=service
+            appointment=appointment,
+            customer=customer,
+            barber=barber,
+            service=service,
+            payment=payment,
         )
-        for appointment, customer, barber, service in rows
+        for appointment, customer, barber, service, payment in rows
     ]
     barbers = (
         [selected]
@@ -165,7 +176,11 @@ def get_admin_appointment(session: Session, appointment_id: int) -> AgendaEntry:
             message="Agendamento não encontrado.",
             status_code=404,
         )
-    appointment, customer, barber, service = row
+    appointment, customer, barber, service, payment = row
     return AgendaEntry(
-        appointment=appointment, customer=customer, barber=barber, service=service
+        appointment=appointment,
+        customer=customer,
+        barber=barber,
+        service=service,
+        payment=payment,
     )
