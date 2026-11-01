@@ -10,6 +10,7 @@ from app.modules.appointments.models import (
     CanceledBy,
 )
 from app.modules.catalog.schemas import Money
+from app.modules.payments.schemas import PaymentResponse
 
 
 class AgendaCustomer(BaseModel):
@@ -50,6 +51,12 @@ class AdminAppointmentResponse(BaseModel):
     # RN-33: quando e quem cancelou; `null` se não foi cancelado.
     canceled_at: datetime | None
     canceled_by: CanceledBy | None
+    # RN-33: quando e por quem (e-mail da administração) foi concluído ou marcado
+    # como falta; `null` nos outros status.
+    closed_at: datetime | None
+    closed_by: str | None
+    # RN-40: o pagamento do atendimento concluído; `null` nos outros status.
+    payment: PaymentResponse | None
 
 
 class AgendaDay(BaseModel):

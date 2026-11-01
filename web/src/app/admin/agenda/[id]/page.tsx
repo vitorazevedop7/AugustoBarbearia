@@ -9,6 +9,8 @@ import {
   todayInSaoPaulo,
 } from "../agenda-state";
 import { AppointmentDetail } from "../appointment-detail";
+import { AppointmentClosing } from "../conclusao/closing-panel";
+import { noticeMessage } from "../conclusao/closing-state";
 import { loadAppointment } from "../data";
 
 export const metadata: Metadata = {
@@ -17,7 +19,10 @@ export const metadata: Metadata = {
 
 const notFoundMessage = "Agendamento não encontrado.";
 
-/** O detalhe de um agendamento; "Voltar" leva à agenda de onde ele foi aberto. */
+/**
+ * O detalhe de um agendamento; "Voltar" leva à agenda de onde ele foi aberto.
+ * Abaixo do cartão fica o fechamento: concluir, falta e pagamento (S5.06).
+ */
 export default async function AgendaAppointmentPage({
   params,
   searchParams,
@@ -26,9 +31,10 @@ export default async function AgendaAppointmentPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const id = appointmentId((await params).id);
-  const back = agendaHref(
-    parseAgendaParams(await searchParams, todayInSaoPaulo()),
-  );
+  const query = await searchParams;
+  const agenda = parseAgendaParams(query, todayInSaoPaulo());
+  const back = agendaHref(agenda);
+  const notice = noticeMessage(query.aviso);
   const loaded =
     id === null ? { message: notFoundMessage } : await loadAppointment(id);
 
@@ -40,8 +46,16 @@ export default async function AgendaAppointmentPage({
             Voltar para a agenda
           </ButtonLink>
         </div>
+        {notice ? <Alert tone="success" title={notice} /> : null}
         {loaded.data ? (
-          <AppointmentDetail appointment={loaded.data} />
+          <>
+            <AppointmentDetail appointment={loaded.data} />
+            <AppointmentClosing
+              appointment={loaded.data}
+              agenda={agenda}
+              now={new Date()}
+            />
+          </>
         ) : (
           <Alert tone="danger" title={loaded.message} />
         )}

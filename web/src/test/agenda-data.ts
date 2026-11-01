@@ -25,6 +25,9 @@ export function adminAppointment(
     duration_minutes: 45,
     canceled_at: null,
     canceled_by: null,
+    closed_at: null,
+    closed_by: null,
+    payment: null,
     ...changes,
   };
 }

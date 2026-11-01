@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Numeric,
+    String,
     func,
     literal_column,
     text,
@@ -47,6 +48,9 @@ class CanceledBy(StrEnum):
 # Nome da exclusion constraint da RN-08. A criação (S3.08) usa o nome para
 # reconhecer a violação e responder "horário não está mais disponível".
 OVERLAP_CONSTRAINT = "ex_appointments_barber_overlap"
+
+# Um e-mail tem no máximo 320 caracteres (RFC 5321).
+CLOSED_BY_MAX_LENGTH = 320
 
 
 def _values_check(column: str, values: type[StrEnum]) -> str:
@@ -85,6 +89,12 @@ class Appointment(Base):
             " AND (canceled_at IS NULL) = (canceled_by IS NULL)",
             name="ck_appointments_cancellation",
         ),
+        # RN-33: a conclusão e a falta sempre registram quando e quem; só elas.
+        CheckConstraint(
+            "(status IN ('COMPLETED', 'NO_SHOW')) = (closed_at IS NOT NULL)"
+            " AND (closed_at IS NULL) = (closed_by IS NULL)",
+            name="ck_appointments_closing",
+        ),
         # RN-13: preço e duração congelados; o fim é sempre início + duração.
         CheckConstraint("price >= 0", name="ck_appointments_price_non_negative"),
         CheckConstraint("duration_minutes > 0", name="ck_appointments_duration"),
@@ -121,6 +131,10 @@ class Appointment(Base):
     source: Mapped[AppointmentSource] = mapped_column(_enum_column(AppointmentSource))
     canceled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     canceled_by: Mapped[CanceledBy | None] = mapped_column(_enum_column(CanceledBy))
+    # RN-33: quando e por quem foi concluído ou marcado como falta. `closed_by` é
+    # o e-mail da conta da administração que fez; `null` nos outros status.
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    closed_by: Mapped[str | None] = mapped_column(String(CLOSED_BY_MAX_LENGTH))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

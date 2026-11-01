@@ -119,6 +119,8 @@ def test_rn08_voltar_a_ativo_num_horario_ocupado_e_recusado(
 
     with pytest.raises(IntegrityError) as error, db_session.begin_nested():
         old.status = AppointmentStatus.SCHEDULED
+        old.closed_at = None  # RN-33: só concluído e falta registram o fechamento
+        old.closed_by = None
         db_session.flush()
 
     assert violated_constraint(error.value) == OVERLAP_CONSTRAINT
