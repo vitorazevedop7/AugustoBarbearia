@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 /** Só entram itens que já têm tela; agenda e relatório chegam nas próximas issues. */
 const items = [
   { href: "/admin", label: "Início" },
+  { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/cadastros", label: "Cadastros" },
 ];
 

@@ -32,7 +32,7 @@ Cliente. A administração não tem perfil de cliente (RN-71).
 - **Então** encontra o cadastro pelo vínculo e não cria outro, mesmo que dois pedidos cheguem ao mesmo tempo.
 
 **CA-2 — Vínculo com cadastro feito pela administração**
-- **Dado** um cliente sem vínculo cadastrado com o e-mail `ana@example.com` (o cadastro pela administração entra na Sprint 4)
+- **Dado** um cliente sem vínculo cadastrado com o e-mail `ana@example.com` (cadastrado pela administração, [cadastro-clientes.md](cadastro-clientes.md))
 - **Quando** alguém entra com a conta Google `Ana@Example.com`
 - **Então** a API vincula a conta a esse cadastro (RN-23), sem criar outro e sem trocar o nome nem o telefone que a barbearia cadastrou. A comparação de e-mail ignora espaços nas extremidades e diferenças de caixa.
 
@@ -101,7 +101,7 @@ Sem JavaScript, o formulário continua funcionando. O campo de telefone usa `typ
 - Restrições no banco: cliente vindo do Google tem e-mail (RN-62), e cliente sem conta tem telefone (RN-62, RN-20).
 
 ## Fora do escopo desta spec
-- O cadastro de cliente pela administração (Sprint 4). Aqui o cadastro sem vínculo só existe nos testes.
+- O cadastro de cliente pela administração: [cadastro-clientes.md](cadastro-clientes.md) (S5.02). Lá também está a regra de que a administração não altera o e-mail de quem já vinculou a conta Google.
 - Pedir o telefone dentro do fluxo de agendamento (RN-10): entra com o agendamento.
 - Atualizar o nome ou o e-mail do cadastro quando eles mudam no Google.
 - Link para o perfil no cabeçalho e exclusão dos dados (RN-72).
