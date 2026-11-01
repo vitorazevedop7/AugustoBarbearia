@@ -26,7 +26,7 @@ import {
 } from "./booking-state";
 
 const textLink =
-  "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-out hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
+  "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
 
 /**
  * Etapa 5: o resumo, o aviso das 2 horas (RN-14) e o botão de confirmar. Sem
@@ -72,7 +72,7 @@ export function ConfirmBooking({
       <BookingHeader step="confirmar" />
       <ChoiceSummary items={summary} />
       {slot ? (
-        <form action={formAction} className="mt-6 flex flex-col gap-6">
+        <form action={formAction} className="mt-10 flex flex-col gap-6">
           {state.status === "error" && state.message ? (
             <Alert tone="danger" title={state.message}>
               <Link href={changeTimeHref} className={textLink}>
@@ -105,7 +105,7 @@ export function ConfirmBooking({
           <SubmitButton />
         </form>
       ) : (
-        <div className="mt-6 flex flex-col gap-6">
+        <div className="mt-10 flex flex-col gap-6">
           <Alert tone="warning" title="Este horário não está mais disponível.">
             Alguém pode ter acabado de reservá-lo. Escolha outro horário.
           </Alert>
@@ -147,7 +147,7 @@ function Confirmed({
   return (
     <>
       <BookingHeader title="Horário confirmado" headingRef={headingRef} />
-      <div className="mt-6">
+      <div className="mt-8">
         <Alert
           tone="success"
           title={`Seu horário está confirmado para ${date}, às ${start}.`}
@@ -168,7 +168,7 @@ function Confirmed({
           { label: "Valor", value: formatPrice(appointment.price) },
         ]}
       />
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-10 flex flex-col gap-3 sm:flex-row">
         <ButtonLink href={MY_APPOINTMENTS_PATH}>
           Ver meus agendamentos
         </ButtonLink>

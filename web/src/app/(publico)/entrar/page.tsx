@@ -31,7 +31,7 @@ export default async function SignInPage({
         <h1 className="mt-6 font-heading text-display-3 font-black uppercase text-ink">
           Entrar
         </h1>
-        <p className="mt-3 text-ink-muted">
+        <p className="mt-4 text-body text-ink-muted">
           Use a sua conta Google para agendar e acompanhar seus horários. Não
           precisa criar senha.
         </p>
@@ -54,7 +54,7 @@ export default async function SignInPage({
           seu atendimento. Saiba mais na{" "}
           <Link
             href="/privacidade"
-            className="font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-out hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
+            className="font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
           >
             Política de privacidade
           </Link>

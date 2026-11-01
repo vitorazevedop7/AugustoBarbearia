@@ -4,4 +4,4 @@
  * próxima etapa, então não há estado "escolhido".
  */
 export const optionClasses =
-  "flex min-h-11 w-full items-center justify-center border border-ink-muted bg-surface px-3 text-ink tabular-nums transition-colors duration-300 ease-out hover:border-brand hover:bg-brand hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
+  "flex min-h-11 w-full items-center justify-center border border-ink-muted bg-surface px-3 text-ink tabular-nums transition-colors duration-300 ease-standard hover:border-brand hover:bg-brand hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";

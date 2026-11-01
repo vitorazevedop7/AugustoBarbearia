@@ -113,7 +113,7 @@ export default async function BookingPage({
     <BookingMain>
       <BookingHeader step={step} />
       <ChoiceSummary items={summary} />
-      <div className="mt-8">{content}</div>
+      <div className="mt-10">{content}</div>
     </BookingMain>
   );
 }
@@ -128,7 +128,7 @@ function Unavailable({
   return (
     <BookingMain>
       <BookingHeader step={step} />
-      <div className="mt-8">
+      <div className="mt-10">
         <Alert tone="danger" title={message} />
       </div>
     </BookingMain>
@@ -180,7 +180,7 @@ async function dayStep(
         title="Nenhum dia com horário livre"
         description={`${barber.name} não tem horário livre para este serviço nos próximos dias. Escolha outro barbeiro ou outro serviço.`}
         action={
-          <ButtonLink href={bookingHref()} variant="outline" size="sm">
+          <ButtonLink href={bookingHref()} variant="outline">
             Escolher outro barbeiro
           </ButtonLink>
         }
@@ -213,7 +213,6 @@ async function timeStep(
           <ButtonLink
             href={bookingHref(withoutChoice(selection, "data"))}
             variant="outline"
-            size="sm"
           >
             Escolher outro dia
           </ButtonLink>

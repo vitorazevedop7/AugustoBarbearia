@@ -214,7 +214,7 @@ function Frame({
         title={current?.title ?? "Remarcar agendamento"}
       />
       <ChoiceSummary items={summary} />
-      <div className="mt-8 flex flex-col gap-6">{children}</div>
+      <div className="mt-10 flex flex-col gap-6">{children}</div>
     </BookingMain>
   );
 }
@@ -236,7 +236,7 @@ async function dayStep(
         title="Nenhum dia com horário livre"
         description={`${barber.name} não tem outro horário livre para este serviço nos próximos dias. Escolha outro barbeiro.`}
         action={
-          <ButtonLink href={rescheduleHref(id)} variant="outline" size="sm">
+          <ButtonLink href={rescheduleHref(id)} variant="outline">
             Escolher outro barbeiro
           </ButtonLink>
         }
@@ -275,7 +275,6 @@ async function timeStep(
               withoutRescheduleChoice(selection, "data"),
             )}
             variant="outline"
-            size="sm"
           >
             Escolher outro dia
           </ButtonLink>

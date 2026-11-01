@@ -13,7 +13,7 @@ export function AdminLinkCard({
   return (
     <Link
       href={href}
-      className="group block h-full bg-surface p-6 shadow-card transition-transform duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group block h-full bg-surface p-6 shadow-card transition-transform duration-300 ease-standard hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <span className="flex items-center justify-between gap-4 font-semibold text-ink">
         {title}

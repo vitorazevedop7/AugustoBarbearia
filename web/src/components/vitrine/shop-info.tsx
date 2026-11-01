@@ -18,7 +18,7 @@ export function InfoLabel({
 }
 
 const linkOnInk =
-  "underline decoration-line-on-ink underline-offset-4 transition-colors duration-300 ease-out hover:decoration-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none";
+  "underline decoration-line-on-ink underline-offset-4 transition-colors duration-300 ease-standard hover:decoration-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none";
 
 /** Horário de funcionamento sobre a faixa escura, com os dias iguais juntos. */
 export function BusinessHoursList({

@@ -12,7 +12,9 @@ export const STEP_TITLES: Record<BookingStep, string> = {
 
 /**
  * Moldura das etapas do agendamento e da remarcação (S3.09), compartilhada
- * com o carregamento.
+ * com o carregamento e com "Meus agendamentos". Fica em `paper`, logo abaixo
+ * da faixa escura do cabeçalho, sem a faixa parcial das páginas internas da
+ * vitrine: no celular, as opções da etapa precisam aparecer na primeira tela.
  */
 export function BookingMain({
   children,
@@ -26,7 +28,7 @@ export function BookingMain({
       id="main-content"
       tabIndex={-1}
       aria-busy={busy || undefined}
-      className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 lg:py-12"
+      className="mx-auto w-full max-w-3xl flex-1 px-4 pt-10 pb-16 sm:px-6 md:pt-16 md:pb-24"
     >
       {children}
     </main>
@@ -57,7 +59,7 @@ export function StepHeader({
       <h1
         ref={headingRef}
         tabIndex={-1}
-        className="mt-2 font-heading text-display-3 font-black uppercase text-ink focus:outline-none"
+        className="mt-3 font-heading text-display-3 font-black uppercase text-ink focus:outline-none"
       >
         {title}
       </h1>
@@ -104,9 +106,9 @@ export type SummaryItem = {
 export function ChoiceSummary({ items }: { items: SummaryItem[] }) {
   if (items.length === 0) return null;
   return (
-    <dl className="mt-6 divide-y divide-line bg-surface px-4 shadow-card sm:px-6">
+    <dl className="mt-8 divide-y divide-line bg-surface px-4 shadow-card sm:px-6">
       {items.map(({ label, value, changeHref }) => (
-        <div key={label} className="flex items-center gap-4 py-3">
+        <div key={label} className="flex items-center gap-4 py-3 sm:py-4">
           <dt className="w-20 shrink-0 text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
             {label}
           </dt>
@@ -115,7 +117,7 @@ export function ChoiceSummary({ items }: { items: SummaryItem[] }) {
             <dd className="shrink-0">
               <Link
                 href={changeHref}
-                className="inline-flex min-h-11 items-center text-sm font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-out hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
               >
                 Trocar <span className="sr-only">{label.toLowerCase()}</span>
               </Link>

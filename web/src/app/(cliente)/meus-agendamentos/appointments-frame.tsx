@@ -14,11 +14,11 @@ export function MyAppointmentsFrame({
       <h1 className="font-heading text-display-3 font-black uppercase text-ink">
         Meus agendamentos
       </h1>
-      <p className="mt-3 text-ink-muted">
+      <p className="mt-4 text-body text-ink-muted">
         Você pode cancelar ou remarcar até 2 horas antes do horário. Depois
         disso, fale com a barbearia.
       </p>
-      <div className="mt-8">{children}</div>
+      <div className="mt-10">{children}</div>
     </BookingMain>
   );
 }

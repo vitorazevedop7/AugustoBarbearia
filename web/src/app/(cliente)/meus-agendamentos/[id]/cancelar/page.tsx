@@ -55,7 +55,7 @@ export default async function CancelAppointmentPage({
     return (
       <BookingMain>
         <StepHeader title={TITLE} />
-        <div className="mt-6 flex flex-col gap-6">
+        <div className="mt-10 flex flex-col gap-6">
           <Alert
             tone="danger"
             title={loaded.message || loadUnavailableMessage}
@@ -71,7 +71,7 @@ export default async function CancelAppointmentPage({
     <BookingMain>
       <StepHeader title={TITLE} />
       <ChoiceSummary items={appointmentSummary(appointment)} />
-      <div className="mt-6 flex flex-col gap-6">
+      <div className="mt-10 flex flex-col gap-6">
         {appointment.can_cancel ? (
           <>
             <Alert
