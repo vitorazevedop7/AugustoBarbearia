@@ -20,11 +20,11 @@ O mesmo sistema tem dois ritmos:
 |---|---|---|
 | Objetivo | Encantar e levar a agendar | Concluir a tarefa rápido |
 | Títulos | Barlow 900 em caixa alta, escala `text-display-*`, ornamento acima | Administração: Inter 600 (`text-2xl`/`text-xl`), sem ornamento |
-| Respiro | Seções `py-section`, de 88px (celular) a 240px (desktop) | Blocos de 24 a 48px |
-| Fundos | Faixas `ink` e `paper` alternadas | `paper` com cards em `surface` |
+| Respiro | Seções `py-section`, de 88px (celular) a 240px (desktop) | Telas do cliente: 40/64px acima e 64/96px abaixo (celular/`md`), blocos de 24 a 40px. Administração: blocos de 24 a 48px |
+| Fundos | Faixas `ink` e `paper` alternadas; nas páginas internas, a faixa escura parcial que o conteúdo atravessa | `paper` com cards em `surface`, logo abaixo da faixa escura do cabeçalho |
 | Movimento | Cascata no hero e entrada ao rolar | Só hover e foco. Nada entra animado |
 
-O fluxo de agendamento (`/agendar`) e as telas do cliente (`/meus-agendamentos`, `/perfil`) são da área logada, mas usam Barlow em caixa alta nos títulos para manter a cara da vitrine. O espaçamento delas é revisto na S4.07 (#80).
+O fluxo de agendamento (`/agendar`) e as telas do cliente (`/meus-agendamentos`, `/perfil`, `/entrar`) são da área logada, mas usam a base da vitrine desde a S4.07 (#80): títulos em Barlow 900 em caixa alta, o texto de apoio abaixo do título em `text-body`, o botão `md` (84px a partir do `md`) na ação principal da tela e o hover de 300ms `ease-standard`. O ritmo continua o de tarefa: sem `py-section`, sem entrada animada e sem a faixa escura parcial (ver [Fluxo de agendamento](#fluxo-de-agendamento)).
 
 ## Fundamentos
 
@@ -54,7 +54,7 @@ Os valores e o contraste estão em [identidade-visual.md](identidade-visual.md#c
 | Número menor | `font-heading font-semibold` | O dia no `DayPicker` (Barlow 600) |
 | Título da administração | `text-2xl font-semibold` | Título da página em `admin` (Inter) |
 | Corpo da vitrine | `text-body` | Texto corrido da vitrine: 16px/1,5 no celular, 18px/1,667 a partir do `md` |
-| Corpo da área logada | `text-base leading-relaxed` | Texto corrido em `(cliente)` e `admin` |
+| Corpo da área logada | `text-base leading-relaxed` | Texto corrido em `(cliente)` e `admin`. Nas telas do cliente, o texto de apoio logo abaixo do `h1` usa `text-body` |
 | Apoio | `text-sm text-ink-muted` | Dicas, metadados, legendas |
 | Rótulo | `text-xs font-semibold uppercase tracking-[0.08em]` | Botões, badges, legendas de grupo, data acima de título |
 
@@ -72,6 +72,8 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 | Bloco de título de seção | até `max-w-3xl` (768px) |
 | Texto corrido e formulários | até `max-w-2xl` (672px) |
 | Seção da vitrine | `py-section`: 88, 100 (`sm`), 160 (`md`) e 240px (`lg`) |
+| Faixa escura das páginas internas | `PageHero`: título com `pt-16 pb-12`, `md:pb-16`, `lg:pt-24 lg:pb-20`; faixa parcial de 128, 192 (`md`) e 240px (`lg`) atrás do começo do conteúdo, que fecha com `pb-section` |
+| Telas do cliente | `pt-10 pb-16 md:pt-16 md:pb-24`, até `max-w-3xl` (perfil: `max-w-2xl`); `mt-8` entre o título e o resumo, `mt-10` antes do conteúdo da etapa |
 | Card | `p-6 sm:p-8` (vitrine: até `lg:p-10`) |
 | Card único de serviços | `px-6 py-12`, `sm:px-10 sm:py-16`, `lg:px-16 lg:py-25.5` (24×48px no celular e 64×102px no desktop, como o Beard X); itens com `gap-x-16 gap-y-12` |
 | Grade de cards | `gap-6` (barbeiros: `lg:gap-7`, os 28px do Beard X) |
@@ -89,7 +91,7 @@ A escala é a do Tailwind (múltiplos de 4px). As combinações fixas são:
 
 ### Movimento
 
-As regras completas estão em [identidade-visual.md](identidade-visual.md#movimento). Em resumo: 300ms no hover, 500ms nas entradas. O botão e as entradas usam `ease` (`ease-standard`), como o Beard X. A entrada ao rolar tem três presets em `data-reveal` (`rise`, `fade`, `zoom`; ver a identidade visual) e o `RevealObserver` fica na página que usa o atributo. Tudo respeita `prefers-reduced-motion`, e a área logada não tem entrada animada.
+As regras completas estão em [identidade-visual.md](identidade-visual.md#movimento). Em resumo: 300ms no hover, 500ms nas entradas. Todo hover (botões, links, chips, campos, cards e a navegação, inclusive na administração) e as entradas usam `ease` (`ease-standard`), como o Beard X; o `ease-out` solto saiu dos componentes na S4.07 (#80). A entrada ao rolar tem três presets em `data-reveal` (`rise`, `fade`, `zoom`; ver a identidade visual) e o `RevealObserver` fica na página que usa o atributo. Tudo respeita `prefers-reduced-motion`, e a área logada não tem entrada animada.
 
 ### Ícones e imagens
 
@@ -135,7 +137,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `ghost-light` | O `ghost` sobre faixa `ink`: o "Sair" do cabeçalho |
 
 - **Texto:** Barlow 900 em caixa alta (18px no `md` a partir de 768px; 16px abaixo; 14px no `sm`).
-- **Tamanhos:** `md` (padrão: 60px no celular e 84px a partir do `md`, como o Beard X) e `sm` (44px: administração, cabeçalho, cards e tabelas). Na administração, todos os botões são `sm`.
+- **Tamanhos:** `md` (padrão: 60px no celular e 84px a partir do `md`, como o Beard X) e `sm` (44px: administração, cabeçalho, cards e tabelas). Na administração, todos os botões são `sm`. Nas telas do cliente, a ação principal da tela é sempre `md`: "Confirmar agendamento", "Salvar", "Entrar com Google", "Cancelar agendamento" e o botão do estado vazio que faz a pessoa seguir ("Agendar horário", "Escolher outro dia"); as ações dentro de um cartão ("Remarcar", "Cancelar") continuam `sm`.
 - **Estados:** hover troca a cor e sobe 3px em 300ms `ease` (o `ghost` sublinha), foco com contorno, `disabled` a 50% e `pending` (trava o botão, mostra um indicador girando e marca `aria-busy`). Use `pending` enquanto uma Server Action roda, com o `useFormStatus` do React.
 - **No celular,** o botão principal de um formulário ou etapa ocupa a largura toda (`w-full sm:w-auto`).
 - **Texto:** verbo no infinitivo e o objeto, curto. "Agendar horário", não "Clique aqui".
@@ -154,6 +156,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 - **`ChoiceChip`** é um `radio` com cara de botão, para escolher **uma** opção de uma grade curta: o horário livre, a forma de pagamento.
 - Agrupe os chips num `<fieldset>` com `<legend>` ("Manhã", "Tarde"). A grade tem 3 colunas no celular e 6 no desktop.
+- Os chips-link do agendamento (`TimePicker`, `DayPicker`) têm a mesma borda e o mesmo hover, com o número em Barlow 600 (`font-heading font-semibold`): o horário em 18px, com 44px de altura, e o dia em 24px, num chip de 80px.
 - **Estados:** livre (borda `ink-muted`), escolhido (`brand`), foco (contorno) e indisponível (riscado). Prefira **não mostrar** um horário indisponível; o riscado é para quando o contexto pede, como na remarcação.
 - Por ser `radio`, funciona sem JS e com as setas do teclado.
 
@@ -179,6 +182,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 ### Estado vazio
 
 - **`EmptyState`** aparece quando uma lista não tem itens. Ele diz o que aconteceu e oferece o próximo passo: "Você ainda não tem horários" + "Agendar horário".
+- Tem fundo `surface` e borda tracejada `ink-muted`, para continuar legível também sobre a faixa escura parcial das páginas internas (S4.07, #80).
 - Uma busca ou filtro sem resultado diz o filtro usado e oferece limpar.
 
 ### Cards da vitrine
@@ -193,6 +197,14 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 - `ServiceItem` e `BarberCard` recebem o nível do título: `h3` dentro de uma seção com título (página inicial) e `h2` numa página que só tem o `h1` antes (`/servicos`, `/barbeiros`).
 - Em grade: barbeiros em 1, 2 (`sm`) e 3 (`lg`) colunas. No `lg`, os cards descem em degraus de 0, 75 e 145px (margem, e não `transform`, que a entrada ao rolar usa) e a grade tem `items-start`, para cada card manter a própria altura. No celular e no tablet, não há degrau.
 - Cada item das grades entra com `data-reveal="rise"` e a cascata de `--reveal-index`/`--reveal-cols`.
+
+### Páginas internas da vitrine
+
+- **`PageHero`** (`components/vitrine/page-hero.tsx`) monta o topo de `/servicos` e `/barbeiros` como as páginas internas do Beard X (S4.07, #80): a faixa `ink` com o ornamento, o `h1` em `text-display-1` e o texto de apoio em `text-body`, e logo abaixo uma **faixa escura parcial** que o conteúdo (`children`) atravessa.
+- A faixa parcial é uma camada decorativa (`aria-hidden`, `absolute`, `-z-10` dentro de um bloco `relative isolate`) de 128px no celular, 192px a partir do `md` e 240px a partir do `lg`. Ela fica atrás do começo do conteúdo, então o card de serviços e as fotos dos barbeiros começam no escuro e terminam no `paper`.
+- Os 240px do desktop passam do maior degrau da equipe (145px): os três cards de barbeiro atravessam a faixa.
+- O que pode aparecer sobre a faixa tem fundo próprio: o card de serviços e as fotos, o `Alert` (`surface`) e o `EmptyState` (`surface`).
+- O conteúdo do topo entra em cascata como o hero da página inicial: ornamento em 0, título em 200ms e texto em 400ms (`animate-rise`). A faixa parcial não se move.
 
 ### Cabeçalho
 
@@ -247,7 +259,8 @@ Proposta detalhada em [referencia-beard-x.md](referencia-beard-x.md#fluxo-de-age
 A implementação está na [spec do agendamento](../specs/agendamento-cliente.md).
 
 - Uma etapa por tela: barbeiro → serviço → dia → horário → confirmar (D11). O estado fica na URL (`?barbeiro=&servico=&data=&hora=`), então "voltar" do navegador funciona.
-- No topo, a etapa atual por extenso ("Etapa 2 de 5 · Serviço"), sem barra de progresso. Abaixo, as escolhas já feitas, cada uma com o link "Trocar".
+- No topo, a etapa atual por extenso ("Etapa 2 de 5 · Serviço"), sem barra de progresso, e o título em `text-display-3`. Abaixo, as escolhas já feitas, cada uma com o link "Trocar".
+- **Sem a faixa escura parcial** (S4.07, #80). A moldura (`BookingMain`) fica em `paper`, logo abaixo da faixa escura do cabeçalho. O fluxo segue o Squire, e não as páginas internas do Beard X; no celular, uma faixa a mais em cada uma das 5 etapas empurraria as opções para fora da primeira tela; e o cabeçalho escuro já faz a ligação com a vitrine. A mesma moldura serve a remarcação, "Meus agendamentos" e o cancelamento.
 - **Cada escolha é um link:** um toque avança, sem botão "Continuar" e sem barra fixa no rodapé. Funciona sem JS.
 - Barbeiro em cards com a foto (2 colunas no celular); serviço em cards com duração e preço (uma coluna). Dia com `DayPicker`: só os dias com horário, agrupados por mês, 3 por linha no celular. Horário com `TimePicker`: chips-link com a cara do `ChoiceChip`, agrupados em Manhã e Tarde, 3 por linha no celular. O `ChoiceChip` (`radio`) continua para formulários, como a forma de pagamento.
 - A confirmação mostra o resumo completo, o aviso das 2h (D6) num `Alert` `info`, o campo Telefone quando o perfil não tem, e o botão "Confirmar agendamento". Depois de confirmar, a mesma página mostra "Horário confirmado", o resumo e "Ver meus agendamentos".
@@ -287,6 +300,7 @@ Tudo formatado com `Intl`, em `pt-BR` e no fuso `America/Sao_Paulo` (RN-01):
 ### Área administrativa
 
 - Densidade maior: `text-sm` em tabelas, botões `sm` (inclusive o "Salvar" dos formulários), títulos em Inter.
+- Da base nova da Sprint 4, a administração recebe só os tokens: a fonte e os botões (S4.03, #76) e o hover em `ease-standard` (S4.07, #80). Densidade, container (`max-w-7xl`) e layout não mudam.
 - Tabelas viram lista de cards no celular. A agenda do dia é a primeira tela, organizada por barbeiro.
 - O status sempre com `StatusBadge`. Valores em reais alinhados à direita, com `tabular-nums`.
 
