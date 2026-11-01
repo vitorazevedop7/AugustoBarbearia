@@ -27,7 +27,7 @@ Visitante e cliente (consultam os horários livres). A administração é afetad
 - RN-30 — Status
 - RN-33 — Rastreabilidade (só os campos de cancelamento, sem o fluxo)
 - RN-60 — Barbeiro (a trava de inativação)
-- RN-03 — Bloqueios (fora do cálculo por enquanto; ver "Fora do escopo")
+- RN-03 — Bloqueios (entram na lista de ocupados desde a S5.04, [bloqueios.md](bloqueios.md))
 
 ## Modelo
 - **Agendamento (`Appointment`)**, tabela `appointments`, no módulo `app/modules/appointments/`:
@@ -64,7 +64,7 @@ Um início `H` é oferecido quando:
 
 A conversão para São Paulo acontece na borda: a abertura e o fechamento são horas locais (`time`), combinadas com a data no fuso `America/Sao_Paulo` e comparadas como instantes. O resultado sai no fuso de São Paulo (`-03:00`).
 
-Os intervalos ocupados são genéricos: hoje são os agendamentos `SCHEDULED` do barbeiro que cruzam o dia; os bloqueios (RN-03) entram na mesma lista na Sprint 4, sem mudar a função. As regras 6 e 7 vêm de uma política (`BookingPolicy`). A do cliente (`CUSTOMER_POLICY`) tem 1 hora e 30 dias. A política da administração (RN-21, sem antecedência nem janela) é definida quando o agendamento pela administração entrar.
+Os intervalos ocupados são genéricos: os agendamentos `SCHEDULED` do barbeiro que cruzam o dia e, desde a S5.04 (#96), os bloqueios dele (RN-03, [bloqueios.md](bloqueios.md)), lidos juntos em `_busy` (`service.py`) sem mudar a função. Por isso o bloqueio vale para o cliente, a remarcação e a administração. As regras 6 e 7 vêm de uma política (`BookingPolicy`). A do cliente (`CUSTOMER_POLICY`) tem 1 hora e 30 dias. A política da administração (RN-21, sem antecedência nem janela) é definida quando o agendamento pela administração entrar.
 
 ### Exemplo (RN-05)
 Segunda-feira, das 10h às 19h, Corte + Barba (45 min). O barbeiro já tem um agendamento das 10h00 às 10h45. O primeiro início oferecido é **11h00**: 10h00 e 10h30 cruzam o agendamento. O último é **18h00**, porque 18h30 + 45 min passa das 19h.
@@ -73,7 +73,7 @@ Segunda-feira, das 10h às 19h, Corte + Barba (45 min). O barbeiro já tem um ag
 `app/modules/availability/service.py` expõe:
 - `list_available_slots(session, barber_id=, service_id=, day=, now=, policy=)`: carrega os dados e chama a função pura;
 - `is_slot_available(session, barber_id=, service_id=, starts_at=, now=, policy=)`: `True` se `starts_at` é exatamente um dos inícios oferecidos naquele dia;
-- `ensure_slot_available(...)`: o mesmo, mas levanta `409 SLOT_UNAVAILABLE` ("Este horário não está mais disponível. Escolha outro.") e trava a linha do barbeiro com `FOR SHARE` até o fim da transação. É o ponto de entrada da criação: a trava serializa a criação com a inativação do barbeiro (RN-60), e a exclusion constraint continua sendo a garantia final da RN-08.
+- `ensure_slot_available(...)`: o mesmo, mas levanta `409 SLOT_UNAVAILABLE` ("Este horário não está mais disponível. Escolha outro.") e trava a linha do barbeiro com `FOR SHARE` até o fim da transação. É o ponto de entrada da criação: a trava serializa a criação com a inativação do barbeiro (RN-60) e com a criação de bloqueios (RN-03, S5.04), e a exclusion constraint continua sendo a garantia final da RN-08.
 - `is_slot_conflict(error)` (`app/modules/appointments/service.py`): `True` quando o insert perdeu a disputa pelo horário (violação de `ex_appointments_barber_overlap` ou deadlock), para a S3.08 responder o mesmo `SLOT_UNAVAILABLE`.
 
 ## Trava da RN-60
@@ -154,7 +154,7 @@ Nenhuma tela nesta issue. A escolha de horário pelo cliente é a S3.08.
 - Os inícios usam o relógio do servidor. Nos testes, a dependência `utc_now` (`app/clock.py`) é substituída.
 
 ## Fora do escopo desta spec
-- **Bloqueios (RN-03):** a tabela, a tela e a entrada no cálculo são da Sprint 4. A função pura já recebe intervalos ocupados genéricos.
+- **Bloqueios (RN-03):** a tabela, a tela e a entrada no cálculo vieram na S5.04 (#96), em [bloqueios.md](bloqueios.md). A criação do bloqueio trava o barbeiro com `FOR UPDATE`, a mesma linha que `ensure_slot_available` trava com `FOR SHARE`, para não correr junto com uma reserva.
 - **Criar agendamento** (cliente ou administração), a tradução do erro da constraint e o limite da RN-11: S3.08 (#57) em diante.
 - Cancelar, remarcar, concluir e marcar falta. Os campos de cancelamento existem, mas nenhum fluxo os preenche ainda.
 - A política da administração (RN-21) e o "encaixe".

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Alert } from "@/components/ui/alert";
+import { ButtonLink } from "@/components/ui/button";
 import { formatLongDate } from "@/lib/format";
 import { AdminPage } from "../admin-page";
 import {
@@ -11,6 +12,14 @@ import {
 } from "./agenda-state";
 import { AgendaToolbar } from "./agenda-toolbar";
 import { AgendaDayView, AgendaWeekView } from "./agenda-views";
+import { loadTimeBlocks } from "./bloqueios/data";
+import {
+  newTimeBlockHref,
+  removeTimeBlockHref,
+  timeBlockNotice,
+  timeBlocksOn,
+} from "./bloqueios/time-block-state";
+import { TimeBlockList } from "./bloqueios/time-blocks";
 import { loadAgenda, loadBarbers } from "./data";
 
 export const metadata: Metadata = {
@@ -27,12 +36,15 @@ export default async function AgendaPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const today = todayInSaoPaulo();
-  const state = parseAgendaParams(await searchParams, today);
+  const params = await searchParams;
+  const state = parseAgendaParams(params, today);
   const period = agendaPeriod(state);
-  const [agenda, allBarbers] = await Promise.all([
+  const [agenda, allBarbers, blocks] = await Promise.all([
     loadAgenda({ ...period, barberId: state.barbeiro }),
     loadBarbers(),
+    loadTimeBlocks({ ...period, barberId: state.barbeiro }),
   ]);
+  const notice = timeBlockNotice(params.aviso);
 
   // O filtro mostra os ativos e o escolhido, mesmo inativo.
   const filterBarbers = (allBarbers ?? agenda.data?.barbers ?? []).filter(
@@ -43,6 +55,10 @@ export default async function AgendaPage({
       ? formatWeekRange(period.start, period.end)
       : formatLongDate(state.data);
   const hrefFor = ({ id }: { id: number }) => appointmentHref(id, state);
+  // RN-03: os bloqueios do período, depois dos agendamentos de cada coluna.
+  const blockList = blocks.data ?? [];
+  const removeHrefFor = ({ id }: { id: number }) =>
+    removeTimeBlockHref(id, state);
 
   return (
     <AdminPage title="Agenda">
@@ -53,7 +69,24 @@ export default async function AgendaPage({
         >
           {title}
         </h2>
-        <AgendaToolbar state={state} today={today} barbers={filterBarbers} />
+        {notice ? <Alert tone="success" title={notice} /> : null}
+        <AgendaToolbar
+          state={state}
+          today={today}
+          barbers={filterBarbers}
+          actions={
+            <ButtonLink
+              href={newTimeBlockHref(state)}
+              variant="outline"
+              size="sm"
+            >
+              Bloquear horário
+            </ButtonLink>
+          }
+        />
+        {agenda.data && !blocks.data ? (
+          <Alert tone="warning" title={blocks.message} />
+        ) : null}
         <div className="mt-2">
           {!agenda.data ? (
             <Alert tone="danger" title={agenda.message} />
@@ -63,6 +96,13 @@ export default async function AgendaPage({
               appointments={agenda.data.appointments}
               hrefFor={hrefFor}
               showBarber={state.barbeiro === undefined}
+              dayExtra={(day) => (
+                <TimeBlockList
+                  blocks={timeBlocksOn(blockList, day.date)}
+                  removeHrefFor={removeHrefFor}
+                  showBarber={state.barbeiro === undefined}
+                />
+              )}
             />
           ) : (
             <AgendaDayView
@@ -70,6 +110,14 @@ export default async function AgendaPage({
               barbers={agenda.data.barbers}
               appointments={agenda.data.appointments}
               hrefFor={hrefFor}
+              barberExtra={(barber) => (
+                <TimeBlockList
+                  blocks={blockList.filter(
+                    (block) => block.barber.id === barber.id,
+                  )}
+                  removeHrefFor={removeHrefFor}
+                />
+              )}
             />
           )}
         </div>

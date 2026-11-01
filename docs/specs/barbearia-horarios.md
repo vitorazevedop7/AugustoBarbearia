@@ -107,8 +107,8 @@ Horas trafegam como `HH:MM:SS` (o formato `time` do OpenAPI). Uma abertura nula 
 - A vitrine lendo esses dados, incluindo o rodapé que hoje tem o horário fixo: S3.05 (#54).
 - Barbeiros e serviços: S3.03 (#52) e S3.04 (#53).
 - O uso do horário no cálculo de disponibilidade: S3.07 (#56).
-- Avisar ou impedir uma mudança de horário que deixe agendamentos futuros fora do expediente. Ainda não existem agendamentos; o tema volta na Sprint 4, junto com os bloqueios.
-- Feriados e horários especiais por data. Hoje isso é um bloqueio por barbeiro (RN-03).
+- Avisar ou impedir uma mudança de horário que deixe agendamentos futuros fora do expediente. A spec dos bloqueios (S5.04, [bloqueios.md](bloqueios.md)) decidiu que o tema não entra lá: virou a issue #105 (`[Backlog]`).
+- Feriados e horários especiais por data. Hoje isso é uma folga de dia inteiro por barbeiro (RN-03, [bloqueios.md](bloqueios.md)).
 
 ## Dúvidas em aberto
 - Endereço, telefone, WhatsApp, Instagram e e-mail reais da barbearia: o Vitor preenche pela tela de cadastro.
