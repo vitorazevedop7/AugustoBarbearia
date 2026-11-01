@@ -26,6 +26,7 @@ from app.modules.availability.schemas import (
     AvailableSlot,
 )
 from app.modules.availability.slots import TimeRange
+from app.modules.notifications.dependencies import OutboxDep
 
 router = APIRouter(
     prefix="/admin",
@@ -89,9 +90,13 @@ def get_available_days(
     status_code=status.HTTP_201_CREATED,
 )
 def create_appointment(
-    data: AdminAppointmentCreate, session: SessionDep, now: NowDep
+    data: AdminAppointmentCreate,
+    session: SessionDep,
+    now: NowDep,
+    outbox: OutboxDep,
 ) -> AdminAppointmentResponse:
-    """Agenda para um cliente já cadastrado ou novo (RN-13, RN-20, RN-21)."""
+    """Agenda para um cliente já cadastrado ou novo (RN-13, RN-20, RN-21) e
+    confirma por e-mail, se ele tiver e-mail (RN-50)."""
     entry = service.create_admin_appointment(
         session,
         customer_id=data.customer_id,
@@ -100,6 +105,7 @@ def create_appointment(
         service_id=data.service_id,
         starts_at=data.starts_at,
         now=now,
+        outbox=outbox,
     )
     return to_response(entry)
 
@@ -108,10 +114,16 @@ def create_appointment(
     "/appointments/{appointment_id}/cancel", response_model=AdminAppointmentResponse
 )
 def cancel_appointment(
-    appointment_id: AppointmentId, session: SessionDep, now: NowDep
+    appointment_id: AppointmentId,
+    session: SessionDep,
+    now: NowDep,
+    outbox: OutboxDep,
 ) -> AdminAppointmentResponse:
-    """Cancela qualquer agendamento ativo, sem prazo (RN-22, RN-31 a RN-33)."""
-    return to_response(service.cancel_admin_appointment(session, appointment_id, now))
+    """Cancela qualquer agendamento ativo, sem prazo (RN-22, RN-31 a RN-33), e
+    avisa o cliente por e-mail (RN-52)."""
+    return to_response(
+        service.cancel_admin_appointment(session, appointment_id, now, outbox=outbox)
+    )
 
 
 @router.post(
@@ -123,14 +135,17 @@ def reschedule_appointment(
     data: AdminAppointmentReschedule,
     session: SessionDep,
     now: NowDep,
+    outbox: OutboxDep,
 ) -> AdminAppointmentResponse:
-    """Muda o início e, se pedido, o barbeiro, sem prazo (RN-15, RN-21, RN-22)."""
+    """Muda o início e, se pedido, o barbeiro, sem prazo (RN-15, RN-21, RN-22), e
+    avisa o cliente por e-mail (RN-52)."""
     entry = service.reschedule_admin_appointment(
         session,
         appointment_id,
         starts_at=data.starts_at,
         barber_id=data.barber_id,
         now=now,
+        outbox=outbox,
     )
     return to_response(entry)
 

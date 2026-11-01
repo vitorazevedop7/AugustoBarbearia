@@ -134,14 +134,35 @@ export function adminRescheduleHref(
   return query ? `${base}?${query}` : base;
 }
 
+/**
+ * O que a administração fica sabendo sobre o e-mail ao cliente (RN-50, RN-52).
+ * Quem recebe é decisão da API (só quem tem e-mail cadastrado); aqui o texto só
+ * não promete o que não vai acontecer.
+ */
+const NO_EMAIL = "O cliente não tem e-mail cadastrado e não recebe aviso:";
+
 /** Avisos que o detalhe mostra depois de uma ação (`?aviso=`). */
 const NOTICES = {
-  criado: "Agendamento criado.",
-  remarcado: "Agendamento remarcado.",
-  cancelado: "Agendamento cancelado.",
+  criado: "Agendamento criado. O cliente será avisado por e-mail.",
+  "criado-sem-email": `Agendamento criado. ${NO_EMAIL} confirme o horário com ele pelo telefone.`,
+  remarcado: "Agendamento remarcado. O cliente será avisado por e-mail.",
+  "remarcado-sem-email": `Agendamento remarcado. ${NO_EMAIL} avise-o do novo horário pelo telefone.`,
+  cancelado: "Agendamento cancelado. O cliente será avisado por e-mail.",
+  "cancelado-sem-email": `Agendamento cancelado. ${NO_EMAIL} avise-o pelo telefone.`,
 } as const;
 
 export type AdminNotice = keyof typeof NOTICES;
+
+/** A ação feita, para escolher o aviso conforme o cliente tenha e-mail ou não. */
+export type AdminAction = "criado" | "remarcado" | "cancelado";
+
+/** `criado-sem-email` etc. quando o cliente não tem e-mail (RN-50). */
+export function noticeFor(
+  action: AdminAction,
+  customerEmail: string | null | undefined,
+): AdminNotice {
+  return customerEmail ? action : `${action}-sem-email`;
+}
 
 /** Só aceita os avisos conhecidos: o texto da URL nunca vai para a tela. */
 export function adminNoticeMessage(
@@ -161,6 +182,13 @@ export function detailWithNotice(
 ): string {
   const href = appointmentHref(id, { data: localDate(startsAt), visao: "dia" });
   return `${href}&aviso=${notice}`;
+}
+
+/** O que as telas de confirmação dizem sobre o aviso ao cliente (RN-50, RN-52). */
+export function customerNoticeText(email: string | null | undefined): string {
+  return email
+    ? "O cliente será avisado por e-mail."
+    : "O cliente não tem e-mail cadastrado e não receberá aviso: fale com ele pelo telefone.";
 }
 
 /** Resultado das Server Actions. `values` repõe o que foi digitado. */

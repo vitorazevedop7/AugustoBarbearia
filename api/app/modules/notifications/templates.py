@@ -63,6 +63,9 @@ class AppointmentDetails:
     starts_at: datetime
     shop: ShopContact
     my_appointments_url: str
+    # RN-52: cancelado pela barbearia (`canceled_by = ADMIN`, RN-33). Só muda o
+    # texto do `CANCELED`: o cliente precisa saber que não foi ele.
+    canceled_by_shop: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,7 +111,9 @@ def short_date(starts_at: datetime) -> str:
     )
 
 
-def _copy(kind: NotificationKind, shop_name: str) -> _Copy:
+def _copy(
+    kind: NotificationKind, shop_name: str, *, canceled_by_shop: bool = False
+) -> _Copy:
     match kind:
         case NotificationKind.CONFIRMATION:
             return _Copy(
@@ -124,6 +129,20 @@ def _copy(kind: NotificationKind, shop_name: str) -> _Copy:
                     "Este é o novo horário:"
                 ),
                 outro=CHANGE_NOTICE,
+            )
+        case NotificationKind.CANCELED if canceled_by_shop:
+            # RN-52 e RN-53: quem cancelou e como falar com a barbearia (os
+            # contatos entram em todo e-mail, logo abaixo).
+            return _Copy(
+                title="Agendamento cancelado",
+                intro=(
+                    f"A {shop_name} cancelou o seu agendamento. "
+                    "O horário não está mais reservado:"
+                ),
+                outro=(
+                    "Para combinar um novo horário, fale com a barbearia pelos "
+                    "contatos abaixo ou agende pelo site."
+                ),
             )
         case NotificationKind.CANCELED:
             return _Copy(
@@ -243,7 +262,7 @@ def _html(copy: _Copy, details: AppointmentDetails) -> str:
 def render(kind: NotificationKind, details: AppointmentDetails) -> RenderedEmail:
     """RN-53: serviço, barbeiro, data e hora, endereço, link para "Meus
     agendamentos" e contato da barbearia, em todo e-mail."""
-    copy = _copy(kind, details.shop.name)
+    copy = _copy(kind, details.shop.name, canceled_by_shop=details.canceled_by_shop)
     return RenderedEmail(
         subject=_subject(kind, details.starts_at),
         html=_html(copy, details),

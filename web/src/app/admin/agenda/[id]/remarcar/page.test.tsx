@@ -75,6 +75,31 @@ describe("remarcar pela administração — /admin/agenda/[id]/remarcar (RN-15, 
     );
   });
 
+  it("a confirmação só fala de e-mail se o cliente tiver (RN-50, RN-52)", async () => {
+    await renderPage({ barbeiro: "1", data: "2026-11-03", hora: "10:30" });
+    expect(
+      screen.getByText(/O cliente será avisado por e-mail\./),
+    ).toBeInTheDocument();
+  });
+
+  it("cliente sem e-mail: a confirmação manda falar pelo telefone", async () => {
+    const base = adminAppointment();
+    api({
+      "/admin/appointments/{appointment_id}": {
+        data: { ...base, customer: { ...base.customer, email: null } },
+      },
+    });
+
+    await renderPage({ barbeiro: "1", data: "2026-11-03", hora: "10:30" });
+
+    expect(
+      screen.getByText(/não tem e-mail cadastrado e não receberá aviso/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/será avisado por e-mail/),
+    ).not.toBeInTheDocument();
+  });
+
   it("confirma com o horário novo", async () => {
     await renderPage({ barbeiro: "1", data: "2026-11-03", hora: "10:30" });
 

@@ -7,14 +7,19 @@ import { apiMessage, formValues } from "../form-state";
 import {
   actionUnavailableMessage,
   detailWithNotice,
+  noticeFor,
+  type AdminAction,
   type AdminBookingState,
-  type AdminNotice,
 } from "./admin-booking-state";
 
 const TIMEOUT_MS = 5000;
 
 type ApiResult = {
-  data?: { id: number; starts_at: string };
+  data?: {
+    id: number;
+    starts_at: string;
+    customer: { email?: string | null };
+  };
   error?: unknown;
 };
 
@@ -47,15 +52,16 @@ function failed(formData: FormData, error?: unknown): AdminBookingState {
 
 /**
  * Sucesso: vai para o detalhe do agendamento, na agenda do dia dele, com o
- * aviso. `redirect` lança uma exceção do Next, por isso fica fora dos `try`.
+ * aviso (que só fala de e-mail se o cliente tiver, RN-50). `redirect` lança uma exceção do Next, por isso fica fora dos `try`.
  */
 function finish(
   result: ApiResult,
   formData: FormData,
-  notice: AdminNotice,
+  action: AdminAction,
 ): AdminBookingState {
   if (!result.data) return failed(formData, result.error);
-  redirect(detailWithNotice(result.data.id, result.data.starts_at, notice));
+  const { id, starts_at, customer } = result.data;
+  redirect(detailWithNotice(id, starts_at, noticeFor(action, customer.email)));
 }
 
 /**

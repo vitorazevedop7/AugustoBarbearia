@@ -60,6 +60,31 @@ describe("agendamento pela administração — Server Actions (RN-20 a RN-22)", 
     });
   });
 
+  it("cliente sem e-mail: o aviso não promete e-mail (RN-50)", async () => {
+    const base = adminAppointment({ id: 12, source: "ADMIN" });
+    POST.mockResolvedValue({
+      data: { ...base, customer: { ...base.customer, email: null } },
+      response: { status: 201 },
+    });
+
+    await expect(
+      createAdminAppointment(idle, form({ ...slot, customer_id: "3" })),
+    ).rejects.toThrow("aviso=criado-sem-email");
+    await expect(
+      cancelAdminAppointment(idle, form({ appointment_id: "7" })),
+    ).rejects.toThrow("aviso=cancelado-sem-email");
+    await expect(
+      rescheduleAdminAppointment(
+        idle,
+        form({
+          appointment_id: "7",
+          starts_at: slot.starts_at,
+          barber_id: "2",
+        }),
+      ),
+    ).rejects.toThrow("aviso=remarcado-sem-email");
+  });
+
   it("cadastra o cliente novo no mesmo pedido (RN-20)", async () => {
     await expect(
       createAdminAppointment(

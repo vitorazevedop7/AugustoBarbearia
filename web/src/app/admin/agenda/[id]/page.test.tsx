@@ -147,7 +147,9 @@ describe("detalhe do agendamento — /admin/agenda/[id]", () => {
 
     await renderPage("7", { data: "2026-11-03", aviso: "criado" });
 
-    expect(screen.getByRole("status")).toHaveTextContent("Agendamento criado.");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Agendamento criado. O cliente será avisado por e-mail.",
+    );
     expect(screen.getByRole("link", { name: /^Remarcar/ })).toHaveAttribute(
       "href",
       "/admin/agenda/7/remarcar?barbeiro=1",

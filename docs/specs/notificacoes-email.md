@@ -2,17 +2,18 @@
 
 - **Issues:** #95 (S5.03, confirmação, remarcação e cancelamento pelo cliente), #100 (S5.08, lembrete), #101 (S5.09, ações da administração)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
-- **Status:** implementada (confirmação, remarcação, cancelamento pelo cliente e lembrete); as ações da administração reaproveitam o módulo na #101
+- **Status:** implementada (confirmação, remarcação, cancelamento pelo cliente, lembrete e as ações da administração)
 
 ## Contexto
 Quem agenda pelo site quer uma prova de que o horário está marcado e um aviso quando ele muda. O e-mail transacional reduz faltas (O3) e dá segurança ao cliente sem que a barbearia precise ligar para ninguém (O1). A decisão técnica está no [ADR 0006](../decisoes/0006-email-e-jobs.md): Resend pelo SDK Python, registro na mesma transação da ação e envio depois do commit.
 
 ## Quem usa
-Cliente (recebe). A administração não recebe e-mails; ela vê as falhas no banco, para diagnóstico (RN-54).
+Cliente (recebe, quando agenda, remarca ou cancela, e quando a administração faz isso por ele). A administração não recebe e-mails; ela vê as falhas no banco, para diagnóstico (RN-54).
 
 ## Histórias
 - Como **cliente**, quero **receber a confirmação do meu agendamento por e-mail** para **ter os dados à mão e saber que deu certo**.
 - Como **cliente**, quero **ser avisado por e-mail quando remarco ou cancelo** para **ter o estado novo registrado**.
+- Como **cliente de balcão com e-mail**, quero **ser avisado quando a barbearia agenda, remarca ou cancela o meu horário** para **saber o estado atual sem precisar ligar**.
 - Como **barbearia**, quero que **uma falha de e-mail nunca desfaça um agendamento** para **não perder clientes por causa de um serviço externo**.
 
 ## Regras envolvidas
@@ -52,7 +53,7 @@ O módulo expõe pouco, de propósito:
 | `RequestOutbox` / `OutboxDep` | `dependencies.py` | A `Outbox` das rotas: background task com a sessão da requisição |
 | `get_email_sender()` | `sender.py` | O remetente da configuração: Resend com `RESEND_API_KEY`, ou o remetente de log sem ela. É dependência do FastAPI, e os testes a substituem |
 
-Uso numa ação nova (#101):
+Uso numa ação nova (é o que `admin_booking` faz, #101):
 
 ```python
 def cancel_by_admin(session: Session, appointment_id: int, *, outbox: Outbox, now: datetime) -> ...:
@@ -87,10 +88,18 @@ Os dados vindos do banco são escapados no HTML. Um campo opcional da barbearia 
 | `CANCELED` | "Agendamento cancelado: …" | "Seu agendamento foi cancelado." + convite para marcar outro horário |
 | `REMINDER` | "Lembrete: seu horário é terça-feira, 3/11, às 10h00" | "Passando para lembrar do seu horário." |
 
-### Onde dispara nesta issue
+### Onde dispara
 - `create_customer_appointment` → `CONFIRMATION` (RN-50).
 - `cancel_customer_appointment` → `CANCELED` (RN-52).
 - `reschedule_customer_appointment` → `RESCHEDULED`, com o novo horário e o novo barbeiro (RN-52).
+
+- `create_admin_appointment` → `CONFIRMATION` (RN-50), para o cliente já cadastrado ou novo (S5.09).
+- `reschedule_admin_appointment` → `RESCHEDULED` (RN-52), com o novo horário e o novo barbeiro (S5.09). Como a do cliente, grava sempre o registro: o lembrete depende dele.
+- `cancel_admin_appointment` → `CANCELED` (RN-52, S5.09), com o texto da barbearia (abaixo).
+
+**Cancelamento pela barbearia (RN-52, RN-53).** O `build_email` lê `canceled_by` do agendamento (RN-33) na hora do envio. Se for `ADMIN`, o `CANCELED` diz "A <barbearia> cancelou o seu agendamento. O horário não está mais reservado:" e, no lugar do convite genérico, orienta a falar com a barbearia pelos contatos (que, como em todo e-mail, vêm no rodapé, RN-53) ou agendar pelo site. O assunto é o mesmo. O `RESCHEDULED` tem o mesmo texto nos dois lados: não há campo que diga quem remarcou (só `canceled_by` existe), e o e-mail mostra o novo horário, que é o que importa.
+
+**Na administração, o `notify` fica dentro do `try` do commit** (`admin_booking.service._commit`): ele lê o cliente e essa leitura descarrega o insert ou o update que o banco pode recusar (RN-08). Assim a recusa vira `409 SLOT_UNAVAILABLE`, nada fica gravado e nenhum e-mail sai.
 
 ### Lembrete (RN-51)
 O comando `python -m app.jobs.send_reminders` (ADR 0006) roda de hora em hora. O cron na Railway é da #32; enquanto isso, à mão:
@@ -162,6 +171,21 @@ A lógica é `send_due_reminders(session, sender, now)` em `notifications/remind
 - **Quando** o job roda a qualquer hora
 - **Então** nenhum lembrete é registrado nem enviado.
 
+**CA-10 — Ações da administração (RN-50, RN-52)**
+- **Dado** um cliente com e-mail
+- **Quando** a administração agenda, remarca ou cancela o horário dele
+- **Então** ele recebe `CONFIRMATION`, `RESCHEDULED` ou `CANCELED` (este dizendo que a barbearia cancelou, com o contato dela), e uma falha de envio deixa o registro `FAILED` sem desfazer a ação (RN-54).
+
+**CA-11 — Cliente de balcão sem e-mail (RN-50)**
+- **Dado** um cliente sem e-mail
+- **Quando** a administração agenda, remarca ou cancela
+- **Então** nada é registrado nem enviado, e a tela diz que ele não tem e-mail cadastrado.
+
+**CA-12 — Remarcação pela administração e lembrete (RN-51)**
+- **Dado** um agendamento remarcado pela administração para daqui a 24h ou mais
+- **Quando** o job de lembrete roda na janela do horário novo
+- **Então** sai o lembrete do horário novo, mesmo que o do antigo já tenha saído; remarcado com menos de 24h de antecedência, não sai.
+
 ## Fluxo
 
 ```mermaid
@@ -181,7 +205,7 @@ sequenceDiagram
 ```
 
 ## API
-Nenhuma rota nova nem mudança de contrato. As rotas do cliente (`POST /me/appointments`, `POST /me/appointments/{id}/cancel` e `POST /me/appointments/{id}/reschedule`) passam a disparar os e-mails.
+Nenhuma rota nova nem mudança de contrato. As rotas do cliente (`POST /me/appointments`, `POST /me/appointments/{id}/cancel` e `POST /me/appointments/{id}/reschedule`) e as da administração (`POST /admin/appointments`, `POST /admin/appointments/{id}/cancel` e `POST /admin/appointments/{id}/reschedule`) disparam os e-mails.
 
 ### Configuração
 | Variável | Para quê |
@@ -193,7 +217,6 @@ Nenhuma rota nova nem mudança de contrato. As rotas do cliente (`POST /me/appoi
 Para usar o Resend de verdade: criar a conta gratuita, gerar uma chave com permissão só de envio e definir o remetente. No domínio de testes do Resend (`onboarding@resend.dev`), os e-mails só chegam ao endereço dono da conta. Para enviar a qualquer cliente, é preciso verificar um domínio próprio (registros DNS indicados pelo Resend).
 
 ## Fora do escopo desta spec
-- Os e-mails das ações da administração (agendar, remarcar, cancelar, RN-52): #101.
 - Reenvio automático de `FAILED` ou `PENDING`, tela de notificações na administração e webhooks de entrega do Resend.
 - WhatsApp (Fase 2): a tabela ganha um canal quando ele entrar (ADR 0006).
 
@@ -202,4 +225,6 @@ Escolhas desta implementação que nenhuma RN decide, a confirmar:
 - O e-mail não mostra o preço. A RN-53 não pede, e o preço já aparece no site.
 - O remetente de log conta o e-mail como `SENT`, para o desenvolvimento seguir o mesmo caminho da produção.
 - Lembrete: um `FAILED` não é tentado de novo, e o remarcado com menos de 24h de antecedência não recebe lembrete. Escolhas conservadoras da #100 (evitam e-mail duplicado ou tardio), a confirmar com os proprietários.
+- Ações da administração: o `CANCELED` pela barbearia tem texto próprio, e o `RESCHEDULED` não distingue quem remarcou (escolha conservadora: sem coluna nova). Confirmar com os proprietários se querem um texto próprio também para a remarcação.
+- Ações da administração: o cliente de balcão sem e-mail que ganha um e-mail depois não recebe e-mail do que já passou, e o lembrete dele usa o `created_at` do agendamento (não o de uma remarcação que não deixou registro).
 - Lembrete: a antecedência usa o `created_at` do banco, então o relógio do servidor de banco e o da API precisam estar em hora certa.
