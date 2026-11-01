@@ -710,6 +710,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/reports/financial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Financial Report
+         * @description Faturamento, atendimentos concluídos, faltas, totais por barbeiro e por
+         *     forma de pagamento, e a lista dos concluídos do período (até 366 dias).
+         *     Entra o atendimento que **começa** no período, em São Paulo (RN-01, RN-43).
+         */
+        get: operations["financial_report_admin_reports_financial_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -978,6 +1000,19 @@ export interface components {
             active: boolean;
         };
         /**
+         * BarberTotal
+         * @description RN-42: o que o barbeiro faturou no período e as faltas dos clientes dele.
+         */
+        BarberTotal: {
+            barber: components["schemas"]["AgendaBarber"];
+            /** Total */
+            total: string;
+            /** Completed Count */
+            completed_count: number;
+            /** No Show Count */
+            no_show_count: number;
+        };
+        /**
          * BarberUpdate
          * @description Só os campos enviados mudam; foto e apresentação aceitam `null` para limpar.
          */
@@ -1017,6 +1052,25 @@ export interface components {
             method: components["schemas"]["PaymentMethod"];
             /** Amount */
             amount?: (number | string) | null;
+        };
+        /**
+         * CompletedAppointment
+         * @description Um atendimento concluído. `amount` é o valor cobrado (RN-40), não o preço.
+         */
+        CompletedAppointment: {
+            /** Appointment Id */
+            appointment_id: number;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            customer: components["schemas"]["ReportCustomer"];
+            barber: components["schemas"]["ReportBarber"];
+            service: components["schemas"]["AgendaService"];
+            /** Amount */
+            amount: string;
+            method: components["schemas"]["PaymentMethod"];
         };
         /**
          * CustomerAppointmentResponse
@@ -1138,6 +1192,37 @@ export interface components {
             /** Message */
             message: string;
         };
+        /**
+         * FinancialReport
+         * @description O relatório do período. Datas no fuso de São Paulo (`-03:00`, RN-01);
+         *     dinheiro como string decimal com duas casas (`"125.00"`).
+         */
+        FinancialReport: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Barber Id */
+            barber_id: number | null;
+            /** Total */
+            total: string;
+            /** Completed Count */
+            completed_count: number;
+            /** No Show Count */
+            no_show_count: number;
+            /** By Barber */
+            by_barber: components["schemas"]["BarberTotal"][];
+            /** By Method */
+            by_method: components["schemas"]["MethodTotal"][];
+            /** Completed */
+            completed: components["schemas"]["CompletedAppointment"][];
+        };
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -1165,6 +1250,17 @@ export interface components {
             role: "admin" | "customer";
             /** Has Phone */
             has_phone: boolean;
+        };
+        /**
+         * MethodTotal
+         * @description RN-43: o que entrou por uma forma de pagamento.
+         */
+        MethodTotal: {
+            method: components["schemas"]["PaymentMethod"];
+            /** Total */
+            total: string;
+            /** Count */
+            count: number;
         };
         /**
          * PaymentMethod
@@ -1232,6 +1328,20 @@ export interface components {
             duration_minutes: number;
             /** Barbers */
             barbers: components["schemas"]["PublicServiceBarber"][];
+        };
+        /** ReportBarber */
+        ReportBarber: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** ReportCustomer */
+        ReportCustomer: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
         };
         /**
          * ServiceBarber
@@ -4548,6 +4658,77 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    financial_report_admin_reports_financial_get: {
+        parameters: {
+            query: {
+                /** @description Data local de São Paulo. */
+                start: string;
+                /** @description Data local de São Paulo, inclusiva. */
+                end: string;
+                barber_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinancialReport"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
