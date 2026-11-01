@@ -143,10 +143,12 @@ flowchart LR
 
 ## E-mails ao cliente (S5.09, #101)
 As três ações usam o módulo `notifications` ([notificacoes-email.md](notificacoes-email.md)), no mesmo padrão do cliente: `notify` registra o e-mail na transação da ação e a `Outbox` o envia depois do commit (`OutboxDep` nas rotas).
-- **Agendar** → `CONFIRMATION` (RN-50), para o cliente já cadastrado ou novo, se ele tiver e-mail.
+- **Agendar** → `CONFIRMATION` (RN-50), para o cliente já cadastrado ou novo, se ele tiver e-mail e o horário ainda não tiver começado.
 - **Remarcar** → `RESCHEDULED` (RN-52), com o novo horário e o novo barbeiro. Toda remarcação grava o registro, porque o lembrete (RN-51) decide o horário novo pelo `created_at` dele.
 - **Cancelar** → `CANCELED` (RN-52). Como `canceled_by` é `ADMIN`, o texto diz que a barbearia cancelou e convida a falar com ela pelos contatos (RN-53).
-- **Cliente sem e-mail:** nada é registrado nem enviado (RN-50). A tela não promete e-mail: depois da ação, o aviso do detalhe e o texto das páginas de cancelar e remarcar dizem que o cliente será avisado por e-mail, ou que ele não tem e-mail cadastrado e deve ser avisado pelo telefone (`?aviso=criado-sem-email`, `remarcado-sem-email` e `cancelado-sem-email`). Quem recebe continua sendo decisão da API.
+- **Horário que já começou (decisão do proprietário):** sem e-mail. Vale para o encaixe e o registro de um atendimento passado (agendar), para cancelar um horário que já começou e para remarcar para um horário que já começou (vale o horário novo). Não afeta o lembrete: um horário que começou nunca entra na janela dele (RN-51).
+- **Cliente sem e-mail:** nada é registrado nem enviado (RN-50).
+- **A resposta diz se houve e-mail:** as três rotas respondem o agendamento da agenda mais `notified: boolean` (`AdminBookingActionResponse`): `true` quando o e-mail foi registrado para envio, `false` quando o cliente não tem e-mail ou o horário já começou. O envio pode ainda falhar (RN-54). O web só exibe: o aviso do detalhe diz "o cliente será avisado por e-mail" ou "nenhum e-mail foi enviado ao cliente" (`?aviso=criado`, `remarcado`, `cancelado` ou `*-sem-aviso`). As páginas de confirmação de cancelar e remarcar não falam de e-mail, porque a decisão só existe depois da ação. A regra de quem recebe continua só na API.
 - **Falha de envio (RN-54):** o registro fica `FAILED` e a ação continua valendo. O erro do banco no commit (horário disputado, e-mail do cliente novo repetido) desfaz tudo, inclusive o registro, e nenhum e-mail sai. Por isso o `notify` roda dentro do `try` do commit: ele lê o cliente, e essa leitura descarrega (autoflush) o insert que o banco pode recusar.
 
 ## Fora do escopo desta spec

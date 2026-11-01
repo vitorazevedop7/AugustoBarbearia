@@ -39,7 +39,8 @@ PAPER = "#FAF7F2"
 SURFACE = "#FFFFFF"
 BRAND = "#C41E3A"
 
-# RN-14: o mesmo prazo das telas do cliente.
+# RN-14: o mesmo prazo das telas do cliente (`CHANGE_NOTICE` e `can_change_at`,
+# em `appointments/service.py`); aqui só o texto.
 CHANGE_NOTICE = "Você pode remarcar ou cancelar pelo site até 2 horas antes do horário."
 
 
@@ -66,6 +67,9 @@ class AppointmentDetails:
     # RN-52: cancelado pela barbearia (`canceled_by = ADMIN`, RN-33). Só muda o
     # texto do `CANCELED`: o cliente precisa saber que não foi ele.
     canceled_by_shop: bool = False
+    # RN-14 e RN-53: o aviso "remarque ou cancele pelo site até 2 horas antes" só
+    # vale enquanto o prazo vale. Depois, o e-mail manda falar com a barbearia.
+    can_change: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,15 +115,36 @@ def short_date(starts_at: datetime) -> str:
     )
 
 
+def _change_outro(details: AppointmentDetails) -> str:
+    """RN-14 e RN-53: o aviso do prazo enquanto ele vale; depois dele, a
+    orientação de falar com a barbearia (os contatos já vêm no fim do e-mail)."""
+    if details.can_change:
+        return CHANGE_NOTICE
+    if _contacts(details.shop):
+        return (
+            "O prazo para remarcar ou cancelar pelo site já passou. Para mudar "
+            "o horário, fale com a barbearia pelos contatos abaixo."
+        )
+    return (
+        "O prazo para remarcar ou cancelar pelo site já passou. Para mudar o "
+        "horário, fale com a barbearia."
+    )
+
+
 def _copy(
-    kind: NotificationKind, shop_name: str, *, canceled_by_shop: bool = False
+    kind: NotificationKind,
+    shop_name: str,
+    *,
+    canceled_by_shop: bool = False,
+    can_change: bool = True,
+    change_outro: str = CHANGE_NOTICE,
 ) -> _Copy:
     match kind:
         case NotificationKind.CONFIRMATION:
             return _Copy(
                 title="Agendamento confirmado",
                 intro=f"Seu horário na {shop_name} está confirmado.",
-                outro=CHANGE_NOTICE,
+                outro=change_outro,
             )
         case NotificationKind.RESCHEDULED:
             return _Copy(
@@ -128,7 +153,7 @@ def _copy(
                     f"Seu agendamento na {shop_name} foi remarcado. "
                     "Este é o novo horário:"
                 ),
-                outro=CHANGE_NOTICE,
+                outro=change_outro,
             )
         case NotificationKind.CANCELED if canceled_by_shop:
             # RN-52 e RN-53: quem cancelou e como falar com a barbearia (os
@@ -155,8 +180,12 @@ def _copy(
                 title="Lembrete do seu horário",
                 intro=f"Passando para lembrar do seu horário na {shop_name}.",
                 outro=(
-                    "Não vai conseguir vir? Remarque ou cancele pelo site "
-                    "até 2 horas antes do horário."
+                    "Não vai conseguir vir? "
+                    + (
+                        "Remarque ou cancele pelo site até 2 horas antes do horário."
+                        if can_change
+                        else change_outro
+                    )
                 ),
             )
 
@@ -262,7 +291,13 @@ def _html(copy: _Copy, details: AppointmentDetails) -> str:
 def render(kind: NotificationKind, details: AppointmentDetails) -> RenderedEmail:
     """RN-53: serviço, barbeiro, data e hora, endereço, link para "Meus
     agendamentos" e contato da barbearia, em todo e-mail."""
-    copy = _copy(kind, details.shop.name, canceled_by_shop=details.canceled_by_shop)
+    copy = _copy(
+        kind,
+        details.shop.name,
+        canceled_by_shop=details.canceled_by_shop,
+        can_change=details.can_change,
+        change_outro=_change_outro(details),
+    )
     return RenderedEmail(
         subject=_subject(kind, details.starts_at),
         html=_html(copy, details),

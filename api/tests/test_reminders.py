@@ -470,7 +470,9 @@ def test_rn54_falha_ao_montar_o_email_conta_como_falha_do_job(
 ) -> None:
     from app.modules.notifications import service
 
-    def broken(session: Session, notification: Notification) -> Email:
+    def broken(
+        session: Session, notification: Notification, now: datetime | None = None
+    ) -> Email:
         raise LookupError("template quebrado")
 
     monkeypatch.setattr(service, "build_email", broken)

@@ -117,13 +117,13 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 ## 6. Notificações (e-mail)
 
-**RN-50 — Confirmação.** Quando um agendamento é criado, o cliente recebe um e-mail de confirmação, se tiver e-mail cadastrado. *Origem: D4; 2025 (RF03).*
+**RN-50 — Confirmação.** Quando um agendamento é criado, o cliente recebe um e-mail de confirmação, se tiver e-mail cadastrado. Quando a administração agenda um horário que já começou (o encaixe, ou o registro de um atendimento que já aconteceu), não há e-mail. *Origem: D4; 2025 (RF03); o caso do horário que já começou é decisão do proprietário, na S5.09.*
 
 **RN-51 — Lembrete.** O cliente recebe um lembrete por e-mail cerca de **24 horas antes** do início. Se o agendamento foi criado com menos de 24h de antecedência, não há lembrete: a confirmação já cumpre esse papel. O mesmo vale para o horário remarcado: a remarcação com menos de 24h de antecedência não gera lembrete, e um lembrete já enviado para o horário antigo não impede o do novo. *Origem: D4; os 24h são padrão adotado; o caso do remarcado é padrão adotado, a confirmar.*
 
-**RN-52 — Alterações.** Remarcação e cancelamento, feitos por qualquer lado, geram e-mail ao cliente com o novo estado do agendamento. *Origem: D4; 2025 (sistema de e-mails do projeto acadêmico).*
+**RN-52 — Alterações.** Remarcação e cancelamento, feitos por qualquer lado, geram e-mail ao cliente com o novo estado do agendamento (o cancelamento feito pela barbearia diz que foi ela). Cancelar, ou remarcar para um horário que já começou, pela administração não gera e-mail: não há o que avisar. *Origem: D4; 2025 (sistema de e-mails do projeto acadêmico); o caso do horário que já começou é decisão do proprietário, na S5.09.*
 
-**RN-53 — Conteúdo.** Todo e-mail traz o serviço, o barbeiro, a data e a hora, o endereço, um link para "Meus agendamentos" e o contato da barbearia. *Origem: padrão adotado.*
+**RN-53 — Conteúdo.** Todo e-mail traz o serviço, o barbeiro, a data e a hora, o endereço, um link para "Meus agendamentos" e o contato da barbearia. O aviso "você pode remarcar ou cancelar pelo site até 2 horas antes" (RN-14) só aparece enquanto o prazo vale; depois dele, o e-mail manda falar com a barbearia. *Origem: padrão adotado; o aviso do prazo é decisão do proprietário, na S5.09.*
 
 **RN-54 — Falha de envio.** Se um e-mail falhar, o agendamento **não** é desfeito. A falha fica registrada para diagnóstico. *Origem: padrão adotado.*
 

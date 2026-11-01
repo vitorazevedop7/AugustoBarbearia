@@ -37,29 +37,6 @@ describe("cancelar pela administração — /admin/agenda/[id]/cancelar (RN-22)"
     ).toBeTruthy();
   });
 
-  it("diz que o cliente será avisado por e-mail, ou que não receberá (RN-50, RN-52)", async () => {
-    await renderPage();
-    expect(
-      screen.getByText(/O cliente será avisado por e-mail\./),
-    ).toBeInTheDocument();
-  });
-
-  it("cliente sem e-mail não é prometido e-mail", async () => {
-    const base = adminAppointment();
-    GET.mockResolvedValue({
-      data: { ...base, customer: { ...base.customer, email: null } },
-    });
-
-    await renderPage();
-
-    expect(
-      screen.getByText(/não tem e-mail cadastrado e não receberá aviso/),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/será avisado por e-mail/),
-    ).not.toBeInTheDocument();
-  });
-
   it("agendamento que não está ativo não tem o botão", async () => {
     GET.mockResolvedValue({ data: adminAppointment({ status: "COMPLETED" }) });
 

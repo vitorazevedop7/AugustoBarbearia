@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   adminNoticeMessage,
-  customerNoticeText,
   adminRescheduleHref,
   detailWithNotice,
   noticeFor,
@@ -75,23 +74,19 @@ describe("estado do agendamento manual na URL", () => {
     });
   });
 
-  it("o aviso só fala de e-mail quando o cliente tem e-mail (RN-50, RN-52)", () => {
-    expect(noticeFor("criado", "ana@example.com")).toBe("criado");
-    expect(noticeFor("remarcado", null)).toBe("remarcado-sem-email");
-    expect(noticeFor("cancelado", undefined)).toBe("cancelado-sem-email");
+  it("o aviso só fala de e-mail quando a API o registrou (RN-50, RN-52)", () => {
+    expect(noticeFor("criado", true)).toBe("criado");
+    expect(noticeFor("remarcado", false)).toBe("remarcado-sem-aviso");
+    expect(noticeFor("cancelado", false)).toBe("cancelado-sem-aviso");
     for (const notice of [
-      "criado-sem-email",
-      "remarcado-sem-email",
-      "cancelado-sem-email",
+      "criado-sem-aviso",
+      "remarcado-sem-aviso",
+      "cancelado-sem-aviso",
     ]) {
       const message = adminNoticeMessage(notice) ?? "";
-      expect(message).toContain("não tem e-mail cadastrado");
+      expect(message).toContain("Nenhum e-mail foi enviado");
       expect(message).not.toContain("será avisado por e-mail");
     }
-    expect(customerNoticeText("ana@example.com")).toBe(
-      "O cliente será avisado por e-mail.",
-    );
-    expect(customerNoticeText(null)).toContain("não tem e-mail cadastrado");
   });
 
   it("apara a busca e ignora valores repetidos", () => {

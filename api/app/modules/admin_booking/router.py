@@ -17,9 +17,9 @@ from app.modules.admin_booking import service
 from app.modules.admin_booking.schemas import (
     AdminAppointmentCreate,
     AdminAppointmentReschedule,
+    AdminBookingActionResponse,
 )
 from app.modules.agenda.router import to_response
-from app.modules.agenda.schemas import AdminAppointmentResponse
 from app.modules.availability.schemas import (
     AvailabilityResponse,
     AvailableDaysResponse,
@@ -48,6 +48,12 @@ LocalDate = Annotated[
     dt.date, Query(alias="date", description="Data local de São Paulo.")
 ]
 OptionalBarber = Annotated[int | None, Query(description="Sem ele, o barbeiro atual.")]
+
+
+def _action_response(result: service.ActionResult) -> AdminBookingActionResponse:
+    return AdminBookingActionResponse(
+        **to_response(result.entry).model_dump(), notified=result.notified
+    )
 
 
 def _slots(slots: list[TimeRange]) -> list[AvailableSlot]:
@@ -86,7 +92,7 @@ def get_available_days(
 
 @router.post(
     "/appointments",
-    response_model=AdminAppointmentResponse,
+    response_model=AdminBookingActionResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_appointment(
@@ -94,10 +100,10 @@ def create_appointment(
     session: SessionDep,
     now: NowDep,
     outbox: OutboxDep,
-) -> AdminAppointmentResponse:
+) -> AdminBookingActionResponse:
     """Agenda para um cliente já cadastrado ou novo (RN-13, RN-20, RN-21) e
     confirma por e-mail, se ele tiver e-mail (RN-50)."""
-    entry = service.create_admin_appointment(
+    result = service.create_admin_appointment(
         session,
         customer_id=data.customer_id,
         new_customer=data.customer,
@@ -107,28 +113,29 @@ def create_appointment(
         now=now,
         outbox=outbox,
     )
-    return to_response(entry)
+    return _action_response(result)
 
 
 @router.post(
-    "/appointments/{appointment_id}/cancel", response_model=AdminAppointmentResponse
+    "/appointments/{appointment_id}/cancel",
+    response_model=AdminBookingActionResponse,
 )
 def cancel_appointment(
     appointment_id: AppointmentId,
     session: SessionDep,
     now: NowDep,
     outbox: OutboxDep,
-) -> AdminAppointmentResponse:
+) -> AdminBookingActionResponse:
     """Cancela qualquer agendamento ativo, sem prazo (RN-22, RN-31 a RN-33), e
     avisa o cliente por e-mail (RN-52)."""
-    return to_response(
+    return _action_response(
         service.cancel_admin_appointment(session, appointment_id, now, outbox=outbox)
     )
 
 
 @router.post(
     "/appointments/{appointment_id}/reschedule",
-    response_model=AdminAppointmentResponse,
+    response_model=AdminBookingActionResponse,
 )
 def reschedule_appointment(
     appointment_id: AppointmentId,
@@ -136,10 +143,10 @@ def reschedule_appointment(
     session: SessionDep,
     now: NowDep,
     outbox: OutboxDep,
-) -> AdminAppointmentResponse:
+) -> AdminBookingActionResponse:
     """Muda o início e, se pedido, o barbeiro, sem prazo (RN-15, RN-21, RN-22), e
     avisa o cliente por e-mail (RN-52)."""
-    entry = service.reschedule_admin_appointment(
+    result = service.reschedule_admin_appointment(
         session,
         appointment_id,
         starts_at=data.starts_at,
@@ -147,7 +154,7 @@ def reschedule_appointment(
         now=now,
         outbox=outbox,
     )
-    return to_response(entry)
+    return _action_response(result)
 
 
 @router.get(

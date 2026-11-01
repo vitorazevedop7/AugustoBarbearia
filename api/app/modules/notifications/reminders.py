@@ -213,7 +213,7 @@ def _send_if_still_due(
     if still_due is None:
         session.commit()  # solta a trava
         return None
-    return send_notification(session, notification_id, sender)
+    return send_notification(session, notification_id, sender, now)
 
 
 def _count(report: ReminderReport, notification: Notification | None) -> ReminderReport:
