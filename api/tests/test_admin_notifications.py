@@ -269,9 +269,14 @@ def test_rn08_rn52_remarcacao_recusada_no_commit_nao_registra_nem_envia(
     edvaldo: int,
     monkeypatch: MonkeyPatch,
 ) -> None:
+    """O `notify` lê o cliente, e essa leitura descarrega (autoflush) o update
+    que o banco recusa. Ele precisa estar dentro do `try` do `_commit` para a
+    recusa virar 409; por isso o cliente sai da sessão, e a leitura vai ao banco
+    (com ele na sessão, o `session.get` não faria SELECT nem autoflush)."""
     appointment = booked_for(db_session, bia, edvaldo, TWO_PM)
     make_appointment(db_session, barber=edvaldo, starts_at=local(2026, 11, 2, 16))
     monkeypatch.setattr(admin_service, "ensure_slot_available", lambda *_a, **_k: None)
+    db_session.expunge(bia)
 
     response = reschedule(api, appointment.id, local(2026, 11, 2, 16))
 
