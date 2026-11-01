@@ -18,7 +18,11 @@ from app.modules.appointments.models import (
     AppointmentStatus,
     CanceledBy,
 )
-from app.modules.appointments.service import is_slot_conflict
+from app.modules.appointments.service import (
+    CHANGE_NOTICE,
+    can_change_at,
+    is_slot_conflict,
+)
 from app.modules.availability.service import (
     Rescheduling,
     ensure_slot_available,
@@ -37,9 +41,6 @@ from app.modules.notifications.service import Outbox, notify
 
 # RN-11: no máximo 2 agendamentos ativos no futuro por cliente.
 MAX_ACTIVE_APPOINTMENTS = 2
-
-# RN-14: o cliente cancela ou remarca até 2 horas antes do início.
-CHANGE_NOTICE = timedelta(hours=2)
 
 
 @dataclass(frozen=True, slots=True)
@@ -174,7 +175,7 @@ def can_change(appointment: Appointment, now: datetime) -> bool:
     """RN-14 e RN-31: ativo e com pelo menos 2 horas até o início. O limite é
     inclusivo: exatamente 2 horas antes ainda pode."""
     deadline = change_deadline(appointment)
-    return deadline is not None and now <= deadline
+    return deadline is not None and can_change_at(appointment.starts_at, now)
 
 
 def _with_relations(session: Session, appointment: Appointment) -> CustomerAppointment:

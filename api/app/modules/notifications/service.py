@@ -10,6 +10,7 @@ A API interna, que o lembrete (S5.08) e as ações da administração (S5.09, em
 """
 
 import logging
+from datetime import datetime
 from typing import Protocol
 
 from sqlalchemy import select
@@ -18,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.clock import utc_now
 from app.config import get_settings
 from app.modules.appointments.models import Appointment, CanceledBy
+from app.modules.appointments.service import can_change_at
 from app.modules.barbers.service import get_barber
 from app.modules.catalog.service import get_service
 from app.modules.customers.models import Customer
@@ -72,8 +74,16 @@ def notify(
     return notification
 
 
-def build_email(session: Session, notification: Notification) -> Email:
-    """Monta o e-mail com o estado atual do agendamento (RN-52, RN-53)."""
+def build_email(
+    session: Session, notification: Notification, now: datetime | None = None
+) -> Email:
+    """Monta o e-mail com o estado atual do agendamento (RN-52, RN-53).
+
+    `now` é o relógio de quem envia (as rotas e o job o injetam, e os testes o
+    fixam); o aviso do prazo de 2 horas só aparece enquanto ele vale (RN-14,
+    RN-53).
+    """
+    now = utc_now() if now is None else now
     appointment = notification.appointment
     customer = session.get(Customer, appointment.customer_id)
     if customer is None:
@@ -97,6 +107,7 @@ def build_email(session: Session, notification: Notification) -> Email:
             ),
             my_appointments_url=f"{web_base_url}/meus-agendamentos",
             canceled_by_shop=appointment.canceled_by == CanceledBy.ADMIN,
+            can_change=can_change_at(appointment.starts_at, now),
         ),
     )
     return Email(
@@ -113,7 +124,10 @@ def _describe(error: Exception) -> str:
 
 
 def send_notification(
-    session: Session, notification_id: int, sender: EmailSender
+    session: Session,
+    notification_id: int,
+    sender: EmailSender,
+    now: datetime | None = None,
 ) -> Notification:
     """Envia um registro `PENDING` e grava o resultado, com commit.
 
@@ -132,7 +146,7 @@ def send_notification(
         session.commit()
         return notification
     try:
-        sender.send(build_email(session, notification))
+        sender.send(build_email(session, notification, now))
     except Exception as error:
         logger.warning(
             "Falha ao enviar a notificação %s (%s).",

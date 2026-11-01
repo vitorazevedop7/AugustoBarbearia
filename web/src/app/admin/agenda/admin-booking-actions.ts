@@ -18,7 +18,7 @@ type ApiResult = {
   data?: {
     id: number;
     starts_at: string;
-    customer: { email?: string | null };
+    notified: boolean;
   };
   error?: unknown;
 };
@@ -52,7 +52,7 @@ function failed(formData: FormData, error?: unknown): AdminBookingState {
 
 /**
  * Sucesso: vai para o detalhe do agendamento, na agenda do dia dele, com o
- * aviso (que só fala de e-mail se o cliente tiver, RN-50). `redirect` lança uma exceção do Next, por isso fica fora dos `try`.
+ * aviso (que só fala de e-mail se a API o registrou, `notified`, RN-50). `redirect` lança uma exceção do Next, por isso fica fora dos `try`.
  */
 function finish(
   result: ApiResult,
@@ -60,8 +60,8 @@ function finish(
   action: AdminAction,
 ): AdminBookingState {
   if (!result.data) return failed(formData, result.error);
-  const { id, starts_at, customer } = result.data;
-  redirect(detailWithNotice(id, starts_at, noticeFor(action, customer.email)));
+  const { id, starts_at, notified } = result.data;
+  redirect(detailWithNotice(id, starts_at, noticeFor(action, notified)));
 }
 
 /**

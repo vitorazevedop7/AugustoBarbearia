@@ -121,6 +121,7 @@ def test_rn50_administracao_agenda_e_o_cliente_recebe_a_confirmacao(
     response = create(api, edvaldo, corte_e_barba, TEN, customer_id=bia.id)
 
     assert response.status_code == 201, response.json()
+    assert response.json()["notified"] is True
     [notification] = notifications_of(db_session, response.json()["id"])
     assert notification.kind == NotificationKind.CONFIRMATION
     assert notification.recipient == "bia@example.com"
@@ -165,6 +166,7 @@ def test_rn50_cliente_novo_sem_email_nao_ganha_registro_nem_envio(
 
     assert response.status_code == 201, response.json()
     assert response.json()["customer"]["email"] is None
+    assert response.json()["notified"] is False
     assert all_notifications(db_session) == []
     assert sender.sent == []
 
@@ -188,6 +190,8 @@ def test_rn50_cliente_cadastrado_sem_email_nao_recebe_nada_em_nenhuma_acao(
     assert canceled.status_code == 200, canceled.json()
 
     assert canceled.json()["status"] == "CANCELED"
+    assert [created.json()["notified"], moved.json()["notified"]] == [False, False]
+    assert canceled.json()["notified"] is False
     assert all_notifications(db_session) == []
     assert sender.sent == []
 
@@ -235,6 +239,7 @@ def test_rn52_administracao_remarca_e_o_cliente_recebe_o_novo_horario(
     response = reschedule(api, appointment.id, local(2026, 11, 4, 16), barber_id=lauro)
 
     assert response.status_code == 200, response.json()
+    assert response.json()["notified"] is True
     [notification] = notifications_of(db_session, appointment.id)
     assert notification.kind == NotificationKind.RESCHEDULED
     assert notification.status == NotificationStatus.SENT
@@ -303,6 +308,7 @@ def test_rn52_rn53_cancelamento_diz_que_foi_a_barbearia_e_traz_o_contato(
 
     assert response.status_code == 200, response.json()
     assert response.json()["canceled_by"] == "ADMIN"
+    assert response.json()["notified"] is True
     [notification] = notifications_of(db_session, appointment.id)
     assert notification.kind == NotificationKind.CANCELED
     assert notification.status == NotificationStatus.SENT

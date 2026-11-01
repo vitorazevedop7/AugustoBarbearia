@@ -20,6 +20,7 @@ Cliente (recebe, quando agenda, remarca ou cancela, e quando a administração f
 - RN-01 — Fuso de São Paulo (data e hora no e-mail)
 - RN-50 — Confirmação
 - RN-51 — Lembrete
+- RN-14 — Prazo de 2 horas (o aviso do e-mail)
 - RN-52 — Alterações
 - RN-53 — Conteúdo
 - RN-54 — Falha de envio
@@ -36,7 +37,7 @@ Cliente (recebe, quando agenda, remarca ou cancela, e quando a administração f
 ### Registro e envio em dois tempos (ADR 0006)
 1. **Na transação da ação:** `notify(session, appointment, kind)` cria o registro `PENDING`. Se a ação for desfeita (horário tomado, por exemplo), o registro some junto.
 2. **Depois do commit:** o service entrega o registro à `Outbox`. Na API, a `Outbox` da requisição agenda o envio como *background task* do FastAPI: a resposta sai primeiro e o envio usa a mesma sessão, que só fecha depois das tarefas.
-3. **No envio:** `send_notification(session, notification_id, sender)` trava o registro, monta o e-mail e chama o remetente. Sucesso → `SENT`; qualquer exceção do remetente → `FAILED` com a mensagem do erro. O agendamento nunca é desfeito (RN-54).
+3. **No envio:** `send_notification(session, notification_id, sender, now=None)` trava o registro, monta o e-mail e chama o remetente. Sucesso → `SENT`; qualquer exceção do remetente → `FAILED` com a mensagem do erro. O agendamento nunca é desfeito (RN-54).
 
 O envio é **idempotente**: só um registro `PENDING` é enviado. Chamar de novo para um registro `SENT` ou `FAILED` não faz nada. No Resend, o envio leva a chave de idempotência `notification-<id>`, então uma repetição do mesmo registro não gera um segundo e-mail.
 
@@ -49,7 +50,7 @@ O módulo expõe pouco, de propósito:
 |---|---|---|
 | `notify(session, appointment, kind) -> Notification \| None` | `service.py` | Registra na transação da ação. Não faz commit. `None` quando o cliente não tem e-mail |
 | `Outbox` (protocolo) com `send_after_commit(notification)` | `service.py` | O que o service chama **depois** do commit. Aceita `None` |
-| `send_notification(session, notification_id, sender)` | `service.py` | Envia um registro `PENDING` e marca `SENT` ou `FAILED`, com commit |
+| `send_notification(session, notification_id, sender, now=None)` | `service.py` | Envia um registro `PENDING` e marca `SENT` ou `FAILED`, com commit. `now` é o relógio que decide o aviso do prazo no e-mail (`utc_now` se omitido); a `RequestOutbox` passa o `utc_now` da requisição e o job do lembrete, o `now` dele |
 | `RequestOutbox` / `OutboxDep` | `dependencies.py` | A `Outbox` das rotas: background task com a sessão da requisição |
 | `get_email_sender()` | `sender.py` | O remetente da configuração: Resend com `RESEND_API_KEY`, ou o remetente de log sem ela. É dependência do FastAPI, e os testes a substituem |
 
@@ -83,10 +84,14 @@ Os dados vindos do banco são escapados no HTML. Um campo opcional da barbearia 
 
 | Tipo | Assunto | Primeira frase |
 |---|---|---|
-| `CONFIRMATION` | "Agendamento confirmado: terça-feira, 3/11, às 10h00" | "Seu horário está confirmado." + o prazo de 2 horas para remarcar ou cancelar pelo site (RN-14) |
+| `CONFIRMATION` | "Agendamento confirmado: terça-feira, 3/11, às 10h00" | "Seu horário está confirmado." + o aviso do prazo de 2 horas, enquanto ele vale (abaixo) |
 | `RESCHEDULED` | "Agendamento remarcado: …" | "Seu agendamento foi remarcado. Veja o novo horário." |
 | `CANCELED` | "Agendamento cancelado: …" | "Seu agendamento foi cancelado." + convite para marcar outro horário |
 | `REMINDER` | "Lembrete: seu horário é terça-feira, 3/11, às 10h00" | "Passando para lembrar do seu horário." |
+
+**Aviso do prazo (RN-14, RN-53).** "Você pode remarcar ou cancelar pelo site até 2 horas antes do horário" (confirmação, remarcação e lembrete) só aparece enquanto o prazo vale: `can_change_at(starts_at, now)` de `appointments/service.py`, a mesma função e a mesma constante `CHANGE_NOTICE` que o `booking` usa (o limite é inclusivo: exatamente 2 horas antes ainda vale). Depois dele, o e-mail diz que o prazo para remarcar ou cancelar pelo site já passou e manda falar com a barbearia, "pelos contatos abaixo" quando o e-mail traz contatos (RN-53) ou só "com a barbearia" quando não traz. O `CANCELED` não tem o aviso. O "agora" é o do envio (`now` de `build_email`), então um e-mail enviado depois do commit sempre reflete o momento dele.
+
+**Horário que já começou (RN-50, RN-52, decisão do proprietário).** As ações da administração não registram nem enviam e-mail quando o horário já começou (`starts_at <= now`, com o `utc_now` da requisição): confirmação de um encaixe ou de um atendimento já acontecido, cancelamento de um horário que já começou e remarcação para um horário que já começou (vale o horário novo). Não há lembrete a proteger: o horário que começou nunca entra na janela do lembrete (RN-51), então a falta do `RESCHEDULED` não muda o job. As ações do cliente não mudam: o horário dele sempre está no futuro.
 
 ### Onde dispara
 - `create_customer_appointment` → `CONFIRMATION` (RN-50).
@@ -179,7 +184,16 @@ A lógica é `send_due_reminders(session, sender, now)` em `notifications/remind
 **CA-11 — Cliente de balcão sem e-mail (RN-50)**
 - **Dado** um cliente sem e-mail
 - **Quando** a administração agenda, remarca ou cancela
-- **Então** nada é registrado nem enviado, e a tela diz que ele não tem e-mail cadastrado.
+- **Então** nada é registrado nem enviado, e a resposta traz `notified = false`, que a tela usa para não prometer e-mail.
+
+**CA-13 — Horário que já começou (RN-50, RN-52)**
+- **Dado** um cliente com e-mail e uma ação da administração sobre um horário que já começou (encaixe, cancelamento, remarcação para um horário que já começou)
+- **Então** nada é registrado nem enviado, e a resposta traz `notified = false`.
+
+**CA-14 — Aviso do prazo (RN-14, RN-53)**
+- **Dado** um e-mail de confirmação, remarcação ou lembrete
+- **Quando** faltam mais de 2 horas para o início (ou exatamente 2)
+- **Então** ele traz o aviso "remarque ou cancele pelo site até 2 horas antes"; com menos de 2 horas, diz que o prazo passou e manda falar com a barbearia.
 
 **CA-12 — Remarcação pela administração e lembrete (RN-51)**
 - **Dado** um agendamento remarcado pela administração para daqui a 24h ou mais

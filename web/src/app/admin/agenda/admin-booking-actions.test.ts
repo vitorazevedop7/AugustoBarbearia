@@ -34,7 +34,10 @@ const slot = {
 describe("agendamento pela administração — Server Actions (RN-20 a RN-22)", () => {
   beforeEach(() => {
     POST.mockReset().mockResolvedValue({
-      data: adminAppointment({ id: 12, source: "ADMIN" }),
+      data: {
+        ...adminAppointment({ id: 12, source: "ADMIN" }),
+        notified: true,
+      },
       response: { status: 201 },
     });
     vi.mocked(createApiClient).mockReturnValue({ POST } as never);
@@ -60,19 +63,18 @@ describe("agendamento pela administração — Server Actions (RN-20 a RN-22)", 
     });
   });
 
-  it("cliente sem e-mail: o aviso não promete e-mail (RN-50)", async () => {
-    const base = adminAppointment({ id: 12, source: "ADMIN" });
+  it("sem e-mail registrado pela API, o aviso não promete e-mail (RN-50, RN-52)", async () => {
     POST.mockResolvedValue({
-      data: { ...base, customer: { ...base.customer, email: null } },
+      data: { ...adminAppointment({ id: 12 }), notified: false },
       response: { status: 201 },
     });
 
     await expect(
       createAdminAppointment(idle, form({ ...slot, customer_id: "3" })),
-    ).rejects.toThrow("aviso=criado-sem-email");
+    ).rejects.toThrow("aviso=criado-sem-aviso");
     await expect(
       cancelAdminAppointment(idle, form({ appointment_id: "7" })),
-    ).rejects.toThrow("aviso=cancelado-sem-email");
+    ).rejects.toThrow("aviso=cancelado-sem-aviso");
     await expect(
       rescheduleAdminAppointment(
         idle,
@@ -82,7 +84,7 @@ describe("agendamento pela administração — Server Actions (RN-20 a RN-22)", 
           barber_id: "2",
         }),
       ),
-    ).rejects.toThrow("aviso=remarcado-sem-email");
+    ).rejects.toThrow("aviso=remarcado-sem-aviso");
   });
 
   it("cadastra o cliente novo no mesmo pedido (RN-20)", async () => {

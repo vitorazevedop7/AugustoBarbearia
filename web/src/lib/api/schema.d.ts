@@ -808,6 +808,44 @@ export interface components {
             closed_by: string | null;
             payment: components["schemas"]["PaymentResponse"] | null;
         };
+        /**
+         * AdminBookingActionResponse
+         * @description O agendamento depois de agendar, remarcar ou cancelar, mais o que a tela
+         *     precisa saber sobre o e-mail ao cliente (RN-50, RN-52).
+         */
+        AdminBookingActionResponse: {
+            /** Id */
+            id: number;
+            status: components["schemas"]["AppointmentStatus"];
+            source: components["schemas"]["AppointmentSource"];
+            customer: components["schemas"]["AgendaCustomer"];
+            barber: components["schemas"]["AgendaBarber"];
+            service: components["schemas"]["AgendaService"];
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Price */
+            price: string;
+            /** Duration Minutes */
+            duration_minutes: number;
+            /** Canceled At */
+            canceled_at: string | null;
+            canceled_by: components["schemas"]["CanceledBy"] | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Closed By */
+            closed_by: string | null;
+            payment: components["schemas"]["PaymentResponse"] | null;
+            /** Notified */
+            notified: boolean;
+        };
         /** AdminPingResponse */
         AdminPingResponse: {
             /**
@@ -3573,7 +3611,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminAppointmentResponse"];
+                    "application/json": components["schemas"]["AdminBookingActionResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -4389,7 +4427,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminAppointmentResponse"];
+                    "application/json": components["schemas"]["AdminBookingActionResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -4469,7 +4507,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminAppointmentResponse"];
+                    "application/json": components["schemas"]["AdminBookingActionResponse"];
                 };
             };
             /** @description Unauthorized */

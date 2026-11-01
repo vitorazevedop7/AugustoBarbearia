@@ -4,7 +4,8 @@ A administração agenda para qualquer cliente, já cadastrado ou novo, com a
 política da RN-21 (`ADMIN_POLICY`: sem antecedência mínima, sem janela e sem
 limite por cliente), e cancela ou remarca qualquer agendamento ativo sem o
 prazo de 2 horas do cliente (RN-22). Cada ação registra o e-mail ao cliente na
-mesma transação e o envia depois do commit (RN-50, RN-52, RN-54).
+mesma transação e o envia depois do commit (RN-50, RN-52, RN-54), menos quando o
+horário já começou (decisão do proprietário, RN-50 e RN-52).
 """
 
 from dataclasses import dataclass
@@ -47,20 +48,42 @@ from app.modules.notifications.service import Outbox, notify
 ADMIN_DAYS_AHEAD = 30
 
 
+@dataclass(frozen=True, slots=True)
+class ActionResult:
+    """O agendamento depois da ação e se o e-mail ao cliente foi registrado
+    (`notified`): `False` quando ele não tem e-mail (RN-50) ou o horário já
+    começou. O envio em si ainda pode falhar (RN-54)."""
+
+    entry: AgendaEntry
+    notified: bool
+
+
 def _commit(
-    session: Session, appointment: Appointment, kind: NotificationKind
+    session: Session,
+    appointment: Appointment,
+    kind: NotificationKind,
+    now: datetime,
 ) -> Notification | None:
     """Registra o e-mail `kind` do agendamento (RN-50, RN-52) e grava a
-    transação, devolvendo o registro para a `Outbox`. RN-08: se outra reserva
-    ficou com o horário ao mesmo tempo, o banco recusa e a resposta é a do
-    horário indisponível; RN-23: o e-mail do cliente novo pode ter sido gravado
-    por outro cadastro.
+    transação, devolvendo o registro para a `Outbox`.
+
+    Sem e-mail quando o horário já começou (`starts_at <= now`): a confirmação,
+    a remarcação ou o cancelamento de um atendimento que já está acontecendo ou
+    já aconteceu (o encaixe, o registro de um horário passado) não tem o que
+    avisar. Para a remarcação, vale o horário novo. Não há lembrete a proteger:
+    o horário que começou nunca entra na janela do lembrete (RN-51).
+
+    RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco recusa e
+    a resposta é a do horário indisponível; RN-23: o e-mail do cliente novo
+    pode ter sido gravado por outro cadastro.
 
     O `notify` fica dentro do `try`: ele lê o cliente, e essa leitura descarrega
     (autoflush) o insert ou o update do agendamento, que é onde o banco recusa.
     """
     try:
-        notification = notify(session, appointment, kind)
+        notification = (
+            notify(session, appointment, kind) if appointment.starts_at > now else None
+        )
         session.commit()
     except DBAPIError as error:
         session.rollback()
@@ -102,7 +125,7 @@ def create_admin_appointment(
     starts_at: datetime,
     now: datetime,
     outbox: Outbox,
-) -> AgendaEntry:
+) -> ActionResult:
     """Cria o agendamento pela administração, numa transação só:
 
     1. RN-20: o cliente já cadastrado precisa existir;
@@ -117,8 +140,8 @@ def create_admin_appointment(
     6. RN-08: o `commit` grava o cliente e o agendamento juntos. Se outra
        reserva ganhou o horário, nada fica gravado, nem o cliente novo;
     7. RN-50: o e-mail de confirmação é registrado na mesma transação (não há
-       registro se o cliente não tem e-mail) e enviado depois do commit. Uma
-       falha no envio não desfaz nada (RN-54).
+       registro se o cliente não tem e-mail ou se o horário já começou) e
+       enviado depois do commit. Uma falha no envio não desfaz nada (RN-54).
     """
     if customer_id is not None:
         get_customer(session, customer_id)
@@ -148,9 +171,11 @@ def create_admin_appointment(
         source=AppointmentSource.ADMIN,
     )
     session.add(appointment)
-    notification = _commit(session, appointment, NotificationKind.CONFIRMATION)
+    notification = _commit(session, appointment, NotificationKind.CONFIRMATION, now)
     outbox.send_after_commit(notification)
-    return get_admin_appointment(session, appointment.id)
+    return ActionResult(
+        get_admin_appointment(session, appointment.id), notification is not None
+    )
 
 
 def _locked_appointment(session: Session, appointment_id: int) -> Appointment:
@@ -189,22 +214,28 @@ def _ensure_active(appointment: Appointment) -> None:
 
 def cancel_admin_appointment(
     session: Session, appointment_id: int, now: datetime, *, outbox: Outbox
-) -> AgendaEntry:
+) -> ActionResult:
     """A administração cancela qualquer agendamento ativo, sem prazo (RN-22,
     RN-31), inclusive o que já começou. Registra quando foi e que foi a
     administração (RN-33). A vaga fica livre na hora (RN-32): a exclusion
     constraint da RN-08 só considera `SCHEDULED`. RN-52: o aviso ao cliente
     (que diz que foi a barbearia, pelo `canceled_by`) é registrado junto e
-    enviado depois do commit."""
+    enviado depois do commit, a não ser que o horário já tenha começado."""
     appointment = _locked_appointment(session, appointment_id)
     _ensure_active(appointment)
     appointment.status = AppointmentStatus.CANCELED
     appointment.canceled_at = now
     appointment.canceled_by = CanceledBy.ADMIN
-    notification = notify(session, appointment, NotificationKind.CANCELED)
+    notification = (
+        notify(session, appointment, NotificationKind.CANCELED)
+        if appointment.starts_at > now
+        else None
+    )
     session.commit()
     outbox.send_after_commit(notification)
-    return get_admin_appointment(session, appointment.id)
+    return ActionResult(
+        get_admin_appointment(session, appointment.id), notification is not None
+    )
 
 
 def _rescheduling(appointment: Appointment) -> Rescheduling:
@@ -224,7 +255,7 @@ def reschedule_admin_appointment(
     barber_id: int | None,
     now: datetime,
     outbox: Outbox,
-) -> AgendaEntry:
+) -> ActionResult:
     """A administração remarca qualquer agendamento ativo, sem prazo (RN-22,
     RN-15, RN-31), numa transação:
 
@@ -237,7 +268,8 @@ def reschedule_admin_appointment(
     5. RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco
        recusa e o agendamento continua no horário antigo;
     6. RN-52: o `RESCHEDULED`, com o novo horário e o novo barbeiro, é
-       registrado na mesma transação e enviado depois do commit. O lembrete
+       registrado na mesma transação e enviado depois do commit, a não ser que
+       o novo horário já tenha começado. O lembrete
        (RN-51) decide o horário novo pelo `created_at` desse registro, então
        toda remarcação o grava, por qualquer lado.
     """
@@ -262,9 +294,11 @@ def reschedule_admin_appointment(
     appointment.barber_id = new_barber_id
     appointment.starts_at = starts_at
     appointment.ends_at = starts_at + timedelta(minutes=appointment.duration_minutes)
-    notification = _commit(session, appointment, NotificationKind.RESCHEDULED)
+    notification = _commit(session, appointment, NotificationKind.RESCHEDULED, now)
     outbox.send_after_commit(notification)
-    return get_admin_appointment(session, appointment.id)
+    return ActionResult(
+        get_admin_appointment(session, appointment.id), notification is not None
+    )
 
 
 # Horários com a política da administração (RN-21).

@@ -5,10 +5,7 @@ import { localDate } from "@/lib/format";
 import { cancelAdminAppointment } from "../../admin-booking-actions";
 import { AdminBookingForm } from "../../admin-booking-form";
 import { AdminStepFrame, appointmentSummary } from "../../admin-booking-frame";
-import {
-  customerNoticeText,
-  notActiveMessage,
-} from "../../admin-booking-state";
+import { notActiveMessage } from "../../admin-booking-state";
 import {
   appointmentHref,
   appointmentId,
@@ -73,8 +70,7 @@ export default async function CancelAdminAppointmentPage({
       {appointment.status === "SCHEDULED" ? (
         <>
           <Alert tone="info" title="O horário fica livre na hora.">
-            O cancelamento fica registrado como feito pela barbearia.{" "}
-            {customerNoticeText(appointment.customer.email)}
+            O cancelamento fica registrado como feito pela barbearia.
           </Alert>
           <AdminBookingForm
             action={cancelAdminAppointment}

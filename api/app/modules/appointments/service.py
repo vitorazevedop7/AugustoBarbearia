@@ -3,7 +3,7 @@
 Criar, cancelar, remarcar e concluir entram nas próximas issues (S3.08 em diante).
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import psycopg
 from sqlalchemy import exists, select
@@ -19,6 +19,18 @@ from app.modules.appointments.models import (
 # SQLSTATEs do Postgres para a reserva que perde a disputa por um horário.
 EXCLUSION_VIOLATION = "23P01"
 DEADLOCK_DETECTED = "40P01"
+
+# RN-14: o cliente cancela ou remarca até 2 horas antes do início.
+CHANGE_NOTICE = timedelta(hours=2)
+
+
+def can_change_at(starts_at: datetime, now: datetime) -> bool:
+    """RN-14: ainda dá para o cliente cancelar ou remarcar um horário que
+    começa em `starts_at`. O limite é inclusivo: exatamente 2 horas antes ainda
+    pode. Só o tempo; o status (RN-31) é conferido por quem chama. É a regra que
+    o `booking` aplica e que os e-mails (RN-53) usam para dizer se o prazo vale.
+    """
+    return now <= starts_at - CHANGE_NOTICE
 
 
 def barber_has_future_appointments(

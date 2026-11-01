@@ -4,6 +4,7 @@ from typing import Self
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, model_validator
 
+from app.modules.agenda.schemas import AdminAppointmentResponse
 from app.modules.customers.schemas import CustomerCreate
 
 
@@ -38,3 +39,13 @@ class AdminAppointmentReschedule(BaseModel):
     starts_at: AwareDatetime
     # Sem ele, o barbeiro continua o mesmo.
     barber_id: int | None = None
+
+
+class AdminBookingActionResponse(AdminAppointmentResponse):
+    """O agendamento depois de agendar, remarcar ou cancelar, mais o que a tela
+    precisa saber sobre o e-mail ao cliente (RN-50, RN-52)."""
+
+    # `true` quando o e-mail foi registrado para envio. `false` se o cliente não
+    # tem e-mail ou se o horário já começou (nesse caso a ação não avisa ninguém).
+    # O envio pode ainda falhar (RN-54); isso fica só no registro.
+    notified: bool
