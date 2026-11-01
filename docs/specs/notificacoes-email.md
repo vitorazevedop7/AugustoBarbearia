@@ -68,7 +68,7 @@ Uso fora de uma requisição (o job da #100): commit dos registros e, em seguida
 
 ### Remetentes
 - **Resend** (`ResendSender`): com `RESEND_API_KEY` definida. `EMAIL_FROM` é obrigatória junto, e a API não sobe sem ela. Tempo limite de 10 segundos por envio.
-- **Log** (`LogSender`): sem `RESEND_API_KEY` (desenvolvimento e testes). Registra no log, em nível `INFO`, o destinatário, o assunto e o texto, e conta como enviado (`SENT`).
+- **Log** (`LogSender`): sem `RESEND_API_KEY` (desenvolvimento e testes). Registra no log, em nível `WARNING` (aparece sem configurar o logging e denuncia uma produção sem a chave), o destinatário, o assunto e o texto, e conta como enviado (`SENT`).
 
 ### Templates (RN-53)
 Ficam em `templates.py`, em português, com versão em HTML simples (estilos inline, sem imagens) e em texto. Todo e-mail traz:
