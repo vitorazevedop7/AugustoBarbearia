@@ -49,9 +49,9 @@ function Breakdown({
 }) {
   return (
     <section aria-labelledby={id} className="flex flex-col gap-3">
-      <h2 id={id} className="text-lg font-semibold text-ink">
+      <h3 id={id} className="text-lg font-semibold text-ink">
         {title}
-      </h2>
+      </h3>
       <ul className="flex flex-col divide-y divide-line bg-surface shadow-card">
         {children}
       </ul>
@@ -119,9 +119,9 @@ export function ReportBreakdowns({ report }: { report: FinancialReport }) {
 export function ReportList({ report }: { report: FinancialReport }) {
   return (
     <section aria-labelledby="concluidos" className="flex flex-col gap-3">
-      <h2 id="concluidos" className="text-lg font-semibold text-ink">
+      <h3 id="concluidos" className="text-lg font-semibold text-ink">
         Atendimentos concluídos
-      </h2>
+      </h3>
       {report.completed.length === 0 ? (
         <p className="text-ink-muted">
           Nenhum atendimento concluído neste período.
