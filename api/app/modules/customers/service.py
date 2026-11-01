@@ -8,7 +8,7 @@ from collections.abc import Sequence
 
 import psycopg.errors
 from sqlalchemy import func, or_, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.schemas import CurrentUser
@@ -112,31 +112,49 @@ def email_taken() -> DomainError:
     )
 
 
+def is_email_conflict(error: DBAPIError) -> bool:
+    """RN-23: a gravação violou o e-mail único, inclusive quando outra transação
+    gravou o mesmo e-mail entre a checagem e o insert."""
+    original = error.orig
+    return (
+        isinstance(original, psycopg.errors.UniqueViolation)
+        and original.diag.constraint_name == EMAIL_CONSTRAINT
+    )
+
+
 def commit_customer(session: Session) -> None:
-    """Grava o cadastro; e-mail repetido vira `409`, inclusive quando outra
-    transação grava o mesmo e-mail entre a checagem e o insert (RN-23)."""
+    """Grava o cadastro; e-mail repetido vira `409` (RN-23)."""
     try:
         session.commit()
     except IntegrityError as error:
         session.rollback()
-        original = error.orig
-        if (
-            isinstance(original, psycopg.errors.UniqueViolation)
-            and original.diag.constraint_name == EMAIL_CONSTRAINT
-        ):
+        if is_email_conflict(error):
             raise email_taken() from error
         raise
 
 
-def create_customer(session: Session, data: CustomerCreate) -> Customer:
+def create_customer(
+    session: Session, data: CustomerCreate, *, commit: bool = True
+) -> Customer:
     """RN-20: a administração cadastra um cliente sem conta, com nome e telefone
     obrigatórios (RN-62) e e-mail opcional. O e-mail já chega normalizado; se um
     dia esse cliente entrar com o Google, o login o vincula (RN-23).
 
-    Outros módulos (o agendamento manual) criam clientes por aqui.
+    Outros módulos (o agendamento manual) criam clientes por aqui. Com
+    `commit=False`, o cliente só é enviado ao banco (`flush`, que já dá o `id`)
+    e entra no `commit` de quem chamou: se o resto falhar, ele não fica gravado.
     """
     customer = Customer(name=data.name, phone=data.phone, email=data.email)
     session.add(customer)
+    if not commit:
+        try:
+            session.flush()
+        except IntegrityError as error:
+            session.rollback()
+            if is_email_conflict(error):
+                raise email_taken() from error
+            raise
+        return customer
     commit_customer(session)
     return customer
 

@@ -67,6 +67,12 @@ class BookingPolicy:
 # RN-06 e RN-07: o cliente agenda com pelo menos 1 hora e até 30 dias à frente.
 CUSTOMER_POLICY = BookingPolicy(min_notice=timedelta(hours=1), max_days_ahead=30)
 
+# RN-21: a administração segue a RN-05, itens 1 a 5, sem antecedência nem
+# janela. Sem antecedência, qualquer início da grade de hoje (RN-04) que caiba
+# no expediente e esteja livre é oferecido, inclusive o que já começou: é o
+# "encaixe" da RN-44. Dia que já passou continua sem horário (`within_window`).
+ADMIN_POLICY = BookingPolicy(min_notice=None, max_days_ahead=None)
+
 
 def _require_aware(moment: datetime) -> None:
     if moment.utcoffset() is None:
@@ -83,12 +89,18 @@ def opening_range(day: date, hours: OpeningHours) -> TimeRange:
 
 def within_window(day: date, now: datetime, policy: BookingPolicy) -> bool:
     """RN-07: a janela vai de hoje até hoje + `max_days_ahead`, em dias do
-    calendário de São Paulo; o último dia é oferecido inteiro."""
+    calendário de São Paulo; o último dia é oferecido inteiro.
+
+    Sem janela (RN-21), não há limite à frente, mas um dia que já passou
+    continua sem horário para qualquer política.
+    """
     _require_aware(now)
-    if policy.max_days_ahead is None:
-        return True
     today = now.astimezone(TIMEZONE).date()
-    return today <= day <= today + timedelta(days=policy.max_days_ahead)
+    if day < today:
+        return False
+    return policy.max_days_ahead is None or day <= today + timedelta(
+        days=policy.max_days_ahead
+    )
 
 
 def available_slots(
