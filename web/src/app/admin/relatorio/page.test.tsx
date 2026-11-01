@@ -133,6 +133,39 @@ describe("relatório financeiro — /admin/relatorio — RN-43", () => {
     );
   });
 
+  it("ignora um barbeiro que não existe e mostra Todos de verdade (CA-13)", async () => {
+    await renderPage({ barbeiro: "999" });
+
+    expect(reportQuery().barber_id).toBeUndefined();
+    expect(screen.getByLabelText("Barbeiro")).toHaveValue("");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Hoje" })).toHaveAttribute(
+      "href",
+      "/admin/relatorio?inicio=2026-11-03&fim=2026-11-03",
+    );
+  });
+
+  it("títulos das listas ficam abaixo do período", async () => {
+    respond(filledReport());
+    await renderPage();
+
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "01/11/2026 a 30/11/2026",
+      }),
+    ).toBeInTheDocument();
+    for (const name of [
+      "Por barbeiro",
+      "Por forma de pagamento",
+      "Atendimentos concluídos",
+    ]) {
+      expect(
+        screen.getByRole("heading", { level: 3, name }),
+      ).toBeInTheDocument();
+    }
+  });
+
   it("lê o período e o barbeiro da URL e os mantém no formulário", async () => {
     await renderPage({
       inicio: "2026-10-05",

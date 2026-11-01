@@ -7,6 +7,7 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.modules.appointments.models import (
@@ -350,8 +351,18 @@ def test_rn43_filtro_por_barbeiro_vale_para_tudo(
         starts_at=local(2026, 11, 3, 15),
         status=AppointmentStatus.NO_SHOW,
     )
+    # A falta de outro barbeiro no período não entra no filtro.
+    make_appointment(
+        db_session,
+        barber=barbers["Edvaldo"],
+        starts_at=local(2026, 11, 3, 15),
+        status=AppointmentStatus.NO_SHOW,
+    )
 
+    everyone = report(admin, **NOVEMBER)
     body = report(admin, barber_id=barbers["Lauro"], **NOVEMBER)
+
+    assert everyone["no_show_count"] == 2
 
     assert body["barber_id"] == barbers["Lauro"]
     assert body["total"] == "60.00"
@@ -361,6 +372,31 @@ def test_rn43_filtro_por_barbeiro_vale_para_tudo(
     assert [row["barber"]["name"] for row in body["by_barber"]] == ["Lauro"]
     assert by_method(body)["PIX"]["total"] == "0.00"
     assert by_method(body)["CASH"]["total"] == "60.00"
+
+
+def test_rn41_correcao_da_forma_move_o_valor_entre_as_formas(
+    admin: TestClient, db_session: Session, barbers: dict[str, int]
+) -> None:
+    appointment = paid(
+        db_session,
+        barber=barbers["Edvaldo"],
+        starts_at=local(2026, 11, 3, 10),
+        amount="35.00",
+        method=PaymentMethod.PIX,
+    )
+    before = report(admin, **NOVEMBER)
+
+    fixed = admin.patch(
+        f"/admin/appointments/{appointment.id}/payment", json={"method": "CASH"}
+    )
+    after = report(admin, **NOVEMBER)
+
+    assert fixed.status_code == 200
+    assert by_method(before)["PIX"]["total"] == "35.00"
+    assert by_method(after)["PIX"] == {"method": "PIX", "total": "0.00", "count": 0}
+    assert by_method(after)["CASH"] == {"method": "CASH", "total": "35.00", "count": 1}
+    assert after["total"] == "35.00"
+    assert after["completed"][0]["method"] == "CASH"
 
 
 def test_rn43_barbeiro_inexistente_responde_404(admin: TestClient) -> None:
@@ -592,3 +628,56 @@ def test_rn44_atendimento_da_administracao_concluido_entra_como_qualquer_outro(
 
     assert body["completed_count"] == 1
     assert body["total"] == "35.00"
+
+
+def test_rn42_barbeiro_inativo_so_com_falta_aparece(
+    admin: TestClient, db_session: Session, barbers: dict[str, int]
+) -> None:
+    gone = Barber(name="Abel", active=True)
+    db_session.add(gone)
+    db_session.flush()
+    make_appointment(
+        db_session,
+        barber=gone.id,
+        starts_at=local(2026, 11, 3, 10),
+        status=AppointmentStatus.NO_SHOW,
+    )
+    gone.active = False
+    db_session.flush()
+
+    body = report(admin, **NOVEMBER)
+
+    row = by_barber(body)["Abel"]
+    assert row["barber"]["active"] is False
+    assert row["total"] == "0.00"
+    assert row["completed_count"] == 0
+    assert row["no_show_count"] == 1
+    assert body["no_show_count"] == 1
+
+
+def test_rn43_by_barber_segue_a_ordem_de_nome_do_banco(
+    admin: TestClient, db_session: Session, barbers: dict[str, int]
+) -> None:
+    # Ativos e inativos com atendimento na mesma ordem (nome, id) do banco.
+    others = [Barber(name=name, active=True) for name in ("Zeca", "Álvaro", "Abel")]
+    db_session.add_all(others)
+    db_session.flush()
+    for index, barber in enumerate(others):
+        paid(
+            db_session,
+            barber=barber.id,
+            starts_at=local(2026, 11, 3, 9 + index),
+            amount="10.00",
+        )
+        barber.active = index == 0  # Álvaro e Abel ficam inativos
+    db_session.flush()
+
+    body = report(admin, **NOVEMBER)
+
+    expected = db_session.scalars(
+        select(Barber.name)
+        .where(Barber.active | Barber.id.in_([other.id for other in others]))
+        .order_by(Barber.name, Barber.id)
+    ).all()
+    assert [row["barber"]["name"] for row in body["by_barber"]] == list(expected)
+    assert {"Abel", "Álvaro", "Zeca", "Edvaldo"} <= set(by_barber(body))
