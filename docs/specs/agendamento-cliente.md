@@ -1,6 +1,6 @@
 # Spec — Agendamento pelo cliente
 
-- **Issue:** #57 (S3.08)
+- **Issues:** #57 (S3.08), #80 (S4.07, aparência com a base visual nova)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -119,6 +119,8 @@ flowchart LR
 3. **Dia:** os dias com horário livre, como links ("Ter, 3 de nov"), numa grade de 3 colunas no celular. Sem dia: estado vazio com "Escolher outro barbeiro".
 4. **Horário:** chips de horário (links), em grupos Manhã (antes do meio-dia) e Tarde, 3 colunas no celular. Sem horário: estado vazio com "Escolher outro dia".
 5. **Confirmar:** o resumo, o aviso das 2 horas num `Alert` `info`, o campo Telefone quando falta e o botão principal. Depois de confirmar, o resumo com "Seu horário está confirmado." e os links "Ver meus agendamentos" e "Voltar para o início".
+
+**Aparência (S4.07, #80):** a base visual da vitrine, com o ritmo de tarefa. O título da etapa em Barlow 900 (`text-display-3`), o botão principal no tamanho `md` (60px no celular, 84px a partir de 768px), chips de horário com 44px e de dia com 80px, número em Barlow 600, e hover de 300ms `ease-standard`. A moldura fica em `paper`, logo abaixo do cabeçalho escuro, **sem a faixa escura parcial** das páginas internas: o fluxo segue o Squire, e uma faixa em cada etapa empurraria as opções para fora da primeira tela do celular. Nada mudou na ordem das etapas, nas regras nem nos textos de erro.
 
 Estados: `loading.tsx` com esqueleto; falha de leitura da API mostra um `Alert` `danger` com "Não foi possível carregar os horários. Tente novamente em instantes." e o resto da página continua; erro da Server Action mostra o `message` da API.
 

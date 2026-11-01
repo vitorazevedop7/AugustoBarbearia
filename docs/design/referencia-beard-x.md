@@ -106,7 +106,7 @@
 
 ## Diferenças entre a nossa vitrine e a referência
 
-Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença; as linhas já resolvidas dizem como ficou.
+Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença; as linhas já resolvidas dizem como ficou. Com a #80, todas as linhas com tarefa estão resolvidas; só os números do "Sobre" ficam em aberto.
 
 | Tema | Beard X | Nossa vitrine hoje | Resolve |
 |---|---|---|---|
@@ -125,8 +125,8 @@ Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz
 | Equipe | Texto sobre a foto; cards em degraus de 0, 75 e 145px | Igual desde a #79: foto 6:7 com o nome sobre um bloco escuro que cresce com o texto (contraste AA), degraus só a partir de 1024px e zoom de 1,1 no hover; "Agendar com <nome>" abaixo da foto | #79 |
 | Ornamentos | SVGs flutuantes nas bordas (110–180 KB cada) | Desde a #79: navalha, tesoura e pente em traço próprio, com menos de 1 KB cada, atrás do conteúdo e só a partir de 1024px | #79 |
 | Números | 2 números na seção Sobre | Sem números: não há dado real (pergunta aberta na [spec da vitrine](../specs/vitrine.md#dúvidas-em-aberto)) | — |
-| Páginas internas | Faixa escura parcial que fotos e cards atravessam | `/servicos` e `/barbeiros` sem a faixa | #80 |
-| Fluxo do cliente e administração | — (vem do Squire) | Títulos, botões e espaçamento do padrão antigo | #80 |
+| Páginas internas | Faixa escura parcial que fotos e cards atravessam | Igual desde a #80: o `PageHero` continua numa faixa `ink` de 128, 192 e 240px atrás do começo do conteúdo; o card de serviços e as fotos da equipe (inclusive o degrau de 145px) a atravessam | #80 |
+| Fluxo do cliente e administração | — (vem do Squire) | Desde a #80, as telas do cliente usam a base nova (Barlow 900, `text-body` no texto de apoio, botão `md` na ação principal, hover em `ease-standard` e mais respiro), sem a faixa parcial; a administração recebeu só os tokens, sem mudar densidade nem layout | #80 |
 
 Os números do Beard X (a seção Sobre com 2 números) só entram na nossa vitrine se houver dado real. A #79 deixou a faixa de fora e registrou a pergunta na spec da vitrine.
 

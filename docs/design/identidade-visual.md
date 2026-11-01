@@ -2,7 +2,7 @@
 
 > Este documento cuida da **marca**: logo, cores, fontes, tom, linguagem e movimento. Os componentes e os padrões de tela estão no [design system](design-system.md).
 
-> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). O cabeçalho e o hero entraram na S4.04 (#77), e a entrada ao rolar, na S4.05 (#78).
+> **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). O cabeçalho e o hero entraram na S4.04 (#77), e a entrada ao rolar, na S4.05 (#78). Serviços, equipe e ornamentos vieram na S4.06 (#79), e as páginas internas e as telas do cliente fecharam a sprint na S4.07 (#80).
 
 > **Status:** proposta para o MVP. As cores e o logo vieram do projeto acadêmico, que usou o material entregue pela barbearia ("cores baseadas no cartão"). O logo em vetor e a confirmação da paleta são as pendências P1 e P2 em [registro.md](../cliente/registro.md). O protótipo aprovado no Figma ainda não está acessível (P6).
 
@@ -71,7 +71,7 @@ A paleta tem preto, branco e vermelho. O vermelho vivo do logo (`#FF3131`) **nã
 A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medida ao vivo, adaptados às cores e às fontes acima. O acento é o vermelho `brand`, e não o champanhe do Beard X. Só reproduzimos estrutura, proporções e padrões de interação; textos, imagens, ícones e código do template ficam de fora.
 
 - **Formas quadradas:** botões, cards e campos não têm arredondamento. A exceção é o círculo claro que segura o logo em fundo escuro.
-- **Faixas escuras e claras:** o hero e o rodapé ficam em `ink`; as seções, em `paper`, com cards em `surface`.
+- **Faixas escuras e claras:** o hero e o rodapé ficam em `ink`; as seções, em `paper`, com cards em `surface`. Nas páginas internas (`/servicos` e `/barbeiros`), a faixa escura do título continua numa faixa parcial que o card de serviços e as fotos da equipe atravessam, como no Beard X (S4.07, #80). As telas do cliente e da administração não têm essa faixa: o conteúdo claro começa logo abaixo do cabeçalho escuro.
 - **Ornamento:** um bigode entre duas linhas, em `brand` (`brand-on-dark` sobre o escuro), fica 24px acima dos títulos de seção, no lugar de um texto pequeno. Ornamentos SVG maiores flutuam nas bordas das seções da página inicial, atrás do conteúdo (S4.06, #79): navalha, tesoura e pente, só em traço, em `ink` a 10% e a partir de 1024px. São desenhos próprios, sem nada do template.
 - **Hero:** ocupa a tela inteira (`min-h-svh`), com overlay preto de 70%. No desktop, a foto fica fixa enquanto a página rola; no celular, ela rola junto (S4.04, #77). A foto fixa é uma camada `fixed` recortada pelo `clip-path` do hero, e não `background-attachment: fixed`, que o Safari ignora.
 - **Elevação mínima:** uma única sombra, `shadow-card` (`0 2px 12px` a 8%), nos cards claros.
@@ -84,11 +84,13 @@ A estrutura e o ritmo vêm da referência [Beard X](referencia-beard-x.md), medi
 
 ## Movimento
 
-Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76), o menu do celular (#77), a entrada ao rolar (#78) e o zoom de foto (#79) já estão alinhados.
+Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida no Beard X. O hover de botão (#76), o menu do celular (#77), a entrada ao rolar (#78), o zoom de foto (#79) e o hover de links, chips e campos (#80) já estão alinhados.
 
 | | Em uso | Alvo (Beard X) |
 |---|---|---|
 | Hover de botão | Troca de cor e sobe 3px, 300ms `ease` (`ease-standard`) | Troca de cor e sobe 3px, 300ms `ease` |
+| Hover de links, chips, campos e cards | Troca de cor em 300ms `ease` (`ease-standard`), na vitrine, nas telas do cliente e na administração (S4.07) | 300ms `ease` em todas as transições |
+| Cascata das páginas internas | Ornamento, título e texto do `PageHero` em 0, 200 e 400ms, como o hero da página inicial (S4.07) | Degraus de 200ms |
 | Zoom de foto em card | 1,1, dentro da moldura com `overflow: hidden`, 300ms `ease` (S4.06) | 1,1, dentro de uma moldura com `overflow: hidden` |
 | Entrada ao rolar | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms, cascata de 200ms nas grades | Igual |
 | Menu do celular | Painel escuro que desce em 400ms `ease` (S4.04) | Igual |

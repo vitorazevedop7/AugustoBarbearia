@@ -1,6 +1,6 @@
 # Spec — Meus agendamentos: ver, remarcar e cancelar
 
-- **Issue:** #58 (S3.09)
+- **Issues:** #58 (S3.09), #80 (S4.07, aparência com a base visual nova)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -119,6 +119,7 @@ flowchart LR
 
 - Rotas no grupo `(cliente)`: `/meus-agendamentos`, `/meus-agendamentos/[id]/cancelar` e `/meus-agendamentos/[id]/remarcar`. As três exigem sessão no servidor.
 - **Cartões:** um `article` por agendamento, título com o serviço (`h3`), a data e o horário, o barbeiro, o valor e o `StatusBadge`. No celular, uma coluna; as ações ficam lado a lado, cada uma com 44px de altura.
+- **Aparência (S4.07, #80):** a mesma moldura do `/agendar`, sem a faixa escura parcial. O texto de apoio abaixo do título usa `text-body`; "Agendar horário" do estado vazio, "Cancelar agendamento" e "Confirmar remarcação" usam o botão `md`, e as ações do cartão continuam `sm`.
 - **Confirmação destrutiva sem JS:** em vez de um `<dialog>`, que precisa de JS para abrir, o cancelamento tem a própria página de confirmação. O foco natural da página fica no título; "Voltar" é a primeira opção depois do resumo, e "Cancelar agendamento" é o botão `danger`.
 - **Depois de cancelar ou remarcar,** o cliente volta para a lista com `?aviso=`, para ver o estado novo em um lugar só. O `/agendar` continua mostrando o resumo depois de confirmar, com o link "Ver meus agendamentos".
 - Estados: `loading.tsx` com esqueleto de cartões; falha de leitura da API mostra um `Alert` `danger` com "Não foi possível carregar seus agendamentos. Tente novamente em instantes."; erro da Server Action mostra o `message` da API.

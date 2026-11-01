@@ -1,6 +1,6 @@
 # Spec — Vitrine pública
 
-- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos)
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -105,6 +105,12 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - A partir de 1024px, ornamentos de traço (navalha, tesoura e pente) ficam nas bordas das seções da página inicial, atrás do conteúdo e sem rolagem horizontal. No celular e no tablet, não aparecem.
 - Um barbeiro ou serviço inativo continua fora da vitrine (CA-9).
 
+**CA-14 — Faixa escura parcial nas páginas internas (#80)**
+- **Dado** um visitante em `/servicos` ou `/barbeiros`, em 360px, 768px ou 1440px
+- **Quando** a página carrega
+- **Então** a faixa escura do título continua atrás do começo do conteúdo (128, 192 e 240px), e o card de serviços ou as fotos da equipe a atravessam, sem rolagem horizontal. No desktop, os três cards em degraus começam dentro da faixa.
+- O estado vazio e o aviso de falha ficam legíveis sobre a faixa, porque têm fundo claro.
+
 ## Fluxo e telas
 Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Elas chegam inteiras, sem esqueleto de carregamento (ver [Carregamento e cache](#carregamento-e-cache)).
 
@@ -121,8 +127,9 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
   4. **Equipe:** os barbeiros ativos em cards com foto 6:7 (ou a inicial), o nome e a primeira linha da apresentação sobre a foto, e "Agendar com <nome>" abaixo dela. No desktop, os cards ficam em degraus (S4.06, #79). Embaixo, "Conhecer a equipe".
   - **Ornamentos** (S4.06, #79): uma navalha no "Sobre", uma tesoura nos serviços e um pente na equipe, nas bordas das seções e atrás do conteúdo. São só decoração e aparecem a partir de 1024px.
   5. **Horário e contato** (faixa `ink`, âncora `#contato`): o horário de funcionamento por dia, agrupando os dias iguais ("Segunda a sexta · 10h às 19h", "Domingo · Fechado"); o endereço com "Como chegar" (busca no Google Maps); e os contatos preenchidos (WhatsApp, telefone, Instagram, e-mail). Sem endereço nem contato, só o horário aparece. Fecha com "Agendar horário".
-- **`/servicos`:** faixa `ink` com o título e o texto de apoio, e depois todos os serviços no mesmo card único da página inicial. Como no Beard X, cuja página de serviços repete o card da home: o visitante reconhece o bloco, a grade de 2 colunas comporta qualquer número de serviços, e cards separados repetiriam a moldura e a sombra a cada item, sem ganho de leitura.
-- **`/barbeiros`:** faixa `ink` com o título, e depois todos os barbeiros nos mesmos cards, em degraus no desktop. Aqui a apresentação sai da foto e aparece inteira abaixo dela, porque não há página própria de cada barbeiro.
+- **Páginas internas (S4.07, #80):** como no Beard X, a faixa `ink` do título (`PageHero`) continua numa faixa parcial atrás do começo do conteúdo, que o card ou as fotos atravessam. A faixa parcial é decoração (`aria-hidden`) atrás do conteúdo e não muda a posição dele.
+- **`/servicos`:** faixa `ink` com o título e o texto de apoio, e depois todos os serviços no mesmo card único da página inicial, atravessando a faixa parcial. Como no Beard X, cuja página de serviços repete o card da home: o visitante reconhece o bloco, a grade de 2 colunas comporta qualquer número de serviços, e cards separados repetiriam a moldura e a sombra a cada item, sem ganho de leitura.
+- **`/barbeiros`:** faixa `ink` com o título, e depois todos os barbeiros nos mesmos cards, em degraus no desktop. A faixa parcial tem 240px no desktop, mais que o maior degrau (145px), então as três fotos a atravessam. Aqui a apresentação sai da foto e aparece inteira abaixo dela, porque não há página própria de cada barbeiro.
 - **Rodapé (todas as páginas):** passa a ler o horário de funcionamento e o contato de `GET /public/shop`, no lugar do horário fixo no código. Se a API falhar, o rodapé mostra só o nome e os links.
 
 ### Carregamento e cache
@@ -154,7 +161,7 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
   - `web/public/images/vitrine/sobre.jpg`: detalhe do trabalho (mãos, navalha ou tesoura), JPEG 3:2 de pelo menos 1800×1200, com até 400 KB.
 - **Hero:** `next/image` com `fill`, `object-cover`, `sizes="100vw"`, `preload` e `fetchPriority="high"`, porque é o LCP. A partir de 1024px, a imagem fica numa camada `fixed`, que o `clip-path: inset(0)` do hero recorta: ela fica parada enquanto o resto da página rola. É a técnica que funciona no Safari, que ignora `background-attachment: fixed`. No celular, a camada é comum e rola junto. A foto é decorativa (`alt=""`), com brilho reduzido (`brightness-75`) e overlay `bg-ink/70` para preservar o contraste AA de `text-surface` e `text-on-ink-muted`, inclusive sobre os pontos claros da foto. A foto e o overlay não entram na cascata de animação do conteúdo.
 - **Sobre:** `next/image` em moldura 3:2 com `overflow-hidden`, `alt` descritivo e zoom de 1,1 no hover, respeitando `prefers-reduced-motion`, como nas fotos de card. A imagem acompanha a condição do texto: a seção inteira só aparece quando `about` estiver preenchido. No desktop, foto e texto ficam lado a lado; no celular, a foto vem acima. O texto fica fora da foto, seguindo o Beard X.
-- Os cards de serviço continuam sem foto, e os heros de `/servicos` e `/barbeiros` continuam como faixas escuras. Galeria, depoimentos e faixa de Instagram aguardam material real.
+- Os cards de serviço continuam sem foto, e os heros de `/servicos` e `/barbeiros` continuam como faixas escuras, sem foto, com a faixa parcial (#80). Galeria, depoimentos e faixa de Instagram aguardam material real.
 
 ## API
 | Método | Caminho | Quem | O que faz |
