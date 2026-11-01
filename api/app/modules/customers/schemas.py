@@ -3,10 +3,16 @@
 import re
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, StringConstraints
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    StringConstraints,
+)
 
 from app.auth.schemas import CurrentUser
-from app.modules.customers.models import NAME_MAX_LENGTH
+from app.modules.customers.models import EMAIL_MAX_LENGTH, NAME_MAX_LENGTH
 
 # DDDs brasileiros em uso (Anatel).
 AREA_CODES = frozenset(
@@ -24,6 +30,8 @@ AREA_CODES = frozenset(
 )
 SEPARATORS = re.compile(r"[\s().-]")
 DIGITS = re.compile(r"[0-9]+")
+# Só confere o formato (algo@dominio.tld): quem confirma o e-mail é o Google.
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 
 def normalize_phone(value: str) -> str:
@@ -40,6 +48,18 @@ def normalize_phone(value: str) -> str:
     if area_code not in AREA_CODES or not (is_mobile or is_landline):
         raise ValueError("Informe o telefone com DDD.")
     return digits
+
+
+def normalize_email(email: str) -> str:
+    """RN-23: e-mails iguais a menos de espaços e caixa são o mesmo cadastro."""
+    return email.strip().lower()
+
+
+def _normalize_optional_email(value: object) -> object:
+    """Normaliza o e-mail (RN-23); campo vazio vira ausência de e-mail."""
+    if not isinstance(value, str):
+        return value
+    return normalize_email(value) or None
 
 
 Name = Annotated[
@@ -70,3 +90,50 @@ class CustomerProfileUpdate(BaseModel):
 
     name: Name | None = None
     phone: Phone | None = None
+
+
+# As restrições ficam no `str`: o Pydantic não as aplica a um `None` opcional.
+OptionalEmail = Annotated[
+    Annotated[
+        str, StringConstraints(max_length=EMAIL_MAX_LENGTH, pattern=EMAIL_PATTERN)
+    ]
+    | None,
+    BeforeValidator(_normalize_optional_email),
+]
+
+
+class CustomerCreate(BaseModel):
+    """Cliente cadastrado pela administração, sem conta Google (RN-20, RN-62)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: Name
+    phone: Phone
+    email: OptionalEmail = None
+
+
+class CustomerUpdate(BaseModel):
+    """`name` e `phone` ausentes ou `null` ficam como estão (RN-62). `email`
+    enviado vazio ou `null` apaga o e-mail; ausente, mantém."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: Name | None = None
+    phone: Phone | None = None
+    email: OptionalEmail = None
+
+
+class CustomerResponse(BaseModel):
+    id: int
+    name: str
+    phone: str | None
+    email: str | None
+    # Só se existe vínculo com uma conta Google; o `sub` não sai da API.
+    has_account: bool
+
+
+class CustomerPage(BaseModel):
+    items: list[CustomerResponse]
+    total: int
+    page: int
+    page_size: int
