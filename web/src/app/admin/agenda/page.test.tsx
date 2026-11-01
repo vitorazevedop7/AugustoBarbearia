@@ -18,6 +18,9 @@ type Responses = { agenda?: unknown; barbers?: unknown };
 
 function respond({ agenda = agendaDay(), barbers }: Responses = {}) {
   GET.mockImplementation((path: string) => {
+    if (path === "/admin/time-blocks") {
+      return Promise.resolve({ data: [], response: { status: 200 } });
+    }
     if (path === "/admin/barbers") {
       return Promise.resolve({
         data:

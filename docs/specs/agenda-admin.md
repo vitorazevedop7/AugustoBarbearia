@@ -112,7 +112,7 @@ flowchart LR
 - Leitura só: nenhuma rota desta issue altera o banco.
 
 ## Fora do escopo desta spec
-- Bloqueios e folgas (S5.04, #96).
+- Bloqueios e folgas (S5.04, #96): entraram pelos pontos de extensão acima, com rota própria (`GET /admin/time-blocks`), em [bloqueios.md](bloqueios.md).
 - Criar, remarcar e cancelar pela administração (S5.05, #97).
 - Concluir com pagamento e marcar falta, e o rótulo "Aguardando registro" para o `SCHEDULED` que já terminou (S5.06, #98).
 - Grade de horários com posição proporcional à duração (linha do tempo). A agenda é uma lista por barbeiro e por dia.
