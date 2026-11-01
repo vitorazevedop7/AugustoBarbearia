@@ -153,6 +153,14 @@ docker compose exec api uv run pytest tests/test_my_appointments.py
 
 `/meus-agendamentos` (grupo `(cliente)`, exige login) mostra os próximos e o histórico em cartões, com "Remarcar" e "Cancelar" quando a API diz que pode (`can_cancel`, `can_reschedule`, RN-14) e o contato da barbearia (`ContactNotice`, `src/components/booking/`) quando o prazo de 2 horas passou. Cancelar tem a própria página de confirmação (`/meus-agendamentos/[id]/cancelar`), que funciona sem JS; remarcar (`/meus-agendamentos/[id]/remarcar?barbeiro=&data=&hora=`) reaproveita `BarberStep`, `DayPicker`, `TimePicker` e a moldura `booking-frame.tsx` de `src/components/booking/`. As duas Server Actions voltam para a lista com `?aviso=`. Na API, tudo fica em `app/modules/booking/`: `GET /me/appointments` (`upcoming`/`history`), `GET /me/appointments/{id}`, `POST .../cancel`, `POST .../reschedule` e os horários da remarcação em `GET .../availability/days` e `GET .../availability`. O agendamento de outro cliente responde `404 APPOINTMENT_NOT_FOUND` (RN-16). A remarcação passa um `Rescheduling` (`availability/service.py`) para o motor: o próprio agendamento sai dos ocupados, vale a duração congelada (RN-13) e o horário atual não é oferecido de novo. A [spec](docs/specs/meus-agendamentos.md) documenta as regras e as decisões.
 
+### Agenda da administração — S5.01
+
+```bash
+docker compose exec api uv run pytest tests/test_agenda.py
+```
+
+`/admin/agenda` mostra o dia (padrão: hoje) ou a semana (segunda a domingo), de todos os barbeiros ou de um, com o estado na URL (`?data=&visao=semana&barbeiro=`) e tudo em links e formulário `GET`, sem JS. Cada agendamento abre `/admin/agenda/[id]`, que guarda o estado da agenda para o "Voltar". A API fica no módulo `app/modules/agenda/` (acima de `appointments`, `barbers`, `catalog`, `customers` e `shop`): `GET /admin/appointments?start=&end=&barber_id=` (datas locais inclusivas, até 7 dias; devolve `days` com o horário de funcionamento, `barbers` e `appointments` em todos os status) e `GET /admin/appointments/{id}`. Os componentes ficam em `web/src/app/admin/agenda/` e recebem as ações das próximas issues: `actions` no `AppointmentDetail` e no `AgendaToolbar`, `barberExtra` no `AgendaDayView` e `dayExtra` no `AgendaWeekView`. A [spec](docs/specs/agenda-admin.md) documenta as regras e as decisões.
+
 ### Cadastro de clientes — S5.02
 
 ```bash

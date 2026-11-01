@@ -433,10 +433,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/appointments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Appointments
+         * @description Os agendamentos que começam no período (até 7 dias), em todos os
+         *     status, com o horário de funcionamento de cada dia (RN-01, RN-02, RN-30).
+         */
+        get: operations["list_appointments_admin_appointments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/appointments/{appointment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Appointment
+         * @description Um agendamento de qualquer cliente (RN-70).
+         */
+        get: operations["get_appointment_admin_appointments__appointment_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AdminAppointmentResponse
+         * @description Um agendamento visto pela administração. Datas no fuso de São Paulo
+         *     (`-03:00`, RN-01); preço e duração congelados na criação (RN-13).
+         */
+        AdminAppointmentResponse: {
+            /** Id */
+            id: number;
+            status: components["schemas"]["AppointmentStatus"];
+            source: components["schemas"]["AppointmentSource"];
+            customer: components["schemas"]["AgendaCustomer"];
+            barber: components["schemas"]["AgendaBarber"];
+            service: components["schemas"]["AgendaService"];
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Price */
+            price: string;
+            /** Duration Minutes */
+            duration_minutes: number;
+            /** Canceled At */
+            canceled_at: string | null;
+            canceled_by: components["schemas"]["CanceledBy"] | null;
+        };
         /** AdminPingResponse */
         AdminPingResponse: {
             /**
@@ -445,6 +517,74 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** AgendaBarber */
+        AgendaBarber: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Active */
+            active: boolean;
+        };
+        /**
+         * AgendaCustomer
+         * @description O cliente do agendamento, com o contato para a barbearia ligar.
+         */
+        AgendaCustomer: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string | null;
+            /** Email */
+            email: string | null;
+        };
+        /**
+         * AgendaDay
+         * @description Um dia do período com o horário de funcionamento (RN-02): a moldura da
+         *     agenda. Abertura e fechamento vazios = fechado. Horas locais de São Paulo.
+         */
+        AgendaDay: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Opens At */
+            opens_at: string | null;
+            /** Closes At */
+            closes_at: string | null;
+        };
+        /**
+         * AgendaResponse
+         * @description O período pedido: os dias, os barbeiros e os agendamentos.
+         */
+        AgendaResponse: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Days */
+            days: components["schemas"]["AgendaDay"][];
+            /** Barbers */
+            barbers: components["schemas"]["AgendaBarber"][];
+            /** Appointments */
+            appointments: components["schemas"]["AdminAppointmentResponse"][];
+        };
+        /** AgendaService */
+        AgendaService: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
         };
         /** AppointmentBarber */
         AppointmentBarber: {
@@ -489,6 +629,12 @@ export interface components {
             /** Name */
             name: string;
         };
+        /**
+         * AppointmentSource
+         * @description Quem criou o agendamento: o cliente pelo site ou a administração.
+         * @enum {string}
+         */
+        AppointmentSource: "ONLINE" | "ADMIN";
         /**
          * AppointmentStatus
          * @description RN-30. Só `SCHEDULED` é ativo e ocupa a agenda (RN-08).
@@ -2831,6 +2977,144 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_appointments_admin_appointments_get: {
+        parameters: {
+            query: {
+                /** @description Data local de São Paulo. */
+                start: string;
+                /** @description Data local de São Paulo, inclusiva. */
+                end: string;
+                barber_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgendaResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_appointment_admin_appointments__appointment_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAppointmentResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/** Só entram itens que já têm tela; agenda e relatório chegam nas próximas issues. */
+/** Só entram itens que já têm tela; o relatório chega numa próxima issue. */
 const items = [
   { href: "/admin", label: "Início" },
+  { href: "/admin/agenda", label: "Agenda" },
   { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/cadastros", label: "Cadastros" },
 ];

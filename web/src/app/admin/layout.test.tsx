@@ -41,6 +41,10 @@ describe("AdminLayout — RN-71", () => {
       "aria-current",
       "page",
     );
+    expect(screen.getByRole("link", { name: "Agenda" })).toHaveAttribute(
+      "href",
+      "/admin/agenda",
+    );
     expect(screen.getByRole("link", { name: "Clientes" })).toHaveAttribute(
       "href",
       "/admin/clientes",

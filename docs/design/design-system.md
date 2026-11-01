@@ -120,6 +120,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
 | `ContactNotice` | `components/booking/contact-notice.tsx` | Pronto (aviso de prazo vencido com os contatos da barbearia, RN-14) |
 | Card de agendamento do cliente | `app/(cliente)/meus-agendamentos/appointment-card.tsx` | Pronto (só em "Meus agendamentos"; a agenda da administração terá o seu) |
+| Agenda da administração: `AgendaToolbar`, `AgendaDayView`, `AgendaWeekView`, `AgendaBarberColumn`, `AgendaItem`, `AppointmentDetail` | `app/admin/agenda/` | Pronto (só na agenda; recebem as ações das próximas issues por `actions`, `children`, `barberExtra` e `dayExtra`) |
 | Tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
 
 ### Botão
@@ -301,7 +302,8 @@ Tudo formatado com `Intl`, em `pt-BR` e no fuso `America/Sao_Paulo` (RN-01):
 
 - Densidade maior: `text-sm` em tabelas, botões `sm` (inclusive o "Salvar" dos formulários), títulos em Inter.
 - Da base nova da Sprint 4, a administração recebe só os tokens: a fonte e os botões (S4.03, #76) e o hover em `ease-standard` (S4.07, #80). Densidade, container (`max-w-7xl`) e layout não mudam.
-- Tabelas viram lista de cards no celular. A agenda do dia é a primeira tela, organizada por barbeiro.
+- Tabelas viram lista de cards no celular.
+- **Agenda** ([spec](../specs/agenda-admin.md)): o dia é uma lista por barbeiro, uma embaixo da outra no celular e lado a lado a partir do `lg`; a semana é um bloco por dia, um embaixo do outro no celular e em grade (até 7 colunas no `xl`). Cada dia mostra o horário de funcionamento (RN-02). Cada agendamento é um cartão-link com borda de 4px à esquerda (`line` nos cancelados e nas faltas): horário, `StatusBadge`, cliente e serviço (e o barbeiro, na semana com todos). A barra tem "Anterior", "Hoje" e "Próximo" (`outline`, `sm`), escolhas em links com `aria-current` (visão e barbeiro) e o formulário `GET` "Ir para a data": tudo funciona sem JS, com o estado na URL. O detalhe é um cartão com `dl` e o lugar das ações no fim.
 - O status sempre com `StatusBadge`. Valores em reais alinhados à direita, com `tabular-nums`.
 
 ## Texto

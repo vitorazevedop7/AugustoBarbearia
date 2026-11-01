@@ -65,12 +65,12 @@ function single(value: string | string[] | undefined): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function positiveInteger(value: string | undefined): number | undefined {
+export function positiveInteger(value: string | undefined): number | undefined {
   if (!value || !/^[1-9]\d{0,9}$/.test(value)) return undefined;
   return Number(value);
 }
 
-function calendarDate(value: string | undefined): string | undefined {
+export function calendarDate(value: string | undefined): string | undefined {
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
   const parsed = new Date(`${value}T00:00:00Z`);
   // Mês ou dia fora do intervalo (2026-13-01) dá Invalid Date, e o toISOString lançaria.
