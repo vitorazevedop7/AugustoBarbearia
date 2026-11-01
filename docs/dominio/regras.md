@@ -119,7 +119,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-50 — Confirmação.** Quando um agendamento é criado, o cliente recebe um e-mail de confirmação, se tiver e-mail cadastrado. *Origem: D4; 2025 (RF03).*
 
-**RN-51 — Lembrete.** O cliente recebe um lembrete por e-mail cerca de **24 horas antes** do início. Se o agendamento foi criado com menos de 24h de antecedência, não há lembrete: a confirmação já cumpre esse papel. *Origem: D4; os 24h são padrão adotado.*
+**RN-51 — Lembrete.** O cliente recebe um lembrete por e-mail cerca de **24 horas antes** do início. Se o agendamento foi criado com menos de 24h de antecedência, não há lembrete: a confirmação já cumpre esse papel. O mesmo vale para o horário remarcado: a remarcação com menos de 24h de antecedência não gera lembrete, e um lembrete já enviado para o horário antigo não impede o do novo. *Origem: D4; os 24h são padrão adotado; o caso do remarcado é padrão adotado, a confirmar.*
 
 **RN-52 — Alterações.** Remarcação e cancelamento, feitos por qualquer lado, geram e-mail ao cliente com o novo estado do agendamento. *Origem: D4; 2025 (sistema de e-mails do projeto acadêmico).*
 

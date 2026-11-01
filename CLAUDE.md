@@ -178,6 +178,15 @@ docker compose exec api uv run pytest tests/test_notifications.py
 
 Agendar, remarcar e cancelar pelo site mandam e-mail ao cliente (RN-50, RN-52). Sem `RESEND_API_KEY`, o e-mail aparece no log da API (`docker compose logs api`); com a chave, `EMAIL_FROM` é obrigatório. O módulo `app/modules/notifications/` expõe `notify(session, appointment, kind)`, que registra `PENDING` na transação da ação, e a `Outbox` (`OutboxDep` nas rotas), que o service chama **depois** do commit com `send_after_commit`; o envio (`send_notification`) marca `SENT` ou `FAILED` e nunca desfaz a ação (RN-54). Fora de requisição (job do lembrete), chame `send_notification(session, id, get_email_sender())` depois do commit. Nos testes, um fixture `autouse` zera `RESEND_API_KEY`, e as rotas recebem um remetente falso por `dependency_overrides[get_email_sender]`. A [spec](docs/specs/notificacoes-email.md) documenta os templates e a configuração do Resend.
 
+### Lembrete por e-mail — S5.08
+
+```bash
+docker compose exec api uv run python -m app.jobs.send_reminders   # roda o job à mão
+docker compose exec api uv run pytest tests/test_reminders.py
+```
+
+O comando envia o lembrete (RN-51) dos agendamentos `SCHEDULED` que começam entre 23h e 25h à frente e ainda não têm lembrete para o horário atual, e imprime no log quantos saíram e quantos falharam. É idempotente: rodar de novo, ou duas execuções ao mesmo tempo, não manda um segundo e-mail (a linha do agendamento é travada com `FOR UPDATE SKIP LOCKED`). Agendamento (ou remarcação) feito com menos de 24h de antecedência não recebe lembrete; o lembrete do horário antigo não impede o do novo. Sem `RESEND_API_KEY`, o e-mail aparece no log. A lógica é `send_due_reminders` em `app/modules/notifications/reminders.py`; o job (`app/jobs/send_reminders.py`, `run(session, sender, now)`) recebe o relógio como argumento, e os testes o fixam. O cron de hora em hora na Railway entra na #32. A [spec](docs/specs/notificacoes-email.md) documenta as decisões.
+
 ## Mapa da documentação
 
 | Documento | Leia quando |
