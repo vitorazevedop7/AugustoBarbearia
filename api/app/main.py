@@ -12,6 +12,7 @@ from app.modules.barbers.router import router as barbers_router
 from app.modules.booking.router import router as booking_router
 from app.modules.catalog.router import public_router as public_catalog_router
 from app.modules.catalog.router import router as catalog_router
+from app.modules.customers.router import admin_router as admin_customers_router
 from app.modules.customers.router import router as customers_router
 from app.modules.shop.router import router as shop_router
 
@@ -27,6 +28,7 @@ def create_app() -> FastAPI:
     application.include_router(auth_router)
     application.include_router(shop_router)
     application.include_router(customers_router)
+    application.include_router(admin_customers_router)
     application.include_router(barbers_router)
     application.include_router(catalog_router)
     application.include_router(public_barbers_router)
