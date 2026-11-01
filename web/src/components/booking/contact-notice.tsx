@@ -2,7 +2,7 @@ import { Alert } from "@/components/ui/alert";
 import { contactLinks, type ShopContact } from "@/lib/contact";
 
 const textLink =
-  "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-out hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
+  "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
 
 export const DEADLINE_TITLE =
   "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia.";

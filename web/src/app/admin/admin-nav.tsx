@@ -27,7 +27,7 @@ export function AdminNav() {
               <Link
                 href={href}
                 aria-current={current ? "page" : undefined}
-                className={`flex min-h-12 items-center border-b-2 px-3 text-sm font-semibold transition-colors duration-300 ease-out focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none ${
+                className={`flex min-h-12 items-center border-b-2 px-3 text-sm font-semibold transition-colors duration-300 ease-standard focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none ${
                   current
                     ? "border-brand text-ink"
                     : "border-transparent text-ink-muted hover:text-ink"

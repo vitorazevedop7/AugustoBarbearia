@@ -18,7 +18,7 @@ export function Checkbox({ label, className = "", ...props }: CheckboxProps) {
       <span className="relative flex size-6 shrink-0 items-center justify-center">
         <input
           type="checkbox"
-          className="peer size-6 cursor-pointer appearance-none border border-ink-muted bg-surface transition-colors duration-300 ease-out checked:border-brand checked:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-paper motion-reduce:transition-none"
+          className="peer size-6 cursor-pointer appearance-none border border-ink-muted bg-surface transition-colors duration-300 ease-standard checked:border-brand checked:bg-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:border-line disabled:bg-paper motion-reduce:transition-none"
           {...props}
         />
         <svg

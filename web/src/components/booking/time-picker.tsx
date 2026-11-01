@@ -45,7 +45,7 @@ export function TimePicker({
                 <li key={slot.starts_at}>
                   <Link
                     href={hrefFor(slot)}
-                    className={`${optionClasses} text-sm font-semibold`}
+                    className={`${optionClasses} font-heading text-lg font-semibold`}
                   >
                     {formatTime(slot.starts_at)}
                   </Link>

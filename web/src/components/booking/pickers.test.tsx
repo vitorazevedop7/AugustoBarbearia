@@ -20,6 +20,8 @@ describe("DayPicker", () => {
     expect(first).toHaveAccessibleName("terça-feira, 1 de dezembro de 2026");
     expect(first).toHaveAttribute("href", "/remarcar?data=2026-12-01");
     expect(first).toHaveTextContent("Ter1dez");
+    // Área de toque bem acima dos 44px.
+    expect(first).toHaveClass("min-h-20");
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(2);
   });
 });
@@ -50,6 +52,12 @@ describe("TimePicker", () => {
         .map((link) => link.textContent),
     ).toEqual(["11:00", "11:30"]);
     expect(screen.queryByRole("region", { name: "Tarde" })).toBeNull();
+    // Área de toque de 44px e o número em Barlow 600, como o dia.
+    expect(screen.getByRole("link", { name: "11:30" })).toHaveClass(
+      "min-h-11",
+      "font-heading",
+      "font-semibold",
+    );
     expect(screen.getByRole("link", { name: "11:00" })).toHaveAttribute(
       "href",
       "/remarcar?inicio=2026-11-03T14:00:00Z",

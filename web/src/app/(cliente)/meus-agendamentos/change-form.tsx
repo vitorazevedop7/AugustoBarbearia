@@ -10,7 +10,7 @@ import type { ShopContact } from "@/lib/contact";
 import { DEADLINE_CODE, type ChangeState } from "./appointments-state";
 
 const textLink =
-  "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-out hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
+  "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
 
 /**
  * Formulário de cancelar ou remarcar: campos ocultos, o erro da API e os

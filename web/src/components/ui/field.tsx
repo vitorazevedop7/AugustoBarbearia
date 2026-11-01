@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 
 /** Borda em `ink-muted`: `line` não tem o contraste de 3:1 exigido para contorno de campo. */
 const control =
-  "block min-h-12 w-full border border-ink-muted bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted transition-colors duration-300 ease-out focus:border-brand focus:outline-2 focus:-outline-offset-2 focus:outline-brand aria-invalid:border-danger aria-invalid:focus:outline-danger disabled:cursor-not-allowed disabled:bg-paper disabled:text-ink-muted motion-reduce:transition-none";
+  "block min-h-12 w-full border border-ink-muted bg-surface px-4 py-3 text-base text-ink placeholder:text-ink-muted transition-colors duration-300 ease-standard focus:border-brand focus:outline-2 focus:-outline-offset-2 focus:outline-brand aria-invalid:border-danger aria-invalid:focus:outline-danger disabled:cursor-not-allowed disabled:bg-paper disabled:text-ink-muted motion-reduce:transition-none";
 
 type FieldMeta = {
   label: string;

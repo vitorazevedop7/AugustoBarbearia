@@ -52,7 +52,7 @@ export async function SiteFooter() {
           </p>
           <Link
             href="/privacidade"
-            className="inline-flex min-h-11 items-center underline underline-offset-4 transition-colors duration-300 ease-out hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none"
+            className="inline-flex min-h-11 items-center underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none"
           >
             Política de privacidade
           </Link>

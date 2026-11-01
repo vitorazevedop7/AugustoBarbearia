@@ -7,7 +7,7 @@ import { BOOKING_PATH } from "@/lib/booking";
 import { formatDuration, formatPrice } from "@/lib/format";
 
 const cardLink =
-  "group flex h-full bg-surface shadow-card outline-offset-4 transition-colors duration-300 ease-out hover:bg-paper focus-visible:outline-2 focus-visible:outline-brand motion-reduce:transition-none";
+  "group flex h-full bg-surface shadow-card outline-offset-4 transition-colors duration-300 ease-standard hover:bg-paper focus-visible:outline-2 focus-visible:outline-brand motion-reduce:transition-none";
 
 /** Etapa 1: os barbeiros em cards com foto (ou a inicial) e nome. */
 export function BarberStep({
@@ -63,7 +63,7 @@ export function ServiceStep({
         title={`${barberName} não tem serviços disponíveis`}
         description="Escolha outro barbeiro para continuar."
         action={
-          <ButtonLink href={BOOKING_PATH} variant="outline" size="sm">
+          <ButtonLink href={BOOKING_PATH} variant="outline">
             Escolher outro barbeiro
           </ButtonLink>
         }

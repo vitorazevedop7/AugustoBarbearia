@@ -43,16 +43,12 @@ export default async function MyAppointmentsPage({
   }
 
   const { upcoming, history } = loaded.data;
-  const book = (
-    <ButtonLink href={BOOKING_PATH} size="sm">
-      Agendar horário
-    </ButtonLink>
-  );
+  const book = <ButtonLink href={BOOKING_PATH}>Agendar horário</ButtonLink>;
 
   return (
     <MyAppointmentsFrame>
       {notice ? (
-        <div className="mb-8">
+        <div className="mb-10">
           <Alert tone="success" title={NOTICES[notice]} />
         </div>
       ) : null}
@@ -63,7 +59,7 @@ export default async function MyAppointmentsPage({
           action={book}
         />
       ) : (
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-12 md:gap-16">
           <section aria-labelledby="proximos">
             <h2
               id="proximos"
@@ -71,7 +67,7 @@ export default async function MyAppointmentsPage({
             >
               Próximos
             </h2>
-            <div className="mt-4">
+            <div className="mt-6">
               {upcoming.length === 0 ? (
                 <EmptyState title="Nenhum horário marcado" action={book} />
               ) : (
@@ -97,7 +93,7 @@ export default async function MyAppointmentsPage({
               >
                 Histórico
               </h2>
-              <ul className="mt-4 flex flex-col gap-4">
+              <ul className="mt-6 flex flex-col gap-4">
                 {history.map((appointment) => (
                   <li key={appointment.id}>
                     <AppointmentCard
