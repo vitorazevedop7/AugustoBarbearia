@@ -49,6 +49,10 @@ describe("AdminLayout — RN-71", () => {
       "href",
       "/admin/clientes",
     );
+    expect(screen.getByRole("link", { name: "Relatório" })).toHaveAttribute(
+      "href",
+      "/admin/relatorio",
+    );
     expect(screen.getByText("Conteúdo restrito")).toBeInTheDocument();
     expect(GET).toHaveBeenCalledWith("/admin/ping", {
       signal: expect.any(AbortSignal),

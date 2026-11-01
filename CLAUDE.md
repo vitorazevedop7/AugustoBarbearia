@@ -196,6 +196,14 @@ docker compose exec api uv run pytest tests/test_payments.py
 
 No detalhe da agenda (`/admin/agenda/[id]`), abaixo do cartão, a administração conclui o atendimento com o valor (já preenchido com o preço congelado) e uma das quatro formas de pagamento em botões grandes, marca a falta (com confirmação, é definitivo) e, no concluído, vê o pagamento e usa "Corrigir". Na API, o módulo `app/modules/payments/` tem `POST /admin/appointments/{id}/complete`, `POST .../no-show` e `PATCH .../payment`; as três travam a linha (`FOR UPDATE`), recebem `utc_now` por `Depends` e devolvem o `AdminAppointmentResponse` da agenda, que ganhou `payment`, `closed_at` e `closed_by` (e-mail da administração, RN-33). A constraint `ck_appointments_closing` mantém o status coerente com esses campos; nas fixtures de teste, `make_appointment` já preenche o fechamento de `COMPLETED` e `NO_SHOW`. A tela fica em `web/src/app/admin/agenda/conclusao/` (Server Actions com `bind` do id e da agenda), fora de `AppointmentDetail`. A [spec](docs/specs/conclusao-atendimento.md) documenta as regras, os códigos de erro e as decisões a confirmar.
 
+### Relatório financeiro — S5.07
+
+```bash
+docker compose exec api uv run pytest tests/test_reports.py
+```
+
+`/admin/relatorio` (`?inicio=&fim=&barbeiro=`, padrão "Este mês") mostra o faturamento, os atendimentos concluídos e as faltas do período, o total por barbeiro (RN-42) e por forma de pagamento (as quatro) e a lista dos concluídos, com os atalhos "Hoje", "Esta semana" e "Este mês" e um formulário `GET`. Na API, o módulo `app/modules/reports/` (acima de `payments`, `agenda` e `barbers`) tem só `GET /admin/reports/financial?start=&end=&barber_id=`: período de até 366 dias em datas de São Paulo, filtrado pelo **início** do atendimento (`starts_at`, como a agenda), somas no banco em `numeric` e dinheiro como string decimal (`"125.00"`). `check_period` e `financial_report` ficam em `service.py`; o relatório reaproveita `period_bounds` da agenda. Nos testes, `paid()` de `tests/test_reports.py` grava um concluído com o `Payment`. A [spec](docs/specs/relatorio-financeiro.md) documenta as regras e as decisões a confirmar (data de referência, limite do período).
+
 ### Lembrete por e-mail — S5.08
 
 ```bash

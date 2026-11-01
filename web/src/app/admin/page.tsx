@@ -18,6 +18,13 @@ export default function AdminHomePage() {
         </li>
         <li>
           <AdminLinkCard
+            href="/admin/relatorio"
+            title="Relatório"
+            description="O faturamento por período, por barbeiro e por forma de pagamento."
+          />
+        </li>
+        <li>
+          <AdminLinkCard
             href="/admin/cadastros"
             title="Cadastros"
             description="Dados da barbearia e horário de funcionamento."
