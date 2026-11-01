@@ -60,7 +60,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-20 — Cliente sem conta.** A administração pode agendar para um cliente já cadastrado ou cadastrar um cliente novo na hora, com **nome e telefone** obrigatórios e e-mail opcional. *Origem: D3; 2025 (RF12, RF13).*
 
-**RN-21 — Regras que valem para a administração.** O agendamento pela administração segue RN-05, itens 1 a 5. **Não** se aplicam a antecedência mínima (RN-06), a janela (RN-07) nem o limite por cliente (RN-11). Isso permite registrar um "encaixe" que começa agora. *Origem: padrão adotado.*
+**RN-21 — Regras que valem para a administração.** O agendamento pela administração segue RN-05, itens 1 a 5. **Não** se aplicam a antecedência mínima (RN-06), a janela (RN-07) nem o limite por cliente (RN-11). Isso permite registrar um "encaixe" que começa agora. O encaixe usa um horário da grade (RN-04), que pode já ter começado (às 14h10, o das 14h00, se o barbeiro estiver livre e o serviço couber no expediente); não existe horário fora da grade. *Origem: padrão adotado; o encaixe na grade foi decidido na S5.05 (#97).*
 
 **RN-22 — Alterações pela administração.** A administração pode cancelar ou remarcar qualquer agendamento ativo a qualquer momento, sem o prazo de 2h. *Origem: D6 ("depois desse prazo, só a barbearia altera").*
 

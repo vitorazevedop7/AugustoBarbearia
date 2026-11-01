@@ -10,6 +10,7 @@ import {
   parseAgendaParams,
   todayInSaoPaulo,
 } from "./agenda-state";
+import { NEW_APPOINTMENT_PATH } from "./admin-booking-state";
 import { AgendaToolbar } from "./agenda-toolbar";
 import { AgendaDayView, AgendaWeekView } from "./agenda-views";
 import { loadTimeBlocks } from "./bloqueios/data";
@@ -76,13 +77,18 @@ export default async function AgendaPage({
           today={today}
           barbers={filterBarbers}
           actions={
-            <ButtonLink
-              href={newTimeBlockHref(state)}
-              variant="outline"
-              size="sm"
-            >
-              Bloquear horário
-            </ButtonLink>
+            <>
+              <ButtonLink href={NEW_APPOINTMENT_PATH} size="sm">
+                Novo agendamento
+              </ButtonLink>
+              <ButtonLink
+                href={newTimeBlockHref(state)}
+                variant="outline"
+                size="sm"
+              >
+                Bloquear horário
+              </ButtonLink>
+            </>
           }
         />
         {agenda.data && !blocks.data ? (
