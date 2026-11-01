@@ -48,7 +48,11 @@ export function ReportToolbar({
           })}
         </ul>
       </nav>
+      {/* Os campos são não controlados: a `key` recria o formulário quando um
+          atalho troca o período por navegação no cliente, senão a data
+          digitada antes continuaria na tela. */}
       <form
+        key={`${state.inicio}|${state.fim}|${state.barbeiro ?? ""}`}
         method="get"
         action={REPORT_PATH}
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,14rem))_auto] lg:items-end"
