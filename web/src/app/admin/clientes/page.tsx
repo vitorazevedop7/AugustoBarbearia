@@ -164,7 +164,21 @@ export default async function ClientesPage({
       <div className="flex flex-col gap-6">
         {notice ? <Alert tone="success" title={notice} /> : null}
         <SearchForm query={query} />
-        {customers.length === 0 ? (
+        {customers.length === 0 && total > 0 ? (
+          <EmptyState
+            title="Esta página ficou vazia"
+            description="A lista mudou desde que você abriu esta página."
+            action={
+              <ButtonLink
+                href={listHref({ q: query, page: 1 })}
+                variant="outline"
+                size="sm"
+              >
+                Voltar à primeira página
+              </ButtonLink>
+            }
+          />
+        ) : customers.length === 0 ? (
           <EmptyState
             title={
               searching

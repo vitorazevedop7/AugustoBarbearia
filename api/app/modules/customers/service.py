@@ -15,6 +15,7 @@ from app.auth.schemas import CurrentUser
 from app.errors import DomainError
 from app.modules.customers.models import NAME_MAX_LENGTH, Customer
 from app.modules.customers.schemas import (
+    SEPARATORS,
     CustomerCreate,
     CustomerUpdate,
     normalize_email,
@@ -175,7 +176,7 @@ def search_customers(
             Customer.email.icontains(term, autoescape=True),
         ]
         if PHONE_SEARCH.fullmatch(term):
-            digits = re.sub(r"\D", "", term.removeprefix("+55"))
+            digits = re.sub(r"\D", "", SEPARATORS.sub("", term).removeprefix("+55"))
             if digits:
                 conditions.append(Customer.phone.contains(digits, autoescape=True))
         statement = statement.where(or_(*conditions))

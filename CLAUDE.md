@@ -163,18 +163,18 @@ A administração busca, cadastra e corrige clientes em `/admin/clientes` (`GET`
 
 ## Mapa da documentação
 
-| Documento                          | Leia quando                                                                            |
-| ---------------------------------- | -------------------------------------------------------------------------------------- |
-| `docs/produto/visao.md`            | For entender o problema, os usuários e o que está **fora do escopo**                   |
-| `docs/produto/roadmap.md`          | For decidir se algo entra agora (fases 0–3)                                            |
-| `docs/dominio/regras.md`           | **Sempre** antes de implementar ou alterar comportamento. As regras são `RN-xx`        |
-| `docs/dominio/modelo.md`           | For criar ou mudar entidades. Tem o glossário PT↔código                                |
-| `docs/arquitetura.md`              | For decidir onde um código mora, as camadas, as rotas e as variáveis de ambiente       |
-| `docs/decisoes/*.md`               | For questionar uma escolha técnica. Os ADRs explicam o porquê                          |
-| `docs/design/identidade-visual.md` | For mexer na marca (logo, tokens de cor, fontes, tom, movimento)                       |
-| `docs/design/design-system.md`     | For criar ou alterar qualquer tela (componentes, padrões, checklist de acessibilidade) |
-| `docs/specs/<feature>.md`          | For implementar uma funcionalidade. É o contrato dela                                  |
-| `docs/cliente/registro.md`         | For precisar saber de onde veio um fato ou uma decisão de produto (D0–D9)              |
+| Documento | Leia quando |
+|---|---|
+| `docs/produto/visao.md` | For entender o problema, os usuários e o que está **fora do escopo** |
+| `docs/produto/roadmap.md` | For decidir se algo entra agora (fases 0–3) |
+| `docs/dominio/regras.md` | **Sempre** antes de implementar ou alterar comportamento. As regras são `RN-xx` |
+| `docs/dominio/modelo.md` | For criar ou mudar entidades. Tem o glossário PT↔código |
+| `docs/arquitetura.md` | For decidir onde um código mora, as camadas, as rotas e as variáveis de ambiente |
+| `docs/decisoes/*.md` | For questionar uma escolha técnica. Os ADRs explicam o porquê |
+| `docs/design/identidade-visual.md` | For mexer na marca (logo, tokens de cor, fontes, tom, movimento) |
+| `docs/design/design-system.md` | For criar ou alterar qualquer tela (componentes, padrões, checklist de acessibilidade) |
+| `docs/specs/<feature>.md` | For implementar uma funcionalidade. É o contrato dela |
+| `docs/cliente/registro.md` | For precisar saber de onde veio um fato ou uma decisão de produto (D0–D9) |
 
 ## Como trabalhar
 
@@ -202,7 +202,6 @@ A administração busca, cadastra e corrige clientes em `/admin/clientes` (`GET`
 ## Regras de código
 
 **Gerais**
-
 - Identificadores no código em **inglês** (ver o glossário em `modelo.md`). Interface, mensagens ao usuário e documentação em **português do Brasil**.
 - **Regra de negócio só na API**, em `app/modules/<modulo>/service.py`, citando a `RN-xx` em comentário ou docstring. O web nunca decide regra; ele só exibe o `message` do erro da API.
 - **Erros da API** no formato `{ "code": "...", "message": "..." }`, com o `message` em português e pronto para o usuário (ADR 0008).
@@ -210,14 +209,12 @@ A administração busca, cadastra e corrige clientes em `/admin/clientes` (`GET`
 - Nada de segredo no código ou no git. Toda variável nova entra no `.env.example` e na tabela de `arquitetura.md`.
 
 **API (Python)**
-
 - Estrutura por módulo: `router.py` (HTTP) → `service.py` (regras) → `models.py` (SQLAlchemy); `schemas.py` (Pydantic).
 - Tipagem completa; Ruff e Pyright limpos.
 - Testes com pytest contra o Postgres do compose. Cada RN implementada tem teste com a RN no nome (ex.: `test_rn14_cliente_nao_cancela_com_menos_de_2h`).
 - O schema só muda por migração do Alembic, revisada no PR.
 
 **Web (TypeScript)**
-
 - Server Components para ler dados e Server Actions para mutações, sempre pela API. O navegador não chama a API diretamente.
 - Cliente HTTP só pelo `src/lib/api/client.ts`, com os tipos **gerados** (`pnpm gen:api`). Não edite `schema.d.ts` à mão.
 - Mobile first (funcionar em 360px). Cores e fontes só pelos tokens da identidade visual, nunca hex solto.
