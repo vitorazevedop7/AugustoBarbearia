@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 from sqlalchemy import Engine, func, select, text
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import current_user
@@ -888,3 +889,40 @@ def test_rn08_rn20_horario_tomado_na_gravacao_nao_deixa_o_cliente_novo(
             connection.execute(
                 text("DELETE FROM customers WHERE email = :email"), {"email": email}
             )
+
+
+def test_rn05_rn13_edicao_do_servico_espera_o_agendamento(
+    migrated_engine: Engine,
+    people: list[Person],  # noqa: F811
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """Entre a conferência do horário e a gravação, outra transação tenta mudar
+    a duração do serviço. A trava do serviço a faz esperar: o agendamento é
+    gravado com a duração conferida."""
+    barber, service = ids(migrated_engine)
+    original = admin_service.ensure_slot_available
+    blocked: list[bool] = []
+
+    def checked_then_edit(*args: Any, **kwargs: Any) -> None:
+        original(*args, **kwargs)
+        with migrated_engine.connect() as connection:
+            transaction = connection.begin()
+            connection.execute(text("SET LOCAL lock_timeout = '200ms'"))
+            try:
+                connection.execute(
+                    text("UPDATE services SET duration_minutes = 90 WHERE id = :id"),
+                    {"id": service},
+                )
+            except DBAPIError:
+                blocked.append(True)
+            transaction.rollback()
+
+    monkeypatch.setattr(admin_service, "ensure_slot_available", checked_then_edit)
+    with real_admin(migrated_engine) as client:
+        response = create(
+            client, barber, service, TEN, customer_id=people[0].customer_id
+        )
+
+    assert response.status_code == 201, response.json()
+    assert response.json()["duration_minutes"] == 45
+    assert blocked == [True]

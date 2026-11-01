@@ -266,6 +266,13 @@ def test_rn21_rn04_politica_da_administracao_oferece_a_grade_de_hoje_inteira() -
     assert slots(day=date(2027, 6, 7), now=now, policy=ADMIN_POLICY) != []
 
 
+def test_rn01_rn21_hoje_da_administracao_e_o_dia_de_sao_paulo() -> None:
+    """Às 23h30 de segunda em São Paulo (terça em UTC), hoje ainda é segunda."""
+    now = datetime(2026, 11, 3, 2, 30, tzinfo=UTC)
+
+    assert starts(slots(now=now, policy=ADMIN_POLICY)) == grid("10:00", "18:30")
+
+
 def test_dia_que_ja_passou_nao_tem_horario_em_nenhuma_politica() -> None:
     now = local(2026, 11, 3, 0, 5)
 
