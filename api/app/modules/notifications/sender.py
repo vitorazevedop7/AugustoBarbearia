@@ -52,10 +52,14 @@ class ResendSender:
 
 
 class LogSender:
-    """Sem `RESEND_API_KEY` (desenvolvimento e testes): o e-mail vai para o log."""
+    """Sem `RESEND_API_KEY` (desenvolvimento e testes): o e-mail vai para o log.
+
+    Em `WARNING`, que aparece sem configurar o logging (o `uvicorn` só configura
+    os próprios loggers) e denuncia uma produção sem a chave.
+    """
 
     def send(self, email: Email) -> None:
-        logger.info(
+        logger.warning(
             "E-mail não enviado (sem RESEND_API_KEY).\nPara: %s\nAssunto: %s\n\n%s",
             email.to,
             email.subject,

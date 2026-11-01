@@ -1,8 +1,10 @@
 """E-mails ao cliente: confirmação, remarcação e cancelamento (RN-50 a RN-54)."""
 
-import logging
+import subprocess
+import sys
 from collections.abc import Iterator
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -353,18 +355,36 @@ def test_sem_chave_o_email_vai_para_o_log(
     app = customer_app(lambda: db_session, now=lambda: NOW.astimezone(UTC))
     with TestClient(app) as client:
         assert client.patch("/me/profile", json={"phone": "11987654321"}).is_success
-        with caplog.at_level(logging.INFO, "app.modules.notifications.sender"):
-            response = book(
-                client,
-                barber_id(db_session, "Edvaldo"),
-                service_by_name(db_session, "Corte + Barba").id,
-            )
+        response = book(
+            client,
+            barber_id(db_session, "Edvaldo"),
+            service_by_name(db_session, "Corte + Barba").id,
+        )
 
     assert response.status_code == 201, response.json()
     assert "Para: ana@example.com" in caplog.text
     assert "Agendamento confirmado: terça-feira, 3/11, às 10h00" in caplog.text
     [notification] = notifications_of(db_session, response.json()["id"])
     assert notification.status == NotificationStatus.SENT
+
+
+def test_log_aparece_sem_configurar_o_logging() -> None:
+    """Num processo novo, como o `uvicorn` sobe a API, o e-mail chega ao stderr."""
+    script = (
+        "from app.modules.notifications.sender import Email, LogSender\n"
+        "LogSender().send(Email(to='ana@example.com', subject='Assunto',"
+        " html='', text='Corpo do e-mail', idempotency_key='k'))\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        capture_output=True,
+        text=True,
+        check=True,
+        cwd=Path(__file__).parents[1],
+    )
+
+    assert "Para: ana@example.com" in result.stderr
+    assert "Corpo do e-mail" in result.stderr
 
 
 def test_com_chave_o_remetente_e_o_resend(monkeypatch: MonkeyPatch) -> None:
