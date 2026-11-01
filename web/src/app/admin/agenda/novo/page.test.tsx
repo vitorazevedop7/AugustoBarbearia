@@ -143,7 +143,9 @@ describe("novo agendamento — /admin/agenda/novo (RN-20, RN-21)", () => {
       "/admin/agenda/novo?barbeiro=1&servico=2&data=2026-11-02&hora=14:00&cliente=novo",
     );
     const search = screen.getByRole("search");
-    expect(within(search).getByLabelText("Buscar cliente")).toHaveValue("ana");
+    expect(
+      within(search).getByLabelText("Buscar por nome, telefone ou e-mail"),
+    ).toHaveValue("ana");
   });
 
   it("cliente: busca sem resultado", async () => {

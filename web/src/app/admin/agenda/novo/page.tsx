@@ -336,8 +336,7 @@ async function customerStep(selection: NewAppointmentSelection, query: string) {
           <TextField
             type="search"
             name="q"
-            label="Buscar cliente"
-            hint="Nome, telefone ou e-mail."
+            label="Buscar por nome, telefone ou e-mail"
             maxLength={100}
             autoComplete="off"
             defaultValue={query}
