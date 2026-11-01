@@ -91,7 +91,7 @@ Nenhuma regra nova: as escolhas abaixo detalham as existentes e estão em "Dúvi
 
 **CA-13 — Período e filtro na URL, sem JS**
 - O estado fica na URL: `?inicio=AAAA-MM-DD&fim=AAAA-MM-DD&barbeiro=<id>`. Se `inicio` e `fim` não forem **ambas** datas válidas, vale Este mês; `barbeiro` inválido, ou que não está na lista de barbeiros, vale "todos": a tela ignora o filtro e o campo mostra "Todos", em vez de um erro com o filtro fingindo estar limpo.
-- Os atalhos "Hoje", "Esta semana" (segunda a domingo da semana de hoje, como na agenda) e "Este mês" são links que mantêm o barbeiro. O atalho do período atual tem `aria-current`.
+- Os atalhos "Hoje", "Esta semana" (segunda a domingo da semana de hoje, como na agenda) e "Este mês" são links que mantêm o barbeiro. O atalho do período atual tem `aria-current`. Com JS, o atalho navega no cliente e o formulário é recriado com o período aplicado, para os campos nunca discordarem do relatório exibido.
 - Um formulário `GET` com "De", "Até" e "Barbeiro" (lista nativa com "Todos") e o botão "Ver relatório" leva a qualquer período. Tudo é link ou formulário `GET`: funciona sem JS.
 - Período recusado pela API (ex.: `fim` antes de `inicio`): um `Alert` `danger` com o `message` da API no lugar do relatório, e o formulário continua com o que foi digitado. Falha de leitura: o `message` da API, ou "Não foi possível carregar o relatório. Tente novamente em instantes.".
 
