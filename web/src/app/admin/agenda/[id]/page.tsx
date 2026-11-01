@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Alert } from "@/components/ui/alert";
 import { ButtonLink } from "@/components/ui/button";
 import { AdminPage } from "../../admin-page";
+import { AdminAppointmentActions } from "../admin-booking-frame";
+import { adminNoticeMessage } from "../admin-booking-state";
 import {
   agendaHref,
   type AgendaAppointment,
@@ -22,7 +24,8 @@ const notFoundMessage = "Agendamento não encontrado.";
 
 /**
  * O detalhe de um agendamento; "Voltar" leva à agenda de onde ele foi aberto.
- * Abaixo do cartão fica o fechamento: concluir, falta e pagamento (S5.06).
+ * No cartão ficam remarcar e cancelar (S5.05); abaixo dele, o fechamento:
+ * concluir, falta e pagamento (S5.06).
  */
 export default async function AgendaAppointmentPage({
   params,
@@ -35,7 +38,7 @@ export default async function AgendaAppointmentPage({
   const query = await searchParams;
   const agenda = parseAgendaParams(query, todayInSaoPaulo());
   const back = agendaHref(agenda);
-  const notice = noticeMessage(query.aviso);
+  const notice = noticeMessage(query.aviso) ?? adminNoticeMessage(query.aviso);
   // Tipo explícito: sem ele, o TypeScript pode reduzir a união e perder `data`.
   const loaded: Loaded<AgendaAppointment> =
     id === null ? { message: notFoundMessage } : await loadAppointment(id);
@@ -51,7 +54,10 @@ export default async function AgendaAppointmentPage({
         {notice ? <Alert tone="success" title={notice} /> : null}
         {loaded.data ? (
           <>
-            <AppointmentDetail appointment={loaded.data} />
+            <AppointmentDetail
+              appointment={loaded.data}
+              actions={<AdminAppointmentActions appointment={loaded.data} />}
+            />
             <AppointmentClosing
               appointment={loaded.data}
               agenda={agenda}

@@ -35,7 +35,7 @@ Administração. O cliente e o visitante não acessam estas rotas nem estas tela
 
 ## Definições desta funcionalidade
 - **Política da administração (`ADMIN_POLICY`, RN-21):** o mesmo cálculo da RN-05 (`available_slots`), sem a antecedência mínima (RN-06) e sem a janela de 30 dias (RN-07). Continuam valendo a grade de 30 minutos (RN-04), o expediente (RN-02), os ocupados (RN-08) e a oferta (barbeiro e serviço ativos, e o barbeiro realiza o serviço). Nenhuma política oferece horário num dia que já passou (data de São Paulo).
-- **Encaixe (RN-21, RN-44, RN-04) — decisão a confirmar com os proprietários:** a administração pode escolher **qualquer horário da grade de hoje** que caiba no expediente e esteja livre, **inclusive o que já começou**. Às 14h10, o horário das 14h00 é oferecido se o barbeiro estiver livre; os da manhã também, para registrar depois um atendimento que já aconteceu. Não existe horário fora da grade: um encaixe às 14h10 fica registrado às 14h00. A alternativa seria oferecer só a partir do horário da grade em andamento (às 14h10, de 14h00 em diante).
+- **Encaixe (RN-21, RN-44, RN-04) — decisão confirmada na S5.05 e registrada na RN-21:** o encaixe usa um horário da grade, que pode já ter começado; nunca um horário fora da grade. Às 14h10, o horário das 14h00 é oferecido se o barbeiro estiver livre e o serviço couber no expediente, e um encaixe às 14h10 fica registrado às 14h00. Como a RN-21 não tem antecedência, os horários livres da manhã de hoje também são oferecidos, para registrar depois um atendimento que já aconteceu.
 - **Dias oferecidos na tela:** a lista de dias da administração vai de hoje até hoje + 30 dias, só os que têm horário. Os 30 dias são só o tamanho da lista, não uma regra: o campo "Outra data" leva a qualquer dia, sem limite à frente.
 - **Cliente do agendamento (RN-20):** um cliente já cadastrado (`customer_id`), de qualquer origem, ou um cliente novo (`customer`: nome e telefone obrigatórios, e-mail opcional, as mesmas validações e o mesmo `create_customer` do cadastro de clientes). Um cliente que veio do Google e ainda não informou telefone também pode ser agendado pela administração: a RN-10 vale só para o agendamento online.
 - **Tudo ou nada:** o cliente novo e o agendamento são gravados na mesma transação. Se o horário não estiver disponível, se o e-mail já existir ou se outra reserva ganhar a disputa, nada é gravado, nem o cliente.
@@ -148,8 +148,10 @@ flowchart LR
 - Horário fora da grade de 30 minutos.
 
 ## Dúvidas em aberto
+Decidido nesta issue: o encaixe usa um horário da grade, que pode já ter começado, e nunca um horário fora dela (agora explícito na RN-21).
+
 Escolhas desta implementação que nenhuma RN decide, a confirmar com os proprietários:
-- **Encaixe e grade (RN-21 × RN-04):** a administração escolhe qualquer horário da grade de hoje que caiba no expediente e esteja livre, inclusive o que já começou (às 14h10, o das 14h00), e não cria horário fora da grade. A alternativa é oferecer só a partir do horário da grade em andamento.
+- **Horários de hoje que já passaram** (a manhã, às 18h) também são oferecidos à administração, porque a RN-21 não tem antecedência. A alternativa seria oferecer só a partir do horário da grade em andamento.
 - **Dia que já passou** não tem horário, nem para a administração. Um atendimento de ontem que não foi registrado não entra mais pelo agendamento manual.
 - **Lista de dias de 30 dias** na tela da administração, com "Outra data" para ir além.
 - **Cliente do Google sem telefone** pode ser agendado pela administração (a RN-10 é do agendamento online).

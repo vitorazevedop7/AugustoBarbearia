@@ -139,6 +139,39 @@ describe("detalhe do agendamento — /admin/agenda/[id]", () => {
     ).toHaveAttribute("href", "/admin/agenda?data=2026-11-03");
   });
 
+  it("agendamento ativo tem Remarcar e Cancelar, e o aviso da ação (RN-22)", async () => {
+    GET.mockResolvedValue({
+      data: adminAppointment(),
+      response: { status: 200 },
+    });
+
+    await renderPage("7", { data: "2026-11-03", aviso: "criado" });
+
+    expect(screen.getByRole("status")).toHaveTextContent("Agendamento criado.");
+    expect(screen.getByRole("link", { name: /^Remarcar/ })).toHaveAttribute(
+      "href",
+      "/admin/agenda/7/remarcar?barbeiro=1",
+    );
+    expect(screen.getByRole("link", { name: /^Cancelar/ })).toHaveAttribute(
+      "href",
+      "/admin/agenda/7/cancelar",
+    );
+  });
+
+  it("agendamento que não está ativo não tem ações", async () => {
+    GET.mockResolvedValue({
+      data: adminAppointment({ status: "COMPLETED" }),
+      response: { status: 200 },
+    });
+
+    await renderPage("7", { aviso: "qualquer" });
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /^Remarcar/ }),
+    ).not.toBeInTheDocument();
+  });
+
   it("mostra o message da API para o agendamento inexistente", async () => {
     GET.mockResolvedValue({
       error: {
