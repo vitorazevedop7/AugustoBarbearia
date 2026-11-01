@@ -451,7 +451,8 @@ export interface paths {
         put?: never;
         /**
          * Create Appointment
-         * @description Agenda para um cliente já cadastrado ou novo (RN-13, RN-20, RN-21).
+         * @description Agenda para um cliente já cadastrado ou novo (RN-13, RN-20, RN-21) e
+         *     confirma por e-mail, se ele tiver e-mail (RN-50).
          */
         post: operations["create_appointment_admin_appointments_post"];
         delete?: never;
@@ -640,7 +641,8 @@ export interface paths {
         put?: never;
         /**
          * Cancel Appointment
-         * @description Cancela qualquer agendamento ativo, sem prazo (RN-22, RN-31 a RN-33).
+         * @description Cancela qualquer agendamento ativo, sem prazo (RN-22, RN-31 a RN-33), e
+         *     avisa o cliente por e-mail (RN-52).
          */
         post: operations["cancel_appointment_admin_appointments__appointment_id__cancel_post"];
         delete?: never;
@@ -660,7 +662,8 @@ export interface paths {
         put?: never;
         /**
          * Reschedule Appointment
-         * @description Muda o início e, se pedido, o barbeiro, sem prazo (RN-15, RN-21, RN-22).
+         * @description Muda o início e, se pedido, o barbeiro, sem prazo (RN-15, RN-21, RN-22), e
+         *     avisa o cliente por e-mail (RN-52).
          */
         post: operations["reschedule_appointment_admin_appointments__appointment_id__reschedule_post"];
         delete?: never;
