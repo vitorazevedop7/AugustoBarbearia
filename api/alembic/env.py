@@ -9,6 +9,7 @@ from app.modules.appointments import models as appointments_models  # noqa: F401
 from app.modules.barbers import models as barbers_models  # noqa: F401
 from app.modules.catalog import models as catalog_models  # noqa: F401
 from app.modules.customers import models as customers_models  # noqa: F401
+from app.modules.notifications import models as notifications_models  # noqa: F401
 from app.modules.shop import models as shop_models  # noqa: F401
 
 # Ao criar modelos, importe-os aqui para registrar suas tabelas em Base.metadata.

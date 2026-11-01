@@ -714,6 +714,13 @@ def pair(migrated_engine: Engine) -> Iterator[list[Person]]:
         customer_ids = [person.customer_id for person in created]
         with migrated_engine.begin() as connection:
             connection.execute(
+                text(
+                    "DELETE FROM notifications WHERE appointment_id IN"
+                    " (SELECT id FROM appointments WHERE customer_id = ANY(:ids))"
+                ),
+                {"ids": customer_ids},
+            )
+            connection.execute(
                 text("DELETE FROM appointments WHERE customer_id = ANY(:ids)"),
                 {"ids": customer_ids},
             )

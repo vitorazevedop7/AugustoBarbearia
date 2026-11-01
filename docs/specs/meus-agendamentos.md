@@ -27,7 +27,7 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 - RN-05 a RN-08 — Disponibilidade do novo horário (via `ensure_slot_available`, S3.07)
 - RN-13 — Preço e duração congelados (mantidos na remarcação)
 - RN-70 — Perfis e permissões
-- RN-52 — E-mails de alteração (fora do escopo; ver abaixo)
+- RN-52 — E-mails de alteração (S5.03, em [notificacoes-email.md](notificacoes-email.md))
 
 ## Definições desta funcionalidade
 - **Próximos:** agendamentos `SCHEDULED` que ainda não terminaram (`ends_at` depois de agora), inclusive o que está em andamento, em ordem de início (o mais próximo primeiro). É o mesmo critério de "ativo no futuro" da RN-11 e da RN-60.
@@ -140,7 +140,7 @@ flowchart LR
 - O resumo de `POST /me/appointments` (S3.08) ganha os mesmos campos novos da lista (`can_cancel`, `can_reschedule`, `change_deadline`, `canceled_at`, `canceled_by`).
 
 ## Fora do escopo desta spec
-- **E-mails de remarcação e de cancelamento (RN-52):** Sprint 4.
+- **E-mails de remarcação e de cancelamento (RN-52):** entraram na S5.03 (#95). Cancelar e remarcar registram o aviso na mesma transação e o enviam depois do commit; ver [notificacoes-email.md](notificacoes-email.md).
 - Cancelar e remarcar pela administração, sem prazo (RN-22): Sprint 4.
 - Trocar o serviço na remarcação (RN-15: o cliente cancela e agenda de novo).
 - Paginação ou filtro do histórico.

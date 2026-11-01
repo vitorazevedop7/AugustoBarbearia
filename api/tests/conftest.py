@@ -23,6 +23,16 @@ from app.main import create_app
 from tests.jwt_tokens import AUDIENCE, ISSUER, JWKS_URL, public_jwk
 
 
+@pytest.fixture(autouse=True)
+def no_real_email(monkeypatch: MonkeyPatch) -> Iterator[None]:
+    """Nenhum teste envia e-mail de verdade, mesmo com a chave no `.env`: sem
+    `RESEND_API_KEY`, o remetente é o de log (S5.03)."""
+    monkeypatch.setenv("RESEND_API_KEY", "")
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 @pytest.fixture(scope="session")
 def migrated_engine() -> Iterator[Engine]:
     source_url = database_url(get_settings().database_url)

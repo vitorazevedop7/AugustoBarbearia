@@ -93,6 +93,8 @@ Os documentos usam os termos em português. **No código, os identificadores sã
 | Pagamento | `Payment` | Valor cobrado e forma de pagamento na conclusão |
 | Forma de pagamento | `PaymentMethod`: `CASH`, `PIX`, `DEBIT`, `CREDIT` | Dinheiro, Pix, débito, crédito |
 | Notificação | `Notification` | Registro de envio de e-mail |
+| Tipo da notificação | `kind`: `CONFIRMATION` / `REMINDER` / `RESCHEDULED` / `CANCELED` | Confirmação, lembrete, remarcação, cancelamento (RN-50 a RN-52) |
+| Situação da notificação | `status`: `PENDING` / `SENT` / `FAILED` | Registrada, enviada ou com falha (RN-54) |
 | Horário disponível | `slot` | Horário de início calculado (RN-05), não armazenado |
 | Encaixe | — | Agendamento feito pela administração começando agora (RN-21, RN-44) |
 | Remarcar | `reschedule` | Mudar a data, o horário ou o barbeiro de um agendamento ativo |

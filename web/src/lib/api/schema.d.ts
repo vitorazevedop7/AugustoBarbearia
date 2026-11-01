@@ -321,7 +321,8 @@ export interface paths {
         put?: never;
         /**
          * Create Appointment
-         * @description Agenda um horário para o cliente do token (RN-05 a RN-13).
+         * @description Agenda um horário para o cliente do token (RN-05 a RN-13) e envia a
+         *     confirmação por e-mail (RN-50).
          */
         post: operations["create_appointment_me_appointments_post"];
         delete?: never;
@@ -362,7 +363,8 @@ export interface paths {
         put?: never;
         /**
          * Cancel Appointment
-         * @description Cancela até 2 horas antes do início (RN-14, RN-31 a RN-33).
+         * @description Cancela até 2 horas antes do início (RN-14, RN-31 a RN-33) e avisa por
+         *     e-mail (RN-52).
          */
         post: operations["cancel_appointment_me_appointments__appointment_id__cancel_post"];
         delete?: never;
@@ -383,7 +385,7 @@ export interface paths {
         /**
          * Reschedule Appointment
          * @description Muda o início e, se pedido, o barbeiro, até 2 horas antes (RN-14,
-         *     RN-15, RN-05 a RN-08).
+         *     RN-15, RN-05 a RN-08), e avisa por e-mail (RN-52).
          */
         post: operations["reschedule_appointment_me_appointments__appointment_id__reschedule_post"];
         delete?: never;

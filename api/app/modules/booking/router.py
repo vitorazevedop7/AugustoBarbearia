@@ -25,6 +25,7 @@ from app.modules.booking.schemas import (
 )
 from app.modules.customers.dependencies import current_customer
 from app.modules.customers.models import Customer
+from app.modules.notifications.dependencies import OutboxDep
 
 router = APIRouter(
     prefix="/me/appointments",
@@ -92,8 +93,10 @@ def create_appointment(
     customer: CustomerDep,
     session: SessionDep,
     now: NowDep,
+    outbox: OutboxDep,
 ) -> CustomerAppointmentResponse:
-    """Agenda um horário para o cliente do token (RN-05 a RN-13)."""
+    """Agenda um horário para o cliente do token (RN-05 a RN-13) e envia a
+    confirmação por e-mail (RN-50)."""
     booked = service.create_customer_appointment(
         session,
         customer,
@@ -101,6 +104,7 @@ def create_appointment(
         service_id=data.service_id,
         starts_at=data.starts_at,
         now=now,
+        outbox=outbox,
     )
     return to_response(booked, now)
 
@@ -117,11 +121,16 @@ def get_appointment(
 
 @router.post("/{appointment_id}/cancel", response_model=CustomerAppointmentResponse)
 def cancel_appointment(
-    appointment_id: int, customer: CustomerDep, session: SessionDep, now: NowDep
+    appointment_id: int,
+    customer: CustomerDep,
+    session: SessionDep,
+    now: NowDep,
+    outbox: OutboxDep,
 ) -> CustomerAppointmentResponse:
-    """Cancela até 2 horas antes do início (RN-14, RN-31 a RN-33)."""
+    """Cancela até 2 horas antes do início (RN-14, RN-31 a RN-33) e avisa por
+    e-mail (RN-52)."""
     booked = service.cancel_customer_appointment(
-        session, customer.id, appointment_id, now
+        session, customer.id, appointment_id, now, outbox=outbox
     )
     return to_response(booked, now)
 
@@ -133,9 +142,10 @@ def reschedule_appointment(
     customer: CustomerDep,
     session: SessionDep,
     now: NowDep,
+    outbox: OutboxDep,
 ) -> CustomerAppointmentResponse:
     """Muda o início e, se pedido, o barbeiro, até 2 horas antes (RN-14,
-    RN-15, RN-05 a RN-08)."""
+    RN-15, RN-05 a RN-08), e avisa por e-mail (RN-52)."""
     booked = service.reschedule_customer_appointment(
         session,
         customer.id,
@@ -143,6 +153,7 @@ def reschedule_appointment(
         starts_at=data.starts_at,
         barber_id=data.barber_id,
         now=now,
+        outbox=outbox,
     )
     return to_response(booked, now)
 
