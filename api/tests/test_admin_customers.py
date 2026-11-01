@@ -137,6 +137,8 @@ def test_rn20_busca_por_telefone_com_ou_sem_formatacao(admin: TestClient) -> Non
     assert names(admin, q="+55 75 9888") == ["Caio"]
     assert names(admin, q="4321") == ["Beto"]
     assert names(admin, q="75") == ["Ana", "Caio"]
+    # Os mesmos formatos que o cadastro aceita (CA-7 do perfil) valem na busca.
+    assert names(admin, q="+ 55 (75) 99999-0000") == ["Ana"]
 
 
 def test_rn20_busca_por_email(admin: TestClient) -> None:

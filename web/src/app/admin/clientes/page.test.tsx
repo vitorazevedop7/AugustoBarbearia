@@ -141,6 +141,17 @@ describe("ClientesPage — RN-20, RN-62", () => {
     );
   });
 
+  it("oferece voltar à primeira página quando a página pedida ficou vazia", async () => {
+    respond([], 20);
+
+    render(await page({ q: "a", pagina: "2" }));
+
+    expect(screen.getByText("Esta página ficou vazia")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Voltar à primeira página" }),
+    ).toHaveAttribute("href", "/admin/clientes?q=a");
+  });
+
   it("avisa quando a API falha, mantendo a busca", async () => {
     GET.mockRejectedValue(new TypeError("fetch failed"));
 
