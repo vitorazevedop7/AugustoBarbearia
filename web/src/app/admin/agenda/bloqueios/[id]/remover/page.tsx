@@ -9,6 +9,7 @@ import {
   parseAgendaParams,
   todayInSaoPaulo,
 } from "../../../agenda-state";
+import type { Loaded } from "../../../data";
 import { loadTimeBlock } from "../../data";
 import { RemoveTimeBlockForm } from "../../remove-form";
 import {
@@ -16,6 +17,7 @@ import {
   timeBlockId,
   timeBlockNotFoundMessage,
   timeBlockTime,
+  type TimeBlock,
 } from "../../time-block-state";
 
 export const metadata: Metadata = {
@@ -55,7 +57,8 @@ export default async function RemoveTimeBlockPage({
       Voltar
     </ButtonLink>
   );
-  const loaded =
+  // Tipo explícito: sem ele, o TypeScript pode reduzir a união e perder `data`.
+  const loaded: Loaded<TimeBlock> =
     id === null
       ? { message: timeBlockNotFoundMessage }
       : await loadTimeBlock(id);

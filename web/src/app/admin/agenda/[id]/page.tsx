@@ -4,6 +4,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { AdminPage } from "../../admin-page";
 import {
   agendaHref,
+  type AgendaAppointment,
   appointmentId,
   parseAgendaParams,
   todayInSaoPaulo,
@@ -11,7 +12,7 @@ import {
 import { AppointmentDetail } from "../appointment-detail";
 import { AppointmentClosing } from "../conclusao/closing-panel";
 import { noticeMessage } from "../conclusao/closing-state";
-import { loadAppointment } from "../data";
+import { loadAppointment, type Loaded } from "../data";
 
 export const metadata: Metadata = {
   title: "Agendamento — Administração — Augusto Barbearia",
@@ -35,7 +36,8 @@ export default async function AgendaAppointmentPage({
   const agenda = parseAgendaParams(query, todayInSaoPaulo());
   const back = agendaHref(agenda);
   const notice = noticeMessage(query.aviso);
-  const loaded =
+  // Tipo explícito: sem ele, o TypeScript pode reduzir a união e perder `data`.
+  const loaded: Loaded<AgendaAppointment> =
     id === null ? { message: notFoundMessage } : await loadAppointment(id);
 
   return (
