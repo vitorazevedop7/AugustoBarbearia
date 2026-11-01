@@ -64,7 +64,7 @@ Um início `H` é oferecido quando:
 
 A conversão para São Paulo acontece na borda: a abertura e o fechamento são horas locais (`time`), combinadas com a data no fuso `America/Sao_Paulo` e comparadas como instantes. O resultado sai no fuso de São Paulo (`-03:00`).
 
-Os intervalos ocupados são genéricos: os agendamentos `SCHEDULED` do barbeiro que cruzam o dia e, desde a S5.04 (#96), os bloqueios dele (RN-03, [bloqueios.md](bloqueios.md)), lidos juntos em `_busy` (`service.py`) sem mudar a função. Por isso o bloqueio vale para o cliente, a remarcação e a administração. As regras 6 e 7 vêm de uma política (`BookingPolicy`). A do cliente (`CUSTOMER_POLICY`) tem 1 hora e 30 dias. A política da administração (RN-21, sem antecedência nem janela) é definida quando o agendamento pela administração entrar.
+Os intervalos ocupados são genéricos: os agendamentos `SCHEDULED` do barbeiro que cruzam o dia e, desde a S5.04 (#96), os bloqueios dele (RN-03, [bloqueios.md](bloqueios.md)), lidos juntos em `_busy` (`service.py`) sem mudar a função. Por isso o bloqueio vale para o cliente, a remarcação e a administração. As regras 6 e 7 vêm de uma política (`BookingPolicy`). A do cliente (`CUSTOMER_POLICY`) tem 1 hora e 30 dias. A política da administração (`ADMIN_POLICY`, S5.05, [agendamento-admin.md](agendamento-admin.md)) não tem antecedência nem janela (RN-21): oferece qualquer início da grade que caiba no expediente e esteja livre, inclusive um de hoje que já começou (o encaixe), e nunca um horário fora da grade. Nenhuma política oferece horário num dia que já passou: `within_window` sempre começa em hoje. `list_available_days` recebe `days_ahead` para a política sem janela, que aí é só o tamanho da lista (30 dias na administração).
 
 ### Exemplo (RN-05)
 Segunda-feira, das 10h às 19h, Corte + Barba (45 min). O barbeiro já tem um agendamento das 10h00 às 10h45. O primeiro início oferecido é **11h00**: 10h00 e 10h30 cruzam o agendamento. O último é **18h00**, porque 18h30 + 45 min passa das 19h.
@@ -157,7 +157,7 @@ Nenhuma tela nesta issue. A escolha de horário pelo cliente é a S3.08.
 - **Bloqueios (RN-03):** a tabela, a tela e a entrada no cálculo vieram na S5.04 (#96), em [bloqueios.md](bloqueios.md). A criação do bloqueio trava o barbeiro com `FOR UPDATE`, a mesma linha que `ensure_slot_available` trava com `FOR SHARE`, para não correr junto com uma reserva.
 - **Criar agendamento** (cliente ou administração), a tradução do erro da constraint e o limite da RN-11: S3.08 (#57) em diante.
 - Cancelar, remarcar, concluir e marcar falta. Os campos de cancelamento existem, mas nenhum fluxo os preenche ainda.
-- A política da administração (RN-21) e o "encaixe".
+- A política da administração (RN-21) e o "encaixe": entraram na S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 - Qualquer tela.
 
 ## Dúvidas em aberto

@@ -134,7 +134,7 @@ docker compose exec api uv run pytest tests/test_availability_slots.py tests/tes
 curl "http://localhost:8000/public/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"
 ```
 
-O cálculo dos horários (RN-05) é a função pura `available_slots` de `app/modules/availability/slots.py`: recebe o dia, o expediente, a oferta (duração, ativos, quem realiza), os intervalos ocupados, o agora e a política (`CUSTOMER_POLICY`: 1h e 30 dias). Os bloqueios (RN-03) entram na lista de ocupados em `_busy` desde a S5.04. A criação de agendamento (S3.08) chama `ensure_slot_available` (`availability/service.py`), que trava o barbeiro com `FOR SHARE` e levanta `409 SLOT_UNAVAILABLE`, e traduz o erro do insert com `is_slot_conflict` (`appointments/service.py`), que reconhece a violação da constraint e o deadlock entre duas reservas simultâneas. Rotas que dependem do relógio recebem `utc_now` (`app/clock.py`) por `Depends`, e os testes o substituem. Os testes de concorrência usam conexões próprias e apagam o que gravaram. A [spec](docs/specs/disponibilidade.md) documenta as regras e as decisões.
+O cálculo dos horários (RN-05) é a função pura `available_slots` de `app/modules/availability/slots.py`: recebe o dia, o expediente, a oferta (duração, ativos, quem realiza), os intervalos ocupados, o agora e a política (`CUSTOMER_POLICY`: 1h e 30 dias; `ADMIN_POLICY`: sem as duas, S5.05). Os bloqueios (RN-03) entram na lista de ocupados em `_busy` desde a S5.04. A criação de agendamento (S3.08) chama `ensure_slot_available` (`availability/service.py`), que trava o barbeiro com `FOR SHARE` e levanta `409 SLOT_UNAVAILABLE`, e traduz o erro do insert com `is_slot_conflict` (`appointments/service.py`), que reconhece a violação da constraint e o deadlock entre duas reservas simultâneas. Rotas que dependem do relógio recebem `utc_now` (`app/clock.py`) por `Depends`, e os testes o substituem. Os testes de concorrência usam conexões próprias e apagam o que gravaram. A [spec](docs/specs/disponibilidade.md) documenta as regras e as decisões.
 
 ### Agendamento pelo cliente — S3.08
 
@@ -204,6 +204,15 @@ docker compose exec api uv run pytest tests/test_reminders.py
 ```
 
 O comando envia o lembrete (RN-51) dos agendamentos `SCHEDULED` que começam entre 23h e 25h à frente e ainda não têm lembrete para o horário atual, e imprime no log quantos saíram e quantos falharam. É idempotente: rodar de novo, ou duas execuções ao mesmo tempo, não manda um segundo e-mail (a linha do agendamento é travada com `FOR UPDATE SKIP LOCKED`). Agendamento (ou remarcação) feito com menos de 24h de antecedência não recebe lembrete; o lembrete do horário antigo não impede o do novo. Sem `RESEND_API_KEY`, o e-mail aparece no log. A lógica é `send_due_reminders` em `app/modules/notifications/reminders.py`; o job (`app/jobs/send_reminders.py`, `run(session, sender, now)`) recebe o relógio como argumento, e os testes o fixam. O cron de hora em hora na Railway entra na #32. A [spec](docs/specs/notificacoes-email.md) documenta as decisões.
+
+### Agendamento pela administração — S5.05
+
+```bash
+docker compose exec api uv run pytest tests/test_admin_booking.py
+curl "http://localhost:8000/admin/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"  # com Bearer de admin
+```
+
+A barra da agenda tem "Novo agendamento" (`/admin/agenda/novo?barbeiro=&servico=&data=&hora=&cliente=`): barbeiro → serviço → dia → horário → cliente (buscado ou `cliente=novo`, com `CustomerFields`) → confirmar. O detalhe de um `SCHEDULED` tem "Remarcar" (`/admin/agenda/[id]/remarcar`, reaproveita `BarberStep`, `DayPicker`, `TimePicker` e o estado da remarcação do cliente) e "Cancelar" (`/admin/agenda/[id]/cancelar`, página de confirmação sem JS); depois de cada ação, o detalhe mostra `?aviso=`. Os arquivos do web ficam em `web/src/app/admin/agenda/admin-booking-*.ts(x)`. Na API, o módulo `app/modules/admin_booking/` (acima de `agenda`, `appointments`, `availability` e `customers`) usa `ADMIN_POLICY` (`availability/slots.py`: sem antecedência nem janela, RN-21; o encaixe é um horário da grade, mesmo que já tenha começado), a mesma trava e constraint do cliente (`ensure_slot_available`, `is_slot_conflict`) e `create_customer(..., commit=False)`, para o cliente novo e o agendamento irem no mesmo `commit`. Cancelar e remarcar não têm prazo (RN-22) e registram `canceled_by = ADMIN` (RN-33). Os e-mails dessas ações são da S5.09 (#101). A [spec](docs/specs/agendamento-admin.md) documenta as regras e as decisões.
 
 ## Mapa da documentação
 

@@ -8,7 +8,7 @@
 Depois de agendar (S3.08), o cliente precisa acompanhar os próprios horários e resolver um imprevisto sem ligar para a barbearia: cancelar ou trocar o dia, o horário ou o barbeiro. O prazo de 2 horas (D6) protege a agenda contra a desistência de última hora (O3), e a vaga cancelada volta na hora para outros clientes (O1). Fora do prazo, a tela mostra o contato da barbearia. Esta funcionalidade reaproveita o motor de disponibilidade (S3.07) e as telas de dia e horário do agendamento (S3.08).
 
 ## Quem usa
-Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alterações pela administração (RN-22) entram na Sprint 4.
+Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alterações pela administração (RN-22) são da S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 
 ## Histórias
 - Como **cliente**, quero **ver meus próximos horários e o histórico** para **lembrar quando e com quem marquei**.
@@ -141,7 +141,7 @@ flowchart LR
 
 ## Fora do escopo desta spec
 - **E-mails de remarcação e de cancelamento (RN-52):** entraram na S5.03 (#95). Cancelar e remarcar registram o aviso na mesma transação e o enviam depois do commit; ver [notificacoes-email.md](notificacoes-email.md).
-- Cancelar e remarcar pela administração, sem prazo (RN-22): Sprint 4.
+- Cancelar e remarcar pela administração, sem prazo (RN-22): S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 - Trocar o serviço na remarcação (RN-15: o cliente cancela e agenda de novo).
 - Paginação ou filtro do histórico.
 - Link "Meus agendamentos" no cabeçalho do site.
