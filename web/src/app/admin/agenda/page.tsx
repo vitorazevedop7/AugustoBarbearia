@@ -18,6 +18,7 @@ import {
   removeTimeBlockHref,
   timeBlockNotice,
   timeBlocksOn,
+  withBlockBarbers,
 } from "./bloqueios/time-block-state";
 import { TimeBlockList } from "./bloqueios/time-blocks";
 import { loadAgenda, loadBarbers } from "./data";
@@ -107,7 +108,7 @@ export default async function AgendaPage({
           ) : (
             <AgendaDayView
               day={agenda.data.days[0]}
-              barbers={agenda.data.barbers}
+              barbers={withBlockBarbers(agenda.data.barbers, blockList)}
               appointments={agenda.data.appointments}
               hrefFor={hrefFor}
               barberExtra={(barber) => (

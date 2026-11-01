@@ -91,6 +91,26 @@ describe("bloqueios na agenda — RN-03", () => {
     expect(within(manoel).queryByText("Bloqueios")).not.toBeInTheDocument();
   });
 
+  it("barbeiro inativo só com bloqueio ganha a coluna no dia", async () => {
+    respond({
+      agenda: agendaDay({ barbers: [agendaBarbers[0]] }),
+      blocks: [
+        timeBlock({ id: 30, barber: { id: 4, name: "Caio", active: false } }),
+      ],
+    });
+
+    await renderPage();
+
+    const caio = screen.getByRole("region", { name: "Caio" });
+    expect(within(caio).getByText("Inativo")).toBeInTheDocument();
+    expect(within(caio).getByText("12:00–13:00")).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("heading", { level: 3 })
+        .map((heading) => heading.textContent),
+    ).toEqual(["Caio", "Edvaldo"]);
+  });
+
   it("na semana, cada dia mostra os bloqueios com o barbeiro", async () => {
     respond({
       agenda: agendaWeek(),

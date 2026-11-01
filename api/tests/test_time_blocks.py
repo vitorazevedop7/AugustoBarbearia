@@ -92,7 +92,10 @@ def block(
     day: str = TUESDAY,
     reason: str | None = None,
 ) -> Any:
+    """Sem início e fim, pede a folga do dia inteiro (`all_day`)."""
     body: dict[str, Any] = {"barber_id": barber, "date": day}
+    if start is None and end is None:
+        body["all_day"] = True
     if start is not None:
         body["start_time"] = start
     if end is not None:
@@ -153,6 +156,40 @@ def test_rn03_rn01_folga_de_dia_inteiro_vai_da_meia_noite_a_meia_noite(
     assert body["starts_at"] == "2026-11-03T00:00:00-03:00"
     assert body["ends_at"] == "2026-11-04T00:00:00-03:00"
     assert body["all_day"] is True
+
+
+def test_rn03_dia_inteiro_ignora_os_horarios(admin: TestClient, edvaldo: int) -> None:
+    response = admin.post(
+        "/admin/time-blocks",
+        json={
+            "barber_id": edvaldo,
+            "date": TUESDAY,
+            "all_day": True,
+            "start_time": "12:00",
+            "end_time": "13:00",
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["all_day"] is True
+
+
+def test_rn03_sem_horarios_e_sem_dia_inteiro_nao_vira_folga(
+    admin: TestClient, db_session: Session, edvaldo: int
+) -> None:
+    """A folga precisa ser pedida: horários em branco são recusados."""
+    for extra in ({}, {"all_day": False, "start_time": None, "end_time": None}):
+        response = admin.post(
+            "/admin/time-blocks",
+            json={"barber_id": edvaldo, "date": TUESDAY, **extra},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "code": "INVALID_TIME_BLOCK",
+            "message": "Informe o início e o fim, ou marque o dia inteiro.",
+        }
+    assert db_session.scalar(select(TimeBlock.id)) is None
 
 
 def test_rn03_folga_em_dia_fechado_e_aceita(admin: TestClient, edvaldo: int) -> None:

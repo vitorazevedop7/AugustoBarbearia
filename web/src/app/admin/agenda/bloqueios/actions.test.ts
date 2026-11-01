@@ -62,6 +62,7 @@ describe("ações dos bloqueios — RN-03", () => {
       body: {
         barber_id: 1,
         date: "2026-11-05",
+        all_day: false,
         start_time: "12:00",
         end_time: "13:00",
         reason: "Almoço",
@@ -90,10 +91,41 @@ describe("ações dos bloqueios — RN-03", () => {
     expect(POST.mock.calls[0][1].body).toEqual({
       barber_id: 2,
       date: "2026-11-05",
+      all_day: true,
       start_time: null,
       end_time: null,
       reason: null,
     });
+  });
+
+  it("horários em branco sem Dia inteiro não pedem folga (a API recusa)", async () => {
+    POST.mockResolvedValue({
+      response: { status: 422 },
+      error: {
+        code: "INVALID_TIME_BLOCK",
+        message: "Informe o início e o fim, ou marque o dia inteiro.",
+      },
+    });
+
+    const state = await createTimeBlock(
+      idle,
+      form({
+        barber_id: "1",
+        date: "2026-11-05",
+        start_time: "",
+        end_time: "",
+      }),
+    );
+
+    expect(POST.mock.calls[0][1].body).toMatchObject({
+      all_day: false,
+      start_time: null,
+      end_time: null,
+    });
+    expect(state.message).toBe(
+      "Informe o início e o fim, ou marque o dia inteiro.",
+    );
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("mostra o message da API e mantém o que foi digitado", async () => {
