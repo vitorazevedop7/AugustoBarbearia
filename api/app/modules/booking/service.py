@@ -1,6 +1,7 @@
 """Regras do agendamento pelo cliente (RN-05 a RN-16, RN-31 a RN-33).
 
 Criar (S3.08), listar, cancelar e remarcar (S3.09) os próprios agendamentos.
+Criar, cancelar e remarcar avisam o cliente por e-mail (RN-50, RN-52, S5.03).
 """
 
 from dataclasses import dataclass
@@ -31,6 +32,8 @@ from app.modules.barbers.service import get_barber
 from app.modules.catalog.models import Service
 from app.modules.catalog.service import get_service
 from app.modules.customers.models import Customer
+from app.modules.notifications.models import NotificationKind
+from app.modules.notifications.service import Outbox, notify
 
 # RN-11: no máximo 2 agendamentos ativos no futuro por cliente.
 MAX_ACTIVE_APPOINTMENTS = 2
@@ -89,6 +92,7 @@ def create_customer_appointment(
     service_id: int,
     starts_at: datetime,
     now: datetime,
+    outbox: Outbox,
 ) -> CustomerAppointment:
     """Cria o agendamento do próprio cliente (RN-16), numa transação:
 
@@ -99,7 +103,9 @@ def create_customer_appointment(
     4. RN-12: nasce `SCHEDULED`, com origem `ONLINE`;
     5. RN-13: guarda o preço e a duração do serviço neste momento;
     6. RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco
-       recusa e a resposta é a mesma do horário indisponível.
+       recusa e a resposta é a mesma do horário indisponível;
+    7. RN-50: registra o e-mail de confirmação na mesma transação e o envia
+       depois do commit. Uma falha no envio não desfaz nada (RN-54).
     """
     customer = _lock_customer(session, customer.id)
     if customer.phone is None:
@@ -141,6 +147,7 @@ def create_customer_appointment(
         source=AppointmentSource.ONLINE,
     )
     session.add(appointment)
+    notification = notify(session, appointment, NotificationKind.CONFIRMATION)
     try:
         session.commit()
     except DBAPIError as error:
@@ -148,6 +155,7 @@ def create_customer_appointment(
         if is_slot_conflict(error):
             raise slot_unavailable() from error
         raise
+    outbox.send_after_commit(notification)
     return CustomerAppointment(appointment=appointment, barber=barber, service=service)
 
 
@@ -261,19 +269,27 @@ def _ensure_changeable(appointment: Appointment, now: datetime) -> None:
 
 
 def cancel_customer_appointment(
-    session: Session, customer_id: int, appointment_id: int, now: datetime
+    session: Session,
+    customer_id: int,
+    appointment_id: int,
+    now: datetime,
+    *,
+    outbox: Outbox,
 ) -> CustomerAppointment:
     """O cliente cancela o próprio agendamento (RN-14, RN-16, RN-31).
 
     Registra quando foi e que foi o cliente (RN-33). A vaga fica livre na hora
-    (RN-32): a exclusion constraint da RN-08 só considera `SCHEDULED`.
+    (RN-32): a exclusion constraint da RN-08 só considera `SCHEDULED`. O aviso
+    por e-mail (RN-52) é registrado junto e enviado depois do commit.
     """
     appointment = _owned_appointment(session, customer_id, appointment_id, lock=True)
     _ensure_changeable(appointment, now)
     appointment.status = AppointmentStatus.CANCELED
     appointment.canceled_at = now
     appointment.canceled_by = CanceledBy.CUSTOMER
+    notification = notify(session, appointment, NotificationKind.CANCELED)
     session.commit()
+    outbox.send_after_commit(notification)
     return _with_relations(session, appointment)
 
 
@@ -294,6 +310,7 @@ def reschedule_customer_appointment(
     starts_at: datetime,
     barber_id: int | None,
     now: datetime,
+    outbox: Outbox,
 ) -> CustomerAppointment:
     """O cliente remarca o próprio agendamento (RN-14, RN-15, RN-31), numa
     transação:
@@ -305,7 +322,9 @@ def reschedule_customer_appointment(
        não ocupa a agenda, então o novo horário pode cruzar o atual;
     4. atualiza a mesma linha: o preço e a duração continuam os da criação;
     5. RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco
-       recusa e o agendamento continua no horário antigo.
+       recusa e o agendamento continua no horário antigo;
+    6. RN-52: o aviso por e-mail, com o novo horário, é registrado na mesma
+       transação e enviado depois do commit.
     """
     appointment = _owned_appointment(session, customer_id, appointment_id, lock=True)
     _ensure_changeable(appointment, now)
@@ -327,6 +346,7 @@ def reschedule_customer_appointment(
     appointment.barber_id = new_barber_id
     appointment.starts_at = starts_at
     appointment.ends_at = starts_at + timedelta(minutes=appointment.duration_minutes)
+    notification = notify(session, appointment, NotificationKind.RESCHEDULED)
     try:
         session.commit()
     except DBAPIError as error:
@@ -334,6 +354,7 @@ def reschedule_customer_appointment(
         if is_slot_conflict(error):
             raise slot_unavailable() from error
         raise
+    outbox.send_after_commit(notification)
     return _with_relations(session, appointment)
 
 

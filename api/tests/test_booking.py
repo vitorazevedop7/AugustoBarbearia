@@ -508,6 +508,13 @@ def people(migrated_engine: Engine) -> Iterator[list[Person]]:
         ids = [person.customer_id for person in created]
         with migrated_engine.begin() as connection:
             connection.execute(
+                text(
+                    "DELETE FROM notifications WHERE appointment_id IN"
+                    " (SELECT id FROM appointments WHERE customer_id = ANY(:ids))"
+                ),
+                {"ids": ids},
+            )
+            connection.execute(
                 text("DELETE FROM appointments WHERE customer_id = ANY(:ids)"),
                 {"ids": ids},
             )
@@ -534,6 +541,19 @@ def count_scheduled(engine: Engine, people: list[Person]) -> int:
             ),
             {"ids": [person.customer_id for person in people]},
         ).scalar_one()
+
+
+def count_notifications(engine: Engine, people: list[Person]) -> dict[str, int]:
+    with engine.connect() as connection:
+        rows = connection.execute(
+            text(
+                "SELECT n.status, count(*) FROM notifications n"
+                " JOIN appointments a ON a.id = n.appointment_id"
+                " WHERE a.customer_id = ANY(:ids) GROUP BY n.status"
+            ),
+            {"ids": [person.customer_id for person in people]},
+        ).all()
+    return {status: count for status, count in rows}
 
 
 def ids(migrated_engine: Engine) -> tuple[int, int]:
@@ -575,6 +595,8 @@ def test_rn08_dois_clientes_no_mesmo_horario_so_um_consegue(
     assert sorted(status for status, _ in results) == [201, 409]
     assert [body for status, body in results if status == 409] == [UNAVAILABLE]
     assert count_scheduled(migrated_engine, people) == 1
+    # RN-50: só a reserva gravada gera confirmação; a recusada não deixa registro.
+    assert count_notifications(migrated_engine, people) == {"SENT": 1}
 
 
 def test_rn11_dois_pedidos_simultaneos_do_mesmo_cliente_nao_passam_do_limite(

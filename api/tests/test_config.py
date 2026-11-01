@@ -29,3 +29,9 @@ def test_database_url_is_required(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("DATABASE_URL", "")
     with pytest.raises(ValidationError):
         Settings()
+
+
+def test_web_base_url_blank_uses_default(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("WEB_BASE_URL", " ")
+
+    assert Settings().web_base_url == "http://localhost:3000"

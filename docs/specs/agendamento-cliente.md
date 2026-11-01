@@ -29,7 +29,7 @@ Cliente (agenda). O visitante percorre as escolhas e entra com o Google para con
 - RN-16 — Privacidade entre clientes (o cliente vem sempre do token)
 - RN-70 — Perfis e permissões (só o cliente agenda para si)
 - RN-14 — Prazo para cancelar e remarcar (só o aviso na confirmação)
-- RN-50 — Confirmação por e-mail (fora do escopo; ver abaixo)
+- RN-50 — Confirmação por e-mail (S5.03, em [notificacoes-email.md](notificacoes-email.md))
 
 ## Decisão de produto: barbeiro antes do serviço
 A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**. Ela substitui a ordem serviço → barbeiro do roadmap e da proposta em `referencia-beard-x.md`. Registrada como **D11** em [registro.md](../cliente/registro.md). O motivo: o cliente de barbearia costuma escolher primeiro **com quem** quer cortar, e o Squire, que é a referência do fluxo, também pergunta o profissional antes do serviço. A tela de serviço mostra só os serviços que aquele barbeiro realiza.
@@ -140,7 +140,7 @@ As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`w
 - `GET /public/availability/days` reaproveita a função pura `available_slots`, com uma leitura do expediente, da oferta e dos ocupados da janela inteira.
 
 ## Fora do escopo desta spec
-- **E-mail de confirmação (RN-50):** Sprint 4.
+- **E-mail de confirmação (RN-50):** entrou na S5.03 (#95). `create_customer_appointment` registra a confirmação na mesma transação e a envia depois do commit; ver [notificacoes-email.md](notificacoes-email.md).
 - **"Meus agendamentos", cancelar e remarcar (RN-14, RN-15):** S3.09 (#58), em [meus-agendamentos.md](meus-agendamentos.md).
 - Agendamento pela administração (RN-20, RN-21) e a opção "qualquer barbeiro".
 - Calendário mensal e "próximo horário livre" no card do barbeiro.

@@ -169,6 +169,15 @@ docker compose exec api uv run pytest tests/test_admin_customers.py
 
 A administração busca, cadastra e corrige clientes em `/admin/clientes` (`GET`/`POST /admin/customers`, `GET`/`PATCH /admin/customers/{id}`), mesmo sem conta Google. A busca (`?q=`, paginada) acha por parte do nome, do e-mail ou do telefone. O cadastro pede nome e telefone; o e-mail é opcional e, se um dia a pessoa entrar com o Google com o mesmo e-mail, o login a vincula a esse cadastro (RN-23); depois disso o e-mail fica travado (`409 CUSTOMER_EMAIL_LOCKED`). Tudo fica no módulo `app/modules/customers/` (`admin_router`); `create_customer` em `service.py` é a função de criação que outros módulos chamam (o agendamento manual, #97). No web, `CustomerFields` (`src/components/admin/customer-fields.tsx`) é o bloco de campos que outras telas da administração reaproveitam, e `parseCustomerForm` (`src/app/admin/clientes/form-data.ts`) lê o envio. A [spec](docs/specs/cadastro-clientes.md) documenta as regras e o que fica para a LGPD (RN-72).
 
+### E-mails ao cliente — S5.03
+
+```bash
+docker compose exec api alembic upgrade head          # cria notifications
+docker compose exec api uv run pytest tests/test_notifications.py
+```
+
+Agendar, remarcar e cancelar pelo site mandam e-mail ao cliente (RN-50, RN-52). Sem `RESEND_API_KEY`, o e-mail aparece no log da API (`docker compose logs api`); com a chave, `EMAIL_FROM` é obrigatório. O módulo `app/modules/notifications/` expõe `notify(session, appointment, kind)`, que registra `PENDING` na transação da ação, e a `Outbox` (`OutboxDep` nas rotas), que o service chama **depois** do commit com `send_after_commit`; o envio (`send_notification`) marca `SENT` ou `FAILED` e nunca desfaz a ação (RN-54). Fora de requisição (job do lembrete), chame `send_notification(session, id, get_email_sender())` depois do commit. Nos testes, um fixture `autouse` zera `RESEND_API_KEY`, e as rotas recebem um remetente falso por `dependency_overrides[get_email_sender]`. A [spec](docs/specs/notificacoes-email.md) documenta os templates e a configuração do Resend.
+
 ## Mapa da documentação
 
 | Documento | Leia quando |
