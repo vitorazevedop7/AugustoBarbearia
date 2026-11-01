@@ -2,7 +2,7 @@
 
 - **Issues:** #95 (S5.03, confirmação, remarcação e cancelamento pelo cliente), #100 (S5.08, lembrete), #101 (S5.09, ações da administração)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
-- **Status:** implementada (confirmação, remarcação e cancelamento pelo cliente); o lembrete e as ações da administração reaproveitam o módulo nas próprias issues
+- **Status:** implementada (confirmação, remarcação, cancelamento pelo cliente e lembrete); as ações da administração reaproveitam o módulo na #101
 
 ## Contexto
 Quem agenda pelo site quer uma prova de que o horário está marcado e um aviso quando ele muda. O e-mail transacional reduz faltas (O3) e dá segurança ao cliente sem que a barbearia precise ligar para ninguém (O1). A decisão técnica está no [ADR 0006](../decisoes/0006-email-e-jobs.md): Resend pelo SDK Python, registro na mesma transação da ação e envio depois do commit.
@@ -18,7 +18,7 @@ Cliente (recebe). A administração não recebe e-mails; ela vê as falhas no ba
 ## Regras envolvidas
 - RN-01 — Fuso de São Paulo (data e hora no e-mail)
 - RN-50 — Confirmação
-- RN-51 — Lembrete (seção reservada abaixo; implementado na #100)
+- RN-51 — Lembrete
 - RN-52 — Alterações
 - RN-53 — Conteúdo
 - RN-54 — Falha de envio
@@ -64,7 +64,7 @@ def cancel_by_admin(session: Session, appointment_id: int, *, outbox: Outbox, no
 
 A rota recebe `outbox: OutboxDep` e passa ao service.
 
-Uso fora de uma requisição (o job da #100): commit dos registros e, em seguida, `send_notification(session, notification.id, get_email_sender())` para cada um, sem `Outbox`.
+Uso fora de uma requisição (o job do lembrete, `reminders.py`): commit dos registros e, em seguida, `send_notification(session, notification.id, get_email_sender())` para cada um, sem `Outbox`.
 
 ### Remetentes
 - **Resend** (`ResendSender`): com `RESEND_API_KEY` definida. `EMAIL_FROM` é obrigatória junto, e a API não sobe sem ela. Tempo limite de 10 segundos por envio.
@@ -92,10 +92,26 @@ Os dados vindos do banco são escapados no HTML. Um campo opcional da barbearia 
 - `cancel_customer_appointment` → `CANCELED` (RN-52).
 - `reschedule_customer_appointment` → `RESCHEDULED`, com o novo horário e o novo barbeiro (RN-52).
 
-### Lembrete (RN-51) — reservado para a #100
-O comando `python -m app.jobs.send_reminders` (ADR 0006) registra `REMINDER` com `notify` para os agendamentos `SCHEDULED` que começam entre 23h e 25h à frente e ainda não têm lembrete, faz o commit e envia com `send_notification`. O template já existe. A #100 decide e documenta aqui:
-- como impedir dois lembretes do mesmo agendamento (por exemplo, índice único parcial em `(appointment_id)` para `kind = 'REMINDER'`) e se um lembrete `FAILED` é tentado de novo;
-- o caso do agendamento criado com menos de 24h de antecedência (sem lembrete, RN-51) e o do remarcado depois do lembrete.
+### Lembrete (RN-51)
+O comando `python -m app.jobs.send_reminders` (ADR 0006) roda de hora em hora. O cron na Railway é da #32; enquanto isso, à mão:
+
+```bash
+docker compose exec api uv run python -m app.jobs.send_reminders
+```
+
+A lógica é `send_due_reminders(session, sender, now)` em `notifications/reminders.py`; o job (`app/jobs/send_reminders.py`) só abre a sessão, escolhe o remetente (`get_email_sender`) e chama `run(session, sender, now=utc_now)`. O relógio entra como argumento e os testes o fixam, como o `utc_now` das rotas. O resultado vai para o log ("Lembretes: N enviados, M com falha.").
+
+**Quem recebe.** Agendamentos `SCHEDULED` que começam entre 23h e 25h à frente de `now` (`[23h, 25h)`), cujo cliente tem e-mail (RN-50), que ainda não têm lembrete para o horário atual. A janela de 2 horas com execução de hora em hora faz cada agendamento passar por duas execuções: a segunda cobre uma falha da primeira. O lembrete reaproveita `notify` e `send_notification`, então tem o mesmo conteúdo dos outros e-mails (RN-53).
+
+**Sem lembrete com menos de 24h de antecedência (RN-51).** A antecedência é o início menos o momento em que o horário atual foi marcado. Esse momento é o `created_at` do agendamento ou, se houve remarcação, o `created_at` do `RESCHEDULED` mais recente (toda remarcação, por qualquer lado, o registra, RN-52; assim nenhuma ação precisa atualizar um campo extra). Antecedência menor que 24h: sem lembrete (exatamente 24h conta como 24h). O horário remarcado segue a mesma regra: remarcado com menos de 24h de antecedência, o `RESCHEDULED` já cumpre o papel da confirmação e não há lembrete.
+
+**Remarcado depois do lembrete.** O lembrete enviado para o horário antigo não impede o do novo: só conta como "já tem lembrete" o `REMINDER` registrado **depois** do último `RESCHEDULED` (a ordem vem do `id` dos registros, não do relógio). Se o novo horário tem pelo menos 24h de antecedência, o cliente recebe outro lembrete quando ele entrar na janela.
+
+**Sem duplicar (idempotência e concorrência).** Para cada agendamento, o job trava a linha com `SELECT ... FOR UPDATE SKIP LOCKED`, confere de novo se já há lembrete (já com a trava), registra o `REMINDER` e faz o commit antes de enviar. Duas execuções ao mesmo tempo: uma pula a linha travada pela outra, ou, se chegar depois, vê o lembrete já registrado. A remarcação do cliente trava a mesma linha, então as duas operações se ordenam. Não há índice único: o "mesmo horário" muda com a remarcação, e a trava resolve sem coluna nova.
+
+**Falha (RN-54).** O envio que falha deixa o registro `FAILED` com o erro, e o job segue com os outros agendamentos. Um `FAILED` **não** é tentado de novo (um registro `FAILED` conta como lembrete registrado). Já um lembrete `PENDING` (o processo caiu entre o commit e o envio), cujo agendamento ainda está ativo e no futuro, é enviado na execução seguinte; `send_notification` só envia o que ainda está `PENDING`, e a chave de idempotência do Resend evita o e-mail duplicado.
+
+**Fuso.** A janela é em instantes absolutos; só o texto do e-mail é convertido para São Paulo (RN-01).
 
 ## Critérios de aceite
 
@@ -134,6 +150,16 @@ O comando `python -m app.jobs.send_reminders` (ADR 0006) registra `REMINDER` com
 - **Quando** um e-mail é enviado
 - **Então** ele aparece no log da API e o registro fica `SENT`.
 
+**CA-8 — Lembrete (RN-51)**
+- **Dado** um agendamento ativo, marcado com 24h ou mais de antecedência, que começa daqui a 24h
+- **Quando** o job roda (uma, duas vezes ou em duas execuções simultâneas)
+- **Então** o cliente recebe um único e-mail `REMINDER`.
+
+**CA-9 — Sem lembrete com menos de 24h (RN-51)**
+- **Dado** um agendamento marcado (ou remarcado) com menos de 24h de antecedência
+- **Quando** o job roda a qualquer hora
+- **Então** nenhum lembrete é registrado nem enviado.
+
 ## Fluxo
 
 ```mermaid
@@ -165,7 +191,6 @@ Nenhuma rota nova nem mudança de contrato. As rotas do cliente (`POST /me/appoi
 Para usar o Resend de verdade: criar a conta gratuita, gerar uma chave com permissão só de envio e definir o remetente. No domínio de testes do Resend (`onboarding@resend.dev`), os e-mails só chegam ao endereço dono da conta. Para enviar a qualquer cliente, é preciso verificar um domínio próprio (registros DNS indicados pelo Resend).
 
 ## Fora do escopo desta spec
-- O job do lembrete e a seleção dos agendamentos (RN-51): #100.
 - Os e-mails das ações da administração (agendar, remarcar, cancelar, RN-52): #101.
 - Reenvio automático de `FAILED` ou `PENDING`, tela de notificações na administração e webhooks de entrega do Resend.
 - WhatsApp (Fase 2): a tabela ganha um canal quando ele entrar (ADR 0006).
@@ -174,3 +199,5 @@ Para usar o Resend de verdade: criar a conta gratuita, gerar uma chave com permi
 Escolhas desta implementação que nenhuma RN decide, a confirmar:
 - O e-mail não mostra o preço. A RN-53 não pede, e o preço já aparece no site.
 - O remetente de log conta o e-mail como `SENT`, para o desenvolvimento seguir o mesmo caminho da produção.
+- Lembrete: um `FAILED` não é tentado de novo, e o remarcado com menos de 24h de antecedência não recebe lembrete. Escolhas conservadoras da #100 (evitam e-mail duplicado ou tardio), a confirmar com os proprietários.
+- Lembrete: a antecedência usa o `created_at` do banco, então o relógio do servidor de banco e o da API precisam estar em hora certa.
