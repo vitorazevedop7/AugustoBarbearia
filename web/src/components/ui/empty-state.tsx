@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import { Ornament } from "./ornament";
 
-/** Lista ou busca sem resultado: diz o que aconteceu e qual é o próximo passo. */
+/**
+ * Lista ou busca sem resultado: diz o que aconteceu e qual é o próximo passo.
+ * O fundo `surface` o mantém legível também sobre a faixa escura parcial das
+ * páginas internas.
+ */
 export function EmptyState({
   title,
   description,
@@ -12,7 +16,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center border border-dashed border-ink-muted px-6 py-12 text-center">
+    <div className="flex flex-col items-center border border-dashed border-ink-muted bg-surface px-6 py-12 text-center">
       <Ornament />
       <p className="mt-6 font-heading text-display-4 font-black uppercase text-ink">
         {title}

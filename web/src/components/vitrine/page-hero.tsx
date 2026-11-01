@@ -1,26 +1,45 @@
+import type { ReactNode } from "react";
 import { Ornament } from "@/components/ui/ornament";
 
-/** Faixa escura do topo das páginas internas da vitrine, com o único `h1`. */
+/**
+ * Topo das páginas internas da vitrine, como no Beard X: a faixa escura com o
+ * único `h1` continua numa faixa parcial (`ink`) atrás do começo do conteúdo,
+ * e o card ou as fotos de `children` a atravessam. A faixa parcial é uma
+ * camada decorativa atrás do conteúdo (`-z-10` dentro do `isolate`), então o
+ * conteúdo não muda de posição se ela mudar de altura.
+ */
 export function PageHero({
   title,
   description,
+  children,
 }: {
   title: string;
   description: string;
+  children: ReactNode;
 }) {
   return (
-    <section className="bg-ink px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-      <div className="mx-auto max-w-site">
-        <div className="motion-safe:animate-rise">
-          <Ornament align="start" tone="dark" />
+    <>
+      <section className="bg-ink px-4 pt-16 pb-12 sm:px-6 md:pb-16 lg:px-8 lg:pt-24 lg:pb-20">
+        <div className="mx-auto max-w-site">
+          <div className="motion-safe:animate-rise">
+            <Ornament align="start" tone="dark" />
+          </div>
+          <h1 className="mt-6 font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:200ms]">
+            {title}
+          </h1>
+          <p className="mt-6 max-w-2xl text-body text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:400ms]">
+            {description}
+          </p>
         </div>
-        <h1 className="mt-6 font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
-          {title}
-        </h1>
-        <p className="mt-4 max-w-2xl text-body text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:160ms]">
-          {description}
-        </p>
+      </section>
+      <div className="relative isolate px-4 pb-section sm:px-6 lg:px-8">
+        <div
+          aria-hidden="true"
+          data-page-band
+          className="absolute inset-x-0 top-0 -z-10 h-32 bg-ink md:h-48 lg:h-60"
+        />
+        <div className="mx-auto max-w-site">{children}</div>
       </div>
-    </section>
+    </>
   );
 }
