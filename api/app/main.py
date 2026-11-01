@@ -17,6 +17,7 @@ from app.modules.catalog.router import router as catalog_router
 from app.modules.customers.router import admin_router as admin_customers_router
 from app.modules.customers.router import router as customers_router
 from app.modules.payments.router import router as payments_router
+from app.modules.reports.router import router as reports_router
 from app.modules.shop.router import router as shop_router
 from app.modules.time_blocks.router import router as time_blocks_router
 
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     application.include_router(payments_router)
     application.include_router(time_blocks_router)
     application.include_router(admin_booking_router)
+    application.include_router(reports_router)
     return application
 
 
