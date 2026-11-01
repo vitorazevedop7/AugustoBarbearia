@@ -8,7 +8,7 @@
 É o centro do MVP: o cliente marca o próprio horário pelo celular, sem ligar para a barbearia (O1), e o sistema garante que ninguém fica com o mesmo horário (O2). A vitrine (S3.05) já leva a `/agendar`, e o motor de disponibilidade (S3.07) já sabe quais horários estão livres e impede a sobreposição no banco. Esta funcionalidade junta as duas coisas: o fluxo de escolha, a confirmação e a criação do agendamento com as regras do cliente.
 
 ## Quem usa
-Cliente (agenda). O visitante percorre as escolhas e entra com o Google para confirmar. A administração não agenda por este fluxo (RN-70); o agendamento manual é da Sprint 4.
+Cliente (agenda). O visitante percorre as escolhas e entra com o Google para confirmar. A administração não agenda por este fluxo (RN-70); o agendamento manual é da S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 
 ## Histórias
 - Como **cliente**, quero **escolher o barbeiro, o serviço, o dia e o horário em poucos toques** para **marcar sem precisar ligar**.
@@ -142,7 +142,8 @@ As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`w
 ## Fora do escopo desta spec
 - **E-mail de confirmação (RN-50):** entrou na S5.03 (#95). `create_customer_appointment` registra a confirmação na mesma transação e a envia depois do commit; ver [notificacoes-email.md](notificacoes-email.md).
 - **"Meus agendamentos", cancelar e remarcar (RN-14, RN-15):** S3.09 (#58), em [meus-agendamentos.md](meus-agendamentos.md).
-- Agendamento pela administração (RN-20, RN-21) e a opção "qualquer barbeiro".
+- Agendamento pela administração (RN-20, RN-21): S5.05 ([agendamento-admin.md](agendamento-admin.md)).
+- A opção "qualquer barbeiro".
 - Calendário mensal e "próximo horário livre" no card do barbeiro.
 - Página `/barbeiros/[slug]`.
 
