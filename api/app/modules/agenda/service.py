@@ -52,7 +52,14 @@ class Agenda:
 
 
 def check_period(start: date, end: date) -> None:
-    """O período tem as duas datas inclusivas e no máximo 7 dias."""
+    """O período tem as duas datas inclusivas e no máximo 7 dias. O último dia
+    do calendário não tem "dia seguinte" para fechar o período."""
+    if end >= date.max:
+        raise DomainError(
+            code="INVALID_PERIOD",
+            message="Escolha uma data válida.",
+            status_code=422,
+        )
     if end < start:
         raise DomainError(
             code="INVALID_PERIOD",

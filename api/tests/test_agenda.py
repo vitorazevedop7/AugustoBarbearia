@@ -213,6 +213,10 @@ def test_rn60_inativo_aparece_so_com_agendamento_no_periodo(
     [
         ({"start": "2026-11-08", "end": "2026-11-02"}, INVALID_ORDER),
         ({"start": "2026-11-02", "end": "2026-11-09"}, TOO_LONG),
+        (
+            {"start": "9999-12-31", "end": "9999-12-31"},
+            {"code": "INVALID_PERIOD", "message": "Escolha uma data válida."},
+        ),
     ],
 )
 def test_periodo_invalido(

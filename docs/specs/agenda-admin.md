@@ -53,6 +53,7 @@ Administração. O cliente e o visitante não acessam (RN-70).
 **CA-4 — Período inválido**
 - `end` antes de `start` responde `422` com `code` = `INVALID_PERIOD` e "A data final precisa ser igual ou posterior à inicial.".
 - Mais de 7 dias responde `422` com `code` = `INVALID_PERIOD` e "Escolha um período de até 7 dias.".
+- O último dia do calendário (`9999-12-31`) como `end` responde `422` com `code` = `INVALID_PERIOD` e "Escolha uma data válida.", porque o período não teria como terminar.
 - Data em outro formato ou ausente responde `422 VALIDATION_ERROR`.
 
 **CA-5 — Detalhe**
