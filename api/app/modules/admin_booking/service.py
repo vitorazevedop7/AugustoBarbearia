@@ -30,7 +30,7 @@ from app.modules.availability.service import (
     slot_unavailable,
 )
 from app.modules.availability.slots import ADMIN_POLICY, TimeRange
-from app.modules.catalog.service import get_service
+from app.modules.catalog.models import Service
 from app.modules.customers.schemas import CustomerCreate
 from app.modules.customers.service import (
     create_customer,
@@ -59,6 +59,26 @@ def _commit(session: Session) -> None:
         raise
 
 
+def _lock_service(session: Session, service_id: int) -> Service:
+    """Trava o serviço (`FOR SHARE`) até o fim da transação e relê o cadastro.
+
+    RN-05 e RN-13: o horário é conferido com a duração do serviço e gravado com
+    a mesma duração e o mesmo preço. Uma edição do serviço ao mesmo tempo
+    espera o agendamento terminar, então não muda a duração entre a conferência
+    e a gravação.
+    """
+    service = session.get(
+        Service, service_id, with_for_update={"read": True}, populate_existing=True
+    )
+    if service is None:
+        raise DomainError(
+            code="SERVICE_NOT_FOUND",
+            message="Serviço não encontrado.",
+            status_code=404,
+        )
+    return service
+
+
 def create_admin_appointment(
     session: Session,
     *,
@@ -72,18 +92,20 @@ def create_admin_appointment(
     """Cria o agendamento pela administração, numa transação só:
 
     1. RN-20: o cliente já cadastrado precisa existir;
-    2. RN-21 e RN-05, itens 1 a 5: `starts_at` é um dos horários oferecidos com
+    2. RN-05 e RN-13: trava o serviço, para a duração conferida ser a gravada;
+    3. RN-21 e RN-05, itens 1 a 5: `starts_at` é um dos horários oferecidos com
        `ADMIN_POLICY` (`ensure_slot_available`, que trava o barbeiro). Sem
        antecedência, é o "encaixe" que começa agora (RN-44). Não há limite
        por cliente (a RN-11 não vale);
-    3. RN-20: o cliente novo é criado com `create_customer`, sem `commit`;
-    4. RN-31 e RN-13: nasce `SCHEDULED`, com origem `ADMIN`, o preço e a
+    4. RN-20: o cliente novo é criado com `create_customer`, sem `commit`;
+    5. RN-31 e RN-13: nasce `SCHEDULED`, com origem `ADMIN`, o preço e a
        duração do serviço neste momento;
-    5. RN-08: o `commit` grava o cliente e o agendamento juntos. Se outra
+    6. RN-08: o `commit` grava o cliente e o agendamento juntos. Se outra
        reserva ganhou o horário, nada fica gravado, nem o cliente novo.
     """
     if customer_id is not None:
         get_customer(session, customer_id)
+    service = _lock_service(session, service_id)
     ensure_slot_available(
         session,
         barber_id=barber_id,
@@ -97,7 +119,6 @@ def create_admin_appointment(
     if customer_id is None:
         # O schema exige um dos dois; aqui só para o tipo.
         raise ValueError("O agendamento precisa de um cliente (RN-20).")
-    service = get_service(session, service_id)
     appointment = Appointment(
         customer_id=customer_id,
         barber_id=barber_id,

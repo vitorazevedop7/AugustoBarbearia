@@ -97,7 +97,7 @@ Administração. O cliente e o visitante não acessam estas rotas nem estas tela
 - Uma escolha por tela, com o estado na URL (`?barbeiro=&servico=&data=&hora=&cliente=`): barbeiro → serviço → dia → horário → cliente → confirmação ("Etapa N de 6"). As escolhas feitas aparecem no topo, cada uma com "Trocar".
 - Barbeiro e serviço: os mesmos cards do agendamento do cliente (`BarberStep`, `ServiceStep`), com os barbeiros e serviços ativos. Dia: `DayPicker` com os dias da CA-6 e o formulário `GET` "Outra data". Horário: `TimePicker` com os horários da CA-6.
 - Cliente: um formulário `GET` "Buscar cliente" (nome, telefone ou e-mail, a busca de `GET /admin/customers`), os resultados como links (nome e telefone) e o link "Cadastrar cliente novo".
-- Confirmação: o resumo (barbeiro, serviço, dia, horário, valor) e o cliente. Com um cliente novo, o formulário tem os campos do `CustomerFields`; o botão "Confirmar agendamento" envia tudo de uma vez pela Server Action. Qualquer recusa mostra o `message` da API num `Alert` `danger`, com o que foi digitado de volta e, se for o horário, o link "Escolher outro horário".
+- Confirmação: o resumo (barbeiro, serviço, dia, horário, valor) e o cliente. Com um cliente novo, o formulário tem os campos do `CustomerFields`; o botão "Confirmar agendamento" envia tudo de uma vez pela Server Action. Qualquer recusa mostra o `message` da API num `Alert` `danger`, com o que foi digitado de volta e, se for o horário, o link "Escolher outro horário". Se o horário deixou de existir, a confirmação pede outro horário no lugar do formulário, e os dados do cliente novo precisam ser digitados de novo: eles não vão para a URL (dado pessoal).
 - Depois de confirmar, a tela vai para o detalhe do agendamento novo, com o `Alert` `success` "Agendamento criado.".
 
 **CA-11 — Remarcar e cancelar no detalhe, sem JS e em 360px**
@@ -136,7 +136,7 @@ flowchart LR
 
 - Módulo novo `app/modules/admin_booking/` (`router.py`, `schemas.py`, `service.py`). Ele fica acima de `agenda`, `appointments`, `availability`, `catalog`, `barbers` e `customers` e nenhum deles o importa, então não forma ciclo. A resposta é a da agenda (`AdminAppointmentResponse`, `to_response` de `agenda/router.py`).
 - `ADMIN_POLICY` fica em `availability/slots.py`, ao lado de `CUSTOMER_POLICY`. `list_available_days` recebe o tamanho da lista (`days_ahead`) quando a política não tem janela.
-- A criação chama `ensure_slot_available` (trava `FOR SHARE` do barbeiro) antes de criar o cliente novo, com `create_customer(..., commit=False)`; o `commit` final grava os dois, e uma falha reconhecida por `is_slot_conflict` vira `409 SLOT_UNAVAILABLE`, e a do e-mail único, `409 CUSTOMER_EMAIL_TAKEN`.
+- A criação trava o serviço (`FOR SHARE`), para a duração conferida ser a gravada mesmo com uma edição do serviço ao mesmo tempo (RN-05, RN-13), e chama `ensure_slot_available` (trava `FOR SHARE` do barbeiro) antes de criar o cliente novo, com `create_customer(..., commit=False)`; o `commit` final grava os dois, e uma falha reconhecida por `is_slot_conflict` vira `409 SLOT_UNAVAILABLE`, e a do e-mail único, `409 CUSTOMER_EMAIL_TAKEN`.
 - Cancelar e remarcar travam o agendamento (`FOR UPDATE`) antes de conferir o status, como no cliente.
 - Rotas que dependem do relógio recebem `utc_now` por `Depends`.
 
@@ -157,4 +157,5 @@ Escolhas desta implementação que nenhuma RN decide, a confirmar com os proprie
 - **Cliente do Google sem telefone** pode ser agendado pela administração (a RN-10 é do agendamento online).
 - **Cancelar ou remarcar um agendamento que já passou** e continua `SCHEDULED` é permitido (RN-22, "a qualquer momento").
 - **O horário vem antes do cliente** no fluxo do "Novo agendamento".
+- **Dados do cliente novo quando o horário é tomado** durante o preenchimento: precisam ser digitados de novo depois de escolher outro horário.
 - **As ações do detalhe aparecem para o status `SCHEDULED`**, o único ativo (RN-30); a API confere de novo e responde `APPOINTMENT_NOT_ACTIVE`.
