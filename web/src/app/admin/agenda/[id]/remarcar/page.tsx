@@ -36,6 +36,7 @@ import { AdminBookingForm } from "../../admin-booking-form";
 import { AdminStepFrame } from "../../admin-booking-frame";
 import {
   adminRescheduleHref,
+  customerNoticeText,
   notActiveMessage,
   stepProgress,
 } from "../../admin-booking-state";
@@ -367,7 +368,8 @@ async function confirmStep({
     content = (
       <>
         <Alert tone="info" title="O serviço e o valor continuam os mesmos.">
-          O horário atual fica livre na hora.
+          O horário atual fica livre na hora.{" "}
+          {customerNoticeText(appointment.customer.email)}
         </Alert>
         <AdminBookingForm
           action={rescheduleAdminAppointment}

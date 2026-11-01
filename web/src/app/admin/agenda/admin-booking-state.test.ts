@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   adminNoticeMessage,
+  customerNoticeText,
   adminRescheduleHref,
   detailWithNotice,
+  noticeFor,
   newAppointmentHref,
   newAppointmentStep,
   parseCustomerQuery,
@@ -73,6 +75,25 @@ describe("estado do agendamento manual na URL", () => {
     });
   });
 
+  it("o aviso só fala de e-mail quando o cliente tem e-mail (RN-50, RN-52)", () => {
+    expect(noticeFor("criado", "ana@example.com")).toBe("criado");
+    expect(noticeFor("remarcado", null)).toBe("remarcado-sem-email");
+    expect(noticeFor("cancelado", undefined)).toBe("cancelado-sem-email");
+    for (const notice of [
+      "criado-sem-email",
+      "remarcado-sem-email",
+      "cancelado-sem-email",
+    ]) {
+      const message = adminNoticeMessage(notice) ?? "";
+      expect(message).toContain("não tem e-mail cadastrado");
+      expect(message).not.toContain("será avisado por e-mail");
+    }
+    expect(customerNoticeText("ana@example.com")).toBe(
+      "O cliente será avisado por e-mail.",
+    );
+    expect(customerNoticeText(null)).toContain("não tem e-mail cadastrado");
+  });
+
   it("apara a busca e ignora valores repetidos", () => {
     expect(parseCustomerQuery("  ana  ")).toBe("ana");
     expect(parseCustomerQuery(["a", "b"])).toBe("");
@@ -83,7 +104,9 @@ describe("estado do agendamento manual na URL", () => {
     expect(detailWithNotice(7, "2026-11-03T22:30:00-03:00", "criado")).toBe(
       "/admin/agenda/7?data=2026-11-03&aviso=criado",
     );
-    expect(adminNoticeMessage("cancelado")).toBe("Agendamento cancelado.");
+    expect(adminNoticeMessage("cancelado")).toBe(
+      "Agendamento cancelado. O cliente será avisado por e-mail.",
+    );
     expect(adminNoticeMessage("<script>")).toBeUndefined();
     expect(adminRescheduleHref(7, { barbeiro: 1 })).toBe(
       "/admin/agenda/7/remarcar?barbeiro=1",

@@ -1,8 +1,8 @@
 """E-mails ao cliente: registro na transação da ação e envio depois do commit
 (RN-50 a RN-54, ADR 0006).
 
-A API interna, que o lembrete (S5.08) e as ações da administração (S5.09)
-reaproveitam:
+A API interna, que o lembrete (S5.08) e as ações da administração (S5.09, em
+`admin_booking`) reaproveitam:
 
 1. `notify` registra o e-mail `PENDING` na transação da ação, sem commit;
 2. depois do commit, o service entrega o registro à `Outbox`;
@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.clock import utc_now
 from app.config import get_settings
-from app.modules.appointments.models import Appointment
+from app.modules.appointments.models import Appointment, CanceledBy
 from app.modules.barbers.service import get_barber
 from app.modules.catalog.service import get_service
 from app.modules.customers.models import Customer
@@ -96,6 +96,7 @@ def build_email(session: Session, notification: Notification) -> Email:
                 email=shop.email,
             ),
             my_appointments_url=f"{web_base_url}/meus-agendamentos",
+            canceled_by_shop=appointment.canceled_by == CanceledBy.ADMIN,
         ),
     )
     return Email(

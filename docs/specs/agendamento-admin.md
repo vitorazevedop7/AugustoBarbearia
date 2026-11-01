@@ -32,7 +32,7 @@ Administração. O cliente e o visitante não acessam estas rotas nem estas tela
 - RN-44 — Atendimento sem agendamento prévio
 - RN-62 — Cliente (nome e telefone obrigatórios)
 - RN-70 — Perfis e permissões
-- RN-50 e RN-52 — E-mails de confirmação e de alteração (fora do escopo; ver abaixo)
+- RN-50, RN-52 a RN-54 — E-mails de confirmação e de alteração (S5.09; ver "E-mails ao cliente")
 
 ## Definições desta funcionalidade
 - **Política da administração (`ADMIN_POLICY`, RN-21):** o mesmo cálculo da RN-05 (`available_slots`), sem a antecedência mínima (RN-06) e sem a janela de 30 dias (RN-07). Continuam valendo a grade de 30 minutos (RN-04), o expediente (RN-02), os ocupados (RN-08) e a oferta (barbeiro e serviço ativos, e o barbeiro realiza o serviço). Nenhuma política oferece horário num dia que já passou (data de São Paulo).
@@ -141,8 +141,15 @@ flowchart LR
 - Cancelar e remarcar travam o agendamento (`FOR UPDATE`) antes de conferir o status, como no cliente.
 - Rotas que dependem do relógio recebem `utc_now` por `Depends`.
 
+## E-mails ao cliente (S5.09, #101)
+As três ações usam o módulo `notifications` ([notificacoes-email.md](notificacoes-email.md)), no mesmo padrão do cliente: `notify` registra o e-mail na transação da ação e a `Outbox` o envia depois do commit (`OutboxDep` nas rotas).
+- **Agendar** → `CONFIRMATION` (RN-50), para o cliente já cadastrado ou novo, se ele tiver e-mail.
+- **Remarcar** → `RESCHEDULED` (RN-52), com o novo horário e o novo barbeiro. Toda remarcação grava o registro, porque o lembrete (RN-51) decide o horário novo pelo `created_at` dele.
+- **Cancelar** → `CANCELED` (RN-52). Como `canceled_by` é `ADMIN`, o texto diz que a barbearia cancelou e convida a falar com ela pelos contatos (RN-53).
+- **Cliente sem e-mail:** nada é registrado nem enviado (RN-50). A tela não promete e-mail: depois da ação, o aviso do detalhe e o texto das páginas de cancelar e remarcar dizem que o cliente será avisado por e-mail, ou que ele não tem e-mail cadastrado e deve ser avisado pelo telefone (`?aviso=criado-sem-email`, `remarcado-sem-email` e `cancelado-sem-email`). Quem recebe continua sendo decisão da API.
+- **Falha de envio (RN-54):** o registro fica `FAILED` e a ação continua valendo. O erro do banco no commit (horário disputado, e-mail do cliente novo repetido) desfaz tudo, inclusive o registro, e nenhum e-mail sai. Por isso o `notify` roda dentro do `try` do commit: ele lê o cliente, e essa leitura descarrega (autoflush) o insert que o banco pode recusar.
+
 ## Fora do escopo desta spec
-- **E-mails de confirmação, remarcação e cancelamento (RN-50, RN-52)** das ações da administração: S5.09 (#101).
 - Trocar o serviço de um agendamento (RN-15: cancelar e agendar de novo).
 - Bloqueios (S5.04, #96) e conclusão com pagamento e falta (S5.06, #98).
 - A opção "qualquer barbeiro".
