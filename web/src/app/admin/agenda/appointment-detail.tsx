@@ -14,7 +14,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
     <>
       <dt className="text-ink-muted">{label}</dt>
-      <dd className="text-ink">{children}</dd>
+      <dd className="min-w-0 text-ink wrap-anywhere">{children}</dd>
     </>
   );
 }
@@ -48,7 +48,7 @@ export function AppointmentDetail({
         </h2>
         <StatusBadge status={appointment.status} />
       </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 text-sm">
         <Row label="Dia">
           {formatLongDate(localDate(appointment.starts_at))}
         </Row>
@@ -69,7 +69,7 @@ export function AppointmentDetail({
         <h3 id="cliente-titulo" className="font-semibold text-ink">
           Cliente
         </h3>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 text-sm">
           <Row label="Nome">{customer.name}</Row>
           <Row label="Telefone">
             {customer.phone ? (

@@ -33,7 +33,7 @@ export function AgendaItem({
           </span>
           <StatusBadge status={appointment.status} />
         </span>
-        <span className="font-semibold text-ink">
+        <span className="font-semibold text-ink wrap-anywhere">
           {appointment.customer.name}
         </span>
         <span className="text-sm text-ink-muted">
