@@ -180,24 +180,26 @@ def list_available_days(
     now: datetime,
     policy: BookingPolicy = CUSTOMER_POLICY,
     rescheduling: Rescheduling | None = None,
+    days_ahead: int | None = None,
 ) -> list[date]:
     """RN-05 a RN-07: os dias da janela que têm pelo menos um horário disponível.
 
     Usa a mesma função pura de `list_available_slots`, dia a dia, mas lê o
     expediente, a oferta e os ocupados uma vez só para a janela inteira. A
-    janela vem da política (RN-07); sem janela não há o que listar.
+    lista vai de hoje até hoje + `days_ahead`; sem ele, até o fim da janela da
+    política (RN-07). A política sem janela (RN-21) precisa de `days_ahead`,
+    que aí é só o tamanho da lista, não uma regra.
     """
-    if policy.max_days_ahead is None:
-        raise ValueError("A lista de dias precisa de uma janela (RN-07).")
+    days_ahead = policy.max_days_ahead if days_ahead is None else days_ahead
+    if days_ahead is None:
+        raise ValueError("A lista de dias precisa de um tamanho (RN-07).")
     barber = get_barber(session, barber_id)
     service = get_service(session, service_id)
     offer = _offer(session, barber, service, rescheduling)
     if not offer.bookable:
         return []
     today = now.astimezone(TIMEZONE).date()
-    days = [
-        today + timedelta(days=offset) for offset in range(policy.max_days_ahead + 1)
-    ]
+    days = [today + timedelta(days=offset) for offset in range(days_ahead + 1)]
     hours = {weekday: _opening_hours_of(session, weekday) for weekday in range(7)}
     window = TimeRange(
         datetime.combine(today, time.min, tzinfo=TIMEZONE),

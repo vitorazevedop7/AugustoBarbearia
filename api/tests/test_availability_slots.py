@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime, time, timedelta
 import pytest
 
 from app.modules.availability.slots import (
+    ADMIN_POLICY,
     CUSTOMER_POLICY,
     BookingPolicy,
     Offer,
@@ -251,6 +252,25 @@ def test_politica_sem_limites_nao_aplica_antecedencia_nem_janela() -> None:
 
     assert starts(slots(now=now, policy=NO_LIMITS)) == grid("10:00", "18:30")
     assert slots(day=date(2027, 6, 7), now=now, policy=NO_LIMITS) != []
+
+
+def test_rn21_rn04_politica_da_administracao_oferece_a_grade_de_hoje_inteira() -> None:
+    """Às 14h10, a administração vê a grade de hoje inteira que está livre,
+    inclusive 14h00, que já começou, e nada fora da grade (RN-04)."""
+    now = local(2026, 11, 2, 14, 10)
+
+    result = starts(slots(now=now, policy=ADMIN_POLICY))
+
+    assert result == grid("10:00", "18:30")
+    assert "14:10" not in result
+    assert slots(day=date(2027, 6, 7), now=now, policy=ADMIN_POLICY) != []
+
+
+def test_dia_que_ja_passou_nao_tem_horario_em_nenhuma_politica() -> None:
+    now = local(2026, 11, 3, 0, 5)
+
+    for policy in (CUSTOMER_POLICY, ADMIN_POLICY, NO_LIMITS):
+        assert slots(day=MONDAY, now=now, policy=policy) == []
 
 
 def test_rn01_recusa_horario_sem_fuso() -> None:
