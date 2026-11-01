@@ -1,7 +1,7 @@
 import { AdminLinkCard } from "./admin-link-card";
 import { AdminPage } from "./admin-page";
 
-/** Início da administração. A agenda do dia vira a primeira tela quando existir. */
+/** Início da administração: os atalhos para as áreas, a agenda primeiro. */
 export default function AdminHomePage() {
   return (
     <AdminPage
@@ -9,6 +9,13 @@ export default function AdminHomePage() {
       description="Escolha o que você quer fazer."
     >
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <li>
+          <AdminLinkCard
+            href="/admin/agenda"
+            title="Agenda"
+            description="Os agendamentos do dia e da semana, por barbeiro."
+          />
+        </li>
         <li>
           <AdminLinkCard
             href="/admin/cadastros"
