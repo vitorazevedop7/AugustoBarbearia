@@ -16,6 +16,13 @@ export default function AdminHomePage() {
             description="Dados da barbearia e horário de funcionamento."
           />
         </li>
+        <li>
+          <AdminLinkCard
+            href="/admin/clientes"
+            title="Clientes"
+            description="Busque, cadastre e corrija quem é atendido pela barbearia."
+          />
+        </li>
       </ul>
     </AdminPage>
   );
