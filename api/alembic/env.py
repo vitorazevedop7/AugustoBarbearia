@@ -12,6 +12,7 @@ from app.modules.customers import models as customers_models  # noqa: F401
 from app.modules.notifications import models as notifications_models  # noqa: F401
 from app.modules.payments import models as payments_models  # noqa: F401
 from app.modules.shop import models as shop_models  # noqa: F401
+from app.modules.time_blocks import models as time_blocks_models  # noqa: F401
 
 # Ao criar modelos, importe-os aqui para registrar suas tabelas em Base.metadata.
 AUTH_TABLES = {"user", "session", "account", "verification", "jwks"}

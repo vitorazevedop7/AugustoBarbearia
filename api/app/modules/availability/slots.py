@@ -105,7 +105,7 @@ def available_slots(
     - `day` é a data local de São Paulo e `hours`, o funcionamento dela
       (`None` = fechado, RN-02);
     - `busy` são os intervalos ocupados do barbeiro: agendamentos ativos
-      (RN-08) e, quando existirem, bloqueios (RN-03);
+      (RN-08) e bloqueios (RN-03);
     - `now` e `policy` aplicam a antecedência e a janela (RN-06, RN-07).
 
     Cada horário sai como o intervalo que o atendimento ocuparia, no fuso de
