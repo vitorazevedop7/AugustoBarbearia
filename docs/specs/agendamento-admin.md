@@ -17,6 +17,7 @@ Administração. O cliente e o visitante não acessam estas rotas nem estas tela
 - Como **administração**, quero **cancelar ou remarcar qualquer agendamento ativo, a qualquer momento** para **resolver o que o cliente pede por telefone depois do prazo dele**.
 
 ## Regras envolvidas
+- RN-03 — Bloqueios (ocupam a agenda também para a administração)
 - RN-04 — Grade de horários (vale também para a administração)
 - RN-05 — Horário disponível (itens 1 a 5)
 - RN-08 — Sem sobreposição (mesma trava e mesma constraint do cliente)
@@ -69,7 +70,7 @@ Administração. O cliente e o visitante não acessam estas rotas nem estas tela
 - Um dia que já passou não tem horário: `409 SLOT_UNAVAILABLE`.
 
 **CA-5 — Continuam valendo os itens 1 a 5 da RN-05 e a RN-08**
-- Horário ocupado, fora do expediente, em dia fechado, com barbeiro ou serviço inativo ou com barbeiro que não realiza o serviço responde `409 SLOT_UNAVAILABLE` com "Este horário não está mais disponível. Escolha outro.". Barbeiro ou serviço inexistente responde `404` (`BARBER_NOT_FOUND`, `SERVICE_NOT_FOUND`).
+- Horário ocupado por agendamento ou por bloqueio (RN-03, [bloqueios.md](bloqueios.md)), fora do expediente, em dia fechado, com barbeiro ou serviço inativo ou com barbeiro que não realiza o serviço responde `409 SLOT_UNAVAILABLE` com "Este horário não está mais disponível. Escolha outro.". Barbeiro ou serviço inexistente responde `404` (`BARBER_NOT_FOUND`, `SERVICE_NOT_FOUND`).
 - Duas reservas simultâneas do mesmo horário (administração e cliente, ou duas da administração): só uma consegue; a outra recebe `409 SLOT_UNAVAILABLE`, pela trava `FOR SHARE` de `ensure_slot_available` e pela exclusion constraint, traduzida por `is_slot_conflict`.
 
 **CA-6 — Horários da administração (RN-21)**

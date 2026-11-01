@@ -30,6 +30,7 @@ from app.modules.appointments.models import (
 from app.modules.barbers.models import Barber
 from app.modules.booking import service as booking_service
 from app.modules.customers.models import Customer
+from app.modules.time_blocks.models import TimeBlock
 from tests.factories import (
     barber_id,
     local,
@@ -538,6 +539,45 @@ def test_rn21_dias_da_administracao_vao_de_hoje_a_hoje_mais_30(
     assert days[0] == "2026-11-02"
     assert "2026-11-08" not in days  # domingo fechado
     assert days[-1] == "2026-12-02"
+
+
+def test_rn03_rn21_bloqueio_vale_para_a_administracao(
+    api: TestClient,
+    db_session: Session,
+    ana: Customer,
+    edvaldo: int,
+    corte_e_barba: int,
+) -> None:
+    """RN-05, item 3: sem antecedência (RN-21), o bloqueio continua ocupando a
+    agenda para o agendamento, a remarcação e os horários da administração."""
+    db_session.add(
+        TimeBlock(
+            barber_id=edvaldo,
+            starts_at=TWO_PM,
+            ends_at=local(2026, 11, 2, 15),
+            reason="Almoço",
+        )
+    )
+    other = make_appointment(db_session, barber=edvaldo, starts_at=TEN)
+    db_session.flush()
+
+    starts = admin_starts(api, edvaldo, corte_e_barba, "2026-11-02")
+    created = create(api, edvaldo, corte_e_barba, TWO_PM, customer_id=ana.id)
+    moved = reschedule(api, other.id, local(2026, 11, 2, 14, 30))
+    rescheduling = api.get(
+        f"/admin/appointments/{other.id}/availability", params={"date": "2026-11-02"}
+    ).json()["slots"]
+
+    for blocked in ("13:30", "14:00", "14:30"):
+        assert f"2026-11-02T{blocked}:00-03:00" not in starts
+        assert f"2026-11-02T{blocked}:00-03:00" not in [
+            slot["starts_at"] for slot in rescheduling
+        ]
+    assert "2026-11-02T15:00:00-03:00" in starts
+    assert created.status_code == 409
+    assert created.json() == UNAVAILABLE
+    assert moved.status_code == 409
+    assert moved.json() == UNAVAILABLE
 
 
 # Cancelar (RN-22, RN-31 a RN-33).
