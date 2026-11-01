@@ -41,6 +41,19 @@ describe("página de serviços — RN-61", () => {
     ).toHaveAttribute("href", "/agendar?servico=3");
   });
 
+  it("põe o card de serviços sobre a faixa escura parcial, como no Beard X", async () => {
+    vi.mocked(getPublicServices).mockResolvedValue(services);
+
+    const { container } = render(await ServicesPage());
+
+    const band = container.querySelector("[data-page-band]");
+    expect(band).toHaveAttribute("aria-hidden", "true");
+    expect(band).toHaveClass("absolute", "-z-10", "bg-ink");
+    expect(band?.parentElement).toHaveClass("relative", "isolate");
+    const card = screen.getAllByRole("article")[0].closest(".shadow-card");
+    expect(band?.parentElement).toContainElement(card as HTMLElement);
+  });
+
   it("mostra o estado vazio", async () => {
     vi.mocked(getPublicServices).mockResolvedValue([]);
 

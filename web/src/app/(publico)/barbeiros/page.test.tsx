@@ -44,6 +44,30 @@ describe("página de barbeiros — RN-60", () => {
     expect(within(edvaldo).getByText("E")).toBeInTheDocument();
   });
 
+  it("põe as fotos sobre a faixa escura parcial, mais alta que o maior degrau", async () => {
+    vi.mocked(getPublicBarbers).mockResolvedValue(barbers);
+
+    const { container } = render(await BarbersPage());
+
+    const band = container.querySelector("[data-page-band]");
+    expect(band).toHaveAttribute("aria-hidden", "true");
+    // 240px no desktop: o terceiro card, 145px abaixo, também a atravessa.
+    expect(band).toHaveClass("-z-10", "bg-ink", "lg:h-60");
+    expect(band?.parentElement).toContainElement(
+      screen.getAllByRole("article")[0],
+    );
+  });
+
+  it("mantém o estado vazio legível sobre a faixa escura", async () => {
+    vi.mocked(getPublicBarbers).mockResolvedValue([]);
+
+    render(await BarbersPage());
+
+    expect(
+      screen.getByText("Nenhum barbeiro disponível no momento").parentElement,
+    ).toHaveClass("bg-surface");
+  });
+
   it("mostra o estado vazio", async () => {
     vi.mocked(getPublicBarbers).mockResolvedValue([]);
 

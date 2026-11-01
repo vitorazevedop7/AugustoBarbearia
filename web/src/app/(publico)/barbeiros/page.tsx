@@ -18,12 +18,9 @@ export default async function BarbersPage() {
       <PageHero
         title="Barbeiros"
         description="Conheça a equipe e escolha com quem você quer ser atendido."
-      />
-      <div className="px-4 py-section sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-site">
-          <BarberList barbers={barbers} headingLevel="h2" fullBio />
-        </div>
-      </div>
+      >
+        <BarberList barbers={barbers} headingLevel="h2" fullBio />
+      </PageHero>
       <RevealObserver />
     </main>
   );
