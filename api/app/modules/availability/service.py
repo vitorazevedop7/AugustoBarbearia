@@ -24,6 +24,7 @@ from app.modules.barbers.service import get_barber
 from app.modules.catalog.models import BarberService, Service
 from app.modules.catalog.service import get_service
 from app.modules.shop.service import get_business_hours
+from app.modules.time_blocks.models import TimeBlock
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,19 +96,24 @@ def _busy(
 ) -> list[TimeRange]:
     """Intervalos ocupados do barbeiro que cruzam `window`.
 
-    RN-08: só agendamentos `SCHEDULED` ocupam a agenda. Os bloqueios (RN-03)
-    entram nesta lista na Sprint 4. Na remarcação, o próprio agendamento não
-    conta como ocupado.
+    RN-05, itens 3 e 4: os agendamentos ativos (RN-08, só `SCHEDULED`) e os
+    bloqueios (RN-03). Na remarcação, o próprio agendamento não conta como
+    ocupado.
     """
-    query = select(Appointment.starts_at, Appointment.ends_at).where(
+    appointments = select(Appointment.starts_at, Appointment.ends_at).where(
         Appointment.barber_id == barber_id,
         Appointment.status == AppointmentStatus.SCHEDULED,
         Appointment.starts_at < window.end,
         Appointment.ends_at > window.start,
     )
     if rescheduling is not None:
-        query = query.where(Appointment.id != rescheduling.appointment_id)
-    rows = session.execute(query).all()
+        appointments = appointments.where(Appointment.id != rescheduling.appointment_id)
+    blocks = select(TimeBlock.starts_at, TimeBlock.ends_at).where(
+        TimeBlock.barber_id == barber_id,
+        TimeBlock.starts_at < window.end,
+        TimeBlock.ends_at > window.start,
+    )
+    rows = [*session.execute(appointments).all(), *session.execute(blocks).all()]
     return [TimeRange(starts_at, ends_at) for starts_at, ends_at in rows]
 
 
@@ -257,7 +263,10 @@ def ensure_slot_available(
 
     Trava a linha do barbeiro com `FOR SHARE` até o fim da transação: assim a
     inativação (RN-60), que trava com `FOR UPDATE`, espera a criação terminar,
-    ou a criação já enxerga o barbeiro inativo. A garantia final contra dois
+    ou a criação já enxerga o barbeiro inativo. O mesmo vale para a criação de
+    um bloqueio (RN-03), que também trava com `FOR UPDATE`: ou o bloqueio
+    espera e enxerga o agendamento, ou a criação espera e enxerga o bloqueio
+    entre os ocupados. A garantia final contra dois
     agendamentos no mesmo horário é a exclusion constraint da RN-08.
     """
     get_barber(session, barber_id, lock="share")
