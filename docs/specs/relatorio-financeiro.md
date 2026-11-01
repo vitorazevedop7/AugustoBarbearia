@@ -33,11 +33,11 @@ Nenhuma regra nova: as escolhas abaixo detalham as existentes e estão em "Dúvi
 ## Definições desta funcionalidade
 - **Período:** duas datas locais de São Paulo, `start` e `end`, as duas inclusivas, ambas obrigatórias. `end` antes de `start` é recusado. O período tem **no máximo 366 dias** (`end − start ≤ 365`), um ano, para a lista não crescer sem limite.
 - **Data de referência:** o atendimento pertence ao dia em que **começa** (`starts_at`), não ao dia em que foi concluído (`closed_at`). É a data que a agenda mostra ([agenda-admin.md](agenda-admin.md)), então o relatório de um dia bate com a agenda do mesmo dia. Entra o que tem `starts_at` em `[00:00 de start, 00:00 do dia seguinte a end)` no fuso de São Paulo, convertido para UTC só na consulta (RN-01). Um atendimento às 22h de São Paulo (01h do dia seguinte em UTC) é do dia em que começa.
-- **Concluídos:** agendamentos `COMPLETED` do período (e do barbeiro, se houver filtro). Cada um tem exatamente um `Payment`. O **faturamento** é a soma do `amount` desses pagamentos.
+- **Concluídos:** agendamentos `COMPLETED` do período (e do barbeiro, se houver filtro). Cada um tem exatamente um `Payment`: a conclusão grava os dois na mesma transação (S5.06), e o relatório **parte dessa premissa** (junção interna). Um `COMPLETED` sem `Payment`, que só existiria por escrita direta no banco, não apareceria em nada. O **faturamento** é a soma do `amount` desses pagamentos.
 - **Faltas:** agendamentos `NO_SHOW` do período (e do barbeiro). Não têm valor.
 - **Fora das somas:** `SCHEDULED` (ainda não fechado) e `CANCELED` não entram em nada.
 - **Barbeiro:** o do agendamento (RN-42), mesmo que tenha sido inativado depois.
-- **Dinheiro:** `numeric(10,2)` no banco, `Decimal` na API, string decimal com duas casas na resposta (`"125.00"`). As somas são feitas no banco (`SUM` sobre `numeric`) e nunca passam por `float`. Sem nenhum concluído, o total é `"0.00"`.
+- **Dinheiro:** `numeric(10,2)` no banco, `Decimal` na API, string decimal com duas casas na resposta (`"125.00"`). Os totais são somados em `Decimal` a partir da **própria lista** dos concluídos, lida numa só consulta (ver "API"), e nunca passam por `float`. Sem nenhum concluído, o total é `"0.00"`.
 
 ## Critérios de aceite
 
@@ -54,7 +54,7 @@ Nenhuma regra nova: as escolhas abaixo detalham as existentes e estão em "Dúvi
 - **Então** o relatório soma 30,00 + 0,00 + 40,00. A cortesia conta em `completed_count` e aparece na lista com `"0.00"`.
 
 **CA-4 — Por barbeiro (RN-42)**
-- `by_barber` traz uma linha por barbeiro com `barber` (`id`, `name`, `active`), `total`, `completed_count` e `no_show_count`, por nome. Sem filtro, vêm os barbeiros **ativos** (mesmo sem atendimento, com zeros) e os **inativos que tenham concluído ou falta no período**. O valor de cada atendimento conta para o barbeiro do agendamento: trocar o cadastro do serviço ou inativar o barbeiro depois não move o valor.
+- `by_barber` traz uma linha por barbeiro com `barber` (`id`, `name`, `active`), `total`, `completed_count` e `no_show_count`, na ordem do banco (nome e id, como o resto da administração). Sem filtro, vêm os barbeiros **ativos** (mesmo sem atendimento, com zeros) e os **inativos que tenham concluído ou falta no período**. O valor de cada atendimento conta para o barbeiro do agendamento: trocar o cadastro do serviço ou inativar o barbeiro depois não move o valor.
 
 **CA-5 — Por forma de pagamento (RN-43)**
 - `by_method` traz sempre as **quatro** formas (`CASH`, `PIX`, `DEBIT`, `CREDIT`), nessa ordem, cada uma com `total` e `count`, mesmo com zero.
@@ -90,7 +90,7 @@ Nenhuma regra nova: as escolhas abaixo detalham as existentes e estão em "Dúvi
 - Sem concluídos no período, a tela mostra "Nenhum atendimento concluído neste período." no lugar da lista, e os totais em R$ 0,00.
 
 **CA-13 — Período e filtro na URL, sem JS**
-- O estado fica na URL: `?inicio=AAAA-MM-DD&fim=AAAA-MM-DD&barbeiro=<id>`. Se `inicio` e `fim` não forem **ambas** datas válidas, vale Este mês; `barbeiro` inválido vale "todos".
+- O estado fica na URL: `?inicio=AAAA-MM-DD&fim=AAAA-MM-DD&barbeiro=<id>`. Se `inicio` e `fim` não forem **ambas** datas válidas, vale Este mês; `barbeiro` inválido, ou que não está na lista de barbeiros, vale "todos": a tela ignora o filtro e o campo mostra "Todos", em vez de um erro com o filtro fingindo estar limpo.
 - Os atalhos "Hoje", "Esta semana" (segunda a domingo da semana de hoje, como na agenda) e "Este mês" são links que mantêm o barbeiro. O atalho do período atual tem `aria-current`.
 - Um formulário `GET` com "De", "Até" e "Barbeiro" (lista nativa com "Todos") e o botão "Ver relatório" leva a qualquer período. Tudo é link ou formulário `GET`: funciona sem JS.
 - Período recusado pela API (ex.: `fim` antes de `inicio`): um `Alert` `danger` com o `message` da API no lugar do relatório, e o formulário continua com o que foi digitado. Falha de leitura: o `message` da API, ou "Não foi possível carregar o relatório. Tente novamente em instantes.".
@@ -120,7 +120,7 @@ flowchart LR
 
 - Módulo novo `app/modules/reports/` (`router.py`, `schemas.py`, `service.py`). Ele fica **acima** de `payments`, `agenda` e `barbers`: lê `Appointment`, `Payment`, `Customer`, `Barber` e `Service`, reaproveita `period_bounds` de `agenda.service` e `get_barber` de `barbers.service`, e ninguém o importa. Não mora em `payments` para não acoplar o fechamento do atendimento (escrita) a uma leitura agregada, e não cria ciclo.
 - A data entra como data local (`AAAA-MM-DD`) e vira instante de São Paulo no `service.py`; as respostas saem em `-03:00` (RN-01).
-- Consultas (todas com o filtro de período e de barbeiro): um agregado por barbeiro (`COUNT`, `SUM` de `payments.amount`, `GROUP BY barber_id`), um por forma de pagamento (`GROUP BY method`), a contagem de faltas por barbeiro, e a lista dos concluídos com as junções de cliente, barbeiro e serviço. O total e a quantidade de concluídos saem da soma dos agregados por forma de pagamento (um `Decimal` exato), e o teste confere que batem com a lista.
+- Consultas: a lista dos concluídos (com as junções de cliente, barbeiro e serviço, no período e no barbeiro) e a contagem de faltas por barbeiro. O total, a quantidade de concluídos e os totais por barbeiro e por forma de pagamento são somados em `Decimal` a partir da lista, então o CA-2 vale sempre, mesmo que um pagamento seja corrigido durante a montagem (com agregados separados em `READ COMMITTED`, cada consulta poderia ver um estado diferente). A soma em Python é exata porque os valores são `numeric(10,2)`.
 - Índices: nenhum novo. A agenda lê pelo mesmo filtro de `starts_at` sem índice dedicado, e o volume de uma barbearia (dezenas de atendimentos por dia, no máximo alguns milhares por ano) não justifica uma migração; se crescer, o índice entra numa issue própria.
 
 ## Fora do escopo desta spec

@@ -23,15 +23,23 @@ export default async function ReportPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const today = todayInSaoPaulo();
-  const state = parseReportParams(await searchParams, today);
-  const [report, allBarbers] = await Promise.all([
-    loadReport({
-      start: state.inicio,
-      end: state.fim,
-      barberId: state.barbeiro,
-    }),
-    loadBarbers(),
-  ]);
+  const requested = parseReportParams(await searchParams, today);
+  const allBarbers = await loadBarbers();
+  // Um barbeiro que não existe na lista é ignorado: a tela mostra "Todos" de
+  // verdade, em vez de um erro com o filtro fingindo estar limpo. Sem a lista
+  // (falha de leitura), a API decide.
+  const unknownBarber =
+    requested.barbeiro !== undefined &&
+    allBarbers !== undefined &&
+    !allBarbers.some((barber) => barber.id === requested.barbeiro);
+  const state = unknownBarber
+    ? { inicio: requested.inicio, fim: requested.fim }
+    : requested;
+  const report = await loadReport({
+    start: state.inicio,
+    end: state.fim,
+    barberId: state.barbeiro,
+  });
 
   // O filtro mostra os ativos e o escolhido, mesmo inativo.
   const filterBarbers = (
