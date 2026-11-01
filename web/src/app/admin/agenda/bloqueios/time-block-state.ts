@@ -5,6 +5,7 @@ import {
   AGENDA_PATH,
   agendaHref,
   parseAgendaParams,
+  type AgendaBarber,
   type AgendaState,
 } from "../agenda-state";
 
@@ -82,15 +83,34 @@ export function timeBlocksOn(blocks: TimeBlock[], date: string): TimeBlock[] {
   return blocks.filter((block) => localDate(block.starts_at) === date);
 }
 
+/**
+ * As colunas da visão do dia: os barbeiros da agenda e também quem só tem
+ * bloqueio no dia (um barbeiro inativado depois de bloquear não aparece na
+ * agenda, mas o bloqueio dele continua valendo). Por nome, como a API.
+ */
+export function withBlockBarbers(
+  barbers: AgendaBarber[],
+  blocks: TimeBlock[],
+): AgendaBarber[] {
+  const found = new Map(barbers.map((barber) => [barber.id, barber]));
+  for (const { barber } of blocks) {
+    if (!found.has(barber.id)) found.set(barber.id, barber);
+  }
+  return [...found.values()].sort(
+    (a, b) => a.name.localeCompare(b.name, "pt-BR") || a.id - b.id,
+  );
+}
+
 function text(formData: FormData, field: string): string {
   const value = formData.get(field);
   return typeof value === "string" ? value.trim() : "";
 }
 
 /**
- * O pedido para a API. Com "Dia inteiro", início e fim não vão: a API faz a
- * folga da meia-noite à meia-noite (RN-03). Sem ele, horário em branco vai
- * como `null`, e a API responde a mensagem certa.
+ * O pedido para a API. "Dia inteiro" vai explícito (`all_day`), sem os
+ * horários: a API faz a folga da meia-noite à meia-noite (RN-03). Sem ele,
+ * horário em branco vai como `null`, e a API recusa com a mensagem certa, em
+ * vez de virar folga sem ninguém ter pedido.
  */
 export function parseTimeBlockForm(formData: FormData): TimeBlockCreate {
   const allDay = formData.get("all_day") !== null;
@@ -98,6 +118,7 @@ export function parseTimeBlockForm(formData: FormData): TimeBlockCreate {
   return {
     barber_id: Number(text(formData, "barber_id")),
     date: text(formData, "date"),
+    all_day: allDay,
     start_time: allDay ? null : text(formData, "start_time") || null,
     end_time: allDay ? null : text(formData, "end_time") || null,
     reason: reason || null,

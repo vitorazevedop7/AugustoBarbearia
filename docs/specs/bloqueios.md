@@ -36,7 +36,7 @@ Administração (cria, vê e remove). O cliente e o visitante não veem os bloqu
   - `created_at`.
 - `CHECK` no banco: `ends_at > starts_at`.
 - **Sem sobreposição entre bloqueios:** a exclusion constraint `ex_time_blocks_barber_overlap` (`barber_id WITH =`, `tstzrange(starts_at, ends_at, '[)') WITH &&`) impede dois bloqueios do mesmo barbeiro que se cruzem. O serviço confere antes e responde com mensagem; a constraint é a última barreira.
-- **Folga de dia inteiro** (RN-03) é um bloqueio da meia-noite do dia até a meia-noite do dia seguinte, no fuso de São Paulo. Ele cobre o expediente do dia, qualquer que seja, e continua cobrindo se o horário de funcionamento mudar depois. Não há coluna própria: a resposta calcula `all_day` a partir do intervalo.
+- **Folga de dia inteiro** (RN-03) é um bloqueio da meia-noite do dia até a meia-noite do dia seguinte, no fuso de São Paulo. Ele cobre o expediente do dia, qualquer que seja, e continua cobrindo se o horário de funcionamento mudar depois. A folga é pedida de forma explícita (`all_day: true`): horários em branco nunca viram folga sem querer. Não há coluna própria: a resposta calcula `all_day` a partir do intervalo.
 - Um bloqueio fica **dentro de um dia**: o início e o fim são horas do mesmo dia local, ou o dia inteiro. Uma folga de vários dias são vários bloqueios (ver "Fora do escopo").
 - Não há edição: para mudar um bloqueio, a administração remove e cria outro.
 
@@ -68,11 +68,11 @@ No Postgres, em `READ COMMITTED`, cada comando enxerga o que foi confirmado ante
 - **Então** a API responde `201` com `id`, `barber` (`id`, `name`, `active`), `starts_at` `2026-11-02T12:00:00-03:00`, `ends_at` `2026-11-02T13:00:00-03:00`, `all_day: false` e `reason: "Almoço"`. O motivo é aparado; motivo vazio vira `null`.
 
 **CA-2 — Folga de dia inteiro (RN-03)**
-- **Quando** a administração envia o mesmo pedido sem `start_time` e `end_time` (ou com os dois `null`)
+- **Quando** a administração envia o mesmo pedido com `all_day: true` (os horários, se vierem, são ignorados)
 - **Então** o bloqueio vai de `2026-11-02T00:00:00-03:00` a `2026-11-03T00:00:00-03:00`, com `all_day: true`.
 
 **CA-3 — Horários inválidos**
-- Só um dos dois horários responde `422` com `code` = `INVALID_TIME_BLOCK` e "Informe o início e o fim, ou marque o dia inteiro.".
+- Sem `all_day` e sem um dos horários (ou sem os dois) responde `422` com `code` = `INVALID_TIME_BLOCK` e "Informe o início e o fim, ou marque o dia inteiro.".
 - Fim igual ou antes do início responde `422` com `code` = `INVALID_TIME_BLOCK` e "O fim do bloqueio precisa ser depois do início.".
 - O último dia do calendário (`9999-12-31`) responde `422` com `code` = `INVALID_TIME_BLOCK` e "Escolha uma data válida.".
 - Data ou hora em outro formato, ou motivo com mais de 120 caracteres, respondem `422 VALIDATION_ERROR`.
@@ -114,12 +114,12 @@ No Postgres, em `READ COMMITTED`, cada comando enxerga o que foi confirmado ante
 
 **CA-11 — Bloqueios na agenda (tela)**
 - **Dado** a administração em `/admin/agenda`
-- **Então**, na visão do dia, cada barbeiro mostra, depois dos agendamentos, os bloqueios dele no dia ("Bloqueios", com "12:00–13:00" ou "Dia inteiro" e o motivo). Na visão da semana, cada dia mostra os bloqueios do dia, com o nome do barbeiro quando a agenda mostra todos. Sem bloqueios, nada aparece (sem aviso de vazio).
+- **Então**, na visão do dia, cada barbeiro mostra, depois dos agendamentos, os bloqueios dele no dia ("Bloqueios", com "12:00–13:00" ou "Dia inteiro" e o motivo). Na visão da semana, cada dia mostra os bloqueios do dia, com o nome do barbeiro quando a agenda mostra todos. Sem bloqueios, nada aparece (sem aviso de vazio). Um barbeiro inativo que só tem bloqueio no dia (inativado depois de bloquear) também ganha a coluna, para o bloqueio não sumir da visão do dia.
 - Falha ao ler os bloqueios mostra um `Alert` `warning` "Não foi possível carregar os bloqueios." e a agenda continua.
 
 **CA-12 — Criar pela tela, sem JS**
 - A barra da agenda tem "Bloquear horário", que leva a `/admin/agenda/bloqueios/novo`, com o estado da agenda na URL (data, visão e barbeiro).
-- O formulário tem barbeiro (os ativos; o da agenda já escolhido), data (a da agenda), "Dia inteiro", início e fim (`type="time"`) e motivo (opcional). Com "Dia inteiro" marcado, início e fim são ignorados.
+- O formulário tem barbeiro (os ativos; o da agenda já escolhido), data (a da agenda), "Dia inteiro", início e fim (`type="time"`) e motivo (opcional). Com "Dia inteiro" marcado, a Server Action envia `all_day: true` e não envia os horários; desmarcado com horários em branco, a API recusa (CA-3) em vez de criar uma folga.
 - Salvar chama `POST /admin/time-blocks` por Server Action. Deu certo: volta para a agenda **no dia do bloqueio**, mantendo a visão e o barbeiro, com o `Alert` `success` "Horário bloqueado.". Recusa: o formulário volta com o que foi digitado e o `message` da API num `Alert` `danger`.
 
 **CA-13 — Remover pela tela, sem JS**
@@ -147,7 +147,7 @@ flowchart LR
 |---|---|---|---|
 | `GET` | `/admin/time-blocks?start=&end=&barber_id=` | Administração (`require_admin`) | Os bloqueios que cruzam o período (até 7 dias), por início |
 | `GET` | `/admin/time-blocks/{id}` | Administração | Um bloqueio |
-| `POST` | `/admin/time-blocks` | Administração | Cria um bloqueio (`date`, `start_time`/`end_time` ou dia inteiro, `reason`), recusando agendamento ativo no intervalo (RN-03) e outro bloqueio cruzado |
+| `POST` | `/admin/time-blocks` | Administração | Cria um bloqueio (`date`, `start_time`/`end_time` ou `all_day`, `reason`), recusando agendamento ativo no intervalo (RN-03) e outro bloqueio cruzado |
 | `DELETE` | `/admin/time-blocks/{id}` | Administração | Remove um bloqueio; os horários voltam na hora |
 
 - **Rota própria, e não dentro de `GET /admin/appointments`:** o bloqueio tem ciclo de vida próprio, e a leitura separada deixa a agenda (que recebe também o agendamento manual e a conclusão) sem mudar de contrato. A página faz as duas leituras em paralelo.
@@ -165,7 +165,7 @@ flowchart LR
 ## Dúvidas em aberto
 Escolhas desta implementação que nenhuma RN decide, a confirmar:
 - **Dia inteiro = da meia-noite à meia-noite** de São Paulo, e não só o expediente daquele dia. Assim a folga continua valendo se o horário de funcionamento mudar.
-- **Dois bloqueios do mesmo barbeiro não se cruzam** (`409 TIME_BLOCK_OVERLAP`). A alternativa seria aceitar e mostrar os dois.
+- **Dois bloqueios do mesmo barbeiro não se cruzam** (`409 TIME_BLOCK_OVERLAP`, com exclusion constraint no banco). A alternativa seria aceitar e mostrar os dois. Se a barbearia confirmar, a restrição entra na RN-03 em `regras.md`; se não, sai a constraint (uma migração).
 - **Bloqueio fora do expediente, em dia fechado, no passado ou de barbeiro inativo** é aceito: não atrapalha nada e não há regra contra. O formulário só oferece os barbeiros ativos.
 - **Um agendamento `SCHEDULED` que já terminou** (ainda sem conclusão nem falta) também impede o bloqueio, porque continua ativo (RN-30).
 - **Remover pede confirmação** numa página, como cancelar agendamento.

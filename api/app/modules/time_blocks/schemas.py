@@ -27,11 +27,13 @@ Reason = Annotated[
 class TimeBlockCreate(BaseModel):
     """Um bloqueio dentro de um dia, em horário local de São Paulo (RN-01).
 
-    Sem `start_time` e `end_time`, é folga do dia inteiro (RN-03).
+    Com `all_day`, é folga do dia inteiro (RN-03) e os horários são
+    ignorados; sem ele, `start_time` e `end_time` são obrigatórios.
     """
 
     barber_id: int
     date: date
+    all_day: bool = False
     start_time: time | None = Field(default=None, description="Hora local, HH:MM.")
     end_time: time | None = Field(default=None, description="Hora local, HH:MM.")
     reason: Reason = None

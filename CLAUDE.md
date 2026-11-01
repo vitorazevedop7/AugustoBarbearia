@@ -178,6 +178,15 @@ docker compose exec api uv run pytest tests/test_notifications.py
 
 Agendar, remarcar e cancelar pelo site mandam e-mail ao cliente (RN-50, RN-52). Sem `RESEND_API_KEY`, o e-mail aparece no log da API (`docker compose logs api`); com a chave, `EMAIL_FROM` é obrigatório. O módulo `app/modules/notifications/` expõe `notify(session, appointment, kind)`, que registra `PENDING` na transação da ação, e a `Outbox` (`OutboxDep` nas rotas), que o service chama **depois** do commit com `send_after_commit`; o envio (`send_notification`) marca `SENT` ou `FAILED` e nunca desfaz a ação (RN-54). Fora de requisição (job do lembrete), chame `send_notification(session, id, get_email_sender())` depois do commit. Nos testes, um fixture `autouse` zera `RESEND_API_KEY`, e as rotas recebem um remetente falso por `dependency_overrides[get_email_sender]`. A [spec](docs/specs/notificacoes-email.md) documenta os templates e a configuração do Resend.
 
+### Bloqueios e folgas — S5.04
+
+```bash
+docker compose exec api alembic upgrade head          # cria time_blocks com a exclusion constraint entre bloqueios
+docker compose exec api uv run pytest tests/test_time_blocks.py
+```
+
+Na agenda (`/admin/agenda`), "Bloquear horário" leva a `/admin/agenda/bloqueios/novo` (barbeiro, data, "Dia inteiro" ou início e fim, motivo), e cada bloqueio aparece depois dos agendamentos do barbeiro (dia) ou do dia (semana), com "Remover" para a confirmação em `/admin/agenda/bloqueios/[id]/remover`. Tudo funciona sem JS, e as Server Actions voltam para a agenda com `?aviso=`. O web fica em `web/src/app/admin/agenda/bloqueios/` (`TimeBlockList`, `TimeBlockForm`, `time-block-state.ts`). A API fica no módulo `app/modules/time_blocks/` (`GET`/`POST /admin/time-blocks`, `GET`/`DELETE /admin/time-blocks/{id}`): o pedido traz a data local e os horários, ou `all_day` para a folga da meia-noite à meia-noite; `create_time_block` trava o barbeiro com `FOR UPDATE` (a mesma linha que `ensure_slot_available` trava com `FOR SHARE`) e recusa agendamento ativo no intervalo (`409 TIME_BLOCK_CONFLICT`, RN-03) e bloqueio cruzado (`409 TIME_BLOCK_OVERLAP`). Os bloqueios entram nos ocupados de `_busy` (`availability/service.py`), então valem para o cliente, a remarcação e a administração sem mudar a função pura. A [spec](docs/specs/bloqueios.md) documenta as regras e as decisões.
+
 ### Conclusão do atendimento — S5.06
 
 ```bash
@@ -195,15 +204,6 @@ docker compose exec api uv run pytest tests/test_reminders.py
 ```
 
 O comando envia o lembrete (RN-51) dos agendamentos `SCHEDULED` que começam entre 23h e 25h à frente e ainda não têm lembrete para o horário atual, e imprime no log quantos saíram e quantos falharam. É idempotente: rodar de novo, ou duas execuções ao mesmo tempo, não manda um segundo e-mail (a linha do agendamento é travada com `FOR UPDATE SKIP LOCKED`). Agendamento (ou remarcação) feito com menos de 24h de antecedência não recebe lembrete; o lembrete do horário antigo não impede o do novo. Sem `RESEND_API_KEY`, o e-mail aparece no log. A lógica é `send_due_reminders` em `app/modules/notifications/reminders.py`; o job (`app/jobs/send_reminders.py`, `run(session, sender, now)`) recebe o relógio como argumento, e os testes o fixam. O cron de hora em hora na Railway entra na #32. A [spec](docs/specs/notificacoes-email.md) documenta as decisões.
-
-### Bloqueios e folgas — S5.04
-
-```bash
-docker compose exec api alembic upgrade head          # cria time_blocks com a exclusion constraint entre bloqueios
-docker compose exec api uv run pytest tests/test_time_blocks.py
-```
-
-Na agenda (`/admin/agenda`), "Bloquear horário" leva a `/admin/agenda/bloqueios/novo` (barbeiro, data, "Dia inteiro" ou início e fim, motivo), e cada bloqueio aparece depois dos agendamentos do barbeiro (dia) ou do dia (semana), com "Remover" para a confirmação em `/admin/agenda/bloqueios/[id]/remover`. Tudo funciona sem JS, e as Server Actions voltam para a agenda com `?aviso=`. O web fica em `web/src/app/admin/agenda/bloqueios/` (`TimeBlockList`, `TimeBlockForm`, `time-block-state.ts`). A API fica no módulo `app/modules/time_blocks/` (`GET`/`POST /admin/time-blocks`, `GET`/`DELETE /admin/time-blocks/{id}`): o pedido traz a data local e os horários, ou nenhum para a folga da meia-noite à meia-noite; `create_time_block` trava o barbeiro com `FOR UPDATE` (a mesma linha que `ensure_slot_available` trava com `FOR SHARE`) e recusa agendamento ativo no intervalo (`409 TIME_BLOCK_CONFLICT`, RN-03) e bloqueio cruzado (`409 TIME_BLOCK_OVERLAP`). Os bloqueios entram nos ocupados de `_busy` (`availability/service.py`), então valem para o cliente, a remarcação e a administração sem mudar a função pura. A [spec](docs/specs/bloqueios.md) documenta as regras e as decisões.
 
 ## Mapa da documentação
 

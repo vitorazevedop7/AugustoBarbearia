@@ -35,18 +35,19 @@ def _invalid(message: str) -> DomainError:
 
 
 def block_range(
-    day: date, start_time: time | None, end_time: time | None
+    day: date, start_time: time | None, end_time: time | None, *, all_day: bool
 ) -> tuple[datetime, datetime]:
     """RN-01, RN-03: o intervalo do bloqueio no fuso de São Paulo.
 
-    Sem início e fim, é a folga do dia inteiro: da meia-noite do dia até a
-    meia-noite seguinte, que cobre o expediente qualquer que seja. Com horário,
-    o bloqueio fica dentro do dia, com o fim depois do início. Segundos são
-    descartados.
+    A folga do dia inteiro é pedida de forma explícita (`all_day`) e vai da
+    meia-noite do dia até a meia-noite seguinte, cobrindo o expediente
+    qualquer que seja; os horários são ignorados. Sem ela, início e fim são
+    obrigatórios, o bloqueio fica dentro do dia e o fim vem depois do início.
+    Segundos são descartados.
     """
     if day >= date.max:
         raise _invalid("Escolha uma data válida.")
-    if start_time is None and end_time is None:
+    if all_day:
         return period_bounds(day, day)
     if start_time is None or end_time is None:
         raise _invalid("Informe o início e o fim, ou marque o dia inteiro.")
@@ -146,7 +147,9 @@ def create_time_block(session: Session, data: TimeBlockCreate) -> TimeBlockEntry
     recusado com o agendamento já confirmado, ou a reserva é recusada com o
     bloqueio já confirmado (RN-05, item 3; RN-08).
     """
-    starts_at, ends_at = block_range(data.date, data.start_time, data.end_time)
+    starts_at, ends_at = block_range(
+        data.date, data.start_time, data.end_time, all_day=data.all_day
+    )
     barber = get_barber(session, data.barber_id, lock="update")
     if _has_active_appointment(session, barber.id, starts_at, ends_at):
         raise _conflict()

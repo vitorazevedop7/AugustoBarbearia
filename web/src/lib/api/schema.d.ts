@@ -1181,7 +1181,8 @@ export interface components {
          * TimeBlockCreate
          * @description Um bloqueio dentro de um dia, em horário local de São Paulo (RN-01).
          *
-         *     Sem `start_time` e `end_time`, é folga do dia inteiro (RN-03).
+         *     Com `all_day`, é folga do dia inteiro (RN-03) e os horários são
+         *     ignorados; sem ele, `start_time` e `end_time` são obrigatórios.
          */
         TimeBlockCreate: {
             /** Barber Id */
@@ -1191,6 +1192,11 @@ export interface components {
              * Format: date
              */
             date: string;
+            /**
+             * All Day
+             * @default false
+             */
+            all_day: boolean;
             /**
              * Start Time
              * @description Hora local, HH:MM.
