@@ -317,6 +317,26 @@ def test_rn40_forma_ausente_ou_valor_malformado_e_recusado(
     assert payment_of(db_session, appointment.id) is None
 
 
+@pytest.mark.parametrize("amount", [35.5, 0.0099999999999999999, -1e-999, 0.0])
+def test_rn40_numero_com_casas_decimais_no_json_e_recusado_sem_float(
+    api: TestClient, db_session: Session, edvaldo: int, amount: float
+) -> None:
+    """Um número JSON com casas chega como `float` e seria arredondado em
+    silêncio; o valor tem de vir como texto decimal (ou inteiro)."""
+    appointment = scheduled(db_session, edvaldo)
+
+    response = complete(api, appointment.id, method="PIX", amount=amount)
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "VALIDATION_ERROR"
+    assert payment_of(db_session, appointment.id) is None
+
+    done = completed(api, db_session, barber_id(db_session, "Lauro"))
+    patched = api.patch(f"/admin/appointments/{done}/payment", json={"amount": amount})
+    assert patched.status_code == 422
+    assert patched.json()["code"] == "VALIDATION_ERROR"
+
+
 def test_rn32_o_horario_concluido_deixa_de_ocupar_a_agenda(
     api: TestClient, db_session: Session, edvaldo: int
 ) -> None:

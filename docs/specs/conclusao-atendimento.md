@@ -56,7 +56,7 @@ Nenhuma regra nova: as escolhas abaixo detalham as existentes e estão listadas 
 - Id inexistente: `404` com `code` = `APPOINTMENT_NOT_FOUND`.
 
 **CA-4 — Valor e forma inválidos (RN-40)**
-- `amount` negativo: `422` com `code` = `INVALID_PAYMENT_AMOUNT` e "O valor cobrado não pode ser negativo.". Mais de duas casas decimais, ou fora de `numeric(10,2)`, ou texto que não é número: `422` `VALIDATION_ERROR`.
+- `amount` negativo: `422` com `code` = `INVALID_PAYMENT_AMOUNT` e "O valor cobrado não pode ser negativo.". Mais de duas casas decimais, fora de `numeric(10,2)`, texto que não é número ou **número JSON com casas decimais** (`35.5`, que chegaria como `float`): `422` `VALIDATION_ERROR`. O valor vai como texto decimal (`"35.50"`) ou inteiro.
 - `method` ausente ou fora dos quatro valores: `422` `VALIDATION_ERROR`.
 - Em todos, o agendamento continua `SCHEDULED`.
 
