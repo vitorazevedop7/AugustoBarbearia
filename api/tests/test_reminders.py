@@ -4,7 +4,7 @@ import threading
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pytest import LogCaptureFixture, MonkeyPatch
@@ -388,6 +388,118 @@ def test_rn54_lembrete_registrado_e_nao_enviado_sai_na_proxima_execucao(
     assert len(reminders_of(db_session, appointment)) == 1
 
 
+def pending_reminder(
+    session: Session, appointment: Appointment, *, at: datetime
+) -> Notification:
+    pending = Notification(
+        appointment_id=appointment.id,
+        kind=NotificationKind.REMINDER,
+        recipient="ana@example.com",
+        created_at=at,
+    )
+    session.add(pending)
+    session.flush()
+    return pending
+
+
+def test_rn54_lembrete_pendente_de_horario_antigo_nao_sai_depois_da_remarcacao(
+    db_session: Session, sender: FakeSender, edvaldo: int
+) -> None:
+    """Registrado, não enviado, e então remarcado: o `PENDING` é do horário
+    antigo e não pode sair com o novo horário, nem somar-se ao lembrete novo."""
+    appointment = booked(db_session, edvaldo, TOMORROW)
+    old = pending_reminder(db_session, appointment, at=NOW)
+    new_start = TOMORROW + timedelta(days=2)
+    reschedule(db_session, appointment, new_start, at=NOW + timedelta(minutes=30))
+
+    assert run(db_session, sender, new_start - timedelta(hours=24)) == ReminderReport(
+        sent=1
+    )
+
+    assert old.status == NotificationStatus.PENDING
+    assert len(sender.sent) == 1
+    assert sender.sent[0].idempotency_key != f"notification-{old.id}"
+
+
+def test_rn54_lembrete_pendente_de_horario_antigo_nao_sai_se_o_novo_e_em_menos_de_24h(
+    db_session: Session, sender: FakeSender, edvaldo: int
+) -> None:
+    appointment = booked(db_session, edvaldo, TOMORROW + timedelta(days=3))
+    old = pending_reminder(db_session, appointment, at=NOW - timedelta(days=1))
+    new_start = NOW + timedelta(hours=23, minutes=30)
+    reschedule(db_session, appointment, new_start, at=NOW - timedelta(minutes=15))
+
+    assert run(db_session, sender) == ReminderReport()
+
+    assert old.status == NotificationStatus.PENDING
+    assert sender.sent == []
+
+
+@pytest.mark.parametrize(
+    ("ahead", "is_sent"),
+    [
+        (timedelta(hours=22, minutes=59), False),
+        (timedelta(hours=23), True),
+        (timedelta(hours=25), False),
+        (timedelta(hours=-1), False),
+    ],
+)
+def test_rn51_lembrete_pendente_tambem_respeita_a_janela_de_23h_a_25h(
+    db_session: Session,
+    sender: FakeSender,
+    edvaldo: int,
+    ahead: timedelta,
+    is_sent: bool,
+) -> None:
+    appointment = booked(db_session, edvaldo, NOW + ahead)
+    pending = pending_reminder(db_session, appointment, at=NOW - timedelta(hours=2))
+
+    run(db_session, sender)
+
+    assert len(sender.sent) == int(is_sent)
+    assert pending.status == (
+        NotificationStatus.SENT if is_sent else NotificationStatus.PENDING
+    )
+
+
+def test_rn54_falha_ao_montar_o_email_conta_como_falha_do_job(
+    db_session: Session,
+    sender: FakeSender,
+    edvaldo: int,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    from app.modules.notifications import service
+
+    def broken(session: Session, notification: Notification) -> Email:
+        raise LookupError("template quebrado")
+
+    monkeypatch.setattr(service, "build_email", broken)
+    appointment = booked(db_session, edvaldo, TOMORROW)
+
+    assert run(db_session, sender) == ReminderReport(failed=1)
+
+    [notification] = reminders_of(db_session, appointment)
+    assert notification.status == NotificationStatus.FAILED
+    assert notification.error is not None
+    assert "template quebrado" in notification.error
+
+
+def test_o_relogio_em_utc_nao_muda_a_janela_nem_o_horario_no_email(
+    db_session: Session, sender: FakeSender, edvaldo: int
+) -> None:
+    """00h30 de terça em São Paulo é 03h30 UTC do mesmo dia; segunda 23h em UTC
+    ainda é segunda 20h em São Paulo."""
+    starts_at = local(2026, 11, 3, 0, 30)
+    booked(db_session, edvaldo, starts_at)
+    now_utc = (starts_at - timedelta(hours=24)).astimezone(UTC)
+
+    assert run(db_session, sender, now_utc) == ReminderReport(sent=1)
+
+    assert (
+        sender.sent[0].subject == "Lembrete: seu horário é terça-feira, 3/11, às 00h30"
+    )
+
+
 def test_o_relogio_do_job_e_o_passado_como_argumento(
     db_session: Session, sender: FakeSender, edvaldo: int
 ) -> None:
@@ -537,6 +649,47 @@ def test_rn51_registro_confere_de_novo_depois_de_travar_o_agendamento(
 
     assert count_reminders(migrated_engine, committed) == 1
     assert len(sender.sent) == 1
+
+
+def test_rn51_cancelado_entre_o_registro_e_o_envio_nao_recebe_lembrete(
+    migrated_engine: Engine,
+    committed: Committed,
+    sender: FakeSender,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """O cliente cancela (e confirma) depois de o job registrar o lembrete e antes
+    de enviar: a conferência com o agendamento travado impede o e-mail."""
+    original = reminders._register_reminder
+
+    def register_then_cancel(
+        session: Session, appointment_id: int, now: datetime
+    ) -> Notification | None:
+        registered = original(session, appointment_id, now)
+        with Session(migrated_engine) as other:
+            other.execute(
+                text(
+                    "UPDATE appointments SET status = 'CANCELED',"
+                    " canceled_at = now(), canceled_by = 'CUSTOMER'"
+                    " WHERE id = :id"
+                ),
+                {"id": appointment_id},
+            )
+            other.commit()
+        return registered
+
+    monkeypatch.setattr(reminders, "_register_reminder", register_then_cancel)
+
+    with Session(migrated_engine) as session:
+        report = send_due_reminders(session, sender, NOW)
+
+    assert report == ReminderReport()
+    assert sender.sent == []
+    with migrated_engine.connect() as connection:
+        status = connection.execute(
+            text("SELECT status FROM notifications WHERE appointment_id = :id"),
+            {"id": committed.appointment_id},
+        ).scalar_one()
+    assert status == "PENDING"
 
 
 def test_logger_resume_a_execucao(

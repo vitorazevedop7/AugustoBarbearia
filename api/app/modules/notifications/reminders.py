@@ -11,8 +11,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import exists, select
-from sqlalchemy.orm import Session
+from sqlalchemy import Select, exists, func, select
+from sqlalchemy.orm import Session, aliased
 
 from app.modules.appointments.models import Appointment, AppointmentStatus
 from app.modules.customers.models import Customer
@@ -21,7 +21,7 @@ from app.modules.notifications.models import (
     NotificationKind,
     NotificationStatus,
 )
-from app.modules.notifications.sender import Email, EmailSender
+from app.modules.notifications.sender import EmailSender
 from app.modules.notifications.service import notify, send_notification
 
 logger = logging.getLogger(__name__)
@@ -150,39 +150,82 @@ def _register_reminder(
     return notification
 
 
-def _unsent_reminder_ids(session: Session, now: datetime) -> Sequence[int]:
-    """Lembretes registrados que não saíram (o processo caiu entre o commit e o
-    envio) e cujo horário ainda não passou."""
-    return session.scalars(
+def _current_pending_reminders(now: datetime) -> Select[tuple[int]]:
+    """Lembretes `PENDING` que ainda valem: do horário atual (registrados depois
+    da última remarcação), de agendamento ativo e dentro da janela de 23h a 25h.
+    Um lembrete de horário antigo ou fora da janela não sai."""
+    rescheduled = aliased(Notification)
+    last_reschedule = (
+        select(func.coalesce(func.max(rescheduled.id), 0))
+        .where(
+            rescheduled.appointment_id == Appointment.id,
+            rescheduled.kind == NotificationKind.RESCHEDULED,
+        )
+        .scalar_subquery()
+    )
+    return (
         select(Notification.id)
         .join(Appointment, Appointment.id == Notification.appointment_id)
         .where(
             Notification.kind == NotificationKind.REMINDER,
             Notification.status == NotificationStatus.PENDING,
+            Notification.id > last_reschedule,
             Appointment.status == AppointmentStatus.SCHEDULED,
-            Appointment.starts_at > now,
+            Appointment.starts_at >= now + WINDOW_START,
+            Appointment.starts_at < now + WINDOW_END,
         )
-        .order_by(Notification.id)
+    )
+
+
+def _unsent_reminder_ids(session: Session, now: datetime) -> Sequence[int]:
+    """Lembretes registrados que não saíram (o processo caiu entre o commit e o
+    envio) e que ainda valem."""
+    return session.scalars(
+        _current_pending_reminders(now).order_by(Notification.id)
     ).all()
 
 
-class _CountingSender:
-    """Conta os envios desta execução. O status do registro não serve: outra
-    execução pode ter enviado o mesmo lembrete, e `send_notification` devolve o
-    registro `SENT` sem enviar de novo."""
+def _send_if_still_due(
+    session: Session, notification_id: int, sender: EmailSender, now: datetime
+) -> Notification | None:
+    """Envia o lembrete `PENDING` com o agendamento travado, depois de conferir
+    de novo que ele ainda vale.
 
-    def __init__(self, sender: EmailSender) -> None:
-        self._sender = sender
-        self.sent = 0
-        self.failed = 0
+    O registro e o envio são commits separados; entre os dois o cliente pode
+    cancelar ou remarcar, ou outra execução pode enviar o mesmo lembrete. A
+    trava na linha do agendamento (a mesma que o cancelamento, a remarcação e o
+    registro do lembrete usam) vale até o commit do envio: ou a alteração já foi
+    confirmada e a conferência a vê, ou ela espera o envio. A espera é curta
+    (outro registro ou um envio, com tempo limite no Resend). Devolve `None`
+    quando não enviou.
+    """
+    appointment_id = session.scalar(
+        select(Notification.appointment_id).where(Notification.id == notification_id)
+    )
+    if appointment_id is None:
+        return None
+    session.scalars(
+        select(Appointment.id).where(Appointment.id == appointment_id).with_for_update()
+    ).one()
+    still_due = session.scalar(
+        _current_pending_reminders(now).where(Notification.id == notification_id)
+    )
+    if still_due is None:
+        session.commit()  # solta a trava
+        return None
+    return send_notification(session, notification_id, sender)
 
-    def send(self, email: Email) -> None:
-        try:
-            self._sender.send(email)
-        except Exception:
-            self.failed += 1
-            raise
-        self.sent += 1
+
+def _count(report: ReminderReport, notification: Notification | None) -> ReminderReport:
+    """Conta o que esta execução enviou. Com o agendamento travado só ela envia
+    o registro, então o status final é o resultado dela."""
+    if notification is None:
+        return report
+    if notification.status == NotificationStatus.SENT:
+        return ReminderReport(report.sent + 1, report.failed)
+    if notification.status == NotificationStatus.FAILED:
+        return ReminderReport(report.sent, report.failed + 1)
+    return report
 
 
 def send_due_reminders(
@@ -193,19 +236,20 @@ def send_due_reminders(
 
     Idempotente: rodar de novo, ou duas vezes ao mesmo tempo, não envia um
     segundo e-mail. Um lembrete `PENDING` de uma execução que caiu é enviado
-    agora; `send_notification` só envia o que ainda está `PENDING`. Uma falha de
-    envio fica no registro (`FAILED`, RN-54) e o job segue com os outros.
+    agora, se ainda estiver na janela e for do horário atual. Uma falha de envio
+    fica no registro (`FAILED`, RN-54) e o job segue com os outros.
     """
-    counter = _CountingSender(sender)
+    report = ReminderReport()
     unsent = list(_unsent_reminder_ids(session, now))
     due = list(_due_appointment_ids(session, now))
     session.commit()  # solta a transação da leitura antes de travar e enviar
     for notification_id in unsent:
-        send_notification(session, notification_id, counter)
+        sent = _send_if_still_due(session, notification_id, sender, now)
+        report = _count(report, sent)
     for appointment_id in due:
         registered = _register_reminder(session, appointment_id, now)
         if registered is not None:
-            send_notification(session, registered.id, counter)
-    report = ReminderReport(sent=counter.sent, failed=counter.failed)
+            sent = _send_if_still_due(session, registered.id, sender, now)
+            report = _count(report, sent)
     logger.info("Lembretes: %s enviados, %s com falha.", report.sent, report.failed)
     return report
