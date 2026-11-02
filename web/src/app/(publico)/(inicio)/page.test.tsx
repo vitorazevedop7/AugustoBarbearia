@@ -239,6 +239,14 @@ describe("página inicial (vitrine)", () => {
     expect(within(contato).queryByText("Como chegar")).toBeNull();
   });
 
+  it("mostra Como funciona entre a equipe e o contato", async () => {
+    render(await HomePage());
+    const how = section("Como funciona");
+    expect(section("Nossa equipe").nextElementSibling).toBe(how);
+    expect(how.nextElementSibling).toBe(section("Horário e contato"));
+    expect(within(how).getAllByRole("listitem")).toHaveLength(4);
+  });
+
   it("mostra o endereço e os contatos preenchidos", async () => {
     vi.mocked(getPublicShop).mockResolvedValue({
       ...shop,

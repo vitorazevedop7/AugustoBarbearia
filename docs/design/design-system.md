@@ -133,7 +133,8 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `FramedPhoto`, `FixedPhotoLayer` | `framed-photo.tsx`, `fixed-photo-layer.tsx` | Prontos (#126): moldura com zoom e camada fixa compartilhada |
 | `Gallery` | `components/vitrine/gallery.tsx` | Pronta (#127): galeria assimétrica com 4 fotos |
 | `BookingBand` | `components/vitrine/booking-band.tsx` | Pronta (#128): chamada para agendar com foto fixa no desktop |
-| `HowItWorks`, `PhotoMosaic` | `components/vitrine/` | Planejados (#129–#131): seções com as fotos aprovadas na D14 |
+| `HowItWorks` | `components/vitrine/how-it-works.tsx` | Pronta (#129): etapas reais do agendamento e fotos sobrepostas |
+| `PhotoMosaic` | `components/vitrine/photo-mosaic.tsx` | Planejado (#131): mosaico com as fotos aprovadas na D14 |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
