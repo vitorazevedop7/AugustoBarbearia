@@ -13,6 +13,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pytest import MonkeyPatch
 from sqlalchemy import Engine, select, text
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import current_user
@@ -648,3 +649,50 @@ def test_rn08_horario_tomado_antes_da_confirmacao(
 
     assert response.status_code == 409
     assert response.json() == UNAVAILABLE
+
+
+def test_rn05_rn13_edicao_do_servico_espera_a_reserva_do_cliente(
+    migrated_engine: Engine, people: list[Person], monkeypatch: MonkeyPatch
+) -> None:
+    """Terça das 10h às 19h, Corte + Barba com 45 min, pedido às 18h. Entre a
+    conferência do horário e a gravação, outra transação tenta mudar a duração
+    para 90 min e confirmar. A trava do serviço a faz esperar: o agendamento é
+    gravado com a duração conferida e não passa do fechamento."""
+    barber, service = ids(migrated_engine)
+    original = booking_service.ensure_slot_available
+    blocked: list[bool] = []
+
+    def checked_then_edit(*args: Any, **kwargs: Any) -> None:
+        original(*args, **kwargs)
+        with migrated_engine.connect() as connection:
+            transaction = connection.begin()
+            connection.execute(text("SET LOCAL lock_timeout = '200ms'"))
+            try:
+                connection.execute(
+                    text("UPDATE services SET duration_minutes = 90 WHERE id = :id"),
+                    {"id": service},
+                )
+            except DBAPIError:
+                blocked.append(True)
+                transaction.rollback()
+            else:
+                transaction.commit()
+
+    monkeypatch.setattr(booking_service, "ensure_slot_available", checked_then_edit)
+    six_pm = local(2026, 11, 3, 18)
+    try:
+        with real_client(migrated_engine, people[0]) as client:
+            response = book(client, barber, service, six_pm)
+    finally:
+        with migrated_engine.begin() as connection:
+            connection.execute(
+                text("UPDATE services SET duration_minutes = 45 WHERE id = :id"),
+                {"id": service},
+            )
+
+    assert response.status_code == 201, response.json()
+    assert response.json()["duration_minutes"] == 45
+    assert datetime.fromisoformat(response.json()["ends_at"]) == six_pm + timedelta(
+        minutes=45
+    )
+    assert blocked == [True]
