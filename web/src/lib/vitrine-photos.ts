@@ -43,4 +43,10 @@ export const vitrinePhotos = {
     width: 1200,
     height: 1800,
   },
+  bookingBand: {
+    src: "/images/vitrine/faixa-agendar.jpg",
+    alt: "",
+    width: 2400,
+    height: 1350,
+  },
 } satisfies Record<string, VitrinePhoto>;

@@ -7,6 +7,7 @@ const PUBLIC_DIR = resolve("public");
 const VITRINE_PHOTOS = [
   "/images/vitrine/hero.jpg",
   "/images/vitrine/sobre.jpg",
+  "/images/vitrine/faixa-agendar.jpg",
 ];
 
 /** Largura e altura do primeiro quadro SOF de um JPEG. */

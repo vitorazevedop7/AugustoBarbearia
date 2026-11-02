@@ -2,7 +2,7 @@
 
 - **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo), #88 (login sem JavaScript), #125 (D14 e plano de imagens), #126–#131 (base comum, galeria, faixa, "Como funciona", heros internos e mosaico)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
-- **Status:** vitrine base, fotos compartilhadas e galeria implementadas (#125–#127); demais seções nas #128–#131
+- **Status:** vitrine base, fotos compartilhadas, galeria e faixa implementadas (#125–#128); demais seções nas #129–#131
 
 ## Contexto
 O visitante, sem login e pelo celular, precisa conhecer a barbearia: os serviços com preço e duração, os barbeiros com foto e apresentação, o endereço, o horário de funcionamento e o contato. Em todo lugar há uma chamada para agendar. A vitrine segue a estrutura da referência Beard X ([referencia-beard-x.md](../design/referencia-beard-x.md)), com os nossos tokens e o nosso código.
@@ -167,7 +167,7 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
   2. **Sobre** (só se o texto "sobre" estiver preenchido): foto 3:2 acima do texto no celular e ao lado dele no desktop, sem texto sobreposto à imagem. A faixa de números do Beard X não entra: não há dado real (ver [Dúvidas em aberto](#dúvidas-em-aberto)).
   3. **Serviços (`surface` com "Sobre", `paper` sem ele):** até 4 serviços num card branco único (S4.06, #79), em 1 coluna no celular e 2 a partir do `md`. Cada item tem nome e preço na mesma linha, duração, descrição, quem realiza e "Agendar". Embaixo, "Ver todos os serviços".
   4. **Galeria "Nosso trabalho" (`paper` com "Sobre", `surface` sem ele):** 4 fotos no layout assimétrico descrito em CA-16 e a chamada "Agendar horário".
-  5. **Faixa de agendamento:** foto escura fixa só no desktop, ornamento, "Agende pelo celular", texto sobre o fluxo e confirmação por e-mail e a chamada "Agendar horário".
+  5. **Faixa de agendamento:** foto com brilho reduzido (`brightness-75`) e overlay `ink/70`, fixa só no desktop, ornamento, "Agende pelo celular", texto sobre o fluxo e confirmação por e-mail e a chamada "Agendar horário". A redução de brilho mantém contraste AA também no texto secundário sobre pontos claros.
   6. **Equipe (`paper`):** os barbeiros ativos em cards com foto 6:7 (ou a inicial), o nome e a primeira linha da apresentação sobre a foto, e "Agendar com <nome>" abaixo dela. No desktop, os cards ficam em degraus (S4.06, #79). Embaixo, "Conhecer a equipe".
   - **Ornamentos** (S4.06, #79): uma navalha no "Sobre", uma tesoura nos serviços e um pente na equipe, nas bordas das seções e atrás do conteúdo. São só decoração e aparecem a partir de 1024px.
   7. **Como funciona (`surface`):** passos e condições das RN-14 e RN-51, com as fotos sobrepostas descritas em CA-18.
