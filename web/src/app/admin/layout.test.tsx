@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApiClient } from "@/lib/api/client";
@@ -6,7 +7,12 @@ import { getCurrentSession } from "@/lib/session";
 import AdminLayout from "./layout";
 
 vi.mock("@/lib/api/client", () => ({ createApiClient: vi.fn() }));
-vi.mock("@/lib/session", () => ({ getCurrentSession: vi.fn() }));
+vi.mock("@/lib/auth", () => ({ auth: {} }));
+vi.mock("@/lib/session", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/session")>()),
+  getCurrentSession: vi.fn(),
+}));
+vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
   usePathname: () => "/admin",
@@ -14,10 +20,18 @@ vi.mock("next/navigation", () => ({
 
 const GET = vi.fn();
 
+/** O cabeçalho que o `proxy.ts` grava com a página pedida. */
+function requested(path: string | null) {
+  vi.mocked(headers).mockResolvedValue(
+    new Headers(path === null ? {} : { "x-requested-path": path }) as never,
+  );
+}
+
 describe("AdminLayout — RN-71", () => {
   beforeEach(() => {
     GET.mockReset();
     vi.mocked(getCurrentSession).mockReset().mockResolvedValue(null);
+    requested("/admin");
     vi.mocked(createApiClient).mockReturnValue({ GET } as never);
     vi.mocked(redirect)
       .mockReset()
@@ -61,7 +75,7 @@ describe("AdminLayout — RN-71", () => {
   });
 
   it.each([
-    [401, "/entrar?voltar=/admin"],
+    [401, "/entrar?voltar=%2Fadmin"],
     [403, "/"],
   ])(
     "redireciona ao destino adequado quando a API retorna %s",
@@ -73,6 +87,29 @@ describe("AdminLayout — RN-71", () => {
       ).rejects.toThrow(`REDIRECT:${destination}`);
 
       expect(redirect).toHaveBeenCalledWith(destination);
+    },
+  );
+
+  it("o login volta à página e aos filtros pedidos", async () => {
+    GET.mockResolvedValue({ response: { status: 401 } });
+    requested("/admin/relatorio?inicio=2026-11-01&fim=2026-11-30");
+
+    await expect(
+      AdminLayout({ children: <p>Conteúdo restrito</p> }),
+    ).rejects.toThrow(
+      "REDIRECT:/entrar?voltar=%2Fadmin%2Frelatorio%3Finicio%3D2026-11-01%26fim%3D2026-11-30",
+    );
+  });
+
+  it.each([null, "//exemplo.com/admin", "/administrador", "/perfil"])(
+    "sem uma página da administração no cabeçalho (%j), volta ao início dela",
+    async (path) => {
+      GET.mockResolvedValue({ response: { status: 401 } });
+      requested(path);
+
+      await expect(
+        AdminLayout({ children: <p>Conteúdo restrito</p> }),
+      ).rejects.toThrow("REDIRECT:/entrar?voltar=%2Fadmin");
     },
   );
 
