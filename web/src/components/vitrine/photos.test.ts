@@ -68,3 +68,14 @@ describe("Galeria da vitrine (D14)", () => {
     expect(bytes.byteLength).toBeLessThanOrEqual(300_000);
   });
 });
+
+describe("Fotos de Como funciona (D14)", () => {
+  it.each([
+    ["como-funciona-cadeira", 300_000],
+    ["como-funciona-celular", 250_000],
+  ])("%s é JPEG de até %i bytes", (name, maxBytes) => {
+    const bytes = readFileSync(`${PUBLIC_DIR}/images/vitrine/${name}.jpg`);
+    expect([...bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+    expect(bytes.byteLength).toBeLessThanOrEqual(maxBytes);
+  });
+});
