@@ -33,6 +33,7 @@ Administração. A vitrine e o agendamento leem os barbeiros ativos nas próxima
 - As migrações criam os três proprietários (RN-63): Edvaldo, Lauro e Manoel, ativos, com fotos placeholder e sem apresentação.
   - A apresentação começa vazia porque o repositório não tem textos dos proprietários. A administração a preenche pela tela.
   - Barbeiros sem foto continuam mostrando a inicial do nome no lugar da foto.
+  - A API confere só o formato do caminho, não se o arquivo existe no web. Se a foto não carrega (um nome de arquivo digitado errado), o `BarberPhoto` também mostra a inicial, em vez de um quadro vazio (#159).
 
 ### Fotos placeholder (D10) — S3.10 (#63)
 - São três fotos fictícias de barbeiro, geradas por IA, em proporção 4:5. Elas **não retratam os proprietários**.

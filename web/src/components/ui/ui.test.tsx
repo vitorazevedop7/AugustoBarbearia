@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Alert } from "./alert";
 import { StatusBadge } from "./badge";
@@ -229,6 +229,23 @@ describe("BarberCard", () => {
     );
     expect(screen.queryByRole("img")).toBeNull();
     expect(screen.getByText("M")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("cai na inicial quando a foto não carrega (#159)", () => {
+    render(
+      <BarberCard
+        name="Lauro"
+        photoPath="/images/barbeiros/naoexiste.jpg"
+        bio={null}
+        href="/agendar?barbeiro=2"
+        sizes="100vw"
+      />,
+    );
+
+    fireEvent.error(screen.getByRole("img", { name: "Foto de Lauro" }));
+
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.getByText("L")).toHaveAttribute("aria-hidden", "true");
   });
 });
 
