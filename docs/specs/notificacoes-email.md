@@ -104,7 +104,7 @@ Os dados vindos do banco são escapados no HTML. Um campo opcional da barbearia 
 
 **Cancelamento pela barbearia (RN-52, RN-53).** O `build_email` lê `canceled_by` do agendamento (RN-33) na hora do envio. Se for `ADMIN`, o `CANCELED` diz "A <barbearia> cancelou o seu agendamento. O horário não está mais reservado:" e, no lugar do convite genérico, orienta a falar com a barbearia pelos contatos (que, como em todo e-mail, vêm no rodapé, RN-53) ou agendar pelo site. O assunto é o mesmo. O `RESCHEDULED` tem o mesmo texto nos dois lados: não há campo que diga quem remarcou (só `canceled_by` existe), e o e-mail mostra o novo horário, que é o que importa.
 
-**Na administração, o `notify` fica dentro do `try` do commit** (`admin_booking.service._commit`): ele lê o cliente e essa leitura descarrega o insert ou o update que o banco pode recusar (RN-08). Assim a recusa vira `409 SLOT_UNAVAILABLE`, nada fica gravado e nenhum e-mail sai.
+**Na criação e na remarcação, pelo cliente ou pela administração, o `notify` fica dentro do `try` do commit** (`booking.service` e `admin_booking.service._commit`): ele lê o cliente e essa leitura pode descarregar o insert ou o update que o banco recusa (RN-08), inclusive quando o cliente não está mais na sessão. Assim a recusa vira `409 SLOT_UNAVAILABLE`, a transação da ação é desfeita e nenhum registro ou e-mail sai. Na remarcação, o agendamento continua no horário anterior.
 
 ### Lembrete (RN-51)
 O comando `python -m app.jobs.send_reminders` (ADR 0006) roda de hora em hora. O cron na Railway é da #32; enquanto isso, à mão:

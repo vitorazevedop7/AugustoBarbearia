@@ -148,8 +148,9 @@ def create_customer_appointment(
         source=AppointmentSource.ONLINE,
     )
     session.add(appointment)
-    notification = notify(session, appointment, NotificationKind.CONFIRMATION)
     try:
+        # RN-08: a leitura do cliente em notify pode descarregar a reserva.
+        notification = notify(session, appointment, NotificationKind.CONFIRMATION)
         session.commit()
     except DBAPIError as error:
         session.rollback()
@@ -347,8 +348,9 @@ def reschedule_customer_appointment(
     appointment.barber_id = new_barber_id
     appointment.starts_at = starts_at
     appointment.ends_at = starts_at + timedelta(minutes=appointment.duration_minutes)
-    notification = notify(session, appointment, NotificationKind.RESCHEDULED)
     try:
+        # RN-08: a leitura do cliente em notify pode descarregar a reserva.
+        notification = notify(session, appointment, NotificationKind.RESCHEDULED)
         session.commit()
     except DBAPIError as error:
         session.rollback()

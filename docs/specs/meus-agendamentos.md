@@ -140,7 +140,7 @@ flowchart LR
 - O resumo de `POST /me/appointments` (S3.08) ganha os mesmos campos novos da lista (`can_cancel`, `can_reschedule`, `change_deadline`, `canceled_at`, `canceled_by`).
 
 ## Fora do escopo desta spec
-- **E-mails de remarcação e de cancelamento (RN-52):** entraram na S5.03 (#95). Cancelar e remarcar registram o aviso na mesma transação e o enviam depois do commit; ver [notificacoes-email.md](notificacoes-email.md).
+- **E-mails de remarcação e de cancelamento (RN-52):** entraram na S5.03 (#95). Cancelar e remarcar registram o aviso na mesma transação e o enviam depois do commit. Na remarcação, o `notify` fica dentro do tratamento de erro do commit: mesmo com o cliente fora da sessão, um autoflush recusado pelo banco responde `409 SLOT_UNAVAILABLE`, preserva o horário anterior e não registra nem envia aviso (RN-08, RN-52); ver [notificacoes-email.md](notificacoes-email.md).
 - Cancelar e remarcar pela administração, sem prazo (RN-22): S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 - Trocar o serviço na remarcação (RN-15: o cliente cancela e agenda de novo).
 - Paginação ou filtro do histórico.
