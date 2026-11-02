@@ -59,33 +59,28 @@ def update_shop(session: Session, data: ShopUpdate) -> Shop:
     return shop
 
 
+def _invalid_hours(message: str) -> DomainError:
+    return DomainError(code="INVALID_BUSINESS_HOURS", message=message, status_code=422)
+
+
 def update_business_hours(
     session: Session, days: Sequence[BusinessHoursDay], *, now: datetime
 ) -> Sequence[BusinessHours]:
     """RN-02: a semana inteira de uma vez; cada dia é fechado (sem horas) ou
     abre antes de fechar. Horas são locais de São Paulo (RN-01)."""
     if sorted(day.weekday for day in days) != list(range(7)):
-        raise DomainError(
-            code="INVALID_BUSINESS_HOURS",
-            message="Informe o horário dos sete dias da semana.",
-            status_code=422,
-        )
+        raise _invalid_hours("Informe o horário dos sete dias da semana.")
     for day in days:
-        closed = day.opens_at is None and day.closes_at is None
-        valid_interval = (
-            day.opens_at is not None
-            and day.closes_at is not None
-            and day.opens_at < day.closes_at
-        )
-        if not (closed or valid_interval):
-            raise DomainError(
-                code="INVALID_BUSINESS_HOURS",
-                message=(
-                    f"{WEEKDAY_NAMES[day.weekday]}, a abertura precisa ser "
-                    "antes do fechamento."
-                ),
-                status_code=422,
-            )
+        name = WEEKDAY_NAMES[day.weekday]
+        if day.opens_at is None and day.closes_at is None:
+            continue
+        # Só uma das horas: o dia não está fechado, falta a outra.
+        if day.closes_at is None:
+            raise _invalid_hours(f"{name}, informe o horário de fechamento.")
+        if day.opens_at is None:
+            raise _invalid_hours(f"{name}, informe o horário de abertura.")
+        if day.opens_at >= day.closes_at:
+            raise _invalid_hours(f"{name}, a abertura precisa ser antes do fechamento.")
 
     # RN-02 × RN-05: trava os sete dias em ordem antes da leitura dos
     # agendamentos. Reservas em andamento mantêm FOR SHARE no dia escolhido;
