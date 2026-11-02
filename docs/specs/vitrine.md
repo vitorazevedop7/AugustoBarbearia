@@ -1,6 +1,6 @@
 # Spec — Vitrine pública
 
-- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo)
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo), #88 (login sem JavaScript)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -118,7 +118,7 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
   - Em nenhuma página ele é fixo: rola com a página, como no Beard X (decisão de 2026-11-01, #116).
   - Em `/`, fica transparente no topo do hero, como no Beard X: nunca fica transparente sobre fundo claro.
   - Nas outras páginas, é uma faixa `ink` no topo, que rola com a página. Em `/servicos` e `/barbeiros`, ela continua na faixa escura do título.
-  - O login (ou "Olá, <nome>" e "Sair") é a única parte que depende do usuário. Ela chega à parte, num `Suspense` com um espaço reservado do mesmo tamanho, para a página não esperar a sessão.
+  - O login (ou "Olá, <nome>" e "Sair") é a única parte que depende do usuário. Ela chega à parte, num `Suspense` com um link "Entrar" para `/entrar` de 44px de altura, para a página não esperar a sessão e continuar oferecendo login sem JS.
   - No desktop (a partir de 1024px), tudo fica numa linha. O link da página atual tem `aria-current="page"`.
   - No celular, um botão "Menu" abre um painel escuro com os links, o botão "Agendar horário" na largura toda e o login. O painel desce de trás do cabeçalho em 400ms (sem animação com `prefers-reduced-motion`), ocupa o resto da tela e trava a rolagem da página. É um `<details>` nativo: abre, fecha e trava a rolagem sem JS. Com JS, ele também fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link.
 - **`/`:**
@@ -137,7 +137,7 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
 Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesmo (S4.02, #75):
 
 - **Sem esqueleto.** `/`, `/servicos` e `/barbeiros` não têm `loading.tsx`. O servidor só responde quando o conteúdo está pronto, então a primeira pintura já é o hero e as seções finais, sem troca de layout. Isso só é rápido porque os dados vêm do cache (abaixo).
-- **Sessão fora do caminho crítico.** O layout raiz não lê a sessão. Só a conta do cabeçalho (`HeaderAccount`) a lê, dentro de um `Suspense` cujo fallback tem a mesma altura dos botões. O servidor envia a página sem esperar a sessão, e a conta chega logo depois, na mesma resposta. No desktop, a conta fica numa caixa de largura fixa, e trocar o fallback pelo login ou pelo nome não move a navegação.
+- **Sessão fora do caminho crítico.** O layout raiz não lê a sessão. Só a conta do cabeçalho (`HeaderAccount`) a lê, dentro de um `Suspense` cujo fallback é um link "Entrar" para `/entrar`, com os mesmos 44px de altura dos botões. No menu do celular, o link ocupa toda a largura; no desktop, fica alinhado à direita dentro da mesma caixa fixa da conta. Assim, sem JavaScript, o login continua disponível mesmo quando o conteúdo da sessão ainda depende do script do streaming. O servidor envia a página sem esperar a sessão, e a conta chega logo depois, na mesma resposta. No desktop, a conta fica numa caixa de largura fixa, e trocar o fallback pelo login ou pelo nome não move a navegação.
 - **Cache dos dados.** `getPublicShop`, `getPublicServices` e `getPublicBarbers` (`web/src/lib/api/public.ts`) guardam a resposta da API no cache de dados do Next, no servidor do web, com uma tag por leitura (`public-shop`, `public-services`, `public-barbers`). Os horários livres (`/public/availability`) não entram no cache, porque mudam a cada agendamento.
 - **Invalidação (RN-60, RN-61).** As Server Actions da administração chamam `updateTag` depois que a API confirma a mudança, e a próxima visita já busca os dados novos:
   - barbeiro criado ou editado (inclusive inativado ou reativado): `public-barbers` e `public-services`, porque cada serviço lista quem o realiza e some quando fica sem barbeiro ativo;
