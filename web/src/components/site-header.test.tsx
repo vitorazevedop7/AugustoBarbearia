@@ -181,6 +181,30 @@ describe("MobileMenu no cabeçalho", () => {
     scrollTo.mockRestore();
   });
 
+  it("aberto, deixa inerte o que está atrás do painel, sem tocar no cabeçalho", () => {
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const page = document.body.appendChild(document.createElement("main"));
+    const { container, unmount } = render(<SiteHeader />);
+    const { details } = menu();
+
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    expect(page).toHaveAttribute("inert");
+    expect(container).not.toHaveAttribute("inert");
+
+    details.open = false;
+    fireEvent(details, new Event("toggle"));
+    expect(page).not.toHaveAttribute("inert");
+
+    // Sair da tela com o menu aberto devolve o foco à página.
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    unmount();
+    expect(page).not.toHaveAttribute("inert");
+    page.remove();
+    vi.mocked(window.scrollTo).mockRestore();
+  });
+
   it("fecha ao navegar", () => {
     const { rerender } = render(<SiteHeader />);
     const { details } = menu();

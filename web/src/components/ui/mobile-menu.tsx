@@ -12,7 +12,8 @@ import {
 /**
  * Menu do celular: um `<details>` nativo, que abre e fecha mesmo sem JS. Com
  * JS, fecha com Esc (devolvendo o foco ao botão), ao navegar e ao escolher um
- * link, e abre com a página no topo. O painel escuro desce de trás do cabeçalho (o pai precisa estar
+ * link, e abre com a página no topo. Aberto, deixa `inert` o que está fora do
+ * cabeçalho, para o Tab não levar o foco a um link escondido atrás do painel. O painel escuro desce de trás do cabeçalho (o pai precisa estar
  * posicionado), ocupa o resto da tela e some a partir de 1024px, onde a
  * navegação fica na linha do cabeçalho. Enquanto ele está aberto, o
  * `globals.css` trava a rolagem da página pelo `data-mobile-menu`, sem JS.
@@ -31,6 +32,14 @@ export function MobileMenu({
     if (details.current) details.current.open = false;
   }, [pathname]);
 
+  // Ao sair da tela com o menu aberto, a página volta a receber o foco.
+  useEffect(() => {
+    const menu = details.current;
+    return () => {
+      if (menu) setPageInert(menu, false);
+    };
+  }, []);
+
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
       const menu = details.current;
@@ -45,10 +54,12 @@ export function MobileMenu({
   // O cabeçalho rola com a página. Aberto com o cabeçalho em parte fora da
   // tela, o painel não chegaria ao fim dela: a página volta ao topo, sem a
   // rolagem suave do layout, porque quem se move é o painel.
-  function showWholePanel(event: SyntheticEvent<HTMLDetailsElement>) {
-    if (event.currentTarget.open) {
+  function onToggle(event: SyntheticEvent<HTMLDetailsElement>) {
+    const menu = event.currentTarget;
+    if (menu.open) {
       window.scrollTo({ top: 0, behavior: "instant" });
     }
+    setPageInert(menu, menu.open);
   }
 
   function closeOnLink(event: MouseEvent<HTMLDivElement>) {
@@ -65,7 +76,7 @@ export function MobileMenu({
     <details
       ref={details}
       data-mobile-menu
-      onToggle={showWholePanel}
+      onToggle={onToggle}
       className="group lg:hidden"
     >
       <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border-2 border-surface px-4 text-xs font-semibold tracking-[0.08em] text-surface uppercase transition-colors duration-300 ease-standard hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
@@ -103,4 +114,22 @@ export function MobileMenu({
       </div>
     </details>
   );
+}
+
+/**
+ * O painel cobre a página, mas o resto dela continua focável. `inert` tira do
+ * Tab (e do leitor de tela) tudo o que está no `body` fora do bloco do menu:
+ * o link de salto, o conteúdo e o rodapé. O cabeçalho continua acessível, e o
+ * anunciador de rotas do Next também, para a navegação pelo menu ser lida.
+ */
+function setPageInert(menu: HTMLElement, inert: boolean) {
+  for (const element of document.body.children) {
+    if (
+      element.contains(menu) ||
+      element.localName === "next-route-announcer"
+    ) {
+      continue;
+    }
+    element.toggleAttribute("inert", inert);
+  }
 }
