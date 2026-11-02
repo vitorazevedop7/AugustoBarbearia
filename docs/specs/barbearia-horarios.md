@@ -122,7 +122,7 @@ Horas trafegam como `HH:MM:SS` (o formato `time` do OpenAPI). Uma abertura nula 
 ## Concorrência entre expediente e reservas (#105)
 A criação e a remarcação chamam `ensure_slot_available`, que trava o dia da semana em `BusinessHours` com `FOR SHARE` até o commit, além da trava do barbeiro. A leitura com trava renova a linha mesmo se a sessão já tiver carregado o expediente. A edição trava os sete dias em ordem com `FOR UPDATE` antes de conferir os agendamentos futuros e só altera os dias depois dessa conferência.
 
-Em `READ COMMITTED`, a consulta dos agendamentos feita depois da espera já vê a reserva confirmada; na ordem inversa, a reserva lê o expediente confirmado antes de calcular a disponibilidade. A edição não trava linhas de agendamento, evitando inverter a ordem das travas da remarcação.
+Em `READ COMMITTED`, a consulta dos agendamentos feita depois da espera já vê a reserva confirmada; na ordem inversa, a reserva lê o expediente confirmado antes de calcular a disponibilidade. A edição não trava linhas de agendamento, evitando inverter a ordem das travas da remarcação. A trava do cliente na criação pelo site é `FOR NO KEY UPDATE`, para a reserva da administração para o mesmo cliente, que já segura o dia, não ficar esperando o cliente enquanto ele espera o dia travado pela edição; detalhes na [spec do agendamento](agendamento-cliente.md).
 
 ## Decisão sobre agendamentos futuros (#105)
 Em 2026-11-01, o Vitor decidiu **impedir a mudança** enquanto houver agendamentos futuros fora do novo expediente (D13, [registro.md](../cliente/registro.md)). O sistema orienta a remarcar antes de salvar; não altera nem cancela agendamentos automaticamente. "Futuro" significa início estritamente depois de agora, não um atendimento que já começou.

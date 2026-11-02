@@ -137,7 +137,7 @@ flowchart LR
 
 - Módulo novo `app/modules/admin_booking/` (`router.py`, `schemas.py`, `service.py`). Ele fica acima de `agenda`, `appointments`, `availability`, `catalog`, `barbers` e `customers` e nenhum deles o importa, então não forma ciclo. A resposta é a da agenda (`AdminAppointmentResponse`, `to_response` de `agenda/router.py`).
 - `ADMIN_POLICY` fica em `availability/slots.py`, ao lado de `CUSTOMER_POLICY`. `list_available_days` recebe o tamanho da lista (`days_ahead`) quando a política não tem janela.
-- A criação trava o serviço (`FOR SHARE`), para a duração conferida ser a gravada mesmo com uma edição do serviço ao mesmo tempo (RN-05, RN-13), e chama `ensure_slot_available` (trava `FOR SHARE` do barbeiro) antes de criar o cliente novo, com `create_customer(..., commit=False)`; o `commit` final grava os dois, e uma falha reconhecida por `is_slot_conflict` vira `409 SLOT_UNAVAILABLE`, e a do e-mail único, `409 CUSTOMER_EMAIL_TAKEN`.
+- A criação trava o serviço (`FOR SHARE`), para a duração conferida ser a gravada mesmo com uma edição do serviço ao mesmo tempo (RN-05, RN-13), e chama `ensure_slot_available` (trava `FOR SHARE` do barbeiro e do dia do expediente) antes de criar o cliente novo, com `create_customer(..., commit=False)`; o `commit` final grava os dois, e uma falha reconhecida por `is_slot_conflict` vira `409 SLOT_UNAVAILABLE`, e a do e-mail único, `409 CUSTOMER_EMAIL_TAKEN`.
 - Cancelar e remarcar travam o agendamento (`FOR UPDATE`) antes de conferir o status, como no cliente.
 - Rotas que dependem do relógio recebem `utc_now` por `Depends`.
 

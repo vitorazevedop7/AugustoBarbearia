@@ -134,7 +134,7 @@ docker compose exec api uv run pytest tests/test_availability_slots.py tests/tes
 curl "http://localhost:8000/public/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"
 ```
 
-O cálculo dos horários (RN-05) é a função pura `available_slots` de `app/modules/availability/slots.py`: recebe o dia, o expediente, a oferta (duração, ativos, quem realiza), os intervalos ocupados, o agora e a política (`CUSTOMER_POLICY`: 1h e 30 dias; `ADMIN_POLICY`: sem as duas, S5.05). Os bloqueios (RN-03) entram na lista de ocupados em `_busy` desde a S5.04. A criação de agendamento (S3.08) chama `ensure_slot_available` (`availability/service.py`), que trava o barbeiro com `FOR SHARE` e levanta `409 SLOT_UNAVAILABLE`, e traduz o erro do insert com `is_slot_conflict` (`appointments/service.py`), que reconhece a violação da constraint e o deadlock entre duas reservas simultâneas. Rotas que dependem do relógio recebem `utc_now` (`app/clock.py`) por `Depends`, e os testes o substituem. Os testes de concorrência usam conexões próprias e apagam o que gravaram. A [spec](docs/specs/disponibilidade.md) documenta as regras e as decisões.
+O cálculo dos horários (RN-05) é a função pura `available_slots` de `app/modules/availability/slots.py`: recebe o dia, o expediente, a oferta (duração, ativos, quem realiza), os intervalos ocupados, o agora e a política (`CUSTOMER_POLICY`: 1h e 30 dias; `ADMIN_POLICY`: sem as duas, S5.05). Os bloqueios (RN-03) entram na lista de ocupados em `_busy` desde a S5.04. A criação de agendamento (S3.08) chama `ensure_slot_available` (`availability/service.py`), que trava o barbeiro e o dia do expediente com `FOR SHARE` e levanta `409 SLOT_UNAVAILABLE`, e traduz o erro do insert com `is_slot_conflict` (`appointments/service.py`), que reconhece a violação da constraint e o deadlock entre duas reservas simultâneas. Rotas que dependem do relógio recebem `utc_now` (`app/clock.py`) por `Depends`, e os testes o substituem. Os testes de concorrência usam conexões próprias e apagam o que gravaram. A [spec](docs/specs/disponibilidade.md) documenta as regras e as decisões.
 
 ### Agendamento pelo cliente — S3.08
 
@@ -143,7 +143,7 @@ docker compose exec api uv run pytest tests/test_booking.py tests/test_availabil
 curl "http://localhost:8000/public/availability/days?barber_id=1&service_id=2"
 ```
 
-`/agendar` tem uma escolha por tela: barbeiro → serviço → dia → horário → confirmar (D11), com o estado na URL (`?barbeiro=&servico=&data=&hora=`, montada por `bookingHref` de `src/lib/booking.ts`). As etapas de escolha só leem rotas `/public` e não exigem login; a confirmação leva ao login com `voltar=` a própria URL, pede o telefone se faltar e chama `POST /me/appointments` por Server Action. A API fica no módulo `app/modules/booking/` (acima de `appointments` e `availability`, para não criar ciclo de import), com `create_customer_appointment` em `service.py`: telefone (RN-10), limite de 2 ativos com a linha do cliente travada (RN-11), `ensure_slot_available` (RN-05 a RN-07) e `is_slot_conflict` → `409 SLOT_UNAVAILABLE` (RN-08). `GET /public/availability/days` lista os dias com horário. `DayPicker` e `TimePicker` (`src/components/booking/`) recebem `hrefFor` e servem para a remarcação. A [spec](docs/specs/agendamento-cliente.md) documenta as regras e as decisões.
+`/agendar` tem uma escolha por tela: barbeiro → serviço → dia → horário → confirmar (D11), com o estado na URL (`?barbeiro=&servico=&data=&hora=`, montada por `bookingHref` de `src/lib/booking.ts`). As etapas de escolha só leem rotas `/public` e não exigem login; a confirmação leva ao login com `voltar=` a própria URL, pede o telefone se faltar e chama `POST /me/appointments` por Server Action. A API fica no módulo `app/modules/booking/` (acima de `appointments` e `availability`, para não criar ciclo de import), com `create_customer_appointment` em `service.py`: telefone (RN-10), limite de 2 ativos com a linha do cliente travada em `FOR NO KEY UPDATE` (RN-11), `ensure_slot_available` (RN-05 a RN-07) e `is_slot_conflict` → `409 SLOT_UNAVAILABLE` (RN-08). `GET /public/availability/days` lista os dias com horário. `DayPicker` e `TimePicker` (`src/components/booking/`) recebem `hrefFor` e servem para a remarcação. A [spec](docs/specs/agendamento-cliente.md) documenta as regras e as decisões.
 
 ### Meus agendamentos — S3.09
 
@@ -229,6 +229,14 @@ docker compose exec api uv run pytest tests/test_admin_notifications.py
 ```
 
 Agendar, remarcar e cancelar pela administração mandam o e-mail da RN-50 e da RN-52 ao cliente que tem e-mail (confirmação, remarcação e cancelamento), no mesmo padrão do cliente: `notify` na transação da ação, envio depois do commit pela `OutboxDep` das rotas de `app/modules/admin_booking/`, e falha de envio só deixa o registro `FAILED` (RN-54). Todo `RESCHEDULED` é registrado, pois o lembrete (S5.08) decide o horário novo por ele. O cancelamento feito pela barbearia (`canceled_by = ADMIN`) tem texto próprio, que diz quem cancelou e traz o contato (RN-53). Cliente sem e-mail, ou horário que já começou (decisão do proprietário), não ganha registro. As três rotas respondem `notified` (`AdminBookingActionResponse`), e o web só o exibe: o aviso `?aviso=` é `criado`/`remarcado`/`cancelado` ou `*-sem-aviso`. O aviso do prazo de 2 horas nos e-mails só aparece enquanto vale, pela mesma `can_change_at` (`appointments/service.py`) que o `booking` usa; `send_notification` e `build_email` recebem `now`. A [spec](docs/specs/notificacoes-email.md) documenta as decisões.
+
+### Expediente com agendamentos futuros — #105
+
+```bash
+docker compose exec api uv run pytest tests/test_business_hours_appointments.py
+```
+
+Salvar o horário de funcionamento (`PUT /admin/business-hours`) que deixe algum agendamento `SCHEDULED` com início futuro fora do novo expediente é recusado por inteiro com `409 BUSINESS_HOURS_CONFLICT` (RN-02, D13); a tela mostra o `message` e mantém o que foi enviado. `update_business_hours` (`shop/service.py`) trava os sete dias de `BusinessHours` em ordem com `FOR UPDATE` antes de conferir os agendamentos, e `ensure_slot_available` trava o dia da reserva com `FOR SHARE` e o relê (`get_business_hours(..., lock=True)`), para criar, remarcar e editar o expediente se ordenarem. A trava do cliente na criação pelo site é `FOR NO KEY UPDATE`, para não fechar um deadlock com a reserva da administração e a edição. Os testes de concorrência usam transações reais e apagam o que gravaram. A [spec](docs/specs/barbearia-horarios.md) documenta as regras e as decisões.
 
 ## Mapa da documentação
 

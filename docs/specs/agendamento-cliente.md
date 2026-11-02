@@ -51,7 +51,7 @@ A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**
 - **Quando** tenta um terceiro
 - **Então** a API responde `409` com `code` = `APPOINTMENT_LIMIT_REACHED` e "Você já tem 2 agendamentos marcados, que é o máximo. Para marcar outro, cancele um deles ou espere o próximo atendimento.", e nada é gravado.
 - Agendamentos cancelados, concluídos, com falta ou que já terminaram não contam. O de outro cliente também não.
-- Dois pedidos simultâneos do mesmo cliente não passam do limite: a criação trava a linha do cliente (`FOR UPDATE`) antes de contar.
+- Dois pedidos simultâneos do mesmo cliente não passam do limite: a criação trava a linha do cliente (`FOR NO KEY UPDATE`) antes de contar.
 
 **CA-4 — Horário indisponível (RN-05 a RN-07)**
 - **Dado** um `starts_at` fora da grade, com menos de 1 hora de antecedência, além da janela de 30 dias, já ocupado, num dia fechado, ou um barbeiro ou serviço inativo, ou um barbeiro que não realiza o serviço
@@ -135,7 +135,8 @@ As telas de dia e de horário são os componentes `DayPicker` e `TimePicker` (`w
 | `GET` | `/public/availability/days?barber_id=&service_id=` | Qualquer um | Datas da janela do cliente com pelo menos um horário disponível |
 
 - A criação fica no módulo novo `app/modules/booking/` (router, schemas e service), que depende de `appointments`, `availability`, `catalog`, `barbers` e `customers`. Ela não fica em `appointments/service.py` porque `appointments` não pode importar `availability`: `availability` → `barbers` → `appointments` formaria um ciclo (a trava da RN-60). As próximas operações do cliente (listar, cancelar, remarcar, S3.09) entram no mesmo módulo.
-- Ordem da criação, numa transação: trava o cliente (`FOR UPDATE`), confere o telefone (RN-10), conta os ativos (RN-11), confere o horário com `ensure_slot_available` (RN-05 a RN-07, trava o barbeiro com `FOR SHARE`), grava e confirma. Uma falha no insert reconhecida por `is_slot_conflict` vira `409 SLOT_UNAVAILABLE` (RN-08), inclusive quando o autoflush acontece na leitura do cliente pelo `notify`: o registro da confirmação fica dentro do mesmo tratamento de erro do commit, e a recusa não deixa agendamento nem aviso (RN-50).
+- Ordem da criação, numa transação: trava o cliente (`FOR NO KEY UPDATE`), confere o telefone (RN-10), conta os ativos (RN-11), confere o horário com `ensure_slot_available` (RN-05 a RN-07, trava o barbeiro e o dia do expediente com `FOR SHARE`), grava e confirma. Uma falha no insert reconhecida por `is_slot_conflict` vira `409 SLOT_UNAVAILABLE` (RN-08), inclusive quando o autoflush acontece na leitura do cliente pelo `notify`: o registro da confirmação fica dentro do mesmo tratamento de erro do commit, e a recusa não deixa agendamento nem aviso (RN-50).
+- A trava do cliente é `FOR NO KEY UPDATE`, e não `FOR UPDATE`, para não segurar a chave estrangeira de um agendamento que a administração grava para o mesmo cliente. Essa reserva já segura o dia do expediente; se esperasse o cliente, enquanto o cliente espera o dia travado por uma edição do expediente (RN-02) e a edição espera o dia dela, as três transações fechariam um deadlock (#105). Dois pedidos do próprio cliente continuam se esperando, porque `FOR NO KEY UPDATE` conflita consigo mesmo.
 - "Ativo no futuro" (RN-11) é `SCHEDULED` com `ends_at` depois de agora, o mesmo critério da RN-60.
 - `GET /public/availability/days` reaproveita a função pura `available_slots`, com uma leitura do expediente, da oferta e dos ocupados da janela inteira.
 

@@ -137,6 +137,6 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 
 ### 2026-11-01 — Mudança de expediente com agendamentos futuros
 - **Com:** registro interno. Decisão do Vitor como product owner (issue #105)
-- **Canal:** conversa no Codex
+- **Canal:** —
 - **Fatos e decisões:**
   - **D13.** A administração **não pode alterar o horário de funcionamento** se a mudança deixar algum agendamento `SCHEDULED` com início futuro fora do novo expediente. É preciso remarcar esses agendamentos antes de salvar. A alteração é recusada integralmente, sem mudar nem cancelar agendamentos. Para essa proteção, "futuro" significa `starts_at` depois de agora; um atendimento que já começou não impede a alteração. A decisão passa a integrar a RN-02 e a [spec de horários](../specs/barbearia-horarios.md).

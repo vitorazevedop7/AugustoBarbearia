@@ -61,17 +61,18 @@ describe("ações dos dados da barbearia", () => {
       error: { code: "BUSINESS_HOURS_CONFLICT", message },
     });
     const data = closedWeek();
+    data.set("dia-0-situacao", "aberto");
     data.set("dia-0-abertura", "10:00");
     data.set("dia-0-fechamento", "17:00");
 
     const state = await saveBusinessHours(idle, data);
 
     expect(PUT).toHaveBeenCalledWith("/admin/business-hours", {
-      body: Array.from({ length: 7 }, (_, weekday) => ({
-        weekday,
-        opens_at: null,
-        closes_at: null,
-      })),
+      body: Array.from({ length: 7 }, (_, weekday) =>
+        weekday === 0
+          ? { weekday, opens_at: "10:00", closes_at: "17:00" }
+          : { weekday, opens_at: null, closes_at: null },
+      ),
     });
     expect(state).toEqual({
       status: "error",

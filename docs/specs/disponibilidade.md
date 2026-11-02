@@ -73,7 +73,7 @@ Segunda-feira, das 10h às 19h, Corte + Barba (45 min). O barbeiro já tem um ag
 `app/modules/availability/service.py` expõe:
 - `list_available_slots(session, barber_id=, service_id=, day=, now=, policy=)`: carrega os dados e chama a função pura;
 - `is_slot_available(session, barber_id=, service_id=, starts_at=, now=, policy=)`: `True` se `starts_at` é exatamente um dos inícios oferecidos naquele dia;
-- `ensure_slot_available(...)`: o mesmo, mas levanta `409 SLOT_UNAVAILABLE` ("Este horário não está mais disponível. Escolha outro.") e trava a linha do barbeiro com `FOR SHARE` até o fim da transação. É o ponto de entrada da criação: a trava serializa a criação com a inativação do barbeiro (RN-60) e com a criação de bloqueios (RN-03, S5.04), e a exclusion constraint continua sendo a garantia final da RN-08.
+- `ensure_slot_available(...)`: o mesmo, mas levanta `409 SLOT_UNAVAILABLE` ("Este horário não está mais disponível. Escolha outro.") e trava com `FOR SHARE`, até o fim da transação, a linha do barbeiro e a do dia do expediente (`BusinessHours`). É o ponto de entrada da criação: as travas serializam a criação com a inativação do barbeiro (RN-60), com a criação de bloqueios (RN-03, S5.04) e com a edição do expediente (RN-02, #105), e a exclusion constraint continua sendo a garantia final da RN-08.
 - `is_slot_conflict(error)` (`app/modules/appointments/service.py`): `True` quando o insert perdeu a disputa pelo horário (violação de `ex_appointments_barber_overlap` ou deadlock), para a S3.08 responder o mesmo `SLOT_UNAVAILABLE`.
 
 ## Trava da RN-60

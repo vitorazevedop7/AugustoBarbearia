@@ -279,7 +279,13 @@ class NoEmailOutbox:
         assert notification is None
 
 
-def reserve(session: Session, seed: Seed, actor: str, action: str) -> str:
+def reserve(
+    session: Session,
+    seed: Seed,
+    actor: str,
+    action: str,
+    starts_at: datetime = TARGET,
+) -> str:
     try:
         if action == "create":
             if actor == "customer":
@@ -290,7 +296,7 @@ def reserve(session: Session, seed: Seed, actor: str, action: str) -> str:
                     customer,
                     barber_id=seed.barber_id,
                     service_id=seed.service_id,
-                    starts_at=TARGET,
+                    starts_at=starts_at,
                     now=NOW,
                     outbox=NoEmailOutbox(),
                 )
@@ -301,7 +307,7 @@ def reserve(session: Session, seed: Seed, actor: str, action: str) -> str:
                     new_customer=None,
                     barber_id=seed.barber_id,
                     service_id=seed.service_id,
-                    starts_at=TARGET,
+                    starts_at=starts_at,
                     now=NOW,
                     outbox=NoEmailOutbox(),
                 )
@@ -446,3 +452,38 @@ def test_rn02_rn05_reserva_espera_edicao_e_rele_expediente_ja_carregado(
         assert session.get(
             Appointment, committed_seed.appointment_id
         ).starts_at == local(2026, 11, 2, 12)
+
+
+def test_rn02_rn11_trava_do_cliente_nao_segura_agendamento_da_administracao(
+    migrated_engine: Engine, committed_seed: Seed
+) -> None:
+    """A trava da RN-11 não impede a chave estrangeira da reserva da administração.
+
+    Se impedisse, o cliente e a administração agendando para a mesma pessoa
+    durante uma edição do expediente fechariam um ciclo: a administração segura
+    o dia e espera o cliente, o cliente espera o dia que a edição já travou, e a
+    edição espera o dia da administração.
+    """
+    ready, release = threading.Event(), threading.Event()
+
+    def customer_booking() -> str:
+        with Session(migrated_engine) as session:
+            session.execute(text("SET LOCAL lock_timeout = '5s'"))
+            hold_commit(session, ready, release)
+            return reserve(session, committed_seed, "customer", "create")
+
+    def admin_booking() -> str:
+        with Session(migrated_engine) as session:
+            session.execute(text("SET LOCAL lock_timeout = '5s'"))
+            return reserve(
+                session, committed_seed, "admin", "create", local(2026, 11, 3, 11)
+            )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        customer = pool.submit(customer_booking)
+        try:
+            assert ready.wait(timeout=10)
+            assert pool.submit(admin_booking).result(timeout=3) == "reservado"
+        finally:
+            release.set()
+        assert customer.result(timeout=10) == "reservado"
