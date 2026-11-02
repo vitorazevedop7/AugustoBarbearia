@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { confirmBooking } from "./actions";
 import { ConfirmBooking } from "./confirm-booking";
@@ -59,7 +59,7 @@ describe("ConfirmBooking", () => {
       level: 1,
       name: "Horário confirmado",
     });
-    expect(heading).toHaveFocus();
+    await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByRole("status")).toHaveTextContent(
       "Seu horário está confirmado para terça-feira, 3 de novembro de 2026, às 10:00.",
     );
