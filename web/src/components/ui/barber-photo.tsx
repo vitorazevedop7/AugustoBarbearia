@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 const ratios = {
   "4/5": "aspect-[4/5]",
@@ -11,7 +14,8 @@ const ratios = {
  * nome, para a tela funcionar enquanto as fotos reais não chegam (P10). A
  * inicial acompanha a largura da moldura, da miniatura da administração ao
  * card da vitrine. Com `zoom`, a foto cresce 10% quando o card (`group`)
- * recebe o ponteiro, sem sair da moldura.
+ * recebe o ponteiro, sem sair da moldura. Se o arquivo não carrega (um
+ * caminho digitado errado no cadastro, #159), a moldura também cai na inicial.
  */
 export function BarberPhoto({
   name,
@@ -31,6 +35,9 @@ export function BarberPhoto({
   decorative?: boolean;
   className?: string;
 }) {
+  // O caminho que falhou: outro caminho tenta carregar de novo.
+  const [failedPath, setFailedPath] = useState<string | null>(null);
+  const showPhoto = photoPath !== null && photoPath !== failedPath;
   const zoomClasses = zoom
     ? "transition-transform duration-300 ease-standard group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
     : "";
@@ -38,13 +45,21 @@ export function BarberPhoto({
     <div
       className={`@container relative ${ratios[ratio]} overflow-hidden bg-line ${className}`}
     >
-      {photoPath ? (
+      {showPhoto ? (
         <Image
           src={photoPath}
           alt={decorative ? "" : `Foto de ${name}`}
           fill
           sizes={sizes}
           className={`object-cover ${zoomClasses}`}
+          onError={() => setFailedPath(photoPath)}
+          // O erro pode acontecer antes da hidratação, sem chamar o `onError`:
+          // uma imagem já concluída e sem largura não carregou.
+          ref={(image) => {
+            if (image?.complete && image.naturalWidth === 0) {
+              setFailedPath(photoPath);
+            }
+          }}
         />
       ) : (
         <span
