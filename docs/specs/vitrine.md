@@ -237,3 +237,10 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
   - os serviços aparecem por nome, e não por preço;
   - até a S3.08, a chamada "Agendar" cai na página 404.
 - Textos reais da barbearia (frase de destaque, sobre, endereço e contato) e as apresentações dos barbeiros: a administração preenche pela tela de cadastro.
+
+## Imagem de compartilhamento (#132)
+
+- A home publica `og:image` absoluto, resolvido a partir de `BETTER_AUTH_URL`.
+- `GET /opengraph-image` responde PNG 1200×630 com `hero.jpg` escurecido, logo e AUGUSTO BARBEARIA em Barlow 900. Nenhuma foto nova é gerada.
+- A fonte local `public/fonts/Barlow-Black.ttf` acompanha sua licença OFL. O preparo standalone inclui fonte, hero e logo no Docker, sem chamadas externas para gerar a prévia.
+- Aceite: `pnpm build && pnpm start` e a imagem Docker devolvem a imagem no tamanho declarado, e a home contém a meta tag `og:image`.
