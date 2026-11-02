@@ -10,7 +10,9 @@ const highlightSizes =
 
 /** Fotos da vitrine, sem simular publicações ou depender do Instagram. */
 export function PhotoMosaic({ instagram }: { instagram?: string | null }) {
-  const instagramLink = contactLinks({ instagram })[0];
+  const instagramLink = contactLinks({ instagram }).find(
+    (link) => link.label === "Instagram",
+  );
 
   return (
     <section

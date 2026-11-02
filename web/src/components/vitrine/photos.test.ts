@@ -90,3 +90,17 @@ describe("Fotos dos topos internos (D14)", () => {
     },
   );
 });
+
+describe("Fotos do mosaico (D14)", () => {
+  it.each([
+    ["mosaico-1", 200_000],
+    ["mosaico-2", 200_000],
+    ["mosaico-3", 200_000],
+    ["mosaico-4", 200_000],
+    ["mosaico-destaque", 300_000],
+  ])("%s é JPEG de até %i bytes", (name, maxBytes) => {
+    const bytes = readFileSync(`${PUBLIC_DIR}/images/vitrine/${name}.jpg`);
+    expect([...bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+    expect(bytes.byteLength).toBeLessThanOrEqual(maxBytes);
+  });
+});
