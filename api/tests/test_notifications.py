@@ -5,7 +5,7 @@ import sys
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 import resend
@@ -309,6 +309,63 @@ def test_rn08_horario_tomado_no_commit_nao_registra_nem_envia(
     assert response.json() == UNAVAILABLE
     assert db_session.scalars(select(Notification)).all() == []
     assert sender.sent == []
+
+
+@pytest.mark.parametrize("action", ["create", "reschedule"])
+def test_rn08_rn50_rn52_conflito_com_cliente_fora_da_sessao_nao_registra_nem_envia(
+    api: TestClient,
+    db_session: Session,
+    sender: FakeSender,
+    ana: Customer,
+    edvaldo: int,
+    corte_e_barba: int,
+    monkeypatch: MonkeyPatch,
+    action: Literal["create", "reschedule"],
+) -> None:
+    """A conferência passa, mas o banco recusa o insert ou update (RN-08).
+
+    O cliente sai da sessão depois da conferência: assim o SELECT de notify
+    dispara o autoflush antes do commit, sem depender do cache da sessão.
+    """
+    customer_id = ana.id
+    original = (
+        make_appointment(db_session, barber=edvaldo, starts_at=TEN, customer=ana)
+        if action == "reschedule"
+        else None
+    )
+    original_id = original.id if original is not None else None
+    make_appointment(db_session, barber=edvaldo, starts_at=WEDNESDAY_TEN)
+    # Preserva o estado anterior quando a transação da ação for desfeita.
+    db_session.commit()
+
+    def checked_then_expunge(session: Session, **_kwargs: Any) -> None:
+        customer = session.get(Customer, customer_id)
+        assert customer is not None
+        session.expunge(customer)
+
+    monkeypatch.setattr(booking_service, "ensure_slot_available", checked_then_expunge)
+
+    if action == "create":
+        response = book(api, edvaldo, corte_e_barba, WEDNESDAY_TEN)
+    else:
+        response = api.post(
+            f"/me/appointments/{original_id}/reschedule",
+            json={"starts_at": WEDNESDAY_TEN.isoformat()},
+        )
+
+    assert response.status_code == 409
+    assert response.json() == UNAVAILABLE
+    assert db_session.scalars(select(Notification)).all() == []
+    assert sender.sent == []
+    remaining = db_session.scalars(
+        select(Appointment).where(Appointment.customer_id == customer_id)
+    ).all()
+    assert [appointment.id for appointment in remaining] == (
+        [original_id] if original_id is not None else []
+    )
+    if original is not None:
+        db_session.refresh(original)
+        assert original.starts_at == TEN
 
 
 def test_rn50_cliente_sem_email_nao_tem_registro(db_session: Session) -> None:
