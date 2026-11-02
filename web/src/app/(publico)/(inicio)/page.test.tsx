@@ -79,7 +79,7 @@ describe("página inicial (vitrine)", () => {
     expect(photo).not.toHaveAttribute("loading", "lazy");
     // Tela inteira; no desktop, a camada da foto fica fixa e o hero a recorta.
     expect(hero).toHaveClass("min-h-svh", "[clip-path:inset(0)]");
-    expect(photo.parentElement).toHaveClass("absolute", "lg:fixed");
+    expect(photo.parentElement).toHaveClass("absolute", "motion-safe:lg:fixed");
     expect(hero.querySelector(".bg-ink\\/70")).toHaveAttribute(
       "aria-hidden",
       "true",

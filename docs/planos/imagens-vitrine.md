@@ -112,7 +112,7 @@ Confira o peso com `ls -l` e baixe a qualidade (75, 70) até caber no limite.
 
 - **`web/src/lib/vitrine-photos.ts`**: um único lugar com `{ src, alt, width, height }` de cada foto da vitrine (inclusive hero e "Sobre", hoje constantes em `page.tsx`). A troca pelas fotos reais (P10) fica restrita a esse arquivo.
 - **`FramedPhoto`** (`web/src/components/ui/framed-photo.tsx`): moldura com `aspect-*`, `overflow-hidden`, `bg-line`, `next/image` com `fill`, `sizes` e `object-cover`, e o zoom 1,1 em 300ms `ease-standard` no hover do `group`, respeitando `motion-reduce`. É o padrão que o "Sobre" e o `BarberPhoto` já usam: extraia e reaproveite no "Sobre".
-- **`FixedPhotoLayer`**: extraia do `Hero` a técnica da foto fixa (camada `absolute inset-0 lg:fixed` + `[clip-path:inset(0)]` na seção + overlay `bg-ink/70`) para o hero e a faixa C usarem o mesmo código.
+- **`FixedPhotoLayer`**: extraia do `Hero` a técnica da foto fixa (camada `absolute inset-0 motion-safe:lg:fixed` + `[clip-path:inset(0)]` na seção + overlay `bg-ink/70`) para o hero e a faixa C usarem o mesmo código.
 - Fora do hero inicial e do topo com foto de `/servicos` e `/barbeiros` (o LCP de cada página), **nenhuma** foto usa `preload`/`fetchPriority`: todas ficam com o lazy padrão do `next/image`. A entrada usa `data-reveal="zoom"` nas molduras e `"rise"` nos textos, como já se faz.
 - Raio 0, cores e fontes só pelos tokens, mobile first (360px sem rolagem horizontal).
 

@@ -1,7 +1,10 @@
 import Image from "next/image";
 import type { VitrinePhoto } from "@/lib/vitrine-photos";
 
-/** A seção deve recortar a camada fixa com `[clip-path:inset(0)]`. */
+/**
+ * A seção deve recortar a camada fixa com `[clip-path:inset(0)]`.
+ * Com menos movimento, a foto rola junto, como no celular.
+ */
 export function FixedPhotoLayer({
   photo,
   preload = false,
@@ -14,7 +17,7 @@ export function FixedPhotoLayer({
 }) {
   return (
     <>
-      <div className="absolute inset-0 lg:fixed">
+      <div className="absolute inset-0 motion-safe:lg:fixed">
         <Image
           src={photo.src}
           alt=""
