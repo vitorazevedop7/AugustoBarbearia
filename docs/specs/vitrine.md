@@ -2,7 +2,7 @@
 
 - **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo), #88 (login sem JavaScript), #125 (D14 e plano de imagens), #126–#131 (base comum, galeria, faixa, "Como funciona", heros internos e mosaico)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
-- **Status:** home e base compartilhada implementadas (#125–#129); heros internos e mosaico nas #130–#131
+- **Status:** home, base compartilhada e heros internos implementados (#125–#130); mosaico na #131
 
 ## Contexto
 O visitante, sem login e pelo celular, precisa conhecer a barbearia: os serviços com preço e duração, os barbeiros com foto e apresentação, o endereço, o horário de funcionamento e o contato. Em todo lugar há uma chamada para agendar. A vitrine segue a estrutura da referência Beard X ([referencia-beard-x.md](../design/referencia-beard-x.md)), com os nossos tokens e o nosso código.

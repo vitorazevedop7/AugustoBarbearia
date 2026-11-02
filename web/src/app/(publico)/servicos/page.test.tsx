@@ -7,6 +7,24 @@ import ServicesPage from "./page";
 vi.mock("@/lib/api/public", () => ({ getPublicServices: vi.fn() }));
 
 describe("página de serviços — RN-61", () => {
+  it("mostra a foto decorativa no topo e preserva a faixa parcial lisa", async () => {
+    vi.mocked(getPublicServices).mockResolvedValue(services);
+
+    const { container } = render(await ServicesPage());
+    const hero = screen.getByRole("heading", { level: 1 }).closest("section");
+    const photo = hero?.querySelector("img");
+
+    expect(photo).toHaveAttribute("alt", "");
+    expect(photo).toHaveAttribute("loading", "lazy");
+    expect(photo).toHaveAttribute(
+      "src",
+      expect.stringContaining(
+        encodeURIComponent("/images/vitrine/topo-servicos.jpg"),
+      ),
+    );
+    expect(container.querySelector("[data-page-band] img")).toBeNull();
+  });
+
   it("lista todos os serviços com preço, duração, quem realiza e o link para agendar", async () => {
     vi.mocked(getPublicServices).mockResolvedValue([
       ...services,
