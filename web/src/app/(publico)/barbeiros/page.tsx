@@ -3,6 +3,7 @@ import { RevealObserver } from "@/components/reveal-observer";
 import { BarberList } from "@/components/vitrine/catalog";
 import { PageHero } from "@/components/vitrine/page-hero";
 import { getPublicBarbers } from "@/lib/api/public";
+import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 export const metadata: Metadata = {
   title: "Barbeiros — Augusto Barbearia",
@@ -16,6 +17,7 @@ export default async function BarbersPage() {
   return (
     <main id="main-content" tabIndex={-1} className="flex-1">
       <PageHero
+        photo={vitrinePhotos.teamHero}
         title="Barbeiros"
         description="Conheça a equipe e escolha com quem você quer ser atendido."
       >

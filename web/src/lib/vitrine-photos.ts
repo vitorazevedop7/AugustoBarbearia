@@ -61,4 +61,16 @@ export const vitrinePhotos = {
     width: 1050,
     height: 1200,
   },
+  servicesHero: {
+    src: "/images/vitrine/topo-servicos.jpg",
+    alt: "",
+    width: 2400,
+    height: 1350,
+  },
+  teamHero: {
+    src: "/images/vitrine/topo-equipe.jpg",
+    alt: "",
+    width: 2400,
+    height: 1350,
+  },
 } satisfies Record<string, VitrinePhoto>;

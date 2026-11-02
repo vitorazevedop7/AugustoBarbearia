@@ -7,6 +7,24 @@ import BarbersPage from "./page";
 vi.mock("@/lib/api/public", () => ({ getPublicBarbers: vi.fn() }));
 
 describe("página de barbeiros — RN-60", () => {
+  it("mostra a foto decorativa no topo e preserva a faixa parcial lisa", async () => {
+    vi.mocked(getPublicBarbers).mockResolvedValue(barbers);
+
+    const { container } = render(await BarbersPage());
+    const hero = screen.getByRole("heading", { level: 1 }).closest("section");
+    const photo = hero?.querySelector("img");
+
+    expect(photo).toHaveAttribute("alt", "");
+    expect(photo).toHaveAttribute("loading", "lazy");
+    expect(photo).toHaveAttribute(
+      "src",
+      expect.stringContaining(
+        encodeURIComponent("/images/vitrine/topo-equipe.jpg"),
+      ),
+    );
+    expect(container.querySelector("[data-page-band] img")).toBeNull();
+  });
+
   it("mostra cada barbeiro com foto 6:7, a apresentação inteira e o link para agendar com ele", async () => {
     vi.mocked(getPublicBarbers).mockResolvedValue([
       {

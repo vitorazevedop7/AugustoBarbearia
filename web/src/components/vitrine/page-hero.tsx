@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Ornament } from "@/components/ui/ornament";
 
@@ -11,15 +12,31 @@ import { Ornament } from "@/components/ui/ornament";
 export function PageHero({
   title,
   description,
+  photo,
   children,
 }: {
   title: string;
   description: string;
+  photo?: { src: string };
   children: ReactNode;
 }) {
   return (
     <>
-      <section className="bg-ink px-4 pt-16 pb-12 sm:px-6 md:pb-16 lg:px-8 lg:pt-24 lg:pb-20">
+      <section
+        className={`${photo ? "relative isolate overflow-hidden " : ""}bg-ink px-4 pt-16 pb-12 sm:px-6 md:pb-16 lg:px-8 lg:pt-24 lg:pb-20`}
+      >
+        {photo ? (
+          <div aria-hidden="true" className="absolute inset-0 -z-10">
+            <Image
+              src={photo.src}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-ink/80" />
+          </div>
+        ) : null}
         <div className="mx-auto max-w-site">
           <div className="motion-safe:animate-rise">
             <Ornament align="start" tone="dark" />

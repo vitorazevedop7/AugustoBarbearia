@@ -134,7 +134,7 @@ Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz
 | Galeria | 4 fotos: laterais 2:3 em degrau, centro 5:4 + 1:1 | Especificada na D14: fotos fictícias próprias, grade 2×2 no celular e composição assimétrica no desktop | #125, #127 |
 | Faixa com fundo fixo | Foto de ferramentas, vídeo e CTA | Especificada como faixa de agendamento com foto fixa, sem vídeo nem botão de play | #125, #128 |
 | Diferenciais | Texto e 2 fotos 7:8 sobrepostas | "Como funciona" descreve o fluxo, o lembrete condicionado à antecedência e o prazo de alteração, com fotos próprias | #125, #129 |
-| Topo das páginas internas | Faixa escura lisa | Divergência aprovada na D14: foto só atrás do título, sob overlay `ink/80`; faixa parcial lisa preservada | #125, #130 |
+| Topo das páginas internas | Faixa escura lisa | Implementado na #130 conforme D14: foto só atrás do título, sob overlay `ink/80`; faixa parcial lisa preservada | #125, #130 |
 | Mosaico final | Instagram: grade `1fr 2fr 1fr`, destaque central em 2 linhas | "Nosso trabalho" em `/servicos` e `/barbeiros`, com fotos fictícias; link ao perfil apenas se cadastrado | #125, #131 |
 | Fluxo do cliente e administração | — (vem do Squire) | Desde a #80, as telas do cliente usam a base nova (Barlow 900, `text-body` no texto de apoio, botão `md` na ação principal, hover em `ease-standard` e mais respiro), sem a faixa parcial; a administração recebeu só os tokens, sem mudar densidade nem layout | #80 |
 
