@@ -180,8 +180,9 @@ describe("página inicial (vitrine)", () => {
     const image = within(band).getByRole("presentation");
     expect(image).toHaveAttribute("loading", "lazy");
     expect(image).not.toHaveAttribute("fetchpriority");
-    expect(image).toHaveClass("object-[55%_50%]");
-    expect(image.parentElement).toHaveClass("lg:fixed");
+    // O brilho reduzido sustenta o contraste AA do texto sobre a foto.
+    expect(image).toHaveClass("object-[55%_50%]", "brightness-75");
+    expect(image.parentElement).toHaveClass("motion-safe:lg:fixed");
     expect(band).toHaveTextContent("Receba a confirmação por e-mail.");
     expect(
       within(band).getByRole("link", { name: "Agendar horário" }),
