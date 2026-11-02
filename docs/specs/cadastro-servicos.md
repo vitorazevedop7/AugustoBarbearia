@@ -41,7 +41,7 @@ Administração. A vitrine e o agendamento leem os serviços ativos nas próxima
 
 ### Como o preço trafega
 - **Na resposta**, o preço é uma **string decimal** com ponto e sempre duas casas: `"25.00"`. O Pydantic v2 serializa `Decimal` como string no JSON, e o schema fixa as duas casas. O tipo gerado no web é `string`.
-- **Na entrada**, o preço vem como string (`"25.00"` ou `"25,00"`, como a pessoa digita) ou como número. A API apara os espaços e, quando há vírgula, trata a vírgula como separador decimal e o ponto como separador de milhar (`"1.234,50"` → `1234.50`). Mais de duas casas decimais é recusado.
+- **Na entrada**, o preço vem como string (`"25.00"` ou `"25,00"`, como a pessoa digita) ou como inteiro (`25`). Número JSON com casas decimais (`25.5`, inclusive `25.0`) é recusado com `422 VALIDATION_ERROR`, antes que o `float` do parser JSON chegue ao `Decimal` (#108). A API apara os espaços e, quando há vírgula, trata a vírgula como separador decimal e o ponto como separador de milhar (`"1.234,50"` → `1234.50`). Mais de duas casas decimais é recusado.
 - **No web**, o preço nunca vira `number`. A lista formata a string da API com `Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })`, que aceita a string decimal sem passar por `float` (→ "R$ 25,00"). O formulário mostra o preço salvo com vírgula (`"25.00"` → `"25,00"`), por troca de texto, e envia o que foi digitado.
 
 ## Critérios de aceite
@@ -74,7 +74,7 @@ Administração. A vitrine e o agendamento leem os serviços ativos nas próxima
 
 **CA-5 — Formato dos campos**
 - **Dado** a administração autenticada
-- **Quando** cria ou edita um serviço com nome vazio ou acima de 80 caracteres, descrição acima de 400, preço com mais de duas casas decimais ou que não é número, ou duração acima de 1440 minutos
+- **Quando** cria ou edita um serviço com nome vazio ou acima de 80 caracteres, descrição acima de 400, preço com mais de duas casas decimais, número JSON com casas decimais ou preço que não é número, ou duração acima de 1440 minutos
 - **Então** a API responde `422` com `code` = `VALIDATION_ERROR`, e nada é gravado.
 
 **CA-6 — Editar serviço**

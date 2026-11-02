@@ -1,23 +1,12 @@
 """Contrato HTTP da conclusão do atendimento (RN-40, RN-41)."""
 
-from typing import Annotated
-
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel
 
 from app.modules.catalog.schemas import Money, Price
 from app.modules.payments.models import PaymentMethod
 
-
-def _reject_float(value: object) -> object:
-    """Dinheiro nunca passa por `float`: um número JSON com casas decimais já
-    chega arredondado ao `Decimal`. O valor vai como string ("35.50") ou inteiro."""
-    if isinstance(value, float):
-        raise ValueError('Envie o valor como texto decimal, por exemplo "35.50".')
-    return value
-
-
-# O formato é o do preço do serviço (`Price`, com a vírgula de quem digita), sem float.
-Amount = Annotated[Price, BeforeValidator(_reject_float)]
+# O preço e o pagamento usam o mesmo formato decimal, sem float.
+Amount = Price
 
 
 class PaymentResponse(BaseModel):
