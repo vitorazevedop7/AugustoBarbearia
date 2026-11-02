@@ -355,6 +355,7 @@ O tom está em [identidade-visual.md](identidade-visual.md#tom). Para a interfac
 - [ ] Contraste AA: texto 4,5:1, texto grande e bordas de controle 3:1.
 - [ ] Todo controle é alcançável por Tab, na ordem visual, com foco visível.
 - [ ] Um `h1` por página e títulos em ordem.
+- [ ] O conteúdo fica num `main` com `id="main-content"` e `tabIndex={-1}`, o alvo de "Pular para o conteúdo". Vale também para a página não encontrada (`app/not-found.tsx` e `app/admin/not-found.tsx`, #151).
 - [ ] Campos com rótulo; erros ligados ao campo.
 - [ ] Imagens com `alt` (ou `alt=""` se forem decorativas).
 - [ ] Funciona sem JS e com `prefers-reduced-motion: reduce`.
