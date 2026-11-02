@@ -1,6 +1,6 @@
 # Spec — Barbearia e horário de funcionamento
 
-- **Issue:** #51 (S3.02)
+- **Issues:** #51 (S3.02), #105 (proteção dos agendamentos ao mudar o expediente)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -18,6 +18,8 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 ## Regras envolvidas
 - RN-01 — Fuso horário
 - RN-02 — Horário de funcionamento
+- RN-05 — Horário disponível (o intervalo inteiro precisa caber no expediente)
+- RN-30 — Status (só `SCHEDULED` futuro impede a mudança)
 - RN-70 — Perfis e permissões
 - RN-71 — Acesso à administração
 
@@ -45,7 +47,7 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 - **Então** recebe 200.
 
 **CA-3 — Administração altera o horário (RN-02)**
-- **Dado** a administração autenticada
+- **Dado** a administração autenticada e nenhum agendamento futuro afetado
 - **Quando** envia `PUT /admin/business-hours` com os 7 dias, fechando a segunda-feira
 - **Então** recebe os 7 dias atualizados, e `GET /public/shop` mostra a segunda como fechada.
 
@@ -79,6 +81,20 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 - **Quando** altera um horário ou um dado e salva
 - **Então** vê o `Alert` de sucesso. Se a API recusar, vê o `message` dela num `Alert` `danger`.
 
+**CA-10 — Não deixar agendamentos futuros fora do expediente (RN-02, RN-05, RN-30)**
+- **Dado** um agendamento `SCHEDULED` com `starts_at` depois de agora
+- **Quando** a administração envia um expediente que fecha o dia, abre depois do início do agendamento ou fecha antes do fim dele
+- **Então** a API responde `409 BUSINESS_HOURS_CONFLICT` com "Há agendamentos futuros fora do novo horário de funcionamento. Remarque esses agendamentos antes de alterar o horário.". Nenhum dos sete dias é alterado, e os agendamentos ficam como estavam.
+- Um agendamento que começa exatamente na abertura ou termina exatamente no fechamento cabe no intervalo. A comparação usa o dia e as horas de São Paulo e a duração congelada do agendamento.
+- Agendamentos que já começaram (`starts_at <= agora`), cancelados, concluídos ou com falta não impedem a mudança. A proteção não tem limite de 30 dias: vale também para os horários futuros marcados pela administração além da janela do cliente.
+- A tela mantém os valores enviados e mostra o `message` da API num `Alert` `danger`, sem invalidar o cache da vitrine.
+
+**CA-11 — Disputa entre mudança de expediente e reserva (RN-02, RN-05)**
+- A proteção vale para criação e remarcação, tanto do cliente como da administração.
+- Se uma reserva com início futuro está sendo confirmada primeiro, a alteração do expediente espera e recusa com `409 BUSINESS_HOURS_CONFLICT` quando o horário não couber.
+- Se a alteração do expediente confirma primeiro, a reserva espera e consulta o expediente novo; se não couber, responde `409 SLOT_UNAVAILABLE`.
+- Nenhuma das duas ordens pode confirmar os dois pedidos e deixar a reserva futura fora do expediente.
+
 ## Fluxo e telas
 - **Layout de `/admin`:** antes de qualquer página da área, o layout verifica o acesso com `GET /admin/ping`, como a página `/admin` fazia na S2.09:
   - sem sessão, leva a `/entrar?voltar=/admin`;
@@ -99,15 +115,22 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 |---|---|---|---|
 | `GET` | `/public/shop` | Qualquer um | Dados da barbearia e os 7 dias de funcionamento |
 | `PUT` | `/admin/shop` | Administração | Substitui os dados da barbearia; devolve o mesmo formato do `GET` |
-| `PUT` | `/admin/business-hours` | Administração | Substitui os 7 dias; devolve a lista atualizada |
+| `PUT` | `/admin/business-hours` | Administração | Substitui os 7 dias; recusa com `409 BUSINESS_HOURS_CONFLICT` se deixar agendamento futuro fora do expediente (RN-02) |
 
 Horas trafegam como `HH:MM:SS` (o formato `time` do OpenAPI). Uma abertura nula significa dia fechado.
+
+## Concorrência entre expediente e reservas (#105)
+A criação e a remarcação chamam `ensure_slot_available`, que trava o dia da semana em `BusinessHours` com `FOR SHARE` até o commit, além da trava do barbeiro. A leitura com trava renova a linha mesmo se a sessão já tiver carregado o expediente. A edição trava os sete dias em ordem com `FOR UPDATE` antes de conferir os agendamentos futuros e só altera os dias depois dessa conferência.
+
+Em `READ COMMITTED`, a consulta dos agendamentos feita depois da espera já vê a reserva confirmada; na ordem inversa, a reserva lê o expediente confirmado antes de calcular a disponibilidade. A edição não trava linhas de agendamento, evitando inverter a ordem das travas da remarcação.
+
+## Decisão sobre agendamentos futuros (#105)
+Em 2026-11-01, o Vitor decidiu **impedir a mudança** enquanto houver agendamentos futuros fora do novo expediente (D13, [registro.md](../cliente/registro.md)). O sistema orienta a remarcar antes de salvar; não altera nem cancela agendamentos automaticamente. "Futuro" significa início estritamente depois de agora, não um atendimento que já começou.
 
 ## Fora do escopo desta spec
 - A vitrine lendo esses dados, incluindo o rodapé que hoje tem o horário fixo: S3.05 (#54).
 - Barbeiros e serviços: S3.03 (#52) e S3.04 (#53).
 - O uso do horário no cálculo de disponibilidade: S3.07 (#56).
-- Avisar ou impedir uma mudança de horário que deixe agendamentos futuros fora do expediente. A spec dos bloqueios (S5.04, [bloqueios.md](bloqueios.md)) decidiu que o tema não entra lá: virou a issue #105 (`[Backlog]`).
 - Feriados e horários especiais por data. Hoje isso é uma folga de dia inteiro por barbeiro (RN-03, [bloqueios.md](bloqueios.md)).
 
 ## Dúvidas em aberto

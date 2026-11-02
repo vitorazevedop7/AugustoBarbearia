@@ -159,7 +159,7 @@ flowchart LR
 - **Bloqueio recorrente** (almoço todo dia): cada dia é um bloqueio.
 - **Editar um bloqueio:** remover e criar outro.
 - **Bloquear todos os barbeiros de uma vez** (feriado): um bloqueio por barbeiro.
-- **Mudar o horário de funcionamento deixando agendamentos fora do expediente** (a dúvida que `barbearia-horarios.md` deixou para esta sprint): não entra aqui. Não é bloqueio, mexe na tela de horários e precisa de decisão de produto (avisar ou impedir). Virou a issue #105 (`[Backlog]`).
+- **Mudar o horário de funcionamento deixando agendamentos fora do expediente:** é tratado pela #105 em [barbearia-horarios.md](barbearia-horarios.md), não pelo módulo de bloqueios. A mudança é impedida enquanto houver agendamento `SCHEDULED` com início futuro cujo intervalo não caiba no novo expediente (RN-02, D13).
 - Mostrar o bloqueio na grade do agendamento manual (S5.05) além do que o motor já faz.
 
 ## Dúvidas em aberto
