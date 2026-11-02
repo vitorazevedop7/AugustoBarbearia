@@ -15,7 +15,8 @@ describe("página de serviços — RN-61", () => {
     const photo = hero?.querySelector("img");
 
     expect(photo).toHaveAttribute("alt", "");
-    expect(photo).toHaveAttribute("loading", "lazy");
+    expect(photo).toHaveAttribute("fetchpriority", "high");
+    expect(photo).not.toHaveAttribute("loading", "lazy");
     expect(photo).toHaveAttribute(
       "src",
       expect.stringContaining(

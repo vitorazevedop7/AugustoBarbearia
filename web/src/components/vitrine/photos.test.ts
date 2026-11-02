@@ -79,3 +79,14 @@ describe("Fotos de Como funciona (D14)", () => {
     expect(bytes.byteLength).toBeLessThanOrEqual(maxBytes);
   });
 });
+
+describe("Fotos dos topos internos (D14)", () => {
+  it.each(["topo-servicos", "topo-equipe"])(
+    "%s é JPEG de até 350 KB",
+    (name) => {
+      const bytes = readFileSync(`${PUBLIC_DIR}/images/vitrine/${name}.jpg`);
+      expect([...bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+      expect(bytes.byteLength).toBeLessThanOrEqual(350_000);
+    },
+  );
+});

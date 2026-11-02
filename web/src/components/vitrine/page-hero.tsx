@@ -7,7 +7,8 @@ import { Ornament } from "@/components/ui/ornament";
  * único `h1` continua numa faixa parcial (`ink`) atrás do começo do conteúdo,
  * e o card ou as fotos de `children` a atravessam. A faixa parcial é uma
  * camada decorativa atrás do conteúdo (`-z-10` dentro do `isolate`), então o
- * conteúdo não muda de posição se ela mudar de altura.
+ * conteúdo não muda de posição se ela mudar de altura. A foto opcional é o
+ * LCP da página e carrega com prioridade, como a do hero inicial.
  */
 export function PageHero({
   title,
@@ -32,6 +33,8 @@ export function PageHero({
               alt=""
               fill
               sizes="100vw"
+              preload
+              fetchPriority="high"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-ink/80" />
