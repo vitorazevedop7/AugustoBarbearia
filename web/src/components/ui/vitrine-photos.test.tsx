@@ -29,7 +29,11 @@ describe("fotos compartilhadas da vitrine", () => {
     const photo = screen.getByRole("presentation");
     expect(photo).toHaveAttribute("fetchpriority", "high");
     expect(photo).not.toHaveAttribute("loading", "lazy");
-    expect(photo.parentElement).toHaveClass("absolute", "inset-0", "lg:fixed");
+    expect(photo.parentElement).toHaveClass(
+      "absolute",
+      "inset-0",
+      "motion-safe:lg:fixed",
+    );
     expect(container.querySelector(".bg-ink\\/70")).toHaveAttribute(
       "aria-hidden",
       "true",

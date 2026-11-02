@@ -154,21 +154,6 @@ export default function DesignSystemPage() {
           </ul>
         </Showcase>
 
-        <Showcase id="fotos" title="Fotos da vitrine">
-          <div className="grid gap-8 lg:grid-cols-2">
-            <FramedPhoto
-              photo={vitrinePhotos.about}
-              sizes="(min-width: 1024px) 50vw, 100vw"
-            />
-            <div className="relative isolate flex min-h-80 items-center justify-center bg-ink p-8 [clip-path:inset(0)]">
-              <FixedPhotoLayer photo={vitrinePhotos.hero} />
-              <p className="relative text-body text-surface">
-                Foto fixa no desktop
-              </p>
-            </div>
-          </div>
-        </Showcase>
-
         <Showcase id="tipografia" title="Tipografia">
           <div className="space-y-6">
             <p className="font-heading text-display-1 font-black uppercase">
@@ -488,6 +473,21 @@ export default function DesignSystemPage() {
             menu do celular está nele: reduza a janela para menos de 1024px e
             abra-o para ver o painel escuro descer.
           </p>
+        </Showcase>
+
+        <Showcase id="fotos" title="Fotos da vitrine">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <FramedPhoto
+              photo={vitrinePhotos.about}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+            <div className="relative isolate flex min-h-80 items-center justify-center bg-ink p-8 [clip-path:inset(0)]">
+              <FixedPhotoLayer photo={vitrinePhotos.hero} />
+              <p className="relative text-body text-surface">
+                Foto fixa no desktop
+              </p>
+            </div>
+          </div>
         </Showcase>
 
         <Showcase id="ornamentos" title="Ornamentos">
