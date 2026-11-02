@@ -10,7 +10,9 @@ export const DEADLINE_TITLE =
 /**
  * Aviso de que o cliente já não altera o agendamento pelo site (RN-14), com
  * os contatos que a administração preencheu. O título repete o `message` da
- * API, e quem decide o prazo é ela (`can_cancel`, `can_reschedule`).
+ * API, e quem decide o prazo é ela (`can_cancel`, `can_reschedule`). Sem
+ * contato preenchido, o aviso fica só com o título: não aponta para um
+ * contato que não existe.
  */
 export function ContactNotice({
   shop,
@@ -37,9 +39,7 @@ export function ContactNotice({
             </li>
           ))}
         </ul>
-      ) : (
-        <p>Use os contatos do rodapé do site.</p>
-      )}
+      ) : null}
     </Alert>
   );
 }

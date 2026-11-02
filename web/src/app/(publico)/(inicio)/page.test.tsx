@@ -237,6 +237,24 @@ describe("página inicial (vitrine)", () => {
     expect(contato).toHaveTextContent("Sábado9h às 14h");
     expect(contato).toHaveTextContent("DomingoFechado");
     expect(within(contato).queryByText("Como chegar")).toBeNull();
+    // Sem contato cadastrado, a seção não promete como falar com a barbearia.
+    expect(contato).toHaveTextContent("Quando estamos abertos.");
+    expect(contato).not.toHaveTextContent("como falar com a barbearia");
+  });
+
+  it("com só o endereço, fala de onde estamos, não de contato", async () => {
+    vi.mocked(getPublicShop).mockResolvedValue({
+      ...shop,
+      address: "Rua A, 10",
+    });
+
+    render(await HomePage());
+
+    const contato = section("Horário e contato");
+    expect(contato).toHaveTextContent("Quando estamos abertos e onde estamos.");
+    expect(
+      within(contato).getByRole("heading", { name: "Onde estamos" }),
+    ).toBeInTheDocument();
   });
 
   it("mostra Como funciona entre a equipe e o contato", async () => {
@@ -272,6 +290,12 @@ describe("página inicial (vitrine)", () => {
       within(contato).getByRole("link", { name: "Instagram @augusto" }),
     ).toHaveAttribute("href", "https://www.instagram.com/augusto/");
     expect(within(contato).queryByText("E-mail")).toBeNull();
+    expect(contato).toHaveTextContent(
+      "Quando estamos abertos e como falar com a barbearia.",
+    );
+    expect(
+      within(contato).getByRole("heading", { name: "Onde estamos e contato" }),
+    ).toBeInTheDocument();
   });
 
   it("mostra os estados vazios sem serviço nem barbeiro", async () => {
