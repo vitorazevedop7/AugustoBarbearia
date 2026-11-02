@@ -8,7 +8,7 @@ import { bookingHref } from "@/lib/booking";
 
 /**
  * Posição do card na grade, para a cascata da entrada ao rolar: o CSS soma
- * 200ms por coluna (`--reveal-cols`, que a `ul` ajusta por breakpoint).
+ * 50ms por coluna (`--reveal-cols`, que a `ul` ajusta por breakpoint).
  */
 function revealIndex(index: number): CSSProperties {
   return { "--reveal-index": index } as CSSProperties;

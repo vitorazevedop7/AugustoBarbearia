@@ -92,7 +92,7 @@ Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida
 | Hover de links, chips, campos e cards | Troca de cor em 300ms `ease` (`ease-standard`), na vitrine, nas telas do cliente e na administração (S4.07) | 300ms `ease` em todas as transições |
 | Cascata das páginas internas | Ornamento, título e texto do `PageHero` em 0, 200 e 400ms, como o hero da página inicial (S4.07) | Degraus de 200ms |
 | Zoom de foto em card | 1,1, dentro da moldura com `overflow: hidden`, 300ms `ease` (S4.06) | 1,1, dentro de uma moldura com `overflow: hidden` |
-| Entrada ao rolar | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms, cascata de 200ms nas grades | Igual |
+| Entrada ao rolar | Três presets (`rise`, `fade`, `zoom`), 500ms `ease`, atraso padrão de 200ms, cascata de 50ms nas grades e disparo antecipado em 96px (#90) | 500ms `ease`, atraso de 200ms; cascata original de 200ms encurtada para evitar cards visíveis ainda vazios |
 | Menu do celular | Painel escuro que desce em 400ms `ease` (S4.04) | Igual |
 
 - **Presets de entrada** (componente `RevealObserver`, uma única vez por elemento). O preset é o valor de `data-reveal`:
@@ -103,10 +103,25 @@ Hoje o código faz o que está em "Em uso". A coluna "Alvo" é a decisão medida
   - o estado vai em outro atributo, `data-reveal-state` (`pending` ou `done`), que só o observer escreve. O servidor nunca o renderiza;
   - a transição só existe no `done`: esconder é instantâneo e fica abaixo da dobra, e o elemento entra com o ritmo do preset;
   - o bloco de título (`SectionHeading`: ornamento, título e texto) anima como uma unidade, com um `data-reveal="rise"` em volta;
-  - nas grades (`catalog.tsx`), cada card recebe `--reveal-index` e a `ul` define `--reveal-cols` por breakpoint; o CSS soma 200ms por coluna ao atraso, e a cascata fica de 200, 400 e 600ms numa grade de 3 colunas. No celular, com 1 coluna, não há degrau.
+  - o observer usa `threshold: 0` e margem inferior positiva de **96px**, independentemente da altura do elemento. Isso compensa também o deslocamento inicial do `rise`, sem esperar que uma fração de um card alto entre na tela;
+  - nas grades (`catalog.tsx`), cada card recebe `--reveal-index` e a `ul` define `--reveal-cols` por breakpoint; o CSS soma **50ms por coluna** ao atraso, e a cascata fica de **200, 250 e 300ms** numa grade de 3 colunas. No celular, com 1 coluna, não há degrau.
 - **Hero:** o conteúdo sobe e aparece em cascata ao carregar (`animate-rise`), com o mesmo ritmo do preset `rise`: 10% da altura do elemento, 500ms `ease`. Os delays ficam na marcação, em degraus de 200ms como no Beard X: ornamento em 0, título em 200ms, texto em 400ms e botões em 600ms. É só CSS, e a cascata não esconde nada antes do JS. O cabeçalho não anima nem fica fixo: rola com a página.
 - **Escondido só abaixo da dobra:** só o que está abaixo da dobra começa escondido. A página que usa `data-reveal` monta o próprio `RevealObserver`; no layout, ele mexeria nos elementos antes de a página hidratar.
 - **Rolagem:** a nativa do navegador. No desktop, a foto do hero fica fixa com CSS, sem parallax por script.
+
+### Medição da entrada dos cards (#90)
+
+Chrome headless, página inicial com os três barbeiros, altura de viewport de 900px e rolagem constante de 600px/s. Mediu-se da entrada do topo da caixa sem o deslocamento do `rise` na viewport até a opacidade superar 0,01. A configuração anterior (`threshold: 0.15`, margem inferior `-10%`, cascata de 200ms) foi reproduzida na mesma página para comparação. Valores arredondados, sujeitos ao intervalo de um frame:
+
+| Largura | Altura do card | Antes: tempo invisível (1º / 2º / 3º) | Depois: tempo invisível (1º / 2º / 3º) |
+|---|---|---|---|
+| 375px | 468px | 583 / 567 / 583ms | 167 / 233 / 150ms |
+| 1440px | 567px | 617 / 833 / 1033ms | 183 / 233 / 283ms |
+
+Nas duas larguras, sem JavaScript e com `prefers-reduced-motion: reduce`, nenhum elemento de entrada fica escondido, não há rolagem horizontal nem erro de hidratação. A animação mantém os 500ms de duração; a mudança é no momento de começar.
+
+### Garantias de movimento
+
 - **Regras:**
   - Todo movimento respeita `prefers-reduced-motion`.
   - Nenhum conteúdo depende de JavaScript para aparecer.

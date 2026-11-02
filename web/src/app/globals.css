@@ -133,7 +133,7 @@ body {
    O preset vem de `data-reveal` (`rise`, `fade` ou `zoom`; qualquer outro valor,
    inclusive o `data-reveal` sem valor, vale `rise`).
    O atraso é `--reveal-delay` (200ms por padrão) mais, nas grades, um degrau de
-   200ms por coluna: `--reveal-index` é a posição do card e `--reveal-cols` o
+   50ms por coluna: `--reveal-index` é a posição do card e `--reveal-cols` o
    número de colunas da grade no breakpoint. A transição fica só no `done`:
    esconder é instantâneo, e o elemento entra com o ritmo do preset. */
 @media (prefers-reduced-motion: no-preference) {
@@ -144,7 +144,7 @@ body {
     transition-delay: 200ms;
     transition-delay: calc(
       var(--reveal-delay, 200ms) +
-        mod(var(--reveal-index, 0), var(--reveal-cols, 1)) * 200ms
+        mod(var(--reveal-index, 0), var(--reveal-cols, 1)) * 50ms
     );
   }
 
