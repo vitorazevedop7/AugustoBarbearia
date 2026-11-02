@@ -138,6 +138,7 @@ def _copy(
     canceled_by_shop: bool = False,
     can_change: bool = True,
     change_outro: str = CHANGE_NOTICE,
+    has_contacts: bool = True,
 ) -> _Copy:
     match kind:
         case NotificationKind.CONFIRMATION:
@@ -157,7 +158,8 @@ def _copy(
             )
         case NotificationKind.CANCELED if canceled_by_shop:
             # RN-52 e RN-53: quem cancelou e como falar com a barbearia (os
-            # contatos entram em todo e-mail, logo abaixo).
+            # contatos preenchidos entram logo abaixo; sem eles, o texto não
+            # aponta para uma lista que não existe).
             return _Copy(
                 title="Agendamento cancelado",
                 intro=(
@@ -165,8 +167,9 @@ def _copy(
                     "O horário não está mais reservado:"
                 ),
                 outro=(
-                    "Para combinar um novo horário, fale com a barbearia pelos "
-                    "contatos abaixo ou agende pelo site."
+                    "Para combinar um novo horário, fale com a barbearia "
+                    + ("pelos contatos abaixo " if has_contacts else "")
+                    + "ou agende pelo site."
                 ),
             )
         case NotificationKind.CANCELED:
@@ -297,6 +300,7 @@ def render(kind: NotificationKind, details: AppointmentDetails) -> RenderedEmail
         canceled_by_shop=details.canceled_by_shop,
         can_change=details.can_change,
         change_outro=_change_outro(details),
+        has_contacts=bool(_contacts(details.shop)),
     )
     return RenderedEmail(
         subject=_subject(kind, details.starts_at),

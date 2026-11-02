@@ -88,7 +88,7 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 - **Dado** um cliente logado em `/meus-agendamentos`, numa tela de 360px
 - **Então** vê "Próximos" e "Histórico", com um cartão por agendamento: serviço, barbeiro, data completa, horário de início e fim, valor e o status (`StatusBadge`; um `SCHEDULED` que já terminou aparece como "Aguardando registro").
 - Cartão de "Próximos" com `can_cancel` / `can_reschedule`: os links "Remarcar" (`outline`) e "Cancelar" e o texto "Você pode cancelar ou remarcar até HH:MM de <data>." (de `change_deadline`).
-- Cartão de "Próximos" sem as ações: o aviso "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia." com os links de contato da barbearia (WhatsApp, telefone, Instagram, e-mail, os que estiverem preenchidos).
+- Cartão de "Próximos" sem as ações: o aviso "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia." com os links de contato da barbearia (WhatsApp, telefone, Instagram, e-mail, os que estiverem preenchidos). Sem nenhum preenchido, o aviso fica só com o título, sem apontar para um contato que não existe (#145).
 - Sem nenhum agendamento: o estado vazio "Você ainda não tem horários" com "Agendar horário". Sem próximos, mas com histórico: "Nenhum horário marcado" com "Agendar horário".
 - Sem sessão, o servidor leva a `/entrar?voltar=/meus-agendamentos` (e para as subpáginas, `voltar=` a URL completa). A administração vai para `/admin`.
 

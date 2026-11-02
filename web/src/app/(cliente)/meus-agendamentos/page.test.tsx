@@ -143,6 +143,21 @@ describe("meus agendamentos — /meus-agendamentos", () => {
     ).toHaveAttribute("href", "tel:+557532210000");
   });
 
+  it("fora do prazo e sem contato cadastrado, não aponta para um contato", async () => {
+    vi.mocked(getPublicShop).mockResolvedValue(shop);
+    listed([lateAppointment()]);
+
+    await renderPage();
+
+    const notice = within(
+      screen.getByRole("article", { name: "Corte + Barba" }),
+    ).getByRole("status");
+    expect(notice).toHaveTextContent(
+      /^Faltam menos de 2 horas para o seu horário\. Para cancelar ou remarcar, fale com a barbearia\.$/,
+    );
+    expect(within(notice).queryByRole("link")).toBeNull();
+  });
+
   it("histórico: cancelado por quem e o que espera registro, sem ações", async () => {
     listed(
       [],

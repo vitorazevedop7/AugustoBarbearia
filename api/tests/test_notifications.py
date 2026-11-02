@@ -535,3 +535,35 @@ def test_rn51_template_do_lembrete() -> None:
     assert email.subject == "Lembrete: seu horário é terça-feira, 3/11, às 20h30"
     assert "Passando para lembrar" in email.text
     assert "http://localhost:3000/meus-agendamentos" in email.html
+
+
+def test_rn52_rn53_cancelamento_pela_barbearia_sem_contatos_nao_aponta_para_baixo() -> (
+    None
+):
+    """Sem nenhum contato preenchido, o e-mail não promete "os contatos abaixo"."""
+    email = render(NotificationKind.CANCELED, details(canceled_by_shop=True))
+
+    for content in (email.text, email.html):
+        assert (
+            "Para combinar um novo horário, fale com a barbearia ou agende pelo site."
+            in content
+        )
+        assert "abaixo" not in content
+        assert "Fale com a barbearia:" not in content
+
+
+def test_rn52_rn53_cancelamento_pela_barbearia_com_contato_aponta_para_ele() -> None:
+    shop = ShopContact(
+        name="Augusto Barbearia",
+        address=None,
+        phone=None,
+        whatsapp="75999990000",
+        instagram=None,
+        email=None,
+    )
+    email = render(NotificationKind.CANCELED, details(canceled_by_shop=True, shop=shop))
+
+    assert (
+        "fale com a barbearia pelos contatos abaixo ou agende pelo site." in email.text
+    )
+    assert "WhatsApp: (75) 99999-0000" in email.text

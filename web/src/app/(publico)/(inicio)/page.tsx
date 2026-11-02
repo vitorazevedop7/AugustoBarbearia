@@ -26,6 +26,7 @@ import {
   type PublicShop,
 } from "@/lib/api/public";
 import { BOOKING_PATH } from "@/lib/booking";
+import { contactLinks } from "@/lib/contact";
 import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 /** A página inicial mostra só os primeiros serviços; o resto fica em /servicos. */
@@ -211,9 +212,32 @@ function Hero({ shop }: { shop: PublicShop | null }) {
   );
 }
 
+/**
+ * O que a seção de contato promete, conforme o que a administração preencheu:
+ * sem endereço nem contato, ela fala só do horário.
+ */
+function contactCopy(shop: PublicShop | null) {
+  const hasAddress = Boolean(shop?.address);
+  const hasLinks = shop ? contactLinks(shop).length > 0 : false;
+  if (hasLinks) {
+    return {
+      description: "Quando estamos abertos e como falar com a barbearia.",
+      label: hasAddress ? "Onde estamos e contato" : "Contato",
+    };
+  }
+  if (hasAddress) {
+    return {
+      description: "Quando estamos abertos e onde estamos.",
+      label: "Onde estamos",
+    };
+  }
+  return { description: "Quando estamos abertos.", label: "" };
+}
+
 /** Horário de funcionamento, endereço e contato, na faixa escura (#contato). */
 function ContactSection({ shop }: { shop: PublicShop | null }) {
   const withContact = shop ? hasContact(shop) : false;
+  const copy = contactCopy(shop);
   return (
     <section
       id="contato"
@@ -226,7 +250,11 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
             id="contato-titulo"
             tone="dark"
             title="Horário e contato"
-            description="Quando estamos abertos e como falar com a barbearia."
+            description={
+              shop
+                ? copy.description
+                : "Quando estamos abertos e como falar com a barbearia."
+            }
           />
         </div>
         <div className="mx-auto mt-12 max-w-4xl lg:mt-16">
@@ -243,7 +271,7 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
               </div>
               {withContact ? (
                 <div>
-                  <InfoLabel>Onde estamos e contato</InfoLabel>
+                  <InfoLabel>{copy.label}</InfoLabel>
                   <div className="mt-4 space-y-4">
                     <ShopAddress address={shop.address ?? null} />
                     <ContactList shop={shop} />
