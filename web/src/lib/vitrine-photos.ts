@@ -49,4 +49,16 @@ export const vitrinePhotos = {
     width: 2400,
     height: 1350,
   },
+  howChair: {
+    src: "/images/vitrine/como-funciona-cadeira.jpg",
+    alt: "Cliente na cadeira durante o corte",
+    width: 1400,
+    height: 1600,
+  },
+  howPhone: {
+    src: "/images/vitrine/como-funciona-celular.jpg",
+    alt: "Cliente com o celular na barbearia",
+    width: 1050,
+    height: 1200,
+  },
 } satisfies Record<string, VitrinePhoto>;

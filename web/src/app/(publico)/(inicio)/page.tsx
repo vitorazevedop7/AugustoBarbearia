@@ -11,6 +11,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { BarberList, ServiceList } from "@/components/vitrine/catalog";
 import { BookingBand } from "@/components/vitrine/booking-band";
 import { Gallery } from "@/components/vitrine/gallery";
+import { HowItWorks } from "@/components/vitrine/how-it-works";
 import {
   BusinessHoursList,
   ContactList,
@@ -151,6 +152,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <HowItWorks />
       <ContactSection shop={shop} />
       <RevealObserver />
 
