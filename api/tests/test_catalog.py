@@ -105,17 +105,50 @@ def test_rn61_cria_servico_ativo_com_os_barbeiros(admin: TestClient) -> None:
         (" 1.234,56 ", "1234.56"),
         ("0", "0.00"),
         (30, "30.00"),
-        (12.5, "12.50"),
+        ("25.50", "25.50"),
         ("99999999.99", "99999999.99"),
     ],
 )
+@pytest.mark.parametrize("method", ["post", "patch"])
 def test_rn61_preco_em_decimal_com_duas_casas(
-    admin: TestClient, price: object, expected: str
+    admin: TestClient, price: object, expected: str, method: str
 ) -> None:
-    created = create(admin, price=price)
+    if method == "post":
+        response = admin.post("/admin/services", json=new_service(admin, price=price))
+        assert response.status_code == 201
+    else:
+        existing = create(admin)
+        response = admin.patch(
+            f"/admin/services/{existing['id']}", json={"price": price}
+        )
+        assert response.status_code == 200
 
-    assert created["price"] == expected
-    assert admin.get(f"/admin/services/{created['id']}").json()["price"] == expected
+    saved = response.json()
+    assert saved["price"] == expected
+    assert admin.get(f"/admin/services/{saved['id']}").json()["price"] == expected
+
+
+@pytest.mark.parametrize("method", ["post", "patch"])
+@pytest.mark.parametrize("price", [25.5, 0.0099999999999999999, -1e-999, 0.0])
+def test_rn61_numero_json_com_casas_decimais_e_recusado_sem_float(
+    admin: TestClient, method: str, price: float
+) -> None:
+    path = "/admin/services"
+    payload = new_service(admin, price=price)
+    if method == "patch":
+        existing = create(admin)
+        path = f"{path}/{existing['id']}"
+        payload = {"price": price}
+    before = admin.get("/admin/services").json()
+
+    response = admin.request(method, path, json=payload)
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "code": "VALIDATION_ERROR",
+        "message": "Confira os dados informados e tente novamente.",
+    }
+    assert admin.get("/admin/services").json() == before
 
 
 def test_rn61_descricao_e_opcional(admin: TestClient) -> None:

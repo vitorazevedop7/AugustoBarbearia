@@ -1092,7 +1092,7 @@ export interface components {
         CompleteAppointment: {
             method: components["schemas"]["PaymentMethod"];
             /** Amount */
-            amount?: (number | string) | null;
+            amount?: (string | number) | null;
         };
         /**
          * CompletedAppointment
@@ -1326,7 +1326,7 @@ export interface components {
         PaymentUpdate: {
             method?: components["schemas"]["PaymentMethod"] | null;
             /** Amount */
-            amount?: (number | string) | null;
+            amount?: (string | number) | null;
         };
         /**
          * PublicBarberResponse
@@ -1403,7 +1403,7 @@ export interface components {
             /** Description */
             description?: string | null;
             /** Price */
-            price: number | string;
+            price: string | number;
             /** Duration Minutes */
             duration_minutes: number;
             /** Barber Ids */
@@ -1437,7 +1437,7 @@ export interface components {
             /** Description */
             description?: string | null;
             /** Price */
-            price?: (number | string) | null;
+            price?: (string | number) | null;
             /** Duration Minutes */
             duration_minutes?: number | null;
             /** Barber Ids */

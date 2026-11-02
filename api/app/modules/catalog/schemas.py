@@ -39,8 +39,12 @@ def _decimal_text(value: object) -> object:
     """Aceita o preço como se digita: "25,50" e "1.234,50" viram "25.50" e "1234.50".
 
     Com vírgula, ela é o separador decimal e o ponto é o de milhar. Sem vírgula,
-    o ponto é o separador decimal. Número segue direto para o `Decimal`.
+    o ponto é o separador decimal. Inteiro segue direto para o `Decimal`.
+    Número JSON com casas já chega como `float` e é recusado antes da conversão,
+    para não aceitar um valor arredondado em silêncio (RN-61).
     """
+    if isinstance(value, float):
+        raise ValueError('Envie o valor como texto decimal, por exemplo "25.50".')
     value = _strip(value)
     if isinstance(value, str) and "," in value:
         return value.replace(".", "").replace(",", ".")
@@ -65,7 +69,7 @@ Description = Annotated[
 # numeric(10,2). O sinal é conferido pelo service (RN-61).
 Price = Annotated[
     Decimal,
-    BeforeValidator(_decimal_text),
+    BeforeValidator(_decimal_text, json_schema_input_type=str | int),
     Field(max_digits=10, decimal_places=2),
 ]
 DurationMinutes = Annotated[int, Field(le=MAX_DURATION_MINUTES)]
