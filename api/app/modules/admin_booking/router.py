@@ -6,13 +6,14 @@ A resposta de cada agendamento é a da agenda (`AdminAppointmentResponse`).
 import datetime as dt
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_admin
 from app.clock import utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.admin_booking import service
 from app.modules.admin_booking.schemas import (
     AdminAppointmentCreate,
@@ -42,12 +43,10 @@ router = APIRouter(
 
 SessionDep = Annotated[Session, Depends(get_session)]
 NowDep = Annotated[dt.datetime, Depends(utc_now)]
-# Maior valor de uma coluna `integer`: ids acima disso são 404, não erro do banco.
-AppointmentId = Annotated[int, Path(ge=1, le=2_147_483_647)]
 LocalDate = Annotated[
     dt.date, Query(alias="date", description="Data local de São Paulo.")
 ]
-OptionalBarber = Annotated[int | None, Query(description="Sem ele, o barbeiro atual.")]
+OptionalBarber = Annotated[Id | None, Query(description="Sem ele, o barbeiro atual.")]
 
 
 def _action_response(result: service.ActionResult) -> AdminBookingActionResponse:
@@ -62,8 +61,8 @@ def _slots(slots: list[TimeRange]) -> list[AvailableSlot]:
 
 @router.get("/availability", response_model=AvailabilityResponse)
 def get_availability(
-    barber_id: int,
-    service_id: int,
+    barber_id: Id,
+    service_id: Id,
     day: LocalDate,
     session: SessionDep,
     now: NowDep,
@@ -80,7 +79,7 @@ def get_availability(
 
 @router.get("/availability/days", response_model=AvailableDaysResponse)
 def get_available_days(
-    barber_id: int, service_id: int, session: SessionDep, now: NowDep
+    barber_id: Id, service_id: Id, session: SessionDep, now: NowDep
 ) -> AvailableDaysResponse:
     """Dias de hoje até hoje + 30 com pelo menos um horário (RN-21). Os 30 dias
     são só o tamanho da lista."""
@@ -121,7 +120,7 @@ def create_appointment(
     response_model=AdminBookingActionResponse,
 )
 def cancel_appointment(
-    appointment_id: AppointmentId,
+    appointment_id: Id,
     session: SessionDep,
     now: NowDep,
     outbox: OutboxDep,
@@ -138,7 +137,7 @@ def cancel_appointment(
     response_model=AdminBookingActionResponse,
 )
 def reschedule_appointment(
-    appointment_id: AppointmentId,
+    appointment_id: Id,
     data: AdminAppointmentReschedule,
     session: SessionDep,
     now: NowDep,
@@ -162,7 +161,7 @@ def reschedule_appointment(
     response_model=AvailableDaysResponse,
 )
 def get_reschedule_days(
-    appointment_id: AppointmentId,
+    appointment_id: Id,
     session: SessionDep,
     now: NowDep,
     barber_id: OptionalBarber = None,
@@ -181,7 +180,7 @@ def get_reschedule_days(
     response_model=AvailabilityResponse,
 )
 def get_reschedule_slots(
-    appointment_id: AppointmentId,
+    appointment_id: Id,
     day: LocalDate,
     session: SessionDep,
     now: NowDep,

@@ -10,6 +10,7 @@ from app.auth.dependencies import require_admin
 from app.clock import TIMEZONE
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.agenda import service
 from app.modules.agenda.schemas import (
     AdminAppointmentResponse,
@@ -80,7 +81,7 @@ def list_appointments(
     start: Annotated[dt.date, Query(description="Data local de São Paulo.")],
     end: Annotated[dt.date, Query(description="Data local de São Paulo, inclusiva.")],
     session: SessionDep,
-    barber_id: int | None = None,
+    barber_id: Id | None = None,
 ) -> AgendaResponse:
     """Os agendamentos que começam no período (até 7 dias), em todos os
     status, com o horário de funcionamento de cada dia (RN-01, RN-02, RN-30)."""
@@ -99,7 +100,7 @@ def list_appointments(
 
 @router.get("/{appointment_id}", response_model=AdminAppointmentResponse)
 def get_appointment(
-    appointment_id: int, session: SessionDep
+    appointment_id: Id, session: SessionDep
 ) -> AdminAppointmentResponse:
     """Um agendamento de qualquer cliente (RN-70)."""
     return to_response(service.get_admin_appointment(session, appointment_id))

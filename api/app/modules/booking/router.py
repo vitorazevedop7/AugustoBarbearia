@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.clock import TIMEZONE, utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.availability.schemas import (
     AvailabilityResponse,
     AvailableDaysResponse,
@@ -111,7 +112,7 @@ def create_appointment(
 
 @router.get("/{appointment_id}", response_model=CustomerAppointmentResponse)
 def get_appointment(
-    appointment_id: int, customer: CustomerDep, session: SessionDep, now: NowDep
+    appointment_id: Id, customer: CustomerDep, session: SessionDep, now: NowDep
 ) -> CustomerAppointmentResponse:
     """Um agendamento do cliente do token. O de outro cliente responde 404
     (RN-16)."""
@@ -121,7 +122,7 @@ def get_appointment(
 
 @router.post("/{appointment_id}/cancel", response_model=CustomerAppointmentResponse)
 def cancel_appointment(
-    appointment_id: int,
+    appointment_id: Id,
     customer: CustomerDep,
     session: SessionDep,
     now: NowDep,
@@ -137,7 +138,7 @@ def cancel_appointment(
 
 @router.post("/{appointment_id}/reschedule", response_model=CustomerAppointmentResponse)
 def reschedule_appointment(
-    appointment_id: int,
+    appointment_id: Id,
     data: AppointmentReschedule,
     customer: CustomerDep,
     session: SessionDep,
@@ -160,7 +161,7 @@ def reschedule_appointment(
 
 @router.get("/{appointment_id}/availability/days", response_model=AvailableDaysResponse)
 def get_reschedule_days(
-    appointment_id: int,
+    appointment_id: Id,
     customer: CustomerDep,
     session: SessionDep,
     now: NowDep,
@@ -179,7 +180,7 @@ def get_reschedule_days(
 
 @router.get("/{appointment_id}/availability", response_model=AvailabilityResponse)
 def get_reschedule_slots(
-    appointment_id: int,
+    appointment_id: Id,
     day: Annotated[
         dt.date, Query(alias="date", description="Data local de São Paulo.")
     ],

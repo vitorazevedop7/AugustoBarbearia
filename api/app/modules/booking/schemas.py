@@ -4,6 +4,7 @@ from datetime import datetime
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict
 
+from app.ids import Id
 from app.modules.appointments.models import AppointmentStatus, CanceledBy
 from app.modules.catalog.schemas import Money
 
@@ -13,8 +14,8 @@ class AppointmentCreate(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    barber_id: int
-    service_id: int
+    barber_id: Id
+    service_id: Id
     # Um dos inícios de `GET /public/availability`, com o fuso (RN-01).
     starts_at: AwareDatetime
 
@@ -38,7 +39,7 @@ class AppointmentReschedule(BaseModel):
     # Um dos inícios de `GET /me/appointments/{id}/availability`, com o fuso.
     starts_at: AwareDatetime
     # Sem ele, o barbeiro continua o mesmo.
-    barber_id: int | None = None
+    barber_id: Id | None = None
 
 
 class CustomerAppointmentResponse(BaseModel):

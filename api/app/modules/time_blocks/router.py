@@ -10,6 +10,7 @@ from app.auth.dependencies import require_admin
 from app.clock import TIMEZONE
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.agenda.schemas import AgendaBarber
 from app.modules.time_blocks import service
 from app.modules.time_blocks.schemas import TimeBlockCreate, TimeBlockResponse
@@ -48,7 +49,7 @@ def list_time_blocks(
     start: Annotated[dt.date, Query(description="Data local de São Paulo.")],
     end: Annotated[dt.date, Query(description="Data local de São Paulo, inclusiva.")],
     session: SessionDep,
-    barber_id: int | None = None,
+    barber_id: Id | None = None,
 ) -> list[TimeBlockResponse]:
     """Os bloqueios que cruzam o período (até 7 dias), por início (RN-03)."""
     entries = service.list_time_blocks(
@@ -69,12 +70,12 @@ def create_time_block(data: TimeBlockCreate, session: SessionDep) -> TimeBlockRe
 
 
 @router.get("/{block_id}", response_model=TimeBlockResponse)
-def get_time_block(block_id: int, session: SessionDep) -> TimeBlockResponse:
+def get_time_block(block_id: Id, session: SessionDep) -> TimeBlockResponse:
     return to_response(service.get_time_block(session, block_id))
 
 
 @router.delete("/{block_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_time_block(block_id: int, session: SessionDep) -> Response:
+def delete_time_block(block_id: Id, session: SessionDep) -> Response:
     """Remove o bloqueio; os horários voltam na hora (RN-05)."""
     service.delete_time_block(session, block_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

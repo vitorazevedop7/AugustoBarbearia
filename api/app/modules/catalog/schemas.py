@@ -17,6 +17,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.ids import Id
 from app.modules.catalog.models import DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH
 
 # Teto técnico: nenhum serviço dura mais que um dia. Evita estourar o `integer`.
@@ -81,7 +82,7 @@ class ServiceCreate(BaseModel):
     description: Description = None
     price: Price
     duration_minutes: DurationMinutes
-    barber_ids: list[int]
+    barber_ids: list[Id]
 
 
 class ServiceUpdate(BaseModel):
@@ -92,7 +93,7 @@ class ServiceUpdate(BaseModel):
     description: Description = None
     price: Price | None = None
     duration_minutes: DurationMinutes | None = None
-    barber_ids: list[int] | None = None
+    barber_ids: list[Id] | None = None
     active: bool | None = None
 
     @model_validator(mode="after")

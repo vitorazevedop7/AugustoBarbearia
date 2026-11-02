@@ -10,6 +10,7 @@ from app.auth.dependencies import require_admin
 from app.clock import TIMEZONE
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.agenda.schemas import AgendaBarber, AgendaService
 from app.modules.reports import service
 from app.modules.reports.schemas import (
@@ -40,7 +41,7 @@ def financial_report(
     start: Annotated[dt.date, Query(description="Data local de São Paulo.")],
     end: Annotated[dt.date, Query(description="Data local de São Paulo, inclusiva.")],
     session: SessionDep,
-    barber_id: int | None = None,
+    barber_id: Id | None = None,
 ) -> FinancialReport:
     """Faturamento, atendimentos concluídos, faltas, totais por barbeiro e por
     forma de pagamento, e a lista dos concluídos do período (até 366 dias).
