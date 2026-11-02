@@ -75,9 +75,18 @@ def _lock_customer(session: Session, customer_id: int) -> Customer:
 
     Dois pedidos simultâneos do mesmo cliente contam os ativos um depois do
     outro, então não passam juntos do limite da RN-11.
+
+    `FOR NO KEY UPDATE`, e não `FOR UPDATE`: a chave estrangeira de um
+    agendamento da administração para o mesmo cliente não espera esta trava.
+    Se esperasse, essa reserva seguraria o dia (`FOR SHARE`) esperando o
+    cliente, o cliente esperaria o dia travado por uma edição do expediente
+    (RN-02) e a edição esperaria o dia da reserva: um deadlock.
     """
     customer = session.get(
-        Customer, customer_id, with_for_update=True, populate_existing=True
+        Customer,
+        customer_id,
+        with_for_update={"key_share": True},
+        populate_existing=True,
     )
     if customer is None:
         # O cliente vem do token e já foi resolvido nesta requisição.

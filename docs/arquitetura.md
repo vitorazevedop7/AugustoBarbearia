@@ -132,7 +132,7 @@ Os prefixos deixam a permissão explícita (RN-70):
 | `PATCH /me/profile` | Cliente (`require_customer`) | Altera nome e telefone; campo ausente ou `null` fica como está (RN-62) |
 | `GET /admin/ping` | Administração (`require_admin`) | `{ "status": "ok" }`, rota de prova da S2.09 |
 | `GET /public/shop` | Qualquer um | Dados da barbearia e horário de funcionamento ([barbearia-horarios.md](specs/barbearia-horarios.md)) |
-| `PUT /admin/shop`, `PUT /admin/business-hours` | Administração (`require_admin`) | Alteram os dados da barbearia e o horário de funcionamento |
+| `PUT /admin/shop`, `PUT /admin/business-hours` | Administração (`require_admin`) | Alteram os dados da barbearia e o horário de funcionamento. Um horário que deixe agendamento futuro fora do expediente responde `409 BUSINESS_HOURS_CONFLICT` (RN-02) |
 | `GET /admin/barbers`, `POST /admin/barbers` | Administração (`require_admin`) | Lista todos os barbeiros (ativos primeiro) e cria um barbeiro ativo ([cadastro-barbeiros.md](specs/cadastro-barbeiros.md)) |
 | `GET /admin/barbers/{id}`, `PATCH /admin/barbers/{id}` | Administração (`require_admin`) | Lê e altera um barbeiro; o `PATCH` muda só os campos enviados, inclusive `active` para inativar ou reativar. Inativar com agendamento ativo que ainda não terminou responde `409 BARBER_HAS_FUTURE_APPOINTMENTS` (RN-60) |
 | `GET /admin/services`, `POST /admin/services` | Administração (`require_admin`) | Lista todos os serviços (ativos primeiro), com os barbeiros que os realizam, e cria um serviço ativo ([cadastro-servicos.md](specs/cadastro-servicos.md)) |
