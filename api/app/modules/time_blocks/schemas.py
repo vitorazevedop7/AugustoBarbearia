@@ -5,6 +5,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, Field, StringConstraints
 
+from app.ids import Id
 from app.modules.agenda.schemas import AgendaBarber
 from app.modules.time_blocks.models import REASON_MAX_LENGTH
 
@@ -31,7 +32,7 @@ class TimeBlockCreate(BaseModel):
     ignorados; sem ele, `start_time` e `end_time` são obrigatórios.
     """
 
-    barber_id: int
+    barber_id: Id
     date: date
     all_day: bool = False
     start_time: time | None = Field(default=None, description="Hora local, HH:MM.")

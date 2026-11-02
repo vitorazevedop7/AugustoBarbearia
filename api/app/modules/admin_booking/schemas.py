@@ -4,6 +4,7 @@ from typing import Self
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, model_validator
 
+from app.ids import Id
 from app.modules.agenda.schemas import AdminAppointmentResponse
 from app.modules.customers.schemas import CustomerCreate
 
@@ -14,11 +15,11 @@ class AdminAppointmentCreate(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    customer_id: int | None = None
+    customer_id: Id | None = None
     # Nome e telefone obrigatórios, e-mail opcional (RN-62), como no cadastro.
     customer: CustomerCreate | None = None
-    barber_id: int
-    service_id: int
+    barber_id: Id
+    service_id: Id
     # Um dos inícios de `GET /admin/availability`, com o fuso (RN-01).
     starts_at: AwareDatetime
 
@@ -38,7 +39,7 @@ class AdminAppointmentReschedule(BaseModel):
     # Um dos inícios de `GET /admin/appointments/{id}/availability`, com o fuso.
     starts_at: AwareDatetime
     # Sem ele, o barbeiro continua o mesmo.
-    barber_id: int | None = None
+    barber_id: Id | None = None
 
 
 class AdminBookingActionResponse(AdminAppointmentResponse):

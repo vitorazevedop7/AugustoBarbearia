@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.auth.dependencies import require_admin
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.catalog import service
 from app.modules.catalog.models import Service
 from app.modules.catalog.schemas import (
@@ -63,7 +64,7 @@ def create_service(
 
 @router.get("/{service_id}", response_model=ServiceResponse, responses=not_found)
 def get_service(
-    service_id: int,
+    service_id: Id,
     session: Annotated[Session, Depends(get_session)],
 ) -> ServiceResponse:
     return to_response(service.get_service(session, service_id))
@@ -71,7 +72,7 @@ def get_service(
 
 @router.patch("/{service_id}", response_model=ServiceResponse, responses=not_found)
 def update_service(
-    service_id: int,
+    service_id: Id,
     data: ServiceUpdate,
     session: Annotated[Session, Depends(get_session)],
 ) -> ServiceResponse:

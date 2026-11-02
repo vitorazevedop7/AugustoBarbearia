@@ -10,6 +10,7 @@ from app.auth.dependencies import require_admin
 from app.clock import utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.barbers import service
 from app.modules.barbers.models import Barber
 from app.modules.barbers.schemas import (
@@ -58,7 +59,7 @@ def create_barber(
 
 @router.get("/{barber_id}", response_model=BarberResponse, responses=not_found)
 def get_barber(
-    barber_id: int,
+    barber_id: Id,
     session: Annotated[Session, Depends(get_session)],
 ) -> BarberResponse:
     return to_response(service.get_barber(session, barber_id))
@@ -70,7 +71,7 @@ def get_barber(
     responses={**not_found, 409: {"model": ErrorResponse}},
 )
 def update_barber(
-    barber_id: int,
+    barber_id: Id,
     data: BarberUpdate,
     session: Annotated[Session, Depends(get_session)],
     now: Annotated[datetime, Depends(utc_now)],

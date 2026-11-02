@@ -2,13 +2,14 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import current_user, require_admin
 from app.auth.schemas import CurrentUser
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.customers import service
 from app.modules.customers.dependencies import current_customer
 from app.modules.customers.models import Customer
@@ -27,9 +28,6 @@ router = APIRouter(
     responses={401: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 profile_responses: dict[int | str, dict[str, object]] = {403: {"model": ErrorResponse}}
-
-# Maior valor de uma coluna `integer`: ids acima disso são 404, não erro do banco.
-CustomerId = Annotated[int, Path(ge=1, le=2_147_483_647)]
 
 admin_router = APIRouter(
     prefix="/admin/customers",
@@ -121,7 +119,7 @@ def create_customer(
     responses={404: {"model": ErrorResponse}},
 )
 def get_customer(
-    customer_id: CustomerId,
+    customer_id: Id,
     session: Annotated[Session, Depends(get_session)],
 ) -> CustomerResponse:
     return to_response(service.get_customer(session, customer_id))
@@ -133,7 +131,7 @@ def get_customer(
     responses={404: {"model": ErrorResponse}, 409: {"model": ErrorResponse}},
 )
 def update_customer(
-    customer_id: CustomerId,
+    customer_id: Id,
     data: CustomerUpdate,
     session: Annotated[Session, Depends(get_session)],
 ) -> CustomerResponse:

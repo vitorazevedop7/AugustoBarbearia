@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.clock import utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
+from app.ids import Id
 from app.modules.availability import service
 from app.modules.availability.schemas import (
     AvailabilityResponse,
@@ -25,8 +26,8 @@ router = APIRouter(tags=["Disponibilidade"])
     responses={404: {"model": ErrorResponse}},
 )
 def get_availability(
-    barber_id: int,
-    service_id: int,
+    barber_id: Id,
+    service_id: Id,
     day: Annotated[
         dt.date, Query(alias="date", description="Data local de São Paulo.")
     ],
@@ -51,8 +52,8 @@ def get_availability(
     responses={404: {"model": ErrorResponse}},
 )
 def get_available_days(
-    barber_id: int,
-    service_id: int,
+    barber_id: Id,
+    service_id: Id,
     session: Annotated[Session, Depends(get_session)],
     now: Annotated[dt.datetime, Depends(utc_now)],
 ) -> AvailableDaysResponse:
