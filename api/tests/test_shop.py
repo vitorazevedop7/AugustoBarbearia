@@ -76,15 +76,38 @@ def test_rn02_aceita_horas_sem_segundos(admin: TestClient) -> None:
             {"weekday": 5, "opens_at": "09:00", "closes_at": "09:00"},
             "No sábado, a abertura precisa ser antes do fechamento.",
         ),
-        (
-            {"weekday": 6, "opens_at": "09:00", "closes_at": None},
-            "No domingo, a abertura precisa ser antes do fechamento.",
-        ),
     ],
 )
 def test_rn02_abertura_precisa_ser_antes_do_fechamento(
     admin: TestClient, client: TestClient, day: dict[str, object], message: str
 ) -> None:
+    week: list[dict[str, object]] = [*WEEK]
+    week[int(str(day["weekday"]))] = day
+
+    response = admin.put("/admin/business-hours", json=week)
+
+    assert response.status_code == 422
+    assert response.json() == {"code": "INVALID_BUSINESS_HOURS", "message": message}
+    assert client.get("/public/shop").json()["business_hours"] == WEEK
+
+
+@pytest.mark.parametrize(
+    ("day", "message"),
+    [
+        (
+            {"weekday": 0, "opens_at": "10:00", "closes_at": None},
+            "Na segunda-feira, informe o horário de fechamento.",
+        ),
+        (
+            {"weekday": 6, "opens_at": None, "closes_at": "13:00"},
+            "No domingo, informe o horário de abertura.",
+        ),
+    ],
+)
+def test_rn02_dia_aberto_precisa_das_duas_horas(
+    admin: TestClient, client: TestClient, day: dict[str, object], message: str
+) -> None:
+    """Só uma das horas preenchida: a mensagem diz qual falta (#158)."""
     week: list[dict[str, object]] = [*WEEK]
     week[int(str(day["weekday"]))] = day
 

@@ -54,7 +54,7 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 **CA-4 — Abertura depois do fechamento (RN-02)**
 - **Dado** a administração autenticada
 - **Quando** envia um dia com abertura 19:00 e fechamento 10:00 (ou com só um dos dois preenchido)
-- **Então** a API responde `422` com `code` = `INVALID_BUSINESS_HOURS` e uma mensagem que cita o dia ("Na segunda-feira, a abertura precisa ser antes do fechamento."). Nada é gravado.
+- **Então** a API responde `422` com `code` = `INVALID_BUSINESS_HOURS` e uma mensagem que cita o dia e o problema: "Na segunda-feira, a abertura precisa ser antes do fechamento." para a ordem, e "Na segunda-feira, informe o horário de fechamento." (ou "de abertura") quando falta uma das horas (#158). Nada é gravado.
 
 **CA-5 — Semana incompleta (RN-02)**
 - **Dado** a administração autenticada
