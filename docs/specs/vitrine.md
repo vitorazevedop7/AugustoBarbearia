@@ -240,7 +240,7 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
 
 ## Imagem de compartilhamento (#132)
 
-- A home publica `og:image` absoluto, resolvido a partir de `BETTER_AUTH_URL`.
-- `GET /opengraph-image` responde PNG 1200×630 com `hero.jpg` escurecido, logo e AUGUSTO BARBEARIA em Barlow 900. Nenhuma foto nova é gerada.
-- A fonte local `public/fonts/Barlow-Black.ttf` acompanha sua licença OFL. O preparo standalone inclui fonte, hero e logo no Docker, sem chamadas externas para gerar a prévia.
+- Todas as rotas herdam do layout raiz o `og:image` absoluto, resolvido a partir de `BETTER_AUTH_URL` (`siteUrl`, em `src/lib/site-url.ts`, volta para `http://localhost:3000` se a variável faltar ou vier sem protocolo), além de `og:site_name`, `og:locale` e `twitter:card` `summary_large_image`.
+- `GET /opengraph-image` responde PNG 1200×630, com menos de 300 KB (o WhatsApp descarta prévias maiores), com o fundo `public/images/vitrine/og-background.jpg` (o hero reduzido a 1200×630, com o escurecimento já aplicado no arquivo, pois a foto cheia sob um overlay gera um PNG de ~700 KB), logo e AUGUSTO BARBEARIA em Barlow 900. Nenhuma foto nova é gerada.
+- A fonte local `public/fonts/Barlow-Black.ttf` acompanha sua licença OFL. O preparo standalone inclui fonte, fundo e logo no Docker, sem chamadas externas para gerar a prévia.
 - Aceite: `pnpm build && pnpm start` e a imagem Docker devolvem a imagem no tamanho declarado, e a home contém a meta tag `og:image`.

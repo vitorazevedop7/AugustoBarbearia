@@ -251,7 +251,7 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 | `EMAIL_FROM` | api, jobs | Remetente dos e-mails (ex.: `Augusto Barbearia <agenda@dominio>`); obrigatória quando há `RESEND_API_KEY` |
 | `WEB_BASE_URL` | api, jobs | Base dos links nos e-mails (ex.: "Meus agendamentos"); vazia ou ausente, `http://localhost:3000` |
 | `BETTER_AUTH_SECRET` | web | Assinatura da sessão |
-| `BETTER_AUTH_URL` | web | URL pública do site |
+| `BETTER_AUTH_URL` | web | URL pública do site, com protocolo (`https://...`); também é a base absoluta do `og:image` |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | web | Login com Google |
 | `API_INTERNAL_URL` | web | Endereço da API na rede privada |
 

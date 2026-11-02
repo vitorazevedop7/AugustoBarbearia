@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Barlow, Inter } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,10 +20,16 @@ const barlow = Barlow({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.BETTER_AUTH_URL || "http://localhost:3000"),
+  metadataBase: siteUrl(),
   title: "Augusto Barbearia",
   description:
     "Serviços com preço e duração, barbeiros, endereço, horário de funcionamento e contato da Augusto Barbearia. Agende seu horário pelo site.",
+  openGraph: {
+    siteName: "Augusto Barbearia",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({
