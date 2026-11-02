@@ -74,7 +74,7 @@ Administração. O cliente e o visitante não acessam (RN-70).
 - O estado fica na URL: `?data=AAAA-MM-DD&visao=dia|semana&barbeiro=<id>`. Valores inválidos são ignorados (data → hoje, visão → dia, barbeiro → todos).
 - Links "Anterior", "Hoje" e "Próximo" andam um dia na visão do dia e uma semana na visão da semana, mantendo a visão e o barbeiro.
 - Links "Dia" e "Semana" trocam a visão; links "Todos" e um por barbeiro (os ativos, mais o escolhido se estiver inativo) trocam o filtro. O escolhido tem `aria-current`.
-- Um formulário `GET` com um campo de data ("Ir para a data") leva a qualquer dia, mantendo a visão e o barbeiro.
+- Um formulário `GET` com um campo de data ("Ir para a data") leva a qualquer dia, mantendo a visão e o barbeiro. O campo sempre mostra o dia da agenda: depois de "Anterior", "Hoje" ou "Próximo", uma data digitada e não enviada é descartada (#153).
 - Tudo é link ou formulário `GET`: funciona sem JS.
 
 **CA-10 — Detalhe na tela**

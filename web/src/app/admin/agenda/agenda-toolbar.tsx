@@ -133,7 +133,11 @@ export function AgendaToolbar({
         ))}
       </Group>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        {/* O campo é não controlado: a `key` recria o formulário quando
+            Anterior, Hoje ou Próximo trocam o dia por navegação no cliente,
+            senão a data digitada e não enviada continuaria na tela (#153). */}
         <form
+          key={state.data}
           method="get"
           action={AGENDA_PATH}
           className="flex items-end gap-3"
