@@ -200,7 +200,7 @@ export default async function ClientesPage({
               </p>
               <NewCustomerLink />
             </div>
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {customers.map((customer) => (
                 <li
                   key={customer.id}

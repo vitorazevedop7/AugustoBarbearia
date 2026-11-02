@@ -351,7 +351,7 @@ O tom está em [identidade-visual.md](identidade-visual.md#tom). Para a interfac
 
 ## Acessibilidade (checklist de cada tela)
 
-- [ ] Funciona em 360px sem rolagem horizontal.
+- [ ] Funciona em 360px sem rolagem horizontal. Grade de cartões começa com `grid-cols-1` (`minmax(0, 1fr)`): sem colunas definidas, a coluna implícita cresce até o conteúdo, e um nome longo com `truncate` empurra a página para o lado (#150).
 - [ ] Contraste AA: texto 4,5:1, texto grande e bordas de controle 3:1.
 - [ ] Todo controle é alcançável por Tab, na ordem visual, com foco visível.
 - [ ] Um `h1` por página e títulos em ordem.
