@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { RevealObserver } from "@/components/reveal-observer";
 import { ServiceList } from "@/components/vitrine/catalog";
 import { PageHero } from "@/components/vitrine/page-hero";
-import { getPublicServices } from "@/lib/api/public";
+import { PhotoMosaic } from "@/components/vitrine/photo-mosaic";
+import { getPublicServices, getPublicShop } from "@/lib/api/public";
 import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 export const metadata: Metadata = {
@@ -13,7 +14,10 @@ export const metadata: Metadata = {
 
 /** Todos os serviços oferecidos (RN-61), cada um com a chamada para agendar. */
 export default async function ServicesPage() {
-  const services = await getPublicServices();
+  const [services, shop] = await Promise.all([
+    getPublicServices(),
+    getPublicShop(),
+  ]);
   return (
     <main id="main-content" tabIndex={-1} className="flex-1">
       <PageHero
@@ -23,6 +27,7 @@ export default async function ServicesPage() {
       >
         <ServiceList services={services} headingLevel="h2" />
       </PageHero>
+      <PhotoMosaic instagram={shop?.instagram} />
       <RevealObserver />
     </main>
   );

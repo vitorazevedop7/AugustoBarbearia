@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { RevealObserver } from "@/components/reveal-observer";
 import { BarberList } from "@/components/vitrine/catalog";
 import { PageHero } from "@/components/vitrine/page-hero";
-import { getPublicBarbers } from "@/lib/api/public";
+import { PhotoMosaic } from "@/components/vitrine/photo-mosaic";
+import { getPublicBarbers, getPublicShop } from "@/lib/api/public";
 import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 export const metadata: Metadata = {
@@ -13,7 +14,10 @@ export const metadata: Metadata = {
 
 /** A equipe ativa (RN-60), cada barbeiro com a chamada para agendar com ele. */
 export default async function BarbersPage() {
-  const barbers = await getPublicBarbers();
+  const [barbers, shop] = await Promise.all([
+    getPublicBarbers(),
+    getPublicShop(),
+  ]);
   return (
     <main id="main-content" tabIndex={-1} className="flex-1">
       <PageHero
@@ -23,6 +27,7 @@ export default async function BarbersPage() {
       >
         <BarberList barbers={barbers} headingLevel="h2" fullBio />
       </PageHero>
+      <PhotoMosaic instagram={shop?.instagram} />
       <RevealObserver />
     </main>
   );

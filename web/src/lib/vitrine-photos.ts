@@ -73,4 +73,34 @@ export const vitrinePhotos = {
     width: 2400,
     height: 1350,
   },
+  mosaicOne: {
+    src: "/images/vitrine/mosaico-1.jpg",
+    alt: "Lavagem de cabelo, com o cliente visto de costas",
+    width: 1200,
+    height: 1200,
+  },
+  mosaicTwo: {
+    src: "/images/vitrine/mosaico-2.jpg",
+    alt: "Pós-barba nas mãos do barbeiro",
+    width: 1200,
+    height: 1200,
+  },
+  mosaicThree: {
+    src: "/images/vitrine/mosaico-3.jpg",
+    alt: "Nuca com cabelo penteado com pomada",
+    width: 1200,
+    height: 1200,
+  },
+  mosaicFour: {
+    src: "/images/vitrine/mosaico-4.jpg",
+    alt: "Detalhe cromado de uma cadeira de barbeiro",
+    width: 1200,
+    height: 1200,
+  },
+  mosaicHighlight: {
+    src: "/images/vitrine/mosaico-destaque.jpg",
+    alt: "Corte social pronto, visto de lado",
+    width: 1600,
+    height: 1600,
+  },
 } satisfies Record<string, VitrinePhoto>;

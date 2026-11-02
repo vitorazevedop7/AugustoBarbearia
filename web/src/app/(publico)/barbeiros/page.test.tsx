@@ -1,12 +1,27 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { getPublicBarbers } from "@/lib/api/public";
-import { barbers } from "@/test/vitrine-data";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getPublicBarbers, getPublicShop } from "@/lib/api/public";
+import { barbers, shop } from "@/test/vitrine-data";
 import BarbersPage from "./page";
 
-vi.mock("@/lib/api/public", () => ({ getPublicBarbers: vi.fn() }));
+vi.mock("@/lib/api/public", () => ({
+  getPublicBarbers: vi.fn(),
+  getPublicShop: vi.fn(),
+}));
 
 describe("página de barbeiros — RN-60", () => {
+  beforeEach(() => vi.mocked(getPublicShop).mockResolvedValue(shop));
+
+  it("fecha a equipe com o mosaico e omite Instagram sem cadastro", async () => {
+    vi.mocked(getPublicBarbers).mockResolvedValue(barbers);
+    render(await BarbersPage());
+    const mosaic = screen.getByRole("region", { name: "Nosso trabalho" });
+    expect(within(mosaic).getAllByRole("img")).toHaveLength(5);
+    expect(within(mosaic).queryByRole("link")).toBeNull();
+    expect(mosaic.previousElementSibling).toContainElement(
+      screen.getAllByRole("article")[0],
+    );
+  });
   it("mostra a foto decorativa no topo e preserva a faixa parcial lisa", async () => {
     vi.mocked(getPublicBarbers).mockResolvedValue(barbers);
 
