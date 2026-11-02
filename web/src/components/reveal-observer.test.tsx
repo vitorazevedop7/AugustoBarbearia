@@ -6,6 +6,7 @@ import { RevealObserver } from "./reveal-observer";
 function stubBrowser({ reducedMotion }: { reducedMotion: boolean }) {
   const observe = vi.fn();
   const unobserve = vi.fn();
+  const options = vi.fn();
   const callback: {
     current?: (entries: Partial<IntersectionObserverEntry>[]) => void;
   } = {};
@@ -14,8 +15,10 @@ function stubBrowser({ reducedMotion }: { reducedMotion: boolean }) {
     class {
       constructor(
         handler: (entries: Partial<IntersectionObserverEntry>[]) => void,
+        observerOptions: IntersectionObserverInit,
       ) {
         callback.current = handler;
+        options(observerOptions);
       }
       observe = observe;
       unobserve = unobserve;
@@ -26,7 +29,7 @@ function stubBrowser({ reducedMotion }: { reducedMotion: boolean }) {
     "matchMedia",
     vi.fn(() => ({ matches: reducedMotion })),
   );
-  return { observe, unobserve, callback };
+  return { observe, unobserve, callback, options };
 }
 
 /** Um bloco acima da dobra e um abaixo de cada preset (o jsdom não calcula layout). */
@@ -84,6 +87,16 @@ describe("RevealObserver", () => {
     }
     expect(observe).toHaveBeenCalledTimes(4);
     expect(observe).not.toHaveBeenCalledWith(above);
+  });
+
+  it("antecipa a entrada com margem fixa, sem esperar uma fração do card alto", () => {
+    const { options } = stubBrowser({ reducedMotion: false });
+    renderBlocks();
+
+    expect(options).toHaveBeenCalledExactlyOnceWith({
+      rootMargin: "0px 0px 96px 0px",
+      threshold: 0,
+    });
   });
 
   it("mantém o preset em data-reveal e grava o estado à parte", () => {

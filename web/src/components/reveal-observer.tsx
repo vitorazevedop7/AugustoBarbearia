@@ -37,7 +37,9 @@ export function RevealObserver() {
           }
         }
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.15 },
+      // Antecipa a entrada sem depender da altura do card. Os 96px também
+      // compensam o deslocamento inicial do preset rise nos cards altos.
+      { rootMargin: "0px 0px 96px 0px", threshold: 0 },
     );
 
     for (const element of document.querySelectorAll<HTMLElement>(
