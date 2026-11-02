@@ -143,9 +143,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 
 ### 2026-11-02 — Fotos placeholder nas novas áreas da vitrine
 - **Com:** registro interno. Decisão do Vitor como product owner (issue #125, autorizada no pedido de execução das issues #125–#132)
-- **Canal:** chat de desenvolvimento
+- **Canal:** —
 - **Fatos e decisões:**
   - **D14.** A D10 e a D12, de 2026-10-29, passam a abranger a galeria "Nosso trabalho" da página inicial (4 fotos), a faixa de agendamento (1), a seção "Como funciona" (2), os heros de `/servicos` e `/barbeiros` (2) e o mosaico no fim dessas páginas internas (5). Até a chegada das fotos reais (P10), essas áreas usam **fotos fictícias geradas por IA**, seguindo a identidade clássica e sóbria e a paleta das fotos existentes. Não retratam a Augusto Barbearia nem os proprietários, não vêm de banco de imagem nem do Beard X e serão substituídas pelas reais. Não podem conter rostos identificáveis, texto, logotipos ou rótulos legíveis.
   - Os heros internos com foto são uma divergência consciente do Beard X, onde são faixas lisas. A faixa de agendamento usa foto fixa apenas no desktop, sem vídeo nem botão de play. O mosaico se chama "Nosso trabalho", sem simular posts; o link "Ver mais no Instagram" só aparece quando o perfil está cadastrado.
   - Produtos, depoimentos, vídeo e publicações fictícias não entram. O texto de "Como funciona" descreve apenas o fluxo existente (D11), o lembrete com a condição da RN-51 e o prazo de cancelamento e remarcação da RN-14. O [plano de imagens](../planos/imagens-vitrine.md) detalha arquivos, proporções e implementação.
-- **Pendência mantida:** P10 (substituição das fotos fictícias pelas reais).
+- **Pendências geradas:** nenhuma; a P10 (substituição das fotos fictícias pelas reais) continua aberta.
