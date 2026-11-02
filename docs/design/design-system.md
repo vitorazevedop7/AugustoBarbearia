@@ -96,8 +96,23 @@ As regras completas estão em [identidade-visual.md](identidade-visual.md#movime
 ### Ícones e imagens
 
 - **Ícones:** SVG inline próprio, traço de 2px em `currentColor`, tamanho de 16, 20 ou 24px (`size-4`, `size-5`, `size-6`), com `aria-hidden="true"` quando há texto ao lado. Não adotamos biblioteca de ícones por enquanto.
-- **Fotos:** sempre `next/image`, com `alt` descritivo (ou `alt=""` se decorativas) e proporção fixa: 6:7 para o card de barbeiro da vitrine (4:5 na administração e no agendamento), 3:2 para o "Sobre" e galeria, e 16:9 para o arquivo de fundo do hero da página inicial, recortado com `object-cover` conforme a tela. O hover das fotos em moldura dá zoom de 1,1 com `overflow-hidden`, em 300ms `ease`, respeitando `prefers-reduced-motion`. Texto sobre foto exige um fundo escuro atrás do próprio texto: `bg-ink/70` no hero e o bloco `ink/80`–`ink/90` do `BarberCard`. No hero, a foto é decorativa, usa `fill`, `sizes="100vw"`, `preload` e `fetchPriority="high"` (o `priority` está obsoleto desde o Next 16); a cascata de entrada fica só no conteúdo. O hero da página inicial tem `min-h-svh`; no desktop, a foto fica numa camada `lg:fixed` recortada pelo `[clip-path:inset(0)]` do hero, e no celular rola junto.
-- Ainda não há fotos reais (pendência P10). Até lá, os três proprietários usam **fotos fictícias geradas por IA** como placeholder (D10), em JPEG 4:5: `web/public/images/barbeiros/edvaldo.jpg`, `lauro.jpg` e `manoel.jpg` (S3.10, #63). A D12 estende essa escolha ao hero e ao "Sobre" da página inicial (#72): `web/public/images/vitrine/hero.jpg` (16:9, pelo menos 2400×1350) e `sobre.jpg` (3:2, pelo menos 1800×1200), com até 400 KB cada. As imagens seguem a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo. Elas não retratam a Augusto Barbearia nem os proprietários, não vêm de banco de imagem e serão substituídas pelas fotos reais. O barbeiro sem foto continua mostrando um quadro neutro com a inicial. O "Sobre" só mostra sua foto quando o texto estiver preenchido: acima no celular e ao lado no desktop, com o texto fora da imagem. Cards de serviço e heros internos continuam sem foto; galeria, depoimentos e Instagram aguardam material real.
+- **Fotos:** sempre `next/image`, com `alt` descritivo (ou `alt=""` se decorativas), `object-cover` e moldura de proporção fixa para reservar o espaço antes da carga. As proporções são:
+
+  | Uso | Proporção |
+  |---|---|
+  | Card de barbeiro na vitrine | 6:7 (arquivo 4:5; administração e agendamento mantêm 4:5) |
+  | "Sobre" | 3:2 |
+  | Galeria: laterais / centro superior / centro inferior | 2:3 / 5:4 / 1:1 no desktop; todas em 3:4 no celular |
+  | "Como funciona": foto grande e sobreposta | 7:8 |
+  | Mosaico | 1:1 |
+  | Fundos do hero, faixa de agendamento e heros internos | Arquivos 16:9, recortados conforme a tela |
+
+- O hover das fotos em moldura dá zoom de 1,1 com `overflow-hidden`, em 300ms `ease-standard`, respeitando `prefers-reduced-motion`. As novas molduras usam `data-reveal="zoom"`; os textos, `data-reveal="rise"`. Nada fica escondido quando não há JS.
+- **Texto sobre foto:** overlay `bg-ink/70` no hero e na faixa de agendamento; `bg-ink/80` nos títulos das páginas internas; bloco `ink/80`–`ink/90` no `BarberCard`. Todo texto precisa manter contraste AA, inclusive sobre o ponto mais claro da foto.
+- **Prioridade:** só a foto decorativa do hero inicial usa `preload` e `fetchPriority="high"`, com `fill` e `sizes="100vw"` (o `priority` está obsoleto desde o Next 16). Todas as demais fotos mantêm o lazy padrão de `next/image` e um `sizes` adequado à grade. A cascata de entrada do hero fica apenas no conteúdo.
+- **Foto fixa:** no hero inicial e na faixa de agendamento, a seção tem `[clip-path:inset(0)]`, a camada da foto é `absolute inset-0 lg:fixed` e o overlay acompanha a camada. No celular, rola junto; no desktop, fica parada e recortada pela seção. O hero tem `min-h-svh`; a faixa usa `py-section` e `lg:min-h-[70svh]`.
+- **Placeholders (P10):** os barbeiros usam fotos fictícias geradas por IA desde a D10 (#63), em `web/public/images/barbeiros/`; a D12 (#72) cobre `web/public/images/vitrine/hero.jpg` (16:9, pelo menos 2400×1350) e `sobre.jpg` (3:2, pelo menos 1800×1200), até 400 KB cada. A D14 (#125) estende a escolha à galeria, faixa de agendamento, "Como funciona", heros internos e mosaico, com arquivos e limites definidos no [plano](../planos/imagens-vitrine.md#4-especificação-de-cada-imagem). São JPEGs progressivos, sRGB, sem EXIF e com qualidade próxima de 80, revisados quanto a anatomia, ferramentas e paleta.
+- As fotos fictícias não retratam a Augusto Barbearia nem os proprietários, não vêm de banco de imagem nem do Beard X e serão substituídas pelas reais. Não contêm rostos identificáveis, texto, logotipos nem rótulos legíveis. O barbeiro sem foto mantém o quadro neutro com a inicial. O "Sobre" só aparece com texto preenchido, com o texto fora da foto. Cards de serviço continuam sem foto; depoimentos e conteúdo real de Instagram aguardam material dos proprietários. O mosaico é uma composição de fotos, sem posts simulados e com link externo apenas quando `shop.instagram` existir.
 
 ## Componentes
 
@@ -115,6 +130,8 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Ornament`, `SectionHeading` | `ornament.tsx`, `section-heading.tsx` | Pronto |
 | `FloatingOrnament` | `floating-ornament.tsx` | Pronto (navalha, tesoura e pente nas bordas das seções, S4.06) |
 | `ServiceCard`, `ServiceItem`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
+| `FramedPhoto`, `FixedPhotoLayer` | `framed-photo.tsx`, `fixed-photo-layer.tsx` | Planejados (#126): moldura com zoom e camada fixa compartilhada |
+| `Gallery`, `BookingBand`, `HowItWorks`, `PhotoMosaic` | `components/vitrine/` | Planejados (#127–#131): seções com as fotos aprovadas na D14 |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
@@ -239,6 +256,14 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
   - Posição e tamanho vêm por `className`, sem `transform` (a entrada ao rolar o usa).
   - Só aparece a partir do `lg`: no celular e no tablet, o texto ocupa a largura toda e não sobra borda para decorar.
   - Na página inicial: navalha no "Sobre", tesoura nos serviços e pente na equipe. Uma seção, um ornamento.
+
+### Composição das novas seções da vitrine (D14)
+
+- A home segue hero (`ink`) → "Sobre" opcional (`paper`) → serviços → galeria → faixa de agendamento (foto escura) → equipe (`paper`) → "Como funciona" (`surface`) → horário e contato (`ink`). Serviços e galeria alternam `surface`/`paper` com o "Sobre" preenchido e `paper`/`surface` sem ele, para evitar duas faixas claras iguais consecutivas.
+- **Galeria:** 2 colunas, gap de 12px no celular; 3 colunas e gap de 28px no `lg`, com as laterais 2:3 em degrau de `mt-20` e as duas fotos centrais empilhadas (5:4 e 1:1). Fecha com "Agendar horário".
+- **Como funciona:** foto grande acima do texto no celular; no `lg`, texto à esquerda e foto à direita, sangrando dentro de uma seção com `overflow-hidden`. A foto menor tem aproximadamente 70% da largura, borda `surface` de 8px e só aparece a partir de `md`. A sobreposição não deve encobrir o texto nem causar rolagem horizontal.
+- **Heros internos:** foto opcional apenas na faixa do título, com overlay `bg-ink/80`. A faixa parcial atrás do começo do conteúdo continua lisa. Sem foto, o `PageHero` preserva o comportamento existente.
+- **Mosaico:** destaque em largura total seguido de 4 fotos em 2×2 no celular; no `lg`, grade `1fr 2fr 1fr`, com o destaque no centro ocupando 2 linhas e gap de 28px. "Ver mais no Instagram" abre o perfil cadastrado em outra aba, com `rel="noopener noreferrer"`.
 
 ## Padrões
 

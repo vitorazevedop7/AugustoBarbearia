@@ -1,11 +1,11 @@
 # Spec — Vitrine pública
 
-- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo), #88 (login sem JavaScript)
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo), #88 (login sem JavaScript), #125 (D14 e plano de imagens), #126–#131 (base comum, galeria, faixa, "Como funciona", heros internos e mosaico)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
-- **Status:** implementada
+- **Status:** vitrine base implementada; expansão de fotos especificada pela D14 (#125), com implementação nas #126–#131
 
 ## Contexto
-Hoje a página inicial diz "Em construção". O visitante, sem login e pelo celular, precisa conhecer a barbearia: os serviços com preço e duração, os barbeiros com foto e apresentação, o endereço, o horário de funcionamento e o contato. Em todo lugar há uma chamada para agendar. A vitrine segue a estrutura da referência Beard X ([referencia-beard-x.md](../design/referencia-beard-x.md)), com os nossos tokens e o nosso código.
+O visitante, sem login e pelo celular, precisa conhecer a barbearia: os serviços com preço e duração, os barbeiros com foto e apresentação, o endereço, o horário de funcionamento e o contato. Em todo lugar há uma chamada para agendar. A vitrine segue a estrutura da referência Beard X ([referencia-beard-x.md](../design/referencia-beard-x.md)), com os nossos tokens e o nosso código.
 
 A vitrine só mostra dados do sistema: a barbearia e o horário de funcionamento (S3.02), os barbeiros (S3.03) e os serviços (S3.04). Ela não inventa fatos sobre a barbearia nem sobre os proprietários. Quando um dado opcional não foi preenchido pela administração (frase de destaque, sobre, endereço, contato, apresentação do barbeiro), o bloco dele não aparece ou dá lugar a um texto genérico neutro.
 
@@ -24,6 +24,7 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - RN-05, item 5 — só se oferece um serviço com um barbeiro ativo que o realiza
 - RN-70 — Perfis e permissões (qualquer um vê a vitrine)
 - RN-02 — Horário de funcionamento (só leitura)
+- RN-14 e RN-51 — prazo de alterações e condição do lembrete, descritos em "Como funciona" (sem mudar regras)
 
 ## O que a vitrine mostra
 - **Serviços:** os serviços ativos, cada um com os barbeiros **ativos** que o realizam.
@@ -68,12 +69,12 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 **CA-7 — Página inicial**
 - **Dado** um visitante em `/`, numa tela de 360px
 - **Quando** a página carrega
-- **Então** vê, nesta ordem: o hero com o nome da barbearia e a chamada "Agendar horário"; o "Sobre", se preenchido; até 4 serviços com preço e duração e o link para todos; a equipe com foto (ou a inicial) e o link para a página dos barbeiros; e o bloco de horário e contato.
+- **Então** vê, nesta ordem: o hero com o nome da barbearia e a chamada "Agendar horário"; o "Sobre", se preenchido; até 4 serviços com preço e duração e o link para todos; a galeria "Nosso trabalho"; a faixa "Agende pelo celular"; a equipe com foto (ou a inicial) e o link para a página dos barbeiros; "Como funciona"; e o bloco de horário e contato.
 
 **CA-8 — Páginas de serviços e de barbeiros**
 - **Dado** um visitante em `/servicos` ou `/barbeiros`
 - **Quando** a página carrega
-- **Então** vê todos os serviços (com quem realiza) ou todos os barbeiros (com a apresentação), cada um com a chamada para agendar.
+- **Então** vê todos os serviços (com quem realiza) ou todos os barbeiros (com a apresentação), cada um com a chamada para agendar. A faixa do título tem uma foto decorativa com overlay escuro; depois da listagem, o mosaico "Nosso trabalho" fecha a página antes do rodapé.
 
 **CA-9 — Inativar tira da vitrine (RN-60, RN-61)**
 - **Dado** um barbeiro ou um serviço que a administração acabou de inativar
@@ -111,6 +112,46 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - **Então** a faixa escura do título continua atrás do começo do conteúdo (128, 192 e 240px), e o card de serviços ou as fotos da equipe a atravessam, sem rolagem horizontal. No desktop, os três cards em degraus começam dentro da faixa.
 - O estado vazio e o aviso de falha ficam legíveis sobre a faixa, porque têm fundo claro.
 
+**CA-15 — Base compartilhada e comportamento preservado (#126)**
+- **Dado** o hero e o "Sobre" existentes, em 360px e 1280px
+- **Quando** as fotos passam a ser declaradas em `vitrine-photos.ts` e a usar `FixedPhotoLayer` e `FramedPhoto`
+- **Então** o aspecto visual é preservado, incluindo o hero fixo apenas no desktop, a condição do "Sobre", a proporção 3:2 e o zoom que respeita `prefers-reduced-motion`.
+
+**CA-16 — Galeria "Nosso trabalho" (#127, D14)**
+- **Dado** um visitante na home, com ou sem o texto do "Sobre"
+- **Quando** chega à seção depois dos serviços
+- **Então** vê 4 fotos com `alt` descritivo e "Agendar horário" para `/agendar`: em 360px, grade de 2 colunas com gap de 12px e molduras 3:4; no `lg`, 3 colunas com gap de 28px, laterais 2:3 em degrau e centro com 5:4 sobre 1:1.
+- Serviços e galeria alternam `surface`/`paper` quando há "Sobre" e `paper`/`surface` sem ele. Nenhuma combinação cria duas seções claras vizinhas do mesmo tom.
+
+**CA-17 — Faixa de agendamento (#128, D14)**
+- **Dado** um visitante entre a galeria e a equipe
+- **Quando** rola a home
+- **Então** vê o ornamento, "Agende pelo celular", o texto sobre escolher barbeiro, serviço e horário e receber confirmação por e-mail, e "Agendar horário". A foto decorativa usa posição 55% 50% e overlay `bg-ink/70`, com texto em contraste AA.
+- A foto fica fixa só no `lg`; no celular, rola junto. A seção usa `py-section` e, no desktop, no mínimo 70svh. Não há vídeo nem botão de play.
+
+**CA-18 — Como funciona (#129, RN-14, RN-51, D11)**
+- **Dado** um visitante entre a equipe e "Horário e contato"
+- **Quando** lê "Como funciona"
+- **Então** vê os passos barbeiro → serviço → dia e horário → confirmação com a conta Google; o lembrete por e-mail cerca de um dia antes, apenas para reservas feitas com pelo menos 24 horas de antecedência; e a opção de cancelar ou remarcar pelo site até 2 horas antes. O texto não promete lembrete para reservas mais próximas do horário.
+- As fotos 7:8 têm `alt` descritivo. No celular só aparece a grande, acima do texto. A menor aparece a partir de `md`, sobreposta com borda `surface` de 8px; no `lg`, a grande sangra para a direita da coluna. A seção recorta a sangria e não causa rolagem horizontal em 360px.
+
+**CA-19 — Foto nos heros internos (#130, D14)**
+- **Dado** um `PageHero` com ou sem `photo`
+- **Quando** renderiza o topo de `/servicos` ou `/barbeiros`
+- **Então** a foto, quando presente, fica somente atrás do título e da descrição, decorativa e sob overlay `bg-ink/80`, mantendo contraste AA. A faixa parcial continua lisa; sem foto, o comportamento atual é preservado.
+
+**CA-20 — Mosaico das páginas internas (#131, D14)**
+- **Dado** um visitante no fim de `/servicos` ou `/barbeiros`
+- **Quando** chega ao mosaico "Nosso trabalho"
+- **Então** vê 5 fotos com `alt` descritivo: destaque em largura total e 4 fotos em 2×2 no celular; no `lg`, grade `1fr 2fr 1fr` em 2 linhas, destaque central ocupando as duas linhas e gap de 28px, com molduras quadradas.
+- "Ver mais no Instagram" aparece somente com `shop.instagram` preenchido, abrindo o perfil em outra aba com `rel="noopener noreferrer"`. Sem o perfil, não há link; a seção não simula posts nem se chama "Instagram".
+
+**CA-21 — Qualidade e carga das novas fotos (#127–#131)**
+- **Dado** as fotos aprovadas na D14
+- **Quando** são revisadas e usadas em 360px e 1280px
+- **Então** respeitam as dimensões e os pesos do [plano](../planos/imagens-vitrine.md#4-especificação-de-cada-imagem), em JPEG progressivo sRGB sem EXIF, sem rosto identificável, texto, logo ou rótulo legível e com anatomia e ferramentas coerentes com as fotos existentes.
+- Fora do hero inicial, todas têm lazy padrão, `sizes` correspondente ao layout e espaço reservado pela moldura, sem salto de layout ou rolagem horizontal. Fotos em moldura usam `data-reveal="zoom"`; textos usam `rise`; a página funciona sem JS e com menos movimento.
+
 ## Fluxo e telas
 Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Elas chegam inteiras, sem esqueleto de carregamento (ver [Carregamento e cache](#carregamento-e-cache)).
 
@@ -124,13 +165,16 @@ Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components qu
 - **`/`:**
   1. **Hero** de tela inteira (foto de fundo com overlay `ink/70`, cabeçalho por cima; no desktop, a foto fica parada enquanto a página rola): ornamento, o nome da barbearia como `h1`, a frase de destaque (ou um texto genérico sobre agendar pelo celular), "Agendar horário" (primário) e "Ver serviços" (`outline-light`). A cascata de entrada continua apenas no conteúdo sobre a foto.
   2. **Sobre** (só se o texto "sobre" estiver preenchido): foto 3:2 acima do texto no celular e ao lado dele no desktop, sem texto sobreposto à imagem. A faixa de números do Beard X não entra: não há dado real (ver [Dúvidas em aberto](#dúvidas-em-aberto)).
-  3. **Serviços:** até 4 serviços num card branco único (S4.06, #79), em 1 coluna no celular e 2 a partir do `md`. Cada item tem nome e preço na mesma linha, duração, descrição, quem realiza e "Agendar". Embaixo, "Ver todos os serviços".
-  4. **Equipe:** os barbeiros ativos em cards com foto 6:7 (ou a inicial), o nome e a primeira linha da apresentação sobre a foto, e "Agendar com <nome>" abaixo dela. No desktop, os cards ficam em degraus (S4.06, #79). Embaixo, "Conhecer a equipe".
+  3. **Serviços (`surface` com "Sobre", `paper` sem ele):** até 4 serviços num card branco único (S4.06, #79), em 1 coluna no celular e 2 a partir do `md`. Cada item tem nome e preço na mesma linha, duração, descrição, quem realiza e "Agendar". Embaixo, "Ver todos os serviços".
+  4. **Galeria "Nosso trabalho" (`paper` com "Sobre", `surface` sem ele):** 4 fotos no layout assimétrico descrito em CA-16 e a chamada "Agendar horário".
+  5. **Faixa de agendamento:** foto escura fixa só no desktop, ornamento, "Agende pelo celular", texto sobre o fluxo e confirmação por e-mail e a chamada "Agendar horário".
+  6. **Equipe (`paper`):** os barbeiros ativos em cards com foto 6:7 (ou a inicial), o nome e a primeira linha da apresentação sobre a foto, e "Agendar com <nome>" abaixo dela. No desktop, os cards ficam em degraus (S4.06, #79). Embaixo, "Conhecer a equipe".
   - **Ornamentos** (S4.06, #79): uma navalha no "Sobre", uma tesoura nos serviços e um pente na equipe, nas bordas das seções e atrás do conteúdo. São só decoração e aparecem a partir de 1024px.
-  5. **Horário e contato** (faixa `ink`, âncora `#contato`): o horário de funcionamento por dia, agrupando os dias iguais ("Segunda a sexta · 10h às 19h", "Domingo · Fechado"); o endereço com "Como chegar" (busca no Google Maps); e os contatos preenchidos (WhatsApp, telefone, Instagram, e-mail). Sem endereço nem contato, só o horário aparece. Fecha com "Agendar horário".
+  7. **Como funciona (`surface`):** passos e condições das RN-14 e RN-51, com as fotos sobrepostas descritas em CA-18.
+  8. **Horário e contato** (faixa `ink`, âncora `#contato`): o horário de funcionamento por dia, agrupando os dias iguais ("Segunda a sexta · 10h às 19h", "Domingo · Fechado"); o endereço com "Como chegar" (busca no Google Maps); e os contatos preenchidos (WhatsApp, telefone, Instagram, e-mail). Sem endereço nem contato, só o horário aparece. Fecha com "Agendar horário".
 - **Páginas internas (S4.07, #80):** como no Beard X, a faixa `ink` do título (`PageHero`) continua numa faixa parcial atrás do começo do conteúdo, que o card ou as fotos atravessam. A faixa parcial é decoração (`aria-hidden`) atrás do conteúdo e não muda a posição dele.
-- **`/servicos`:** faixa `ink` com o título e o texto de apoio, e depois todos os serviços no mesmo card único da página inicial, atravessando a faixa parcial. Como no Beard X, cuja página de serviços repete o card da home: o visitante reconhece o bloco, a grade de 2 colunas comporta qualquer número de serviços, e cards separados repetiriam a moldura e a sombra a cada item, sem ganho de leitura.
-- **`/barbeiros`:** faixa `ink` com o título, e depois todos os barbeiros nos mesmos cards, em degraus no desktop. A faixa parcial tem 240px no desktop, mais que o maior degrau (145px), então as três fotos a atravessam. Aqui a apresentação sai da foto e aparece inteira abaixo dela, porque não há página própria de cada barbeiro.
+- **`/servicos`:** faixa `ink` com foto decorativa de bancada, overlay `bg-ink/80`, título e texto de apoio, e depois todos os serviços no mesmo card único da página inicial, atravessando a faixa parcial. Como no Beard X, cuja página de serviços repete o card da home: o visitante reconhece o bloco, a grade de 2 colunas comporta qualquer número de serviços, e cards separados repetiriam a moldura e a sombra a cada item, sem ganho de leitura. Depois da listagem, o mosaico "Nosso trabalho" aparece antes do rodapé.
+- **`/barbeiros`:** faixa `ink` com foto decorativa de três cadeiras vazias, overlay `bg-ink/80` e o título, e depois todos os barbeiros nos mesmos cards, em degraus no desktop. A faixa parcial tem 240px no desktop, mais que o maior degrau (145px), então as três fotos a atravessam. Aqui a apresentação sai da foto e aparece inteira abaixo dela, porque não há página própria de cada barbeiro. Depois da listagem, o mesmo mosaico "Nosso trabalho" fecha o conteúdo.
 - **Rodapé (todas as páginas):** passa a ler o horário de funcionamento e o contato de `GET /public/shop`, no lugar do horário fixo no código. Se a API falhar, o rodapé mostra só o nome e os links.
 
 ### Carregamento e cache
@@ -157,12 +201,14 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
 - **Texto sobre a foto** (S4.06, #79): o nome e a primeira linha da apresentação ficam num bloco `ink/80` a `ink/90` colado à base da foto, com uma faixa de 64px acima que esmaece até a foto. O bloco acompanha a altura do texto, e não da foto: com o nome em duas linhas, ele cresce junto. Assim o branco passa de 10:1 e o `on-ink-muted` de 5:1 sobre qualquer ponto da foto, inclusive o mais claro. Sem foto, a inicial fica acima do bloco, à vista.
 - Os três proprietários têm fotos fictícias como placeholder desde a S3.10 (#63, D10). Um barbeiro sem foto mostra no card o mesmo quadro neutro com a inicial da administração. O componente `BarberPhoto` passou para `components/ui/` e é usado pelos dois lados.
 - O hero da página inicial e o "Sobre a barbearia" usam fotos fictícias geradas por IA (#72, D12), até a substituição pelas fotos reais (P10). Elas combinam com as fotos dos barbeiros e com a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo. Não retratam a Augusto Barbearia nem os proprietários e não vêm de banco de imagem.
-- Os caminhos são constantes no código, sem cadastro, upload ou troca pela administração:
+- Os caminhos, `alt` e dimensões passam a ficar centralizados em `web/src/lib/vitrine-photos.ts` (#126), sem cadastro, upload ou troca pela administração:
   - `web/public/images/vitrine/hero.jpg`: interior de barbearia tradicional (cadeira, espelho e bancada), JPEG 16:9 de pelo menos 2400×1350, com até 400 KB. O assunto fica centralizado para preservar o foco no recorte vertical do celular.
   - `web/public/images/vitrine/sobre.jpg`: detalhe do trabalho (mãos, navalha ou tesoura), JPEG 3:2 de pelo menos 1800×1200, com até 400 KB.
 - **Hero:** `next/image` com `fill`, `object-cover`, `sizes="100vw"`, `preload` e `fetchPriority="high"`, porque é o LCP. A partir de 1024px, a imagem fica numa camada `fixed`, que o `clip-path: inset(0)` do hero recorta: ela fica parada enquanto o resto da página rola. É a técnica que funciona no Safari, que ignora `background-attachment: fixed`. No celular, a camada é comum e rola junto. A foto é decorativa (`alt=""`), com brilho reduzido (`brightness-75`) e overlay `bg-ink/70` para preservar o contraste AA de `text-surface` e `text-on-ink-muted`, inclusive sobre os pontos claros da foto. A foto e o overlay não entram na cascata de animação do conteúdo.
 - **Sobre:** `next/image` em moldura 3:2 com `overflow-hidden`, `alt` descritivo e zoom de 1,1 no hover, respeitando `prefers-reduced-motion`, como nas fotos de card. A imagem acompanha a condição do texto: a seção inteira só aparece quando `about` estiver preenchido. No desktop, foto e texto ficam lado a lado; no celular, a foto vem acima. O texto fica fora da foto, seguindo o Beard X.
-- Os cards de serviço continuam sem foto, e os heros de `/servicos` e `/barbeiros` continuam como faixas escuras, sem foto, com a faixa parcial (#80). Galeria, depoimentos e faixa de Instagram aguardam material real.
+- A D14 (#125) aprova mais 14 fotos fictícias para galeria, faixa de agendamento, "Como funciona", heros internos e mosaico. Aplicam-se as mesmas restrições da D12, acrescidas da proibição de rótulos legíveis. Não se usam fotos nem referências de imagem do Beard X. O [plano de imagens](../planos/imagens-vitrine.md) define cenas, arquivos, dimensões mínimas, limites de peso, textos alternativos e a revisão antes do uso.
+- `FramedPhoto` padroniza moldura, proporção fixa, lazy e zoom de 1,1 em 300ms `ease-standard`; o "Sobre" passa a usá-lo sem mudança visual. `FixedPhotoLayer` compartilha a camada fixa e o overlay entre hero e faixa de agendamento, com `[clip-path:inset(0)]` na seção.
+- Os cards de serviço continuam sem foto. Heros internos ganham foto só atrás do título; a faixa parcial continua lisa. O mosaico usa fotos fictícias, sem simular feed ou publicações de Instagram; só o link externo depende do perfil cadastrado. Depoimentos, vídeo e conteúdo real de redes sociais continuam aguardando material real.
 
 ## API
 | Método | Caminho | Quem | O que faz |
@@ -179,7 +225,7 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
 - O fluxo de agendamento (`/agendar`): S3.08 (#57).
 - As fotos placeholder dos barbeiros: entregues na S3.10 (#63).
 - Página própria de cada barbeiro (`/barbeiros/[slug]`) e "próximo horário livre" no card: decisões pendentes da referência, ficam para quando o agendamento existir.
-- Página de contato com FAQ (cancelamento até 2h antes, D6), galeria, depoimentos e Instagram embutido: não há material real ainda.
+- Página de contato com FAQ (cancelamento até 2h antes, D6), depoimentos, vídeo e Instagram embutido: não há material real ainda. A galeria e o mosaico de fotos fictícias estão cobertos pela D14; produtos e loja continuam fora do MVP.
 - Serviço em destaque escolhido pela administração: não há campo para isso. A página inicial mostra os primeiros 4 serviços, na ordem da API.
 - Mapa embutido: "Como chegar" abre a busca do endereço no Google Maps.
 

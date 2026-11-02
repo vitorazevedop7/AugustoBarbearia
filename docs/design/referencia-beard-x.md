@@ -1,7 +1,7 @@
 # Referência visual: Beard X
 
 > **O que é:** o reverse engineering do front-end que escolhemos como referência para a vitrine. Serve de base para o design system da Augusto Barbearia.
-> **Status:** análise de 2026-10-28, corrigida e completada com medições ao vivo (CSS real, dados das interações do Webflow e medições em 375 e 1440px) em 2026-10-31. A adaptação para a nossa identidade está em [identidade-visual.md](identidade-visual.md).
+> **Status:** análise de 2026-10-28, corrigida e completada com medições ao vivo (CSS real, dados das interações do Webflow e medições em 375 e 1440px) em 2026-10-31; inventário de imagens ampliado em 2026-11-02 (galeria, faixa, diferenciais e mosaico). A adaptação para a nossa identidade está em [identidade-visual.md](identidade-visual.md).
 
 ## Origem e licença
 
@@ -64,7 +64,7 @@
 | Agendamento, meus agendamentos, perfil | — (vem do Squire) | o fluxo inteiro, cards de agendamento, estados vazios |
 | Administração | só campos, badges e botões | todo o resto, a partir do design system |
 
-**Descartar:** loja, carrinho, blog, newsletter, formulário de contato, vídeo, slider de unidades. Depoimentos e Instagram ficam de fora até existir material real.
+**Descartar:** loja, carrinho, blog, newsletter, formulário de contato, vídeo, slider de unidades. Depoimentos e feed de Instagram ficam de fora até existir material real. A D14 permite fotos fictícias na galeria e no mosaico, sem simular publicações; a faixa de vídeo vira uma faixa de agendamento com foto.
 
 ## Movimento e imagens
 
@@ -99,6 +99,11 @@
 | Zoom de foto em card | Manter | `scale(1.1)` dentro de uma moldura com `overflow: hidden` (#79) |
 | Menu mobile | Manter | Painel escuro que desce em 400ms `ease`; `aria-expanded`, fecha com Esc e trava o scroll |
 | Ornamentos flutuantes | Manter, próprios | 2 ou 3 SVGs leves e `aria-hidden`, atrás do conteúdo (#79) |
+| Galeria assimétrica | Manter proporções e degraus | 4 fotos próprias, 2 colunas no celular; 3 no `lg`, laterais 2:3 em degrau e centro 5:4 + 1:1 (#127, D14) |
+| Faixa de vídeo | Adaptar para agendamento | Foto de ferramentas fixa só no desktop, overlay `ink/70`, texto sobre o fluxo e CTA; sem vídeo nem play (#128, D14) |
+| Diferenciais com fotos sobrepostas | Adaptar para "Como funciona" | Duas fotos 7:8 e passos reais do agendamento; nenhuma afirmação inventada sobre a barbearia (#129) |
+| Mosaico de Instagram | Adaptar para "Nosso trabalho" | 5 fotos próprias no fim de `/servicos` e `/barbeiros`; link externo apenas com perfil cadastrado, sem simular posts (#131) |
+| Heros internos lisos | Divergir conscientemente | Foto decorativa atrás do título, overlay `ink/80`; faixa parcial continua lisa (#130, D14) |
 | FAQ | Manter | `<details>` nativo |
 | Depoimentos | Se houver material | Carrossel com CSS scroll-snap, sem autoplay |
 | Parallax por script, marquee, lightbox, loader, dropdown, Lottie | Cortar | O fundo fixo do hero é só CSS |
@@ -126,6 +131,11 @@ Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz
 | Ornamentos | SVGs flutuantes nas bordas (110–180 KB cada) | Desde a #79: navalha, tesoura e pente em traço próprio, com menos de 1 KB cada, atrás do conteúdo e só a partir de 1024px | #79 |
 | Números | 2 números na seção Sobre | Sem números: não há dado real (pergunta aberta na [spec da vitrine](../specs/vitrine.md#dúvidas-em-aberto)) | — |
 | Páginas internas | Faixa escura parcial que fotos e cards atravessam | Igual desde a #80: o `PageHero` continua numa faixa `ink` de 128, 192 e 240px atrás do começo do conteúdo; o card de serviços e as fotos da equipe (inclusive o degrau de 145px) a atravessam | #80 |
+| Galeria | 4 fotos: laterais 2:3 em degrau, centro 5:4 + 1:1 | Especificada na D14: fotos fictícias próprias, grade 2×2 no celular e composição assimétrica no desktop | #125, #127 |
+| Faixa com fundo fixo | Foto de ferramentas, vídeo e CTA | Especificada como faixa de agendamento com foto fixa, sem vídeo nem botão de play | #125, #128 |
+| Diferenciais | Texto e 2 fotos 7:8 sobrepostas | "Como funciona" descreve o fluxo, o lembrete condicionado à antecedência e o prazo de alteração, com fotos próprias | #125, #129 |
+| Topo das páginas internas | Faixa escura lisa | Divergência aprovada na D14: foto só atrás do título, sob overlay `ink/80`; faixa parcial lisa preservada | #125, #130 |
+| Mosaico final | Instagram: grade `1fr 2fr 1fr`, destaque central em 2 linhas | "Nosso trabalho" em `/servicos` e `/barbeiros`, com fotos fictícias; link ao perfil apenas se cadastrado | #125, #131 |
 | Fluxo do cliente e administração | — (vem do Squire) | Desde a #80, as telas do cliente usam a base nova (Barlow 900, `text-body` no texto de apoio, botão `md` na ação principal, hover em `ease-standard` e mais respiro), sem a faixa parcial; a administração recebeu só os tokens, sem mudar densidade nem layout | #80 |
 
 Os números do Beard X (a seção Sobre com 2 números) só entram na nossa vitrine se houver dado real. A #79 deixou a faixa de fora e registrou a pergunta na spec da vitrine.
