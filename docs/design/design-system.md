@@ -130,7 +130,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Ornament`, `SectionHeading` | `ornament.tsx`, `section-heading.tsx` | Pronto |
 | `FloatingOrnament` | `floating-ornament.tsx` | Pronto (navalha, tesoura e pente nas bordas das seções, S4.06) |
 | `ServiceCard`, `ServiceItem`, `BarberCard`, `BarberPhoto` | `service-card.tsx`, `barber-card.tsx`, `barber-photo.tsx` | Pronto |
-| `FramedPhoto`, `FixedPhotoLayer` | `framed-photo.tsx`, `fixed-photo-layer.tsx` | Planejados (#126): moldura com zoom e camada fixa compartilhada |
+| `FramedPhoto`, `FixedPhotoLayer` | `framed-photo.tsx`, `fixed-photo-layer.tsx` | Prontos (#126): moldura com zoom e camada fixa compartilhada |
 | `Gallery`, `BookingBand`, `HowItWorks`, `PhotoMosaic` | `components/vitrine/` | Planejados (#127–#131): seções com as fotos aprovadas na D14 |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
@@ -256,6 +256,12 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
   - Posição e tamanho vêm por `className`, sem `transform` (a entrada ao rolar o usa).
   - Só aparece a partir do `lg`: no celular e no tablet, o texto ocupa a largura toda e não sobra borda para decorar.
   - Na página inicial: navalha no "Sobre", tesoura nos serviços e pente na equipe. Uma seção, um ornamento.
+
+### Fotos compartilhadas
+
+- `vitrine-photos.ts` concentra os caminhos, textos alternativos e dimensões para a substituição na P10.
+- `FramedPhoto` recebe `photo`, `sizes` e `ratioClassName` (3:2 por padrão); a moldura reserva espaço, recorta o zoom e aceita os atributos de entrada.
+- `FixedPhotoLayer` recebe `photo`, `imageClassName` e `preload` (só no hero inicial). A seção deve ter `[clip-path:inset(0)]`, conteúdo `relative` acima do overlay e fundo `ink`.
 
 ### Composição das novas seções da vitrine (D14)
 

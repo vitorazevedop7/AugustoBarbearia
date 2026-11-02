@@ -1,10 +1,11 @@
-import Image from "next/image";
 import { Suspense } from "react";
 import { ApiStatus, ApiStatusBar } from "@/components/api-status";
 import { RevealObserver } from "@/components/reveal-observer";
 import { Alert } from "@/components/ui/alert";
 import { ButtonLink } from "@/components/ui/button";
 import { FloatingOrnament } from "@/components/ui/floating-ornament";
+import { FixedPhotoLayer } from "@/components/ui/fixed-photo-layer";
+import { FramedPhoto } from "@/components/ui/framed-photo";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { BarberList, ServiceList } from "@/components/vitrine/catalog";
@@ -22,13 +23,12 @@ import {
   type PublicShop,
 } from "@/lib/api/public";
 import { BOOKING_PATH } from "@/lib/booking";
+import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 /** A página inicial mostra só os primeiros serviços; o resto fica em /servicos. */
 const FEATURED_SERVICES = 4;
 
 const SHOP_NAME = "Augusto Barbearia";
-const HERO_PHOTO_PATH = "/images/vitrine/hero.jpg";
-const ABOUT_PHOTO_PATH = "/images/vitrine/sobre.jpg";
 
 /** Vitrine (S3.05): só dados do sistema, com textos genéricos onde faltam. */
 export default async function HomePage() {
@@ -52,18 +52,11 @@ export default async function HomePage() {
             className="top-24 -right-24 w-[26rem] xl:w-[32rem]"
           />
           <div className="mx-auto grid max-w-site items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div
+            <FramedPhoto
+              photo={vitrinePhotos.about}
               data-reveal="zoom"
-              className="group relative aspect-[3/2] overflow-hidden bg-line"
-            >
-              <Image
-                src={ABOUT_PHOTO_PATH}
-                alt="Mãos de barbeiro com tesoura durante um corte de cabelo"
-                fill
-                sizes="(min-width: 1344px) 608px, (min-width: 1024px) calc((100vw - 8rem) / 2), (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)"
-                className="object-cover transition-transform duration-300 ease-standard group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-              />
-            </div>
+              sizes="(min-width: 1344px) 608px, (min-width: 1024px) calc((100vw - 8rem) / 2), (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)"
+            />
             <div
               data-reveal="rise"
               className="min-w-0 text-center lg:text-left"
@@ -178,18 +171,11 @@ export default async function HomePage() {
 function Hero({ shop }: { shop: PublicShop | null }) {
   return (
     <section className="relative isolate flex min-h-svh items-center justify-center bg-ink px-4 pt-32 pb-20 text-center [clip-path:inset(0)] sm:px-6 lg:pt-36 lg:pb-28">
-      <div className="absolute inset-0 lg:fixed">
-        <Image
-          src={HERO_PHOTO_PATH}
-          alt=""
-          fill
-          sizes="100vw"
-          preload
-          fetchPriority="high"
-          className="object-cover brightness-75"
-        />
-      </div>
-      <div aria-hidden="true" className="absolute inset-0 bg-ink/70" />
+      <FixedPhotoLayer
+        photo={vitrinePhotos.hero}
+        preload
+        imageClassName="brightness-75"
+      />
       <div className="relative mx-auto w-full max-w-3xl">
         <div className="motion-safe:animate-rise">
           <Ornament tone="dark" />
