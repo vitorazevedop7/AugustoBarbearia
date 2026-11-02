@@ -1,12 +1,33 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { getPublicServices } from "@/lib/api/public";
-import { service, services } from "@/test/vitrine-data";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getPublicServices, getPublicShop } from "@/lib/api/public";
+import { service, services, shop } from "@/test/vitrine-data";
 import ServicesPage from "./page";
 
-vi.mock("@/lib/api/public", () => ({ getPublicServices: vi.fn() }));
+vi.mock("@/lib/api/public", () => ({
+  getPublicServices: vi.fn(),
+  getPublicShop: vi.fn(),
+}));
 
 describe("página de serviços — RN-61", () => {
+  beforeEach(() => vi.mocked(getPublicShop).mockResolvedValue(shop));
+
+  it("fecha a lista com o mosaico e o Instagram cadastrado", async () => {
+    vi.mocked(getPublicServices).mockResolvedValue(services);
+    vi.mocked(getPublicShop).mockResolvedValue({
+      ...shop,
+      instagram: "augusto",
+    });
+    render(await ServicesPage());
+    const mosaic = screen.getByRole("region", { name: "Nosso trabalho" });
+    expect(within(mosaic).getAllByRole("img")).toHaveLength(5);
+    expect(
+      within(mosaic).getByRole("link", { name: /Ver mais no Instagram/ }),
+    ).toHaveAttribute("href", "https://www.instagram.com/augusto/");
+    expect(mosaic.previousElementSibling).toContainElement(
+      screen.getAllByRole("article")[0],
+    );
+  });
   it("mostra a foto decorativa no topo e preserva a faixa parcial lisa", async () => {
     vi.mocked(getPublicServices).mockResolvedValue(services);
 

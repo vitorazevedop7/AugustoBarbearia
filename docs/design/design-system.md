@@ -134,7 +134,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `Gallery` | `components/vitrine/gallery.tsx` | Pronta (#127): galeria assimétrica com 4 fotos |
 | `BookingBand` | `components/vitrine/booking-band.tsx` | Pronta (#128): chamada para agendar com foto fixa no desktop |
 | `HowItWorks` | `components/vitrine/how-it-works.tsx` | Pronta (#129): etapas reais do agendamento e fotos sobrepostas |
-| `PhotoMosaic` | `components/vitrine/photo-mosaic.tsx` | Planejado (#131): mosaico com as fotos aprovadas na D14 |
+| `PhotoMosaic` | `components/vitrine/photo-mosaic.tsx` | Pronto (#131): mosaico com as fotos aprovadas na D14 e Instagram condicional |
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
@@ -274,6 +274,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 - **Como funciona:** foto grande acima do texto no celular; no `lg`, texto à esquerda e foto à direita, sangrando dentro de uma seção com `overflow-hidden`. A foto menor tem aproximadamente 70% da largura, borda `surface` de 8px e só aparece a partir de `md`. A sobreposição não deve encobrir o texto nem causar rolagem horizontal.
 - **Heros internos:** foto opcional apenas na faixa do título, com overlay `bg-ink/80`. A faixa parcial atrás do começo do conteúdo continua lisa. Sem foto, o `PageHero` preserva o comportamento existente.
 - **Mosaico:** destaque em largura total seguido de 4 fotos em 2×2 no celular; no `lg`, grade `1fr 2fr 1fr`, com o destaque no centro ocupando 2 linhas e gap de 28px. "Ver mais no Instagram" abre o perfil cadastrado em outra aba, com `rel="noopener noreferrer"`.
+- O `PhotoMosaic` corrige a largura central pelo gap (`calc(50% - 14px)`), mantendo tanto o destaque quanto as quatro laterais quadradas e alinhadas.
 
 ## Padrões
 
