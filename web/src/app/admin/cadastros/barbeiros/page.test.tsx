@@ -51,6 +51,9 @@ describe("BarbeirosPage — RN-60", () => {
       "/admin/cadastros/barbeiros/novo",
     );
     expect(screen.queryByRole("status")).toBeNull();
+    // Coluna `minmax(0, 1fr)` no celular: um nome longo não alarga a grade
+    // além da tela (#150).
+    expect(screen.getByRole("list")).toHaveClass("grid-cols-1");
   });
 
   it("mostra o aviso de quem voltou de um formulário", async () => {

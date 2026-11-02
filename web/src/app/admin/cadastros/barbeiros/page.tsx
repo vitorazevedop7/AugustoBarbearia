@@ -74,7 +74,7 @@ export default async function BarbeirosPage({
             <div>
               <NewBarberLink />
             </div>
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {barbers.map((barber) => (
                 <li
                   key={barber.id}
