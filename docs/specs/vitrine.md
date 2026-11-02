@@ -7,7 +7,7 @@
 ## Contexto
 O visitante, sem login e pelo celular, precisa conhecer a barbearia: os serviços com preço e duração, os barbeiros com foto e apresentação, o endereço, o horário de funcionamento e o contato. Em todo lugar há uma chamada para agendar. A vitrine segue a estrutura da referência Beard X ([referencia-beard-x.md](../design/referencia-beard-x.md)), com os nossos tokens e o nosso código.
 
-A vitrine só mostra dados do sistema: a barbearia e o horário de funcionamento (S3.02), os barbeiros (S3.03) e os serviços (S3.04). Ela não inventa fatos sobre a barbearia nem sobre os proprietários. Quando um dado opcional não foi preenchido pela administração (frase de destaque, sobre, endereço, contato, apresentação do barbeiro), o bloco dele não aparece ou dá lugar a um texto genérico neutro.
+A vitrine só mostra dados do sistema: a barbearia e o horário de funcionamento (S3.02), os barbeiros (S3.03) e os serviços (S3.04). Ela não inventa fatos sobre a barbearia nem sobre os proprietários. A única exceção aceita é o título "Nosso trabalho" sobre as fotos fictícias da galeria e do mosaico, até a troca pelas fotos reais (D14, P10). Quando um dado opcional não foi preenchido pela administração (frase de destaque, sobre, endereço, contato, apresentação do barbeiro), o bloco dele não aparece ou dá lugar a um texto genérico neutro.
 
 ## Quem usa
 Visitante, cliente e administração: todos veem a vitrine (RN-70).
