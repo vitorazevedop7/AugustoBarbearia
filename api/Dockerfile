@@ -10,9 +10,13 @@ RUN uv sync --locked --no-dev
 # Desenvolvimento (docker compose): dependências de dev e reload. O código vem
 # por volume e o .venv fica num volume anônimo, fora do código montado.
 FROM builder AS dev
+# O Pyright baixa o Node pelo nodeenv. Sem versão fixa, o nodeenv tenta
+# descobrir a mais recente e falha dentro do container (#161); fica a mesma
+# linha LTS do web (web/.node-version).
 ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=0 \
-    PATH="/app/.venv/bin:$PATH"
+    PATH="/app/.venv/bin:$PATH" \
+    PYRIGHT_PYTHON_NODE_VERSION=24.22.1
 # libatomic1: o Pyright roda sobre um Node baixado na hora, que precisa dela.
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends libatomic1 \
