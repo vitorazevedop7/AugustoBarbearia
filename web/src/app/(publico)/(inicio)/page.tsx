@@ -88,7 +88,7 @@ export default async function HomePage() {
       <section
         id="servicos"
         aria-labelledby="servicos-titulo"
-        className={`relative isolate scroll-mt-20 overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : ""}`}
+        className={`relative isolate overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : ""}`}
       >
         <FloatingOrnament
           shape="scissors"
@@ -122,7 +122,7 @@ export default async function HomePage() {
       <section
         id="equipe"
         aria-labelledby="equipe-titulo"
-        className={`relative isolate scroll-mt-20 overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
+        className={`relative isolate overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
       >
         <FloatingOrnament
           shape="comb"
@@ -168,7 +168,8 @@ export default async function HomePage() {
 }
 
 /**
- * Hero de tela inteira, com o cabeçalho transparente por cima (`HeaderFrame`).
+ * Hero de tela inteira, com o cabeçalho transparente por cima (`HeaderFrame`),
+ * que rola com a página.
  * No desktop, a foto fica numa camada fixa na tela, e o `clip-path` do hero a
  * recorta: ela fica parada enquanto a página rola, o que o
  * `background-attachment: fixed` não garante no Safari. No celular, a camada
@@ -224,7 +225,7 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
     <section
       id="contato"
       aria-labelledby="contato-titulo"
-      className="scroll-mt-20 bg-ink px-4 py-section sm:px-6 lg:px-8"
+      className="bg-ink px-4 py-section sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-site">
         <div data-reveal="rise">

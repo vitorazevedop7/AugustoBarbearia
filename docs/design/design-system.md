@@ -210,23 +210,20 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 ### Cabeçalho
 
 - **`SiteHeader`** fica no layout raiz e é sempre escuro: o logo no círculo `surface` (o PNG só funciona sobre o claro, P1), o nome em Barlow 900, a navegação em `surface` com o traço `brand` na página atual, a conta (`outline-light` e `ghost-light`) e o "Agendar" (`primary`, `sm`). Tem 80px de altura e segue o container da vitrine.
-- **`HeaderFrame`** decide o modo pela página e pela rolagem (`data-mode`):
+- **Não é fixo**, como no Beard X: em todas as páginas, ele rola com a página, e quem rola o deixa para trás (decisão de 2026-11-01, #116). Por isso as seções com âncora (`#contato`) não precisam de `scroll-margin`.
+- **`HeaderFrame`** decide o modo pela página (`data-mode`), sem depender de JS:
 
 | Modo | Onde | Como fica |
 |---|---|---|
-| `hero` | Página inicial, sem JS (o HTML do servidor) | Transparente no topo do hero e rola com a página, como no Beard X |
-| `floating` | Página inicial, com JS, no topo | Fixo e transparente sobre o hero |
-| `pinned` | Página inicial, assim que a página rola | Faixa `ink` fixa; a cor troca em 300ms `ease` |
-| `bar` | Todas as outras páginas | Faixa `ink` presa no topo (`sticky`), contínua com o `PageHero` |
+| `hero` | Página inicial | Transparente no topo do hero, que é escuro: nunca fica sobre fundo claro |
+| `bar` | Todas as outras páginas | Faixa `ink` no topo, contínua com o `PageHero` |
 
-- **Sem JS, o padrão seguro é o modo `hero`:** o cabeçalho só fica transparente sobre o hero, que é escuro, e nunca sobre fundo claro. O que o JS acrescenta é só a faixa fixa ao rolar.
-- O cabeçalho escurece logo que a página rola, e não depois do hero: transparente e fixo, ele cobriria o título e os botões do hero que passam por baixo.
 - As telas do cliente (`/agendar`, `/meus-agendamentos`, `/perfil`, `/entrar`) e a administração usam a mesma faixa escura. Ela combina com o rodapé escuro, e o conteúdo claro começa logo abaixo dela; não há variante clara.
 
 ### Menu do celular
 
 - **`MobileMenu`** é um `<details>` nativo com o botão "Menu" (ícone e texto, contorno claro). Abaixo de 1024px, ele guarda a navegação, o "Agendar horário" na largura toda e o login; a partir de 1024px, tudo fica na linha do cabeçalho.
-- Funciona sem JS. Com JS, fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link.
+- Funciona sem JS. Com JS, fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link, e abre com a página no topo: como o cabeçalho rola com a página, o painel aberto com ele em parte fora da tela não chegaria ao fim dela.
 - O painel é escuro (`ink`) e desce de trás do cabeçalho em 400ms `ease` (`animate-menu-down`), recortado por uma moldura com `overflow-hidden`. Ele ocupa o resto da tela e rola sozinho se o conteúdo não couber. A animação só vale com o menu aberto, para recomeçar a cada abertura; com `prefers-reduced-motion`, ele abre sem animação.
 - Aberto, ele trava a rolagem da página pelo CSS (`html:has([data-mobile-menu][open])`, abaixo de 1024px), então isso também funciona sem JS. Sobre o hero, o cabeçalho escurece junto com o painel.
 - O link da página atual tem `aria-current="page"` e um traço em `brand`.

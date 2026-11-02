@@ -1,12 +1,18 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, type MouseEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  type MouseEvent,
+  type ReactNode,
+  type SyntheticEvent,
+} from "react";
 
 /**
  * Menu do celular: um `<details>` nativo, que abre e fecha mesmo sem JS. Com
  * JS, fecha com Esc (devolvendo o foco ao botão), ao navegar e ao escolher um
- * link. O painel escuro desce de trás do cabeçalho (o pai precisa estar
+ * link, e abre com a página no topo. O painel escuro desce de trás do cabeçalho (o pai precisa estar
  * posicionado), ocupa o resto da tela e some a partir de 1024px, onde a
  * navegação fica na linha do cabeçalho. Enquanto ele está aberto, o
  * `globals.css` trava a rolagem da página pelo `data-mobile-menu`, sem JS.
@@ -36,6 +42,15 @@ export function MobileMenu({
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, []);
 
+  // O cabeçalho rola com a página. Aberto com o cabeçalho em parte fora da
+  // tela, o painel não chegaria ao fim dela: a página volta ao topo, sem a
+  // rolagem suave do layout, porque quem se move é o painel.
+  function showWholePanel(event: SyntheticEvent<HTMLDetailsElement>) {
+    if (event.currentTarget.open) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }
+
   function closeOnLink(event: MouseEvent<HTMLDivElement>) {
     if (
       event.target instanceof Element &&
@@ -47,7 +62,12 @@ export function MobileMenu({
   }
 
   return (
-    <details ref={details} data-mobile-menu className="group lg:hidden">
+    <details
+      ref={details}
+      data-mobile-menu
+      onToggle={showWholePanel}
+      className="group lg:hidden"
+    >
       <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border-2 border-surface px-4 text-xs font-semibold tracking-[0.08em] text-surface uppercase transition-colors duration-300 ease-standard hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
         <svg
           aria-hidden="true"
