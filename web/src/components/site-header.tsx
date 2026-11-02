@@ -13,7 +13,8 @@ import { BOOKING_PATH } from "@/lib/booking";
  * Na página inicial, ele fica transparente sobre o hero (`HeaderFrame`), e
  * em nenhuma página é fixo: rola com ela. No desktop fica tudo numa linha;
  * no celular, num menu. Só a conta depende do usuário, e ela chega à parte,
- * num `Suspense` com o mesmo tamanho.
+ * num `Suspense` cujo fallback é o link "Entrar", do mesmo tamanho, para o
+ * login funcionar sem JavaScript.
  */
 export function SiteHeader() {
   return (
