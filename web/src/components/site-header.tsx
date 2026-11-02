@@ -57,7 +57,7 @@ export function SiteHeader() {
               Agendar horário
             </ButtonLink>
             <div className="mt-4">
-              <Suspense fallback={<AccountPlaceholder />}>
+              <Suspense fallback={<AccountPlaceholder stacked />}>
                 <HeaderAccount stacked />
               </Suspense>
             </div>

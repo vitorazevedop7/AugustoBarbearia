@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { getCurrentSession } from "@/lib/session";
-import { HeaderAccount } from "./header-account";
+import { AccountPlaceholder, HeaderAccount } from "./header-account";
 
 vi.mock("@/lib/auth-actions", () => ({
   signInWithGoogle: vi.fn(),
@@ -35,5 +35,27 @@ describe("HeaderAccount", () => {
     expect(
       screen.queryByRole("button", { name: "Entrar com Google" }),
     ).toBeNull();
+  });
+});
+
+describe("AccountPlaceholder", () => {
+  it("oferece um link para entrar enquanto a sessão não chegou, sem ler a sessão", () => {
+    vi.mocked(getCurrentSession).mockClear();
+    render(<AccountPlaceholder />);
+
+    const link = screen.getByRole("link", { name: "Entrar" });
+    expect(link).toHaveAttribute("href", "/entrar");
+    expect(link).toHaveClass("min-h-11");
+    expect(link).not.toHaveClass("w-full");
+    expect(getCurrentSession).not.toHaveBeenCalled();
+  });
+
+  it("ocupa toda a largura do menu do celular com a mesma altura da conta", () => {
+    render(<AccountPlaceholder stacked />);
+
+    expect(screen.getByRole("link", { name: "Entrar" })).toHaveClass(
+      "w-full",
+      "min-h-11",
+    );
   });
 });

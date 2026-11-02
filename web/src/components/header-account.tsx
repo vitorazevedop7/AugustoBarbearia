@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { signInWithGoogle, signOut } from "@/lib/auth-actions";
 import { getCurrentSession } from "@/lib/session";
 
@@ -22,9 +22,18 @@ export async function HeaderAccount({
   );
 }
 
-/** Ocupa o lugar da conta, com a mesma altura dos botões, enquanto a sessão chega. */
-export function AccountPlaceholder() {
-  return <div aria-hidden="true" className="h-11 w-full" />;
+/** Mantém o login disponível sem JS enquanto a sessão chega por streaming. */
+export function AccountPlaceholder({ stacked = false }: { stacked?: boolean }) {
+  return (
+    <ButtonLink
+      href="/entrar"
+      variant="outline-light"
+      size="sm"
+      className={stacked ? "w-full" : ""}
+    >
+      Entrar
+    </ButtonLink>
+  );
 }
 
 /** Entrar com Google ou, para quem está logado, o primeiro nome e "Sair", sobre o cabeçalho escuro. */

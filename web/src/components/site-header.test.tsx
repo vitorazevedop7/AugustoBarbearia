@@ -4,15 +4,30 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SiteHeader } from "./site-header";
 
+const account = vi.hoisted(() => ({ pending: false }));
+
 // A conta lê a sessão no servidor e tem sua própria suíte.
-vi.mock("@/components/header-account", () => ({
-  HeaderAccount: () => <p>Conta do usuário</p>,
-  AccountPlaceholder: () => null,
+vi.mock("@/lib/session", () => ({ getCurrentSession: vi.fn() }));
+vi.mock("@/lib/auth-actions", () => ({
+  signInWithGoogle: vi.fn(),
+  signOut: vi.fn(),
 }));
+vi.mock("@/components/header-account", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@/components/header-account")>();
+  return {
+    ...original,
+    HeaderAccount: () => {
+      if (account.pending) throw new Promise(() => {});
+      return <p>Conta do usuário</p>;
+    },
+  };
+});
 vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
 
 describe("SiteHeader", () => {
   beforeEach(() => {
+    account.pending = false;
     vi.mocked(usePathname).mockReturnValue("/");
   });
 
@@ -28,6 +43,21 @@ describe("SiteHeader", () => {
   it("mostra a conta no desktop e no menu do celular", () => {
     render(<SiteHeader />);
     expect(screen.getAllByText("Conta do usuário")).toHaveLength(2);
+  });
+
+  it("mantém o login no HTML inicial no desktop e no menu enquanto a sessão espera", () => {
+    account.pending = true;
+    const container = document.createElement("div");
+    container.innerHTML = renderToStaticMarkup(<SiteHeader />);
+
+    const links = container.querySelectorAll('a[href="/entrar"]');
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveTextContent("Entrar");
+    expect(links[0]).toHaveClass("min-h-11");
+    expect(links[0].parentElement).toHaveClass("w-52", "justify-end");
+    expect(links[1]).toHaveClass("min-h-11", "w-full");
+    expect(links[1].closest("details")).not.toBeNull();
+    account.pending = false;
   });
 
   it("navega pela vitrine e chama para agendar", () => {
