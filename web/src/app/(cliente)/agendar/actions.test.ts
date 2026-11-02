@@ -96,7 +96,7 @@ describe("confirmBooking — RN-10 a RN-13", () => {
       response: { status: 422 },
       error: {
         code: "VALIDATION_ERROR",
-        message: "Confira os dados informados e tente novamente.",
+        message: "Informe o telefone com DDD.",
       },
     });
 
@@ -105,7 +105,8 @@ describe("confirmBooking — RN-10 a RN-13", () => {
     expect(POST).not.toHaveBeenCalled();
     expect(state).toEqual({
       status: "error",
-      message: "Confira os dados informados e tente novamente.",
+      message: "Informe o telefone com DDD.",
+      code: "VALIDATION_ERROR",
       phone: "98765",
     });
   });
@@ -133,7 +134,7 @@ describe("confirmBooking — RN-10 a RN-13", () => {
 
       const state = await confirmBooking(previous, form());
 
-      expect(state).toEqual({ status: "error", message, phone: "" });
+      expect(state).toEqual({ status: "error", message, code, phone: "" });
     },
   );
 

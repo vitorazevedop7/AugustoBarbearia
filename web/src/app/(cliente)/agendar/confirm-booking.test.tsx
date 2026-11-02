@@ -79,6 +79,7 @@ describe("ConfirmBooking", () => {
     vi.mocked(confirmBooking).mockResolvedValue({
       status: "error",
       message: "Este horário não está mais disponível. Escolha outro.",
+      code: "SLOT_UNAVAILABLE",
       phone: "98765",
     });
     render(<ConfirmBooking {...props} />);
@@ -99,6 +100,30 @@ describe("ConfirmBooking", () => {
       screen.getByRole("link", { name: "Escolher outro horário" }),
     ).toHaveAttribute("href", props.changeTimeHref);
     expect(screen.getByLabelText("Telefone")).toHaveValue("98765");
+  });
+
+  it("telefone recusado: mostra o que corrigir, sem levar a outro horário", async () => {
+    vi.mocked(confirmBooking).mockResolvedValue({
+      status: "error",
+      message: "Informe o telefone com DDD.",
+      code: "VALIDATION_ERROR",
+      phone: "123",
+    });
+    render(<ConfirmBooking {...props} />);
+
+    fireEvent.change(screen.getByLabelText("Telefone"), {
+      target: { value: "123" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Confirmar agendamento" }),
+    );
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Informe o telefone com DDD.");
+    expect(
+      screen.queryByRole("link", { name: "Escolher outro horário" }),
+    ).toBeNull();
+    expect(screen.getByLabelText("Telefone")).toHaveValue("123");
   });
 
   it("sem pedir telefone quando o perfil já tem", () => {

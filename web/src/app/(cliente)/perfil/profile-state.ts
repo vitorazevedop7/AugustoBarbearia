@@ -28,3 +28,11 @@ export function apiErrorMessage(error: unknown): string | undefined {
   }
   return typeof error.message === "string" ? error.message : undefined;
 }
+
+/** `code` do erro da API (ADR 0008), para a tela escolher o caminho de volta. */
+export function apiErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("code" in error)) {
+    return undefined;
+  }
+  return typeof error.code === "string" ? error.code : undefined;
+}

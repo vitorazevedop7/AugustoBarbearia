@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.schemas import CurrentUser
+from app.errors import VALIDATION_MESSAGE
 from app.modules.customers import service
 from app.modules.customers.models import Customer
 from app.modules.customers.schemas import normalize_phone
@@ -206,22 +207,26 @@ def test_rn62_campo_ausente_ou_nulo_nao_apaga_o_telefone(
     assert response.json()["name"] == "Novo Nome"
 
 
+DDD = "Informe o telefone com DDD."
+ONLY_DIGITS = "O telefone deve ter só números."
+
+
 @pytest.mark.parametrize(
-    "body",
+    ("body", "message"),
     [
-        {"phone": "98765-4321"},
-        {"phone": "(10) 98765-4321"},
-        {"phone": "(11) 88765-4321"},
-        {"phone": "(11) 1234-5678"},
-        {"phone": "(11) 98765-43210"},
-        {"phone": "11 9876a-4321"},
-        {"phone": "١١٩٨٧٦٥٤٣٢١"},
-        {"phone": ""},
-        {"phone": 11987654321},
-        {"phone": "1" * 31},
-        {"name": "   "},
-        {"name": "A" * 121},
-        {"email": "outro@example.com"},
+        ({"phone": "98765-4321"}, DDD),
+        ({"phone": "(10) 98765-4321"}, DDD),
+        ({"phone": "(11) 88765-4321"}, DDD),
+        ({"phone": "(11) 1234-5678"}, DDD),
+        ({"phone": "(11) 98765-43210"}, DDD),
+        ({"phone": "11 9876a-4321"}, ONLY_DIGITS),
+        ({"phone": "١١٩٨٧٦٥٤٣٢١"}, ONLY_DIGITS),
+        ({"phone": ""}, DDD),
+        ({"phone": 11987654321}, "Confira o telefone."),
+        ({"phone": "1" * 31}, "O telefone pode ter no máximo 30 caracteres."),
+        ({"name": "   "}, "Informe o nome."),
+        ({"name": "A" * 121}, "O nome pode ter no máximo 120 caracteres."),
+        ({"email": "outro@example.com"}, VALIDATION_MESSAGE),
     ],
 )
 def test_rn62_dados_invalidos_nao_alteram_o_perfil(
@@ -229,16 +234,15 @@ def test_rn62_dados_invalidos_nao_alteram_o_perfil(
     db_session: Session,
     private_key: Ed25519PrivateKey,
     body: dict[str, object],
+    message: str,
 ) -> None:
+    """CA-6: a recusa diz o que corrigir, com a mensagem da API."""
     headers = headers_for(private_key)
 
     response = auth_client.patch("/me/profile", headers=headers, json=body)
 
     assert response.status_code == 422
-    assert response.json() == {
-        "code": "VALIDATION_ERROR",
-        "message": "Confira os dados informados e tente novamente.",
-    }
+    assert response.json() == {"code": "VALIDATION_ERROR", "message": message}
     assert auth_client.get("/me/profile", headers=headers).json() == {
         "name": "Cliente Teste",
         "email": "customer@example.com",

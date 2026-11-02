@@ -12,6 +12,8 @@ from pydantic import (
     StringConstraints,
 )
 
+from app.errors import InvalidInput
+
 
 def _blank_to_none(value: object) -> object:
     """Campo opcional enviado vazio pelo formulário vira ausência de valor."""
@@ -27,7 +29,7 @@ def _phone_digits(value: object) -> object:
     if isinstance(value, str):
         digits = re.sub(r"\D", "", value)
         if len(digits) not in (10, 11):
-            raise ValueError("O telefone precisa ter DDD e número.")
+            raise InvalidInput("O telefone precisa ter DDD e número.")
         return digits
     return value
 
@@ -41,7 +43,7 @@ def _instagram_handle(value: object) -> object:
 
 def _whole_minutes(value: time | None) -> time | None:
     if value is not None and (value.second or value.microsecond or value.tzinfo):
-        raise ValueError("Informe a hora em horas e minutos, sem fuso.")
+        raise InvalidInput("Informe a hora em horas e minutos, sem fuso.")
     return value
 
 
