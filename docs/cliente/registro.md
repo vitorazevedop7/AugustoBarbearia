@@ -44,7 +44,7 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 | P7 | Nome oficial: "Augusto" ou "Augustus" Barbearia | 2026-10-08 | Vitor | Resolvida: decisão D1 (2026-10-08) | — |
 | P8 | Quem é o ponto de contato principal e quem administra o sistema | 2026-10-08 | Vitor | Parcial: a administração é feita pela equipe da barbearia (D2); o ponto de contato fica para a apresentação | — |
 | P9 | Lista real de serviços, com preço e duração | 2026-10-08 | Proprietários | Apresentação. Até lá, o sistema usa os serviços do projeto acadêmico | — |
-| P10 | Fotos da barbearia e dos barbeiros para a vitrine (hero, "Sobre" e cards da equipe) | 2026-10-28 | Proprietários | Apresentação. Até lá, os barbeiros (D10), o hero e o "Sobre" (D12) usam fotos fictícias geradas por IA como placeholder, a substituir pelas reais | #63, #72 |
+| P10 | Fotos da barbearia e dos barbeiros para a vitrine (hero, "Sobre", cards da equipe, galeria, faixa de agendamento, "Como funciona", heros internos e mosaico) | 2026-10-28 | Proprietários | Apresentação. Até lá, as áreas aprovadas em D10, D12 e D14 usam fotos fictícias geradas por IA como placeholder, a substituir pelas reais | #63, #72, #125–#131 |
 
 ## Entradas
 
@@ -140,3 +140,12 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Canal:** —
 - **Fatos e decisões:**
   - **D13.** A administração **não pode alterar o horário de funcionamento** se a mudança deixar algum agendamento `SCHEDULED` com início futuro fora do novo expediente. É preciso remarcar esses agendamentos antes de salvar. A alteração é recusada integralmente, sem mudar nem cancelar agendamentos. Para essa proteção, "futuro" significa `starts_at` depois de agora; um atendimento que já começou não impede a alteração. A decisão passa a integrar a RN-02 e a [spec de horários](../specs/barbearia-horarios.md).
+
+### 2026-11-02 — Fotos placeholder nas novas áreas da vitrine
+- **Com:** registro interno. Decisão do Vitor como product owner (issue #125, autorizada no pedido de execução das issues #125–#132)
+- **Canal:** chat de desenvolvimento
+- **Fatos e decisões:**
+  - **D14.** A D10 e a D12, de 2026-10-29, passam a abranger a galeria "Nosso trabalho" da página inicial (4 fotos), a faixa de agendamento (1), a seção "Como funciona" (2), os heros de `/servicos` e `/barbeiros` (2) e o mosaico no fim dessas páginas internas (5). Até a chegada das fotos reais (P10), essas áreas usam **fotos fictícias geradas por IA**, seguindo a identidade clássica e sóbria e a paleta das fotos existentes. Não retratam a Augusto Barbearia nem os proprietários, não vêm de banco de imagem nem do Beard X e serão substituídas pelas reais. Não podem conter rostos identificáveis, texto, logotipos ou rótulos legíveis.
+  - Os heros internos com foto são uma divergência consciente do Beard X, onde são faixas lisas. A faixa de agendamento usa foto fixa apenas no desktop, sem vídeo nem botão de play. O mosaico se chama "Nosso trabalho", sem simular posts; o link "Ver mais no Instagram" só aparece quando o perfil está cadastrado.
+  - Produtos, depoimentos, vídeo e publicações fictícias não entram. O texto de "Como funciona" descreve apenas o fluxo existente (D11), o lembrete com a condição da RN-51 e o prazo de cancelamento e remarcação da RN-14. O [plano de imagens](../planos/imagens-vitrine.md) detalha arquivos, proporções e implementação.
+- **Pendência mantida:** P10 (substituição das fotos fictícias pelas reais).
