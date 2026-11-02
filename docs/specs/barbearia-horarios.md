@@ -97,7 +97,7 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 
 ## Fluxo e telas
 - **Layout de `/admin`:** antes de qualquer página da área, o layout verifica o acesso com `GET /admin/ping`, como a página `/admin` fazia na S2.09:
-  - sem sessão, leva a `/entrar?voltar=/admin`;
+  - sem sessão, leva ao login, que depois volta a esta página (#154);
   - cliente vai para `/`;
   - falha da API mostra um aviso.
 

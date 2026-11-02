@@ -46,7 +46,7 @@ Cliente e administração. Visitantes continuam acessando as rotas públicas.
 - **Quando** existe sessão
 - **Então** envia o JWT de `getApiToken()` como Bearer; sem sessão, permite chamadas públicas sem Authorization.
 - **Quando** abre `/admin`
-- **Então** o servidor consulta `/admin/ping`; com 200 mostra “Acesso permitido”, com 401 sem sessão redireciona para `/entrar?voltar=/admin`, com 403 redireciona para `/`. Falhas de infraestrutura mostram um aviso de indisponibilidade, sem conceder acesso. Se a sessão web ainda existe, mas a API rejeita o JWT com 401 (ex.: JWKS indisponível), mostra o mesmo aviso, evitando um ciclo entre a administração e o login.
+- **Então** o servidor consulta `/admin/ping`; com 200 mostra “Acesso permitido”, com 401 sem sessão redireciona para o login com `voltar=` a página e a busca pedidas (`/entrar?voltar=%2Fadmin%2Frelatorio%3F…`, #154; fora de `/admin`, `voltar=/admin`), com 403 redireciona para `/`. Falhas de infraestrutura mostram um aviso de indisponibilidade, sem conceder acesso. Se a sessão web ainda existe, mas a API rejeita o JWT com 401 (ex.: JWKS indisponível), mostra o mesmo aviso, evitando um ciclo entre a administração e o login.
 
 **CA-6 — Contrato e testes independentes**
 - **Dado** o contrato OpenAPI exportado

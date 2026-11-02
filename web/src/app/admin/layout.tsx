@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
 import { createApiClient } from "@/lib/api/client";
-import { getCurrentSession } from "@/lib/session";
+import { REQUESTED_PATH_HEADER } from "@/lib/requested-path";
+import { getCurrentSession, safeRedirectPath } from "@/lib/session";
 import { AdminNav } from "./admin-nav";
 import { AdminPage } from "./admin-page";
 
@@ -35,7 +37,7 @@ export default async function AdminLayout({
 
   // redirect lança uma exceção do Next e precisa ficar fora do catch de rede.
   if (result.response.status === 401) {
-    if (!(await getCurrentSession())) redirect("/entrar?voltar=/admin");
+    if (!(await getCurrentSession())) redirect(await loginPath());
     // Uma sessão válida voltaria de /entrar para cá, causando um ciclo quando
     // a API rejeita o JWT (por exemplo, durante uma falha na busca do JWKS).
     return <AccessProblem message={unavailableMessage} />;
@@ -54,6 +56,18 @@ export default async function AdminLayout({
       {children}
     </>
   );
+}
+
+/**
+ * O login volta à página pedida, com a busca (filtros, período), validada como
+ * a do cliente. Fora de `/admin` ou sem o cabeçalho, volta ao início dela.
+ */
+async function loginPath(): Promise<string> {
+  const requested = safeRedirectPath(
+    (await headers()).get(REQUESTED_PATH_HEADER),
+  );
+  const back = /^\/admin(?:[/?]|$)/.test(requested) ? requested : "/admin";
+  return `/entrar?voltar=${encodeURIComponent(back)}`;
 }
 
 function AccessProblem({ message }: { message: string }) {
