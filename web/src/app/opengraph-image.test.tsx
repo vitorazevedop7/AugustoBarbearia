@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import OpenGraphImage, { alt, contentType, size } from "./opengraph-image";
 
 describe("imagem de compartilhamento", () => {
-  it("rasteriza os assets locais em PNG 1200×630 com a fonte Barlow", async () => {
+  it("rasteriza os assets locais em PNG 1200×630 abaixo de 300 KB", async () => {
     const response = await OpenGraphImage();
     const bytes = Buffer.from(await response.arrayBuffer());
 
@@ -14,6 +14,8 @@ describe("imagem de compartilhamento", () => {
     // O IHDR confirma o tamanho do arquivo renderizado, não só os metadados.
     expect(bytes.readUInt32BE(16)).toBe(size.width);
     expect(bytes.readUInt32BE(20)).toBe(size.height);
+    // O WhatsApp descarta miniaturas grandes demais.
+    expect(bytes.byteLength).toBeLessThan(300_000);
     expect(alt).toBe("Augusto Barbearia");
   });
 });

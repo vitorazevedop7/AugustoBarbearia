@@ -13,8 +13,8 @@ const colors = { ink: "#111111", surface: "#ffffff" };
 export default async function OpenGraphImage() {
   // Assets locais: sem chamadas externas na geração nem no runtime Docker.
   // prepare-standalone.mjs já inclui todo o diretório public na imagem final.
-  const [hero, logo, barlow] = await Promise.all([
-    readFile(join(process.cwd(), "public/images/vitrine/hero.jpg")),
+  const [background, logo, barlow] = await Promise.all([
+    readFile(join(process.cwd(), "public/images/vitrine/og-background.jpg")),
     readFile(join(process.cwd(), "public/logo.png")),
     readFile(join(process.cwd(), "public/fonts/Barlow-Black.ttf")),
   ]);
@@ -31,24 +31,16 @@ export default async function OpenGraphImage() {
         color: colors.surface,
       }}
     >
-      {/* ImageResponse usa img nativo para rasterizar a prévia. */}
+      {/* ImageResponse usa img nativo para rasterizar a prévia. O fundo é o
+          hero reduzido a 1200×630 com o escurecimento (ink a 80%) já aplicado
+          no arquivo: assim o PNG fica leve (o WhatsApp descarta prévias acima
+          de ~300 KB), o que não ocorre com a foto cheia sob um overlay. */}
       <img
-        src={`data:image/jpeg;base64,${hero.toString("base64")}`}
+        src={`data:image/jpeg;base64,${background.toString("base64")}`}
         alt=""
         width={1200}
         height={630}
         style={{ position: "absolute", top: 0, left: 0, objectFit: "cover" }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: colors.ink,
-          opacity: 0.8,
-        }}
       />
       <div
         style={{
