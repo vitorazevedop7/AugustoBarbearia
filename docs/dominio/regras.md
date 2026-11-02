@@ -18,7 +18,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-01 — Fuso horário.** Todas as datas e horas do sistema estão no fuso de São Paulo (`America/Sao_Paulo`). *Origem: padrão adotado.*
 
-**RN-02 — Horário de funcionamento.** A administração configura o horário de funcionamento por dia da semana, como um intervalo de abertura e fechamento ou "fechado". O padrão inicial é segunda a sexta das 10h às 19h, sábado das 9h às 14h e domingo fechado. Todos os barbeiros seguem esse horário. *Origem: 2025 (elicitação).*
+**RN-02 — Horário de funcionamento.** A administração configura o horário de funcionamento por dia da semana, como um intervalo de abertura e fechamento ou "fechado". O padrão inicial é segunda a sexta das 10h às 19h, sábado das 9h às 14h e domingo fechado. Todos os barbeiros seguem esse horário. A mudança é impedida se qualquer agendamento ativo (`SCHEDULED`) com início depois de agora ficar fora do novo intervalo de funcionamento do seu dia, considerando todo o intervalo do agendamento. A administração precisa remarcar esses agendamentos antes de alterar o expediente; nenhum dia é alterado parcialmente. Agendamentos que já começaram e os status finais não impedem a mudança. A garantia vale também com criação ou remarcação simultânea. *Origem: 2025 (elicitação); D13.*
 
 **RN-03 — Bloqueios.** A administração pode bloquear um intervalo na agenda de um barbeiro, com motivo opcional: almoço, folga, compromisso. Folga de dia inteiro é um bloqueio que cobre o dia todo. Um bloqueio só pode ser criado num intervalo sem agendamentos ativos. *Origem: 2025 (RF11, "bloquear horário"); D2.*
 

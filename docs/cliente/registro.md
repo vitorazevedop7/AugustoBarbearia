@@ -134,3 +134,9 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Canal:** —
 - **Fatos e decisões:**
   - **D12.** A D10, de 2026-10-29, passa a abranger também o fundo do hero da página inicial e a foto ao lado do "Sobre a barbearia". Enquanto as fotos reais não chegam (P10), esses espaços usam **fotos fictícias geradas por IA**, em proporção 16:9 para o hero e 3:2 para o "Sobre". Elas **não retratam a Augusto Barbearia nem os proprietários**, não vêm de banco de imagem e serão substituídas pelas fotos reais. As imagens seguem a identidade clássica e sóbria, sem rostos identificáveis, texto ou logotipo.
+
+### 2026-11-01 — Mudança de expediente com agendamentos futuros
+- **Com:** registro interno. Decisão do Vitor como product owner (issue #105)
+- **Canal:** conversa no Codex
+- **Fatos e decisões:**
+  - **D13.** A administração **não pode alterar o horário de funcionamento** se a mudança deixar algum agendamento `SCHEDULED` com início futuro fora do novo expediente. É preciso remarcar esses agendamentos antes de salvar. A alteração é recusada integralmente, sem mudar nem cancelar agendamentos. Para essa proteção, "futuro" significa `starts_at` depois de agora; um atendimento que já começou não impede a alteração. A decisão passa a integrar a RN-02 e a [spec de horários](../specs/barbearia-horarios.md).

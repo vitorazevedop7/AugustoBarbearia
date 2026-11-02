@@ -1,6 +1,7 @@
 """Rotas da barbearia: leitura pública e alteração pela administração (RN-70)."""
 
 from collections.abc import Sequence
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_admin
 from app.auth.schemas import CurrentUser
+from app.clock import utc_now
 from app.db import get_session
 from app.errors import ErrorResponse
 from app.modules.shop import service
@@ -67,11 +69,12 @@ def put_shop(
 @router.put(
     "/admin/business-hours",
     response_model=list[BusinessHoursDay],
-    responses=admin_errors,
+    responses={**admin_errors, 409: {"model": ErrorResponse}},
 )
 def put_business_hours(
     days: list[BusinessHoursDay],
+    now: Annotated[datetime, Depends(utc_now)],
     session: Annotated[Session, Depends(get_session)],
     _admin: Annotated[CurrentUser, Depends(require_admin)],
 ) -> list[BusinessHoursDay]:
-    return _days(service.update_business_hours(session, days))
+    return _days(service.update_business_hours(session, days, now=now))

@@ -270,8 +270,12 @@ def ensure_slot_available(
     espera e enxerga o agendamento, ou a criação espera e enxerga o bloqueio
     entre os ocupados. A garantia final contra dois
     agendamentos no mesmo horário é a exclusion constraint da RN-08.
+    O dia do expediente também fica em `FOR SHARE`, contra a edição da RN-02.
     """
     get_barber(session, barber_id, lock="share")
+    # RN-02 × RN-05: mantém o expediente estável até gravar a reserva. Se a
+    # edição chegou primeiro, espera e relê o dia antes de calcular o horário.
+    get_business_hours(session, starts_at.astimezone(TIMEZONE).weekday(), lock=True)
     if not is_slot_available(
         session,
         barber_id=barber_id,
