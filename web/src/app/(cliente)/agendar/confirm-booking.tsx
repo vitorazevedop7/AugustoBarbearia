@@ -75,9 +75,11 @@ export function ConfirmBooking({
         <form action={formAction} className="mt-10 flex flex-col gap-6">
           {state.status === "error" && state.message ? (
             <Alert tone="danger" title={state.message}>
-              <Link href={changeTimeHref} className={textLink}>
-                Escolher outro horário
-              </Link>
+              {state.code === "SLOT_UNAVAILABLE" ? (
+                <Link href={changeTimeHref} className={textLink}>
+                  Escolher outro horário
+                </Link>
+              ) : null}
             </Alert>
           ) : null}
           <Alert

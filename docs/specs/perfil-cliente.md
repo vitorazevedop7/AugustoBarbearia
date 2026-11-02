@@ -59,7 +59,7 @@ Cliente. A administração não tem perfil de cliente (RN-71).
 - **Então** a API salva e devolve o perfil atualizado. Campo ausente ou `null` fica como está; o telefone não pode ser apagado (RN-62).
 - **Dado** um telefone ou nome inválido
 - **Quando** envia o `PATCH`
-- **Então** a API responde `422` com `code` = `VALIDATION_ERROR`, nada muda, e a tela mostra a mensagem da API acima dos campos.
+- **Então** a API responde `422` com `code` = `VALIDATION_ERROR` e um `message` que diz o que corrigir ("Informe o telefone com DDD.", "Informe o nome.", "O nome pode ter no máximo 120 caracteres."), nada muda, e a tela mostra a mensagem da API acima dos campos (#148).
 
 **CA-7 — Formato do telefone**
 - O telefone aceita a digitação comum: espaços, parênteses, pontos, hífens e o prefixo `+55` são ignorados.

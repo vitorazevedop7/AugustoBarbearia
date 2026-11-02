@@ -7,6 +7,8 @@ export type BookedAppointment =
 export type ConfirmState = {
   status: "idle" | "error" | "success";
   message?: string;
+  /** `code` da recusa da API: só `SLOT_UNAVAILABLE` leva a outro horário. */
+  code?: string;
   phone: string;
   appointment?: BookedAppointment;
 };

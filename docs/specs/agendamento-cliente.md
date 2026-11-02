@@ -92,7 +92,7 @@ A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**
 **CA-11 — Telefone na confirmação (RN-10)**
 - **Dado** um cliente sem telefone (`has_phone` = `false` em `GET /me`)
 - **Quando** abre a confirmação
-- **Então** vê o campo Telefone antes do botão "Confirmar agendamento". Ao confirmar, a Server Action salva o telefone (`PATCH /me/profile`) e cria o agendamento. Telefone inválido mostra o `message` da API e mantém o que foi digitado.
+- **Então** vê o campo Telefone antes do botão "Confirmar agendamento". Ao confirmar, a Server Action salva o telefone (`PATCH /me/profile`) e cria o agendamento. Telefone inválido mostra o `message` da API ("Informe o telefone com DDD.") e mantém o que foi digitado. O link "Escolher outro horário" só acompanha a recusa do horário (`SLOT_UNAVAILABLE`); nas outras recusas, o problema não é o horário (#148).
 
 **CA-12 — Confirmação e resumo**
 - A confirmação mostra o barbeiro, o serviço, a data completa, o horário de início e de fim, a duração, o preço e o aviso das 2 horas (RN-14, D6), com o botão "Confirmar agendamento".

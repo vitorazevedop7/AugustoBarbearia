@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createApiClient } from "@/lib/api/client";
 import { getCurrentSession, safeRedirectPath } from "@/lib/session";
-import { apiErrorMessage } from "../perfil/profile-state";
+import { apiErrorCode, apiErrorMessage } from "../perfil/profile-state";
 import { confirmUnavailableMessage, type ConfirmState } from "./booking-state";
 
 const TIMEOUT_MS = 5000;
@@ -20,9 +20,10 @@ export async function confirmBooking(
   const phoneField = formData.get("phone");
   const phone = typeof phoneField === "string" ? phoneField : "";
   const back = safeRedirectPath(formData.get("voltar"));
-  const failed = (message?: string): ConfirmState => ({
+  const failed = (message?: string, code?: string): ConfirmState => ({
     status: "error",
     message: message || confirmUnavailableMessage,
+    code,
     phone,
   });
   const client = createApiClient();
@@ -39,11 +40,9 @@ export async function confirmBooking(
     }
     await leaveWhenNotCustomer(saved.response.status, back);
     if (!saved.data) {
-      return failed(
-        saved.response.status === 401
-          ? undefined
-          : apiErrorMessage(saved.error),
-      );
+      return saved.response.status === 401
+        ? failed()
+        : failed(apiErrorMessage(saved.error), apiErrorCode(saved.error));
     }
   }
 
@@ -62,11 +61,9 @@ export async function confirmBooking(
   }
   await leaveWhenNotCustomer(created.response.status, back);
   if (!created.data) {
-    return failed(
-      created.response.status === 401
-        ? undefined
-        : apiErrorMessage(created.error),
-    );
+    return created.response.status === 401
+      ? failed()
+      : failed(apiErrorMessage(created.error), apiErrorCode(created.error));
   }
   return { status: "success", phone, appointment: created.data };
 }

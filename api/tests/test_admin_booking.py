@@ -288,15 +288,18 @@ def test_rn20_rn23_email_repetido_nao_grava_nada(
 
 
 @pytest.mark.parametrize(
-    "customer",
+    ("customer", "message"),
     [
-        {},
-        {"customer_id": 1, "customer": NEW_CUSTOMER},
-        {"customer": {"name": "João", "phone": "123"}},
-        {"customer": {"name": "  ", "phone": "(75) 99876-5432"}},
-        {"customer": {"name": "João"}},
-        {"customer": {**NEW_CUSTOMER, "email": "sem-arroba"}},
-        {"customer": NEW_CUSTOMER, "source": "ONLINE"},
+        ({}, VALIDATION["message"]),
+        ({"customer_id": 1, "customer": NEW_CUSTOMER}, VALIDATION["message"]),
+        ({"customer": {"name": "João", "phone": "123"}}, "Informe o telefone com DDD."),
+        (
+            {"customer": {"name": "  ", "phone": "(75) 99876-5432"}},
+            "Informe o nome.",
+        ),
+        ({"customer": {"name": "João"}}, "Informe o telefone."),
+        ({"customer": {**NEW_CUSTOMER, "email": "sem-arroba"}}, "Confira o e-mail."),
+        ({"customer": NEW_CUSTOMER, "source": "ONLINE"}, VALIDATION["message"]),
     ],
 )
 def test_rn20_rn62_corpo_invalido(
@@ -305,11 +308,13 @@ def test_rn20_rn62_corpo_invalido(
     edvaldo: int,
     corte_e_barba: int,
     customer: dict[str, Any],
+    message: str,
 ) -> None:
+    """A recusa do cliente novo diz o campo a corrigir (RN-62)."""
     response = create(api, edvaldo, corte_e_barba, TEN, **customer)
 
     assert response.status_code == 422
-    assert response.json() == VALIDATION
+    assert response.json() == {"code": "VALIDATION_ERROR", "message": message}
     assert db_session.scalar(select(func.count()).select_from(Appointment)) == 0
 
 

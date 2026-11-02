@@ -146,7 +146,7 @@ def test_rn61_numero_json_com_casas_decimais_e_recusado_sem_float(
     assert response.status_code == 422
     assert response.json() == {
         "code": "VALIDATION_ERROR",
-        "message": "Confira os dados informados e tente novamente.",
+        "message": "Confira o preço.",
     }
     assert admin.get("/admin/services").json() == before
 

@@ -12,6 +12,7 @@ from pydantic import (
 )
 
 from app.auth.schemas import CurrentUser
+from app.errors import InvalidInput
 from app.modules.customers.models import EMAIL_MAX_LENGTH, NAME_MAX_LENGTH
 
 # DDDs brasileiros em uso (Anatel).
@@ -40,13 +41,15 @@ def normalize_phone(value: str) -> str:
     Ignora separadores e o prefixo `+55` e devolve só os dígitos.
     """
     digits = SEPARATORS.sub("", value).removeprefix("+55")
+    if not digits:
+        raise InvalidInput("Informe o telefone com DDD.")
     if not DIGITS.fullmatch(digits):
-        raise ValueError("O telefone deve ter só números.")
+        raise InvalidInput("O telefone deve ter só números.")
     area_code, number = int(digits[:2]), digits[2:]
     is_mobile = len(number) == 9 and number[0] == "9"
     is_landline = len(number) == 8 and number[0] in "2345"
     if area_code not in AREA_CODES or not (is_mobile or is_landline):
-        raise ValueError("Informe o telefone com DDD.")
+        raise InvalidInput("Informe o telefone com DDD.")
     return digits
 
 
