@@ -222,7 +222,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 ### Páginas internas da vitrine
 
 - **`PageHero`** (`components/vitrine/page-hero.tsx`) monta o topo de `/servicos` e `/barbeiros` como as páginas internas do Beard X (S4.07, #80): a faixa `ink` com o ornamento, o `h1` em `text-display-1` e o texto de apoio em `text-body`, e logo abaixo uma **faixa escura parcial** que o conteúdo (`children`) atravessa.
-- Desde a #130, recebe `photo?: { src: string }`: a foto decorativa preenche só a faixa do título sob overlay `ink/80`, com lazy. `/servicos` usa a bancada e `/barbeiros`, as três cadeiras vazias. Sem `photo`, o topo continua liso.
+- Desde a #130, recebe `photo?: { src: string }`: a foto decorativa preenche só a faixa do título sob overlay `ink/80`, com `preload` e `fetchPriority="high"` por ser o LCP da página. `/servicos` usa a bancada e `/barbeiros`, as três cadeiras vazias. Sem `photo`, o topo continua liso.
 - A faixa parcial é uma camada decorativa (`aria-hidden`, `absolute`, `-z-10` dentro de um bloco `relative isolate`) de 128px no celular, 192px a partir do `md` e 240px a partir do `lg`. Ela fica atrás do começo do conteúdo, então o card de serviços e as fotos dos barbeiros começam no escuro e terminam no `paper`.
 - Os 240px do desktop passam do maior degrau da equipe (145px): os três cards de barbeiro atravessam a faixa.
 - O que pode aparecer sobre a faixa tem fundo próprio: o card de serviços e as fotos, o `Alert` (`surface`) e o `EmptyState` (`surface`).

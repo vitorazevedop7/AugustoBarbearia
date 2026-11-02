@@ -38,7 +38,8 @@ describe("PageHero", () => {
     const hero = screen.getByRole("heading", { level: 1 }).closest("section");
     const photo = hero?.querySelector("img");
     expect(photo).toHaveAttribute("alt", "");
-    expect(photo).toHaveAttribute("loading", "lazy");
+    expect(photo).toHaveAttribute("fetchpriority", "high");
+    expect(photo).not.toHaveAttribute("loading", "lazy");
     expect(photo).toHaveAttribute("sizes", "100vw");
     expect(photo).toHaveAttribute("data-nimg", "fill");
     expect(photo).toHaveClass("object-cover");
