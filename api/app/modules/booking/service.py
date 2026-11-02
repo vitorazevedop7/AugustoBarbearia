@@ -108,13 +108,14 @@ def create_customer_appointment(
 
     1. RN-10: o cliente tem telefone no cadastro;
     2. RN-11: tem menos de 2 agendamentos ativos no futuro;
-    3. RN-05 a RN-07: `starts_at` é um dos horários disponíveis, com a política
+    3. RN-05 e RN-13: trava o serviço, para a duração conferida ser a gravada;
+    4. RN-05 a RN-07: `starts_at` é um dos horários disponíveis, com a política
        do cliente (`ensure_slot_available`, que trava o barbeiro);
-    4. RN-12: nasce `SCHEDULED`, com origem `ONLINE`;
-    5. RN-13: guarda o preço e a duração do serviço neste momento;
-    6. RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco
+    5. RN-12: nasce `SCHEDULED`, com origem `ONLINE`;
+    6. RN-13: guarda o preço e a duração do serviço neste momento;
+    7. RN-08: se outra reserva ficou com o horário ao mesmo tempo, o banco
        recusa e a resposta é a mesma do horário indisponível;
-    7. RN-50: registra o e-mail de confirmação na mesma transação e o envia
+    8. RN-50: registra o e-mail de confirmação na mesma transação e o envia
        depois do commit. Uma falha no envio não desfaz nada (RN-54).
     """
     customer = _lock_customer(session, customer.id)
@@ -136,6 +137,7 @@ def create_customer_appointment(
             ),
             status_code=409,
         )
+    service = get_service(session, service_id, lock=True)
     ensure_slot_available(
         session,
         barber_id=barber_id,
@@ -144,7 +146,6 @@ def create_customer_appointment(
         now=now,
     )
     barber = get_barber(session, barber_id)
-    service = get_service(session, service_id)
     appointment = Appointment(
         customer_id=customer.id,
         barber_id=barber.id,

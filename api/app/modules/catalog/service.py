@@ -109,8 +109,21 @@ def list_offered_services(session: Session) -> list[OfferedService]:
     return offered
 
 
-def get_service(session: Session, service_id: int) -> Service:
-    service = session.get(Service, service_id)
+def get_service(session: Session, service_id: int, *, lock: bool = False) -> Service:
+    """`lock` trava o serviço (`FOR SHARE`) até o fim da transação e relê o
+    cadastro.
+
+    RN-05 e RN-13: quem agenda confere o horário com a duração do serviço e
+    grava a mesma duração e o mesmo preço. Com a trava, uma edição do serviço ao
+    mesmo tempo espera o agendamento terminar, então a duração não muda entre a
+    conferência e a gravação.
+    """
+    service = session.get(
+        Service,
+        service_id,
+        with_for_update={"read": True} if lock else None,
+        populate_existing=lock,
+    )
     if service is None:
         raise DomainError(
             code="SERVICE_NOT_FOUND",
