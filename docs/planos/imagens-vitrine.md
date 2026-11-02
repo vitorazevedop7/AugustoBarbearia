@@ -92,7 +92,7 @@ Todos ficam em `web/public/images/vitrine/`, em JPEG progressivo, sRGB, sem EXIF
 | E1 | `topo-servicos.jpg` | 16:9 | 2400×1350 | 350 KB | Fundo do `PageHero` de `/servicos` | Barber station detail: row of tools and products on the counter, wide shot, low-key | `""` (decorativa) |
 | E2 | `topo-equipe.jpg` | 16:9 | 2400×1350 | 350 KB | Fundo do `PageHero` de `/barbeiros` | Three empty classic barber chairs in a row, mirrors, warm light (lembra os três barbeiros) | `""` (decorativa) |
 | F1–F4 | `mosaico-1.jpg` … `mosaico-4.jpg` | 1:1 | 1200×1200 | 200 KB | Mosaico, 4 laterais | Variados e coerentes entre si: lavagem do cabelo (por trás), pós-barba nas mãos, cabelo penteado com pomada (nuca), poste/detalhe da cadeira cromada | Descrição curta de cada cena |
-| F5 | `mosaico-destaque.jpg` | 1:1 | 1600×1600 | 300 KB | Mosaico, centro grande | Finished classic side-part haircut seen from the back/side, client's face out of frame | "Corte social pronto, visto de lado" |
+| F5 | `mosaico-destaque.jpg` | 1:1 | 1600×1600 | 300 KB | Mosaico, centro grande | Finished classic side-part haircut seen from the back/side, client's face out of frame | "Corte social pronto, visto de costas" |
 
 São **14 imagens novas**. Faça uma revisão em lote antes de implementar: mãos com cinco dedos, ferramentas coerentes, nenhum rótulo legível, nenhum rosto reconhecível e paleta igual à do `hero.jpg`. Imagem reprovada é gerada de novo.
 

@@ -99,7 +99,7 @@ export const vitrinePhotos = {
   },
   mosaicHighlight: {
     src: "/images/vitrine/mosaico-destaque.jpg",
-    alt: "Corte social pronto, visto de lado",
+    alt: "Corte social pronto, visto de costas",
     width: 1600,
     height: 1600,
   },
