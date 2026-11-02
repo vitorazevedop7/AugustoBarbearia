@@ -142,6 +142,37 @@ describe("página inicial (vitrine)", () => {
     );
   });
 
+  it.each([null, "Sobre cadastrado."])(
+    "mostra a galeria depois dos serviços e alterna os fundos com about=%s",
+    async (about) => {
+      vi.mocked(getPublicShop).mockResolvedValue({ ...shop, about });
+      render(await HomePage());
+      const gallery = section("Nosso trabalho");
+      expect(section("Serviços").nextElementSibling).toBe(gallery);
+      expect(
+        within(gallery)
+          .getAllByRole("img")
+          .map((image) => image.getAttribute("alt")),
+      ).toEqual([
+        "Barbeiro acertando um degradê com a máquina",
+        "Barba feita na navalha, com toalha quente",
+        "Tesoura, pente e pincel na bancada",
+        "Acabamento de barba com máquina e pente",
+      ]);
+      expect(gallery).toHaveClass(about ? "bg-paper" : "bg-surface");
+      expect(section("Nossa equipe")).toHaveClass(
+        about ? "bg-surface" : "bg-paper",
+      );
+      expect(
+        within(gallery).getByRole("link", { name: "Agendar horário" }),
+      ).toHaveAttribute("href", "/agendar");
+      for (const photo of within(gallery).getAllByRole("img")) {
+        expect(photo).toHaveAttribute("loading", "lazy");
+        expect(photo.parentElement).toHaveAttribute("data-reveal", "zoom");
+      }
+    },
+  );
+
   it("RN-60: mostra a equipe com a inicial no lugar da foto que falta", async () => {
     render(await HomePage());
 

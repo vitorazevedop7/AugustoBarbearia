@@ -9,6 +9,7 @@ import { FramedPhoto } from "@/components/ui/framed-photo";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { BarberList, ServiceList } from "@/components/vitrine/catalog";
+import { Gallery } from "@/components/vitrine/gallery";
 import {
   BusinessHoursList,
   ContactList,
@@ -112,10 +113,12 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <Gallery surface={!shop?.about} />
+
       <section
         id="equipe"
         aria-labelledby="equipe-titulo"
-        className={`relative isolate overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "" : "bg-surface"}`}
+        className={`relative isolate overflow-hidden px-4 py-section sm:px-6 lg:px-8 ${shop?.about ? "bg-surface" : "bg-paper"}`}
       >
         <FloatingOrnament
           shape="comb"
