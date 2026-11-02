@@ -1,6 +1,6 @@
 # Spec — Vitrine pública
 
-- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas)
+- **Issues:** #54 (S3.05), #72 (S3.11, fotos placeholder do hero e do "Sobre"), #75 (S4.02, carregamento sem salto), #77 (S4.04, hero de tela inteira e cabeçalho integrado), #79 (S4.06, serviços, equipe e ornamentos), #80 (S4.07, faixa escura parcial das páginas internas), #116 (cabeçalho não fixo)
 - **Fase:** 1 (MVP) (ver `docs/produto/roadmap.md`)
 - **Status:** implementada
 
@@ -94,7 +94,7 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 **CA-12 — Hero de tela inteira e cabeçalho integrado (#77)**
 - **Dado** um visitante em `/`, em 360px, 768px ou 1440px
 - **Quando** a página carrega e ele rola
-- **Então** o hero ocupa a altura da tela, sem rolagem horizontal, com o título sem quebrar palavra e os botões na largura toda em 360px; a foto fica parada só a partir de 1024px; o cabeçalho começa transparente sobre o hero e vira uma faixa escura fixa ao rolar.
+- **Então** o hero ocupa a altura da tela, sem rolagem horizontal, com o título sem quebrar palavra e os botões na largura toda em 360px; a foto fica parada só a partir de 1024px; o cabeçalho fica transparente sobre o hero e rola com a página, sem ficar fixo (decisão de 2026-11-01, #116).
 - Sem JS, o cabeçalho e o menu funcionam; com `prefers-reduced-motion`, nada se move além da rolagem.
 
 **CA-13 — Serviços, equipe e ornamentos no padrão Beard X (#79)**
@@ -115,8 +115,9 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Elas chegam inteiras, sem esqueleto de carregamento (ver [Carregamento e cache](#carregamento-e-cache)).
 
 - **Cabeçalho (todas as páginas):** logo, links para Serviços, Barbeiros e Contato (`/#contato`), o login e o botão "Agendar", sempre em fundo escuro (S4.04, #77).
-  - Em `/`, fica transparente sobre o hero, como no Beard X. Quando a página rola, vira uma faixa `ink` fixa, para o "Agendar" continuar à mão. Sem JS, ele fica no topo do hero e rola com a página: nunca fica transparente sobre fundo claro.
-  - Nas outras páginas, é uma faixa `ink` presa no topo. Em `/servicos` e `/barbeiros`, ela continua na faixa escura do título.
+  - Em nenhuma página ele é fixo: rola com a página, como no Beard X (decisão de 2026-11-01, #116).
+  - Em `/`, fica transparente no topo do hero, como no Beard X: nunca fica transparente sobre fundo claro.
+  - Nas outras páginas, é uma faixa `ink` no topo, que rola com a página. Em `/servicos` e `/barbeiros`, ela continua na faixa escura do título.
   - O login (ou "Olá, <nome>" e "Sair") é a única parte que depende do usuário. Ela chega à parte, num `Suspense` com um espaço reservado do mesmo tamanho, para a página não esperar a sessão.
   - No desktop (a partir de 1024px), tudo fica numa linha. O link da página atual tem `aria-current="page"`.
   - No celular, um botão "Menu" abre um painel escuro com os links, o botão "Agendar horário" na largura toda e o login. O painel desce de trás do cabeçalho em 400ms (sem animação com `prefers-reduced-motion`), ocupa o resto da tela e trava a rolagem da página. É um `<details>` nativo: abre, fecha e trava a rolagem sem JS. Com JS, ele também fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link.

@@ -1,7 +1,7 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { renderToStaticMarkup } from "react-dom/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SiteHeader } from "./site-header";
 
 // A conta lê a sessão no servidor e tem sua própria suíte.
@@ -63,34 +63,9 @@ describe("SiteHeader", () => {
   });
 });
 
-describe("SiteHeader sobre o hero", () => {
-  let frames: FrameRequestCallback[] = [];
-
-  /** Roda o quadro pedido pela rolagem, como o navegador faria. */
-  function scrollTo(y: number) {
-    window.scrollY = y;
-    act(() => {
-      window.dispatchEvent(new Event("scroll"));
-      for (const frame of frames.splice(0)) frame(0);
-    });
-  }
-
-  beforeEach(() => {
+describe("SiteHeader sem fixar", () => {
+  it("na página inicial, fica transparente no topo do hero e rola com a página", () => {
     vi.mocked(usePathname).mockReturnValue("/");
-    frames = [];
-    vi.stubGlobal("requestAnimationFrame", (frame: FrameRequestCallback) => {
-      frames.push(frame);
-      return frames.length;
-    });
-    vi.stubGlobal("cancelAnimationFrame", vi.fn());
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    window.scrollY = 0;
-  });
-
-  it("sem JS, fica transparente no topo do hero e rola com a página", () => {
     const container = document.createElement("div");
     container.innerHTML = renderToStaticMarkup(<SiteHeader />);
     const header = container.querySelector("header");
@@ -99,27 +74,26 @@ describe("SiteHeader sobre o hero", () => {
     expect(header).toHaveClass("absolute", "bg-transparent");
   });
 
-  it("com JS, fica fixo e transparente no topo e escurece ao rolar", () => {
+  it("não fica fixo quando a página rola", () => {
+    vi.mocked(usePathname).mockReturnValue("/");
     render(<SiteHeader />);
     const header = screen.getByRole("banner");
-    scrollTo(0);
-    expect(header).toHaveAttribute("data-mode", "floating");
-    expect(header).toHaveClass("fixed", "bg-transparent");
+    window.scrollY = 120;
+    fireEvent.scroll(window);
 
-    scrollTo(120);
-    expect(header).toHaveAttribute("data-mode", "pinned");
-    expect(header).toHaveClass("fixed", "bg-ink");
-
-    scrollTo(0);
-    expect(header).toHaveAttribute("data-mode", "floating");
+    expect(header).toHaveAttribute("data-mode", "hero");
+    expect(header).not.toHaveClass("fixed");
+    expect(header).not.toHaveClass("sticky");
+    window.scrollY = 0;
   });
 
-  it("nas outras páginas, é uma faixa escura presa no topo", () => {
+  it("nas outras páginas, é uma faixa escura no topo que rola com a página", () => {
     vi.mocked(usePathname).mockReturnValue("/servicos");
     render(<SiteHeader />);
     const header = screen.getByRole("banner");
     expect(header).toHaveAttribute("data-mode", "bar");
-    expect(header).toHaveClass("sticky", "bg-ink");
+    expect(header).toHaveClass("relative", "bg-ink");
+    expect(header).not.toHaveClass("sticky");
   });
 });
 
@@ -159,6 +133,22 @@ describe("MobileMenu no cabeçalho", () => {
       .closest(".bg-ink");
     // Só anima com o menu aberto e sem pedido de menos movimento.
     expect(panel).toHaveClass("motion-safe:group-open:animate-menu-down");
+  });
+
+  it("abre com a página no topo, para o painel ocupar o resto da tela", () => {
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    render(<SiteHeader />);
+    const { details } = menu();
+
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" });
+
+    scrollTo.mockClear();
+    details.open = false;
+    fireEvent(details, new Event("toggle"));
+    expect(scrollTo).not.toHaveBeenCalled();
+    scrollTo.mockRestore();
   });
 
   it("fecha ao navegar", () => {

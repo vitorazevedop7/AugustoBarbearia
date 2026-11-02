@@ -10,8 +10,8 @@ import { BOOKING_PATH } from "@/lib/booking";
 
 /**
  * Cabeçalho escuro, com a navegação da vitrine e a chamada para agendar.
- * Na página inicial, ele fica transparente sobre o hero e vira uma faixa
- * escura fixa quando a página rola (`HeaderFrame`). No desktop fica tudo numa linha;
+ * Na página inicial, ele fica transparente sobre o hero (`HeaderFrame`), e
+ * em nenhuma página é fixo: rola com ela. No desktop fica tudo numa linha;
  * no celular, num menu. Só a conta depende do usuário, e ela chega à parte,
  * num `Suspense` com o mesmo tamanho.
  */

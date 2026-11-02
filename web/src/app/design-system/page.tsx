@@ -89,7 +89,7 @@ function Showcase({
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="scroll-mt-20 border-t border-line py-12 lg:py-16"
+      className="border-t border-line py-12 lg:py-16"
     >
       <h2
         id={`${id}-title`}
