@@ -160,9 +160,7 @@ describe("página inicial (vitrine)", () => {
         "Acabamento de barba com máquina e pente",
       ]);
       expect(gallery).toHaveClass(about ? "bg-paper" : "bg-surface");
-      expect(section("Nossa equipe")).toHaveClass(
-        about ? "bg-surface" : "bg-paper",
-      );
+      expect(section("Nossa equipe")).toHaveClass("bg-paper");
       expect(
         within(gallery).getByRole("link", { name: "Agendar horário" }),
       ).toHaveAttribute("href", "/agendar");
@@ -172,6 +170,23 @@ describe("página inicial (vitrine)", () => {
       }
     },
   );
+
+  it("mostra a faixa de agendamento entre a galeria e a equipe, com foto decorativa lazy", async () => {
+    render(await HomePage());
+    const band = section("Agende pelo celular");
+    expect(section("Nosso trabalho").nextElementSibling).toBe(band);
+    expect(band.nextElementSibling).toBe(section("Nossa equipe"));
+    expect(band).toHaveClass("[clip-path:inset(0)]", "lg:min-h-[70svh]");
+    const image = within(band).getByRole("presentation");
+    expect(image).toHaveAttribute("loading", "lazy");
+    expect(image).not.toHaveAttribute("fetchpriority");
+    expect(image).toHaveClass("object-[55%_50%]");
+    expect(image.parentElement).toHaveClass("lg:fixed");
+    expect(band).toHaveTextContent("Receba a confirmação por e-mail.");
+    expect(
+      within(band).getByRole("link", { name: "Agendar horário" }),
+    ).toHaveAttribute("href", "/agendar");
+  });
 
   it("RN-60: mostra a equipe com a inicial no lugar da foto que falta", async () => {
     render(await HomePage());
