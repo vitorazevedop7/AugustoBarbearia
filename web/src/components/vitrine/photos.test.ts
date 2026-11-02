@@ -54,3 +54,16 @@ describe("Fotos placeholder da vitrine (D12)", () => {
     expect(bytes.byteLength).toBeLessThanOrEqual(400_000);
   });
 });
+
+describe("Galeria da vitrine (D14)", () => {
+  it.each([
+    "galeria-degrade",
+    "galeria-navalha",
+    "galeria-ferramentas",
+    "galeria-barba",
+  ])("%s é JPEG de até 300 KB", (name) => {
+    const bytes = readFileSync(`${PUBLIC_DIR}/images/vitrine/${name}.jpg`);
+    expect([...bytes.subarray(0, 3)]).toEqual([0xff, 0xd8, 0xff]);
+    expect(bytes.byteLength).toBeLessThanOrEqual(300_000);
+  });
+});
