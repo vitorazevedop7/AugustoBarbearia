@@ -1,6 +1,6 @@
 # Plano: mais imagens na vitrine
 
-> Brief para o Codex. Ele **gera** as imagens e **implementa** cada uso. Antes de começar, leia `CLAUDE.md`, `docs/design/design-system.md` (seção "Ícones e imagens"), `docs/design/referencia-beard-x.md` e a [spec da vitrine](../specs/vitrine.md).
+> Brief de implementação. Quem implementa **gera** as imagens e **implementa** cada uso. Antes de começar, leia `CLAUDE.md`, `docs/design/design-system.md` (seção "Ícones e imagens"), `docs/design/referencia-beard-x.md` e a [spec da vitrine](../specs/vitrine.md).
 >
 > **Decisão de produto:** D14 aprovada por Vitor em 2026-11-02 no pedido de execução das issues #125–#132; registro e critérios entram na #125. A implementação segue as dependências abaixo.
 >
@@ -15,7 +15,7 @@
 
    | Bloco do Beard X | Decisão | Motivo |
    |---|---|---|
-   | Produtos (3 fotos 1:1) | Não entra | Não temos loja; está fora do escopo (`visao.md`) |
+   | Produtos (3 fotos 1:1) | Não entra | Não temos loja; descartada na [referência visual](../design/referencia-beard-x.md) |
    | Depoimentos (avatares 1:1 + estrelas) | Não entra | Seriam avaliações inventadas. Aguardam depoimentos reais |
    | Vídeo ("Take a look at our work") | Vira a **faixa de agendamento com foto** (item C) | Não temos vídeo real. Fica a foto fixa sem o botão de play |
    | Ícones de linha por serviço | Backlog | Os serviços vêm da API; um ícone por serviço exigiria campo novo no `Service` (issue separada) |
@@ -113,7 +113,7 @@ Confira o peso com `ls -l` e baixe a qualidade (75, 70) até caber no limite.
 - **`web/src/lib/vitrine-photos.ts`**: um único lugar com `{ src, alt, width, height }` de cada foto da vitrine (inclusive hero e "Sobre", hoje constantes em `page.tsx`). A troca pelas fotos reais (P10) fica restrita a esse arquivo.
 - **`FramedPhoto`** (`web/src/components/ui/framed-photo.tsx`): moldura com `aspect-*`, `overflow-hidden`, `bg-line`, `next/image` com `fill`, `sizes` e `object-cover`, e o zoom 1,1 em 300ms `ease-standard` no hover do `group`, respeitando `motion-reduce`. É o padrão que o "Sobre" e o `BarberPhoto` já usam: extraia e reaproveite no "Sobre".
 - **`FixedPhotoLayer`**: extraia do `Hero` a técnica da foto fixa (camada `absolute inset-0 lg:fixed` + `[clip-path:inset(0)]` na seção + overlay `bg-ink/70`) para o hero e a faixa C usarem o mesmo código.
-- Fora do hero, **nenhuma** foto usa `preload`/`fetchPriority`: todas ficam com o lazy padrão do `next/image`. A entrada usa `data-reveal="zoom"` nas molduras e `"rise"` nos textos, como já se faz.
+- Fora do hero inicial e do topo com foto de `/servicos` e `/barbeiros` (o LCP de cada página), **nenhuma** foto usa `preload`/`fetchPriority`: todas ficam com o lazy padrão do `next/image`. A entrada usa `data-reveal="zoom"` nas molduras e `"rise"` nos textos, como já se faz.
 - Raio 0, cores e fontes só pelos tokens, mobile first (360px sem rolagem horizontal).
 
 ### B. Galeria "Nosso trabalho" (home)
@@ -121,7 +121,7 @@ Confira o peso com `ls -l` e baixe a qualidade (75, 70) até caber no limite.
 - Componente `web/src/components/vitrine/gallery.tsx`, com `SectionHeading` ("Nosso trabalho"; descrição genérica, sem prometer o que não sabemos) e um `ButtonLink` "Agendar horário" para `BOOKING_PATH`.
 - **Celular:** grade de 2 colunas com gap de 12px, todas as molduras em `aspect-[3/4]` (B1, B2, B3, B4 em ordem).
 - **`lg`:** `grid-cols-3`, gap de 28px. Colunas 1 e 3 com moldura `aspect-[2/3]` e `mt-20` (o degrau de 77px do Beard X); coluna 2 com B2 `aspect-[5/4]` em cima e B3 `aspect-square` embaixo, gap de 28px.
-- `sizes`: `(min-width: 1024px) calc((min(100vw, 1344px) - 8rem) / 3), calc((100vw - 2.75rem) / 2)` (ajuste ao `max-w-site` real).
+- `sizes`: `(min-width: 1024px) calc((min(100vw, 1340px) - 8rem) / 3), calc((100vw - 2.75rem) / 2)` (ajuste ao `max-w-site` real).
 
 ### C. Faixa de agendamento com foto fixa (home)
 
@@ -132,7 +132,7 @@ Confira o peso com `ls -l` e baixe a qualidade (75, 70) até caber no limite.
 
 - Componente `web/src/components/vitrine/how-it-works.tsx`, numa grade de 2 colunas no `lg`.
   - **Texto à esquerda:** `SectionHeading` alinhado à esquerda e uma lista numerada com **apenas o que o sistema faz**: 1) escolha o barbeiro; 2) o serviço; 3) o dia e o horário; 4) confirme com a conta Google. Depois, "lembrete por e-mail um dia antes" (RN-51) e "cancele ou remarque pelo site até 2 horas antes" (RN-14). Confira os textos em `docs/dominio/regras.md`; não invente diferenciais.
-  - **Fotos à direita:** D1 em `aspect-[7/8]`, sangrando para a direita a partir do `lg` (`lg:-mr-[calc((100vw-min(100vw,var(--max-site)))/2)]` ou equivalente; a seção tem `overflow-hidden`). D2 em `aspect-[7/8]` com ≈ 70% da largura de D1, `absolute`, deslocada para a esquerda e para baixo (≈ 100px e 40% da altura), com uma borda `surface` de 8px para separar.
+  - **Fotos à direita:** D1 em `aspect-[7/8]`, sangrando para a direita a partir do `lg` (`lg:-mr-[calc((100vw-min(100vw,var(--container-site)))/2)]` ou equivalente; a seção tem `overflow-hidden`). D2 em `aspect-[7/8]` com ≈ 70% da largura de D1, `absolute`, deslocada para a esquerda e para baixo (≈ 100px e 40% da altura), com uma borda `surface` de 8px para separar.
   - **Celular:** só D1, acima do texto; D2 aparece a partir do `md`.
 
 ### E. Foto no hero das páginas internas

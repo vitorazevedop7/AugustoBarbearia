@@ -111,7 +111,7 @@
 
 ## Diferenças entre a nossa vitrine e a referência
 
-Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença; as linhas já resolvidas dizem como ficou. Com a #80, todas as linhas com tarefa estão resolvidas; só os números do "Sobre" ficam em aberto.
+Medidas em 2026-10-31, com a vitrine da `main` e o Beard X. A última coluna diz qual tarefa da Sprint 4 resolve cada diferença; as linhas já resolvidas dizem como ficou. Com a #80, todas as linhas da Sprint 4 estão resolvidas; só os números do "Sobre" ficam em aberto. As linhas de galeria, faixa, "Como funciona", topos internos e mosaico foram acrescentadas em 2026-11-02 com a D14 e são resolvidas pelas #127 a #131.
 
 | Tema | Beard X | Nossa vitrine hoje | Resolve |
 |---|---|---|---|

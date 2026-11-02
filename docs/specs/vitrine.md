@@ -150,7 +150,7 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 - **Dado** as fotos aprovadas na D14
 - **Quando** são revisadas e usadas em 360px e 1280px
 - **Então** respeitam as dimensões e os pesos do [plano](../planos/imagens-vitrine.md#4-especificação-de-cada-imagem), em JPEG progressivo sRGB sem EXIF, sem rosto identificável, texto, logo ou rótulo legível e com anatomia e ferramentas coerentes com as fotos existentes.
-- Fora do hero inicial, todas têm lazy padrão, `sizes` correspondente ao layout e espaço reservado pela moldura, sem salto de layout ou rolagem horizontal. Fotos em moldura usam `data-reveal="zoom"`; textos usam `rise`; a página funciona sem JS e com menos movimento.
+- Fora da foto que abre a página (o hero inicial e o topo de `/servicos` e `/barbeiros`, com preload e prioridade alta por serem o LCP), todas têm lazy padrão, `sizes` correspondente ao layout e espaço reservado pela moldura, sem salto de layout ou rolagem horizontal. Fotos em moldura usam `data-reveal="zoom"`; textos usam `rise`; a página funciona sem JS e com menos movimento.
 
 ## Fluxo e telas
 Tudo fica no grupo `(publico)`, sem login. As páginas são Server Components que leem a API pelo servidor, sem token (`createPublicApiClient`), e funcionam sem JS. Elas chegam inteiras, sem esqueleto de carregamento (ver [Carregamento e cache](#carregamento-e-cache)).
@@ -225,7 +225,7 @@ Na referência Beard X, a página chega inteira de uma vez. A vitrine faz o mesm
 - O fluxo de agendamento (`/agendar`): S3.08 (#57).
 - As fotos placeholder dos barbeiros: entregues na S3.10 (#63).
 - Página própria de cada barbeiro (`/barbeiros/[slug]`) e "próximo horário livre" no card: decisões pendentes da referência, ficam para quando o agendamento existir.
-- Página de contato com FAQ (cancelamento até 2h antes, D6), depoimentos, vídeo e Instagram embutido: não há material real ainda. A galeria e o mosaico de fotos fictícias estão cobertos pela D14; produtos e loja continuam fora do MVP.
+- Página de contato com FAQ (cancelamento até 2h antes, D6), depoimentos, vídeo e Instagram embutido: não há material real ainda. A galeria e o mosaico de fotos fictícias estão cobertos pela D14; produtos e loja ficam fora do MVP, como já descartado na [referência visual](../design/referencia-beard-x.md).
 - Serviço em destaque escolhido pela administração: não há campo para isso. A página inicial mostra os primeiros 4 serviços, na ordem da API.
 - Mapa embutido: "Como chegar" abre a busca do endereço no Google Maps.
 
