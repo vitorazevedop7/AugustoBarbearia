@@ -13,9 +13,12 @@ import { ChoiceChip } from "@/components/ui/choice-chip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SelectField, TextAreaField, TextField } from "@/components/ui/field";
 import { FloatingOrnament } from "@/components/ui/floating-ornament";
+import { FixedPhotoLayer } from "@/components/ui/fixed-photo-layer";
+import { FramedPhoto } from "@/components/ui/framed-photo";
 import { Ornament } from "@/components/ui/ornament";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ServiceCard, ServiceItem } from "@/components/ui/service-card";
+import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 /** Vitrine viva do design system (docs/design/design-system.md). Fora da navegação e dos buscadores. */
 export const metadata: Metadata = {
@@ -72,6 +75,7 @@ const sections = [
   { id: "avisos", title: "Avisos" },
   { id: "titulos", title: "Títulos de seção" },
   { id: "cards", title: "Cards da vitrine" },
+  { id: "fotos", title: "Fotos da vitrine" },
   { id: "ornamentos", title: "Ornamentos" },
   { id: "composicao", title: "Composição" },
 ];
@@ -148,6 +152,21 @@ export default function DesignSystemPage() {
               </li>
             ))}
           </ul>
+        </Showcase>
+
+        <Showcase id="fotos" title="Fotos da vitrine">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <FramedPhoto
+              photo={vitrinePhotos.about}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+            <div className="relative isolate flex min-h-80 items-center justify-center bg-ink p-8 [clip-path:inset(0)]">
+              <FixedPhotoLayer photo={vitrinePhotos.hero} />
+              <p className="relative text-body text-surface">
+                Foto fixa no desktop
+              </p>
+            </div>
+          </div>
         </Showcase>
 
         <Showcase id="tipografia" title="Tipografia">
