@@ -247,6 +247,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 - Funciona sem JS. Com JS, fecha com Esc (o foco volta para o botão), ao navegar e ao escolher um link, e abre com a página no topo: como o cabeçalho rola com a página, o painel aberto com ele em parte fora da tela não chegaria ao fim dela.
 - O painel é escuro (`ink`) e desce de trás do cabeçalho em 400ms `ease` (`animate-menu-down`), recortado por uma moldura com `overflow-hidden`. Ele ocupa o resto da tela e rola sozinho se o conteúdo não couber. A animação só vale com o menu aberto, para recomeçar a cada abertura; com `prefers-reduced-motion`, ele abre sem animação.
 - Aberto, ele trava a rolagem da página pelo CSS (`html:has([data-mobile-menu][open])`, abaixo de 1024px), então isso também funciona sem JS. Sobre o hero, o cabeçalho escurece junto com o painel.
+- Aberto, com JS, ele deixa `inert` tudo o que está no `body` fora do cabeçalho (o link de salto, o `main`, o rodapé), menos o anunciador de rotas do Next. Assim o Tab não leva o foco a um link escondido atrás do painel (#152); fechar o menu, ou sair da página com ele aberto, devolve tudo ao normal.
 - O link da página atual tem `aria-current="page"` e um traço em `brand`.
 
 ### Ornamento e título de seção
