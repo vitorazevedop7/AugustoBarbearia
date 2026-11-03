@@ -51,7 +51,9 @@ export default async function AgendaAppointmentPage({
             Voltar para a agenda
           </ButtonLink>
         </div>
-        {notice ? <Alert tone="success" title={notice} /> : null}
+        {notice ? (
+          <Alert tone="success" revealOnMount="top" title={notice} />
+        ) : null}
         {loaded.data ? (
           <>
             <AppointmentDetail

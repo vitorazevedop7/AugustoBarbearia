@@ -162,7 +162,9 @@ export default async function ClientesPage({
   return (
     <AdminPage title="Clientes" description={description}>
       <div className="flex flex-col gap-6">
-        {notice ? <Alert tone="success" title={notice} /> : null}
+        {notice ? (
+          <Alert tone="success" revealOnMount="top" title={notice} />
+        ) : null}
         <SearchForm query={query} />
         {customers.length === 0 && total > 0 ? (
           <EmptyState

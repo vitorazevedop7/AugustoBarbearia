@@ -53,7 +53,7 @@ export function ConfirmBooking({
       {slot ? (
         <form action={formAction} className="mt-10 flex flex-col gap-6">
           {state.status === "error" && state.message ? (
-            <Alert tone="danger" title={state.message}>
+            <Alert tone="danger" revealOnMount="center" title={state.message}>
               {state.code === "SLOT_UNAVAILABLE" ? (
                 <Link href={changeTimeHref} className={textLink}>
                   Escolher outro horário

@@ -63,7 +63,9 @@ export default async function ServicosPage({
   return (
     <AdminPage title="Serviços" description={description}>
       <div className="flex flex-col gap-6">
-        {notice ? <Alert tone="success" title={notice} /> : null}
+        {notice ? (
+          <Alert tone="success" revealOnMount="top" title={notice} />
+        ) : null}
         {services.length === 0 ? (
           <EmptyState
             title="Nenhum serviço cadastrado"

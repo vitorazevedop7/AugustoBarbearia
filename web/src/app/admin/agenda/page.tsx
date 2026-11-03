@@ -71,7 +71,9 @@ export default async function AgendaPage({
         >
           {title}
         </h2>
-        {notice ? <Alert tone="success" title={notice} /> : null}
+        {notice ? (
+          <Alert tone="success" revealOnMount="top" title={notice} />
+        ) : null}
         <AgendaToolbar
           state={state}
           today={today}

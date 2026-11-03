@@ -62,7 +62,9 @@ export default async function BarbeirosPage({
   return (
     <AdminPage title="Barbeiros" description={description}>
       <div className="flex flex-col gap-6">
-        {notice ? <Alert tone="success" title={notice} /> : null}
+        {notice ? (
+          <Alert tone="success" revealOnMount="top" title={notice} />
+        ) : null}
         {barbers.length === 0 ? (
           <EmptyState
             title="Nenhum barbeiro cadastrado"
