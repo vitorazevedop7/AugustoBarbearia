@@ -1,7 +1,7 @@
 """Contrato HTTP da barbearia e do horário de funcionamento."""
 
 import re
-from datetime import time
+from datetime import datetime, time
 from typing import Annotated
 
 from pydantic import (
@@ -12,7 +12,7 @@ from pydantic import (
     StringConstraints,
 )
 
-from app.errors import InvalidInput
+from app.errors import ErrorResponse, InvalidInput
 
 
 def _blank_to_none(value: object) -> object:
@@ -108,3 +108,23 @@ class BusinessHoursDay(BaseModel):
 
 class ShopResponse(ShopData):
     business_hours: list[BusinessHoursDay]
+
+
+class ConflictingAppointment(BaseModel):
+    """Um agendamento que ficaria fora do novo expediente (RN-02)."""
+
+    id: int
+    # Em `-03:00` (RN-01).
+    starts_at: datetime
+    ends_at: datetime
+    barber_name: str
+    customer_name: str
+
+
+class BusinessHoursConflict(ErrorResponse):
+    """O `409 BUSINESS_HOURS_CONFLICT`: o `{code, message}` de sempre (ADR 0008)
+    e os agendamentos que impedem a mudança, do mais próximo ao mais distante.
+    A lista para em `CONFLICT_LIST_LIMIT`; `total` conta todos."""
+
+    appointments: list[ConflictingAppointment]
+    total: int

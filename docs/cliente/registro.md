@@ -141,6 +141,13 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Fatos e decisões:**
   - **D13.** A administração **não pode alterar o horário de funcionamento** se a mudança deixar algum agendamento `SCHEDULED` com início futuro fora do novo expediente. É preciso remarcar esses agendamentos antes de salvar. A alteração é recusada integralmente, sem mudar nem cancelar agendamentos. Para essa proteção, "futuro" significa `starts_at` depois de agora; um atendimento que já começou não impede a alteração. A decisão passa a integrar a RN-02 e a [spec de horários](../specs/barbearia-horarios.md).
 
+### 2026-11-02 — O que a recusa do expediente mostra
+- **Com:** registro interno. Decisão do Vitor como product owner (issue #124)
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D15.** Quando a mudança do expediente é recusada (D13), a recusa **lista os agendamentos afetados**, do mais próximo ao mais distante, com data, hora, barbeiro e cliente, cada um com link para o detalhe na agenda. A lista mostra até 20, e a mensagem conta todos.
+  - Só contam os **dias cujo horário muda**. Um agendamento que já estava fora do expediente (criado antes da D13, ou um encaixe da administração) impede a mudança do dia dele, não a de outros dias. A decisão passa a integrar a RN-02 e a [spec de horários](../specs/barbearia-horarios.md).
+
 ### 2026-11-02 — Fotos placeholder nas novas áreas da vitrine
 - **Com:** registro interno. Decisão do Vitor como product owner (issue #125, autorizada no pedido de execução das issues #125–#132)
 - **Canal:** —

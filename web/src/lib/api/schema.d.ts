@@ -1068,6 +1068,22 @@ export interface components {
             active?: boolean | null;
         };
         /**
+         * BusinessHoursConflict
+         * @description O `409 BUSINESS_HOURS_CONFLICT`: o `{code, message}` de sempre (ADR 0008)
+         *     e os agendamentos que impedem a mudança, do mais próximo ao mais distante.
+         *     A lista para em `CONFLICT_LIST_LIMIT`; `total` conta todos.
+         */
+        BusinessHoursConflict: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
+            /** Appointments */
+            appointments: components["schemas"]["ConflictingAppointment"][];
+            /** Total */
+            total: number;
+        };
+        /**
          * BusinessHoursDay
          * @description Um dia da semana (0 = segunda … 6 = domingo); horas nulas = fechado.
          */
@@ -1112,6 +1128,28 @@ export interface components {
             /** Amount */
             amount: string;
             method: components["schemas"]["PaymentMethod"];
+        };
+        /**
+         * ConflictingAppointment
+         * @description Um agendamento que ficaria fora do novo expediente (RN-02).
+         */
+        ConflictingAppointment: {
+            /** Id */
+            id: number;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Barber Name */
+            barber_name: string;
+            /** Customer Name */
+            customer_name: string;
         };
         /**
          * CustomerAppointmentResponse
@@ -1802,7 +1840,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["BusinessHoursConflict"];
                 };
             };
             /** @description Unprocessable Content */
