@@ -5,6 +5,7 @@ múltipla de 5 e de no mínimo 10 minutos, pelo menos um barbeiro) ficam no
 service, com mensagens próprias.
 """
 
+import re
 from decimal import Decimal
 from typing import Annotated, Self
 
@@ -17,6 +18,7 @@ from pydantic import (
     model_validator,
 )
 
+from app.errors import InvalidInput
 from app.ids import Id
 from app.modules.catalog.models import DESCRIPTION_MAX_LENGTH, NAME_MAX_LENGTH
 
@@ -36,20 +38,36 @@ def _blank_to_none(value: object) -> object:
     return value
 
 
-def _decimal_text(value: object) -> object:
-    """Aceita o preço como se digita: "25,50" e "1.234,50" viram "25.50" e "1234.50".
+# Os formatos aceitos (#146), só com algarismos ASCII. Com vírgula, ela é o
+# separador decimal, e o ponto, o de milhar em grupos de 3 ("1.000,00"). Sem
+# vírgula, o ponto só pode ser o decimal, com até 2 casas ("25.50").
+COMMA_DECIMAL = re.compile(r"-?(?:[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]+),[0-9]{1,2}")
+DOT_DECIMAL = re.compile(r"-?[0-9]+(?:\.[0-9]{1,2})?")
+MONEY_FORMAT_MESSAGE = (
+    "Informe o valor em reais com até duas casas decimais, como 25, 25,50 ou 1.000,00."
+)
 
-    Com vírgula, ela é o separador decimal e o ponto é o de milhar. Sem vírgula,
-    o ponto é o separador decimal. Inteiro segue direto para o `Decimal`.
-    Número JSON com casas já chega como `float` e é recusado antes da conversão,
-    para não aceitar um valor arredondado em silêncio (RN-61).
+
+def _decimal_text(value: object) -> object:
+    """Aceita o valor como se digita: "25", "25,50", "25.50" e "1.000,00".
+
+    Recusa o que mudaria o valor em silêncio (#146): "1.000" (em pt-BR é mil,
+    mas leria 1,00), "25.5000", "1,000.00", notação científica ("1e3") e
+    algarismos de outros sistemas. O sinal é conferido pelo service (RN-61,
+    RN-40). Inteiro segue direto para o `Decimal`. Número JSON com casas já
+    chega como `float` e é recusado antes da conversão, para não aceitar um
+    valor arredondado (RN-61).
     """
     if isinstance(value, float):
         raise ValueError('Envie o valor como texto decimal, por exemplo "25.50".')
     value = _strip(value)
-    if isinstance(value, str) and "," in value:
+    if not isinstance(value, str):
+        return value
+    if COMMA_DECIMAL.fullmatch(value):
         return value.replace(".", "").replace(",", ".")
-    return value
+    if DOT_DECIMAL.fullmatch(value):
+        return value
+    raise InvalidInput(MONEY_FORMAT_MESSAGE)
 
 
 def _money_text(value: Decimal) -> str:

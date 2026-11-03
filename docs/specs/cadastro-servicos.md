@@ -41,7 +41,7 @@ Administração. A vitrine e o agendamento leem os serviços ativos nas próxima
 
 ### Como o preço trafega
 - **Na resposta**, o preço é uma **string decimal** com ponto e sempre duas casas: `"25.00"`. O Pydantic v2 serializa `Decimal` como string no JSON, e o schema fixa as duas casas. O tipo gerado no web é `string`.
-- **Na entrada**, o preço vem como string (`"25.00"` ou `"25,00"`, como a pessoa digita) ou como inteiro (`25`). Número JSON com casas decimais (`25.5`, inclusive `25.0`) é recusado com `422 VALIDATION_ERROR`, antes que o `float` do parser JSON chegue ao `Decimal` (#108). A API apara os espaços e, quando há vírgula, trata a vírgula como separador decimal e o ponto como separador de milhar (`"1.234,50"` → `1234.50`). Mais de duas casas decimais é recusado.
+- **Na entrada**, o preço vem como string (`"25.00"` ou `"25,00"`, como a pessoa digita) ou como inteiro (`25`). Número JSON com casas decimais (`25.5`, inclusive `25.0`) é recusado com `422 VALIDATION_ERROR`, antes que o `float` do parser JSON chegue ao `Decimal` (#108). A API apara os espaços e aceita só estes formatos, com algarismos de 0 a 9 (#146): inteiro (`"25"`), vírgula decimal com ponto de milhar opcional em grupos de 3 (`"25,50"`, `"1.000,00"`, `"1000,00"`) ou ponto decimal com até duas casas (`"25.50"`). Qualquer outro texto, inclusive os que mudariam o valor em silêncio (`"1.000"`, que em pt-BR é mil; `"25.5000"`; `"1,000.00"`; `"1e3"`), responde `422 VALIDATION_ERROR` com "Informe o valor em reais com até duas casas decimais, como 25, 25,50 ou 1.000,00.".
 - **No web**, o preço nunca vira `number`. A lista formata a string da API com `Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" })`, que aceita a string decimal sem passar por `float` (→ "R$ 25,00"). O formulário mostra o preço salvo com vírgula (`"25.00"` → `"25,00"`), por troca de texto, e envia o que foi digitado.
 
 ## Critérios de aceite
@@ -112,7 +112,7 @@ Administração. A vitrine e o agendamento leem os serviços ativos nas próxima
 - **`/admin/cadastros/servicos/novo`** e **`/admin/cadastros/servicos/{id}`:** o mesmo formulário, com:
   - nome;
   - descrição (opcional), com até 400 caracteres;
-  - preço, um campo de texto com teclado decimal e a dica "Em reais, como 25,00.";
+  - preço, um campo de texto com teclado decimal e a dica "Em reais, como 25,00 ou 1.000,00.";
   - duração em minutos, um campo numérico com a dica "Múltiplo de 5, no mínimo 10 minutos.";
   - "Quem realiza", um `<fieldset>` com uma caixa de seleção (`Checkbox`) por barbeiro cadastrado. O inativo aparece com "(inativo)" no rótulo;
   - só na edição, a situação (Ativo/Inativo), com a dica de que o inativo some da vitrine e não recebe agendamentos novos.
