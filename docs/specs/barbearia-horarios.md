@@ -84,10 +84,11 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 **CA-10 — Não deixar agendamentos futuros fora do expediente (RN-02, RN-05, RN-30)**
 - **Dado** um agendamento `SCHEDULED` com `starts_at` depois de agora
 - **Quando** a administração envia um expediente que fecha o dia, abre depois do início do agendamento ou fecha antes do fim dele
-- **Então** a API responde `409 BUSINESS_HOURS_CONFLICT` com "Há agendamentos futuros fora do novo horário de funcionamento. Remarque esses agendamentos antes de alterar o horário.". Nenhum dos sete dias é alterado, e os agendamentos ficam como estavam.
+- **Então** a API responde `409 BUSINESS_HOURS_CONFLICT` com "Há 2 agendamentos futuros fora do novo horário de funcionamento. Remarque ou cancele esses agendamentos antes de alterar o horário." (no singular com 1), `appointments` (até 20, do mais próximo ao mais distante: `id`, `starts_at` e `ends_at` em `-03:00`, `barber_name`, `customer_name`) e `total`. Nenhum dos sete dias é alterado, e os agendamentos ficam como estavam (#124).
+- Só contam os dias cujo horário muda. Um agendamento que já estava fora do expediente impede a mudança do dia dele, não a de outros dias (D15).
 - Um agendamento que começa exatamente na abertura ou termina exatamente no fechamento cabe no intervalo. A comparação usa o dia e as horas de São Paulo e a duração congelada do agendamento.
 - Agendamentos que já começaram (`starts_at <= agora`), cancelados, concluídos ou com falta não impedem a mudança. A proteção não tem limite de 30 dias: vale também para os horários futuros marcados pela administração além da janela do cliente.
-- A tela mantém os valores enviados e mostra o `message` da API num `Alert` `danger`, sem invalidar o cache da vitrine.
+- A tela mantém os valores enviados e mostra o `message` da API num `Alert` `danger`, com a lista dos agendamentos: cada um é um link para `/admin/agenda/[id]` ("segunda-feira, 9 de novembro de 2026, 15:00 às 15:45 · Lauro · Ana") e, além dos 20, "E mais N agendamentos depois desses.". O cache da vitrine não é invalidado.
 
 **CA-11 — Disputa entre mudança de expediente e reserva (RN-02, RN-05)**
 - A proteção vale para criação e remarcação, tanto do cliente como da administração.
@@ -115,7 +116,7 @@ Administração (edita). Visitante e cliente (leem pela vitrine, nas próximas i
 |---|---|---|---|
 | `GET` | `/public/shop` | Qualquer um | Dados da barbearia e os 7 dias de funcionamento |
 | `PUT` | `/admin/shop` | Administração | Substitui os dados da barbearia; devolve o mesmo formato do `GET` |
-| `PUT` | `/admin/business-hours` | Administração | Substitui os 7 dias; recusa com `409 BUSINESS_HOURS_CONFLICT` se deixar agendamento futuro fora do expediente (RN-02) |
+| `PUT` | `/admin/business-hours` | Administração | Substitui os 7 dias; recusa com `409 BUSINESS_HOURS_CONFLICT` (`BusinessHoursConflict`: `code`, `message`, `appointments`, `total`) se deixar agendamento futuro fora do expediente nos dias que mudam (RN-02) |
 
 Horas trafegam como `HH:MM:SS` (o formato `time` do OpenAPI). Uma abertura nula significa dia fechado.
 
@@ -126,6 +127,9 @@ Em `READ COMMITTED`, a consulta dos agendamentos feita depois da espera já vê 
 
 ## Decisão sobre agendamentos futuros (#105)
 Em 2026-11-01, o Vitor decidiu **impedir a mudança** enquanto houver agendamentos futuros fora do novo expediente (D13, [registro.md](../cliente/registro.md)). O sistema orienta a remarcar antes de salvar; não altera nem cancela agendamentos automaticamente. "Futuro" significa início estritamente depois de agora, não um atendimento que já começou.
+
+## Decisão sobre a recusa (#124)
+Em 2026-11-02, o Vitor decidiu que a recusa lista os agendamentos afetados e que só os dias que mudam são conferidos (D15, [registro.md](../cliente/registro.md)). A lista vai no próprio `409`, além de `code` e `message` (ADR 0008): `DomainError` ganhou `extra`, campos acrescentados ao corpo. Ela para em 20 (`CONFLICT_LIST_LIMIT`, `shop/service.py`) para a resposta não crescer com um dia fechado de vez; `total` conta todos.
 
 ## Fora do escopo desta spec
 - A vitrine lendo esses dados, incluindo o rodapé que hoje tem o horário fixo: S3.05 (#54).

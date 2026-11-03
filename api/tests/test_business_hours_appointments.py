@@ -4,7 +4,8 @@ import threading
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from dataclasses import dataclass
-from datetime import UTC, datetime, time
+from datetime import UTC, datetime, time, timedelta
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -36,13 +37,18 @@ from tests.test_shop import WEEK
 
 NOW = local(2026, 11, 2, 8)
 TARGET = local(2026, 11, 3, 10)
-CONFLICT = {
-    "code": "BUSINESS_HOURS_CONFLICT",
-    "message": (
-        "Há agendamentos futuros fora do novo horário de funcionamento. "
-        "Remarque esses agendamentos antes de alterar o horário."
-    ),
-}
+ONE_CONFLICT = (
+    "Há 1 agendamento futuro fora do novo horário de funcionamento. "
+    "Remarque ou cancele esse agendamento antes de alterar o horário."
+)
+
+
+def conflicting(body: dict[str, Any]) -> list[int]:
+    """Os ids da recusa da RN-02, conferindo o `{code, message}` (ADR 0008)."""
+    assert body["code"] == "BUSINESS_HOURS_CONFLICT"
+    assert isinstance(body["message"], str)
+    assert body["total"] == len(body["appointments"])
+    return [item["id"] for item in body["appointments"]]
 
 
 def changed_week(
@@ -96,7 +102,8 @@ def test_rn02_rn05_recusa_expediente_que_nao_comporta_o_intervalo_congelado(
     response = admin.put("/admin/business-hours", json=week)
 
     assert response.status_code == 409
-    assert response.json() == CONFLICT
+    assert conflicting(response.json()) == [appointment.id]
+    assert response.json()["message"] == ONE_CONFLICT
     # A semana inteira fica como estava, inclusive um dia sem conflito.
     assert admin.get("/public/shop").json()["business_hours"] == WEEK
     db_session.refresh(appointment)
@@ -157,7 +164,7 @@ def test_rn02_agendamento_que_ja_comecou_nao_impede_mudanca(
 def test_rn02_confere_todos_os_barbeiros_e_sem_janela_de_30_dias(
     admin: TestClient, db_session: Session
 ) -> None:
-    make_appointment(
+    appointment = make_appointment(
         db_session,
         barber=barber_id(db_session, "Manoel"),
         starts_at=local(2027, 1, 4, 10),
@@ -166,7 +173,7 @@ def test_rn02_confere_todos_os_barbeiros_e_sem_janela_de_30_dias(
     response = admin.put("/admin/business-hours", json=changed_week())
 
     assert response.status_code == 409
-    assert response.json() == CONFLICT
+    assert conflicting(response.json()) == [appointment.id]
 
 
 def test_rn01_rn02_dia_local_da_reserva_pode_ser_diferente_do_dia_utc(
@@ -177,7 +184,7 @@ def test_rn01_rn02_dia_local_da_reserva_pode_ser_diferente_do_dia_utc(
     assert monday is not None
     monday.opens_at, monday.closes_at = time(22), time(23, 59)
     db_session.flush()
-    make_appointment(
+    appointment = make_appointment(
         db_session,
         barber=barber_id(db_session, "Edvaldo"),
         starts_at=local(2026, 11, 2, 23),
@@ -190,13 +197,13 @@ def test_rn01_rn02_dia_local_da_reserva_pode_ser_diferente_do_dia_utc(
     week[0] = {"weekday": 0, "opens_at": None, "closes_at": None}
     response = admin.put("/admin/business-hours", json=week)
     assert response.status_code == 409
-    assert response.json() == CONFLICT
+    assert conflicting(response.json()) == [appointment.id]
 
 
 def test_rn01_rn02_fim_no_dia_seguinte_nao_cabe_no_expediente_do_inicio(
     admin: TestClient, db_session: Session
 ) -> None:
-    make_appointment(
+    appointment = make_appointment(
         db_session,
         barber=barber_id(db_session, "Edvaldo"),
         starts_at=local(2026, 11, 2, 23, 30),
@@ -208,7 +215,88 @@ def test_rn01_rn02_fim_no_dia_seguinte_nao_cabe_no_expediente_do_inicio(
     )
 
     assert response.status_code == 409
-    assert response.json() == CONFLICT
+    assert conflicting(response.json()) == [appointment.id]
+
+
+def test_rn02_recusa_lista_os_agendamentos_afetados(
+    admin: TestClient, db_session: Session
+) -> None:
+    """#124: a recusa leva a cada agendamento, sem procurar na agenda: data e
+    hora em São Paulo, barbeiro e cliente, do mais próximo ao mais distante."""
+    ana = make_customer(db_session)
+    ana.name = "Ana Lima"
+    later = make_appointment(
+        db_session,
+        barber=barber_id(db_session, "Lauro"),
+        starts_at=local(2026, 11, 9, 15),
+        customer=ana,
+    )
+    first = make_appointment(
+        db_session,
+        barber=barber_id(db_session, "Edvaldo"),
+        starts_at=local(2026, 11, 2, 10),
+    )
+
+    response = admin.put("/admin/business-hours", json=changed_week())
+
+    assert response.status_code == 409
+    body = response.json()
+    assert conflicting(body) == [first.id, later.id]
+    assert body["message"] == (
+        "Há 2 agendamentos futuros fora do novo horário de funcionamento. "
+        "Remarque ou cancele esses agendamentos antes de alterar o horário."
+    )
+    assert body["appointments"][1] == {
+        "id": later.id,
+        "starts_at": "2026-11-09T15:00:00-03:00",
+        "ends_at": "2026-11-09T15:45:00-03:00",
+        "barber_name": "Lauro",
+        "customer_name": "Ana Lima",
+    }
+
+
+def test_rn02_recusa_lista_ate_20_e_conta_todos(
+    admin: TestClient, db_session: Session
+) -> None:
+    customer = make_customer(db_session)
+    edvaldo = barber_id(db_session, "Edvaldo")
+    for week in range(21):
+        make_appointment(
+            db_session,
+            barber=edvaldo,
+            starts_at=local(2026, 11, 2, 10) + timedelta(weeks=week),
+            customer=customer,
+        )
+
+    response = admin.put("/admin/business-hours", json=changed_week())
+
+    assert response.status_code == 409
+    body = response.json()
+    assert body["total"] == 21
+    assert len(body["appointments"]) == 20
+    assert body["message"].startswith("Há 21 agendamentos futuros")
+
+
+def test_rn02_agendamento_ja_fora_do_expediente_so_impede_o_proprio_dia(
+    admin: TestClient, db_session: Session
+) -> None:
+    """#124: um encaixe às 8h de segunda (antes da abertura das 10h) não impede
+    mudar a terça. Mudar a segunda, sim, mesmo para um horário que comporta os
+    outros agendamentos."""
+    early = make_appointment(
+        db_session,
+        barber=barber_id(db_session, "Edvaldo"),
+        starts_at=local(2026, 11, 9, 8),
+    )
+
+    tuesday = changed_week(weekday=1, opens_at="09:00", closes_at="18:00")
+    assert admin.put("/admin/business-hours", json=tuesday).status_code == 200
+
+    monday = changed_week(weekday=0, opens_at="10:00", closes_at="20:00")
+    monday[1] = tuesday[1]
+    response = admin.put("/admin/business-hours", json=monday)
+    assert response.status_code == 409
+    assert conflicting(response.json()) == [early.id]
 
 
 # Transações reais, em conexões próprias: cliente/admin × criar/remarcar × duas ordens.
@@ -391,7 +479,7 @@ def test_rn02_rn05_edicao_espera_criacao_ou_remarcacao_e_recusa_conflito(
         finally:
             release.set()
         assert reservation.result(timeout=10) == "reservado"
-        assert edition.result(timeout=10) == CONFLICT["code"]
+        assert edition.result(timeout=10) == "BUSINESS_HOURS_CONFLICT"
     with Session(migrated_engine) as session:
         assert session.get(BusinessHours, 1).opens_at == time(10)
         assert (

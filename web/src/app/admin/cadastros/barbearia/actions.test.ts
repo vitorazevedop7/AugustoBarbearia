@@ -55,10 +55,24 @@ describe("ações dos dados da barbearia", () => {
 
   it("RN-02: devolve o conflito de expediente e mantém os valores sem invalidar o cache", async () => {
     const message =
-      "Há agendamentos futuros fora do novo horário de funcionamento. Remarque esses agendamentos antes de alterar o horário.";
+      "Há 1 agendamento futuro fora do novo horário de funcionamento. Remarque ou cancele esse agendamento antes de alterar o horário.";
+    const appointments = [
+      {
+        id: 23,
+        starts_at: "2026-11-02T18:00:00-03:00",
+        ends_at: "2026-11-02T18:45:00-03:00",
+        barber_name: "Edvaldo",
+        customer_name: "Ana Lima",
+      },
+    ];
     PUT.mockResolvedValue({
       response: { status: 409 },
-      error: { code: "BUSINESS_HOURS_CONFLICT", message },
+      error: {
+        code: "BUSINESS_HOURS_CONFLICT",
+        message,
+        appointments,
+        total: 1,
+      },
     });
     const data = closedWeek();
     data.set("dia-0-situacao", "aberto");
@@ -78,6 +92,7 @@ describe("ações dos dados da barbearia", () => {
       status: "error",
       message,
       values: Object.fromEntries(data.entries()),
+      conflicts: { appointments, total: 1 },
     });
     expect(updateTag).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();

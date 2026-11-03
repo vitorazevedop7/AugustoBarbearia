@@ -1,7 +1,18 @@
 import type { components } from "@/lib/api/schema";
+import type { FormState } from "../../form-state";
 
 export type ShopUpdate = components["schemas"]["ShopUpdate"];
 export type BusinessHoursDay = components["schemas"]["BusinessHoursDay"];
+export type ConflictingAppointment =
+  components["schemas"]["ConflictingAppointment"];
+
+/**
+ * Estado do formulário do expediente: na recusa da RN-02, os agendamentos que
+ * impedem a mudança, como a API os listou (#124).
+ */
+export type BusinessHoursFormState = FormState & {
+  conflicts?: { appointments: ConflictingAppointment[]; total: number };
+};
 
 export const WEEKDAYS = [
   "Segunda-feira",

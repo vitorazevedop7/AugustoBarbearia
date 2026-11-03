@@ -14,7 +14,12 @@ from app.db import get_session
 from app.errors import ErrorResponse
 from app.modules.shop import service
 from app.modules.shop.models import BusinessHours, Shop
-from app.modules.shop.schemas import BusinessHoursDay, ShopResponse, ShopUpdate
+from app.modules.shop.schemas import (
+    BusinessHoursConflict,
+    BusinessHoursDay,
+    ShopResponse,
+    ShopUpdate,
+)
 
 router = APIRouter(tags=["Barbearia"])
 
@@ -69,7 +74,7 @@ def put_shop(
 @router.put(
     "/admin/business-hours",
     response_model=list[BusinessHoursDay],
-    responses={**admin_errors, 409: {"model": ErrorResponse}},
+    responses={**admin_errors, 409: {"model": BusinessHoursConflict}},
 )
 def put_business_hours(
     days: list[BusinessHoursDay],

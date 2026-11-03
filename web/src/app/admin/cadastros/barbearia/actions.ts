@@ -9,7 +9,11 @@ import {
   formValues,
   saveUnavailableMessage as unavailable,
 } from "../../form-state";
-import { parseBusinessHoursForm, parseShopForm } from "./form-data";
+import {
+  type BusinessHoursFormState,
+  parseBusinessHoursForm,
+  parseShopForm,
+} from "./form-data";
 
 const PATH = "/admin/cadastros/barbearia";
 
@@ -42,9 +46,9 @@ export async function saveShop(
 }
 
 export async function saveBusinessHours(
-  _previous: FormState,
+  _previous: BusinessHoursFormState,
   formData: FormData,
-): Promise<FormState> {
+): Promise<BusinessHoursFormState> {
   const parsed = parseBusinessHoursForm(formData);
   if ("error" in parsed) {
     return {
@@ -62,6 +66,15 @@ export async function saveBusinessHours(
         status: "error",
         message: apiMessage(error),
         values: formValues(formData),
+        // RN-02: os agendamentos que impedem a mudança, para abrir cada um.
+        ...("appointments" in error
+          ? {
+              conflicts: {
+                appointments: error.appointments,
+                total: error.total,
+              },
+            }
+          : {}),
       };
     }
   } catch {

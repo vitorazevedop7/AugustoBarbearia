@@ -1,7 +1,7 @@
 """Contrato de erros HTTP da API (ADR 0008)."""
 
 import logging
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -19,13 +19,26 @@ class ErrorResponse(BaseModel):
 
 
 class DomainError(Exception):
-    """Erro levantado por services, com mensagem pronta para a interface."""
+    """Erro levantado por services, com mensagem pronta para a interface.
 
-    def __init__(self, *, code: str, message: str, status_code: int = 400) -> None:
+    `extra` acrescenta campos ao corpo, além de `code` e `message` (por exemplo,
+    os agendamentos que impedem a mudança do expediente, RN-02). Os valores já
+    vêm prontos para JSON.
+    """
+
+    def __init__(
+        self,
+        *,
+        code: str,
+        message: str,
+        status_code: int = 400,
+        extra: Mapping[str, Any] | None = None,
+    ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
+        self.extra = extra or {}
 
 
 class InvalidInput(ValueError):
@@ -110,7 +123,10 @@ def register_error_handlers(app: FastAPI) -> None:
     async def handle_domain_error(_request: Request, exc: DomainError) -> JSONResponse:
         return JSONResponse(
             status_code=exc.status_code,
-            content=ErrorResponse(code=exc.code, message=exc.message).model_dump(),
+            content={
+                **exc.extra,
+                **ErrorResponse(code=exc.code, message=exc.message).model_dump(),
+            },
         )
 
     @app.exception_handler(RequestValidationError)
