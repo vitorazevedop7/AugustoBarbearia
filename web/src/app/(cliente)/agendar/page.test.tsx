@@ -102,7 +102,41 @@ describe("agendamento — fluxo /agendar (D11)", () => {
       screen.getByRole("link", { name: "Edvaldo" }).getAttribute("href"),
     ).toBe("/agendar?barbeiro=1");
     expect(screen.getAllByRole("link")).toHaveLength(3);
-    expect(getCurrentSession).not.toHaveBeenCalled();
+    // O visitante não é levado ao login, e a API privada nem é consultada.
+    expect(redirect).not.toHaveBeenCalled();
+    expect(GET).not.toHaveBeenCalled();
+  });
+
+  it("RN-11: com 2 horários marcados, avisa o limite antes das escolhas", async () => {
+    GET.mockResolvedValue({
+      data: { upcoming: [], history: [], can_book: false },
+      response: { status: 200 },
+    });
+
+    await renderPage();
+
+    expect(GET).toHaveBeenCalledWith("/me/appointments", {
+      signal: expect.any(AbortSignal),
+    });
+    const notice = screen.getByRole("status");
+    expect(notice).toHaveTextContent(
+      "Você já tem 2 horários marcados, que é o máximo.",
+    );
+    expect(
+      within(notice).getByRole("link", { name: "Ver meus agendamentos" }),
+    ).toHaveAttribute("href", "/meus-agendamentos");
+    expect(screen.getByRole("link", { name: "Edvaldo" })).toBeVisible();
+  });
+
+  it("RN-11: abaixo do limite, nenhum aviso", async () => {
+    GET.mockResolvedValue({
+      data: { upcoming: [], history: [], can_book: true },
+      response: { status: 200 },
+    });
+
+    await renderPage();
+
+    expect(screen.queryByRole("status")).toBeNull();
   });
 
   it("entrada pelo card do serviço: só os barbeiros que o realizam, e o serviço segue escolhido", async () => {

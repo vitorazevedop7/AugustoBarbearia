@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { confirmBooking } from "./actions";
 import { ConfirmBooking } from "./confirm-booking";
@@ -26,54 +26,27 @@ describe("ConfirmBooking", () => {
     vi.mocked(confirmBooking).mockReset();
   });
 
-  it("depois de confirmar, mostra o resumo e o link para Meus agendamentos", async () => {
+  it("RN-11: no limite, a recusa leva a Meus agendamentos, não a outro horário", async () => {
     vi.mocked(confirmBooking).mockResolvedValue({
-      status: "success",
-      phone: "11987654321",
-      appointment: {
-        id: 7,
-        status: "SCHEDULED",
-        barber: { id: 1, name: "Edvaldo" },
-        service: { id: 2, name: "Corte + Barba" },
-        starts_at: "2026-11-03T10:00:00-03:00",
-        ends_at: "2026-11-03T10:45:00-03:00",
-        price: "35.00",
-        duration_minutes: 45,
-        canceled_at: null,
-        canceled_by: null,
-        change_deadline: "2026-11-03T10:00:00-03:00",
-        can_cancel: true,
-        can_reschedule: true,
-        late_change: false,
-      },
+      status: "error",
+      message:
+        "Você já tem 2 agendamentos marcados, que é o máximo. Para marcar outro, cancele um deles ou espere o próximo atendimento.",
+      code: "APPOINTMENT_LIMIT_REACHED",
+      phone: "",
     });
-    render(<ConfirmBooking {...props} />);
+    render(<ConfirmBooking {...props} needsPhone={false} />);
 
-    fireEvent.change(screen.getByLabelText("Telefone"), {
-      target: { value: "11987654321" },
-    });
     fireEvent.click(
       screen.getByRole("button", { name: "Confirmar agendamento" }),
     );
 
-    const heading = await screen.findByRole("heading", {
-      level: 1,
-      name: "Horário confirmado",
-    });
-    await waitFor(() => expect(heading).toHaveFocus());
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Seu horário está confirmado para terça-feira, 3 de novembro de 2026, às 10:00.",
-    );
-    expect(screen.getByText("Corte + Barba · 45 min")).toBeVisible();
-    expect(screen.getByText("R$ 35,00")).toBeVisible();
+    await screen.findByRole("alert");
     expect(
       screen.getByRole("link", { name: "Ver meus agendamentos" }),
     ).toHaveAttribute("href", "/meus-agendamentos");
-    expect(screen.queryByRole("button")).toBeNull();
-    const data = vi.mocked(confirmBooking).mock.calls[0][1];
-    expect(data.get("phone")).toBe("11987654321");
-    expect(data.get("starts_at")).toBe("2026-11-03T10:00:00-03:00");
-    expect(data.get("voltar")).toBe(props.backHref);
+    expect(
+      screen.queryByRole("link", { name: "Escolher outro horário" }),
+    ).toBeNull();
   });
 
   it("mostra o erro da API com o link para outro horário e mantém o telefone", async () => {

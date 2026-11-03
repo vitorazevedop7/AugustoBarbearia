@@ -38,7 +38,7 @@ import {
   ChoiceSummary,
   type SummaryItem,
 } from "@/components/booking/booking-frame";
-import { loadUnavailableMessage } from "./booking-state";
+import { loadUnavailableMessage, MY_APPOINTMENTS_PATH } from "./booking-state";
 import { ConfirmBooking } from "./confirm-booking";
 import { barbersFor, resolveSelection, servicesFor } from "./selection";
 import { BarberStep, ServiceStep } from "@/components/booking/steps";
@@ -110,12 +110,56 @@ export default async function BookingPage({
     content = await timeStep(selection, barber, service, selection.data);
   }
 
+  const limitReached = await bookingLimitReached();
   return (
     <BookingMain>
       <BookingHeader step={step} />
       <ChoiceSummary items={summary} />
-      <div className="mt-10">{content}</div>
+      <div className="mt-10 flex flex-col gap-6">
+        {limitReached ? <LimitNotice /> : null}
+        <div>{content}</div>
+      </div>
     </BookingMain>
+  );
+}
+
+/**
+ * RN-11: o cliente logado já tem 2 horários marcados. Quem decide é a API
+ * (`can_book`); sem sessão, para a administração ou se a API não responder,
+ * nada aparece, e a confirmação recusa como antes (#155).
+ */
+async function bookingLimitReached(): Promise<boolean> {
+  if (!(await getCurrentSession())) return false;
+  try {
+    const { data } = await createApiClient().GET("/me/appointments", {
+      signal: AbortSignal.timeout(5000),
+    });
+    return data?.can_book === false;
+  } catch {
+    return false;
+  }
+}
+
+/** O aviso do limite antes das escolhas, com o caminho para liberar um horário. */
+function LimitNotice() {
+  return (
+    <Alert
+      tone="warning"
+      title="Você já tem 2 horários marcados, que é o máximo."
+    >
+      <p>
+        Para marcar outro, cancele um deles em Meus agendamentos ou espere o
+        próximo atendimento.
+      </p>
+      <ButtonLink
+        href={MY_APPOINTMENTS_PATH}
+        variant="outline"
+        size="sm"
+        className="mt-3"
+      >
+        Ver meus agendamentos
+      </ButtonLink>
+    </Alert>
   );
 }
 

@@ -63,8 +63,11 @@ describe("confirmBooking — RN-10 a RN-13", () => {
       });
   });
 
-  it("cria o agendamento com o horário que a API ofereceu", async () => {
-    const state = await confirmBooking(previous, form());
+  it("cria o agendamento e vai para a página própria do horário confirmado", async () => {
+    // #155: recarregar essa página não pede a confirmação de novo.
+    await expect(confirmBooking(previous, form())).rejects.toThrow(
+      `REDIRECT:/agendar/confirmado/${appointment.id}`,
+    );
 
     expect(PATCH).not.toHaveBeenCalled();
     expect(POST).toHaveBeenCalledWith("/me/appointments", {
@@ -75,11 +78,12 @@ describe("confirmBooking — RN-10 a RN-13", () => {
       },
       signal: expect.any(AbortSignal),
     });
-    expect(state).toEqual({ status: "success", phone: "", appointment });
   });
 
   it("salva o telefone antes de agendar quando o perfil não tem (RN-10)", async () => {
-    const state = await confirmBooking(previous, form("(11) 98765-4321"));
+    await expect(
+      confirmBooking(previous, form("(11) 98765-4321")),
+    ).rejects.toThrow("REDIRECT:/agendar/confirmado/");
 
     expect(PATCH).toHaveBeenCalledWith("/me/profile", {
       body: { phone: "(11) 98765-4321" },
@@ -88,7 +92,6 @@ describe("confirmBooking — RN-10 a RN-13", () => {
     expect(PATCH.mock.invocationCallOrder[0]).toBeLessThan(
       POST.mock.invocationCallOrder[0],
     );
-    expect(state.status).toBe("success");
   });
 
   it("telefone recusado: mostra o message da API, mantém o digitado e não agenda", async () => {

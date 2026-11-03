@@ -91,6 +91,7 @@ def list_appointments(
     return CustomerAppointmentsResponse(
         upcoming=[to_response(item, now) for item in upcoming],
         history=[to_response(item, now) for item in history],
+        can_book=service.can_book_more(session, customer.id, now),
     )
 
 

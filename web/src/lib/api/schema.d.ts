@@ -1198,6 +1198,8 @@ export interface components {
             upcoming: components["schemas"]["CustomerAppointmentResponse"][];
             /** History */
             history: components["schemas"]["CustomerAppointmentResponse"][];
+            /** Can Book */
+            can_book: boolean;
         };
         /**
          * CustomerChangeResponse

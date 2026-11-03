@@ -51,6 +51,7 @@ A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**
 - **Quando** tenta um terceiro
 - **Então** a API responde `409` com `code` = `APPOINTMENT_LIMIT_REACHED` e "Você já tem 2 agendamentos marcados, que é o máximo. Para marcar outro, cancele um deles ou espere o próximo atendimento.", e nada é gravado.
 - Agendamentos cancelados, concluídos, com falta ou que já terminaram não contam. O de outro cliente também não.
+- O limite aparece antes das escolhas (#155): para o cliente logado, `/agendar` lê `GET /me/appointments`, que traz `can_book` (calculado pela API, RN-11). Com `can_book` = `false`, todas as etapas de escolha mostram o `Alert` `warning` "Você já tem 2 horários marcados, que é o máximo." com o botão "Ver meus agendamentos". Na confirmação, a recusa `APPOINTMENT_LIMIT_REACHED` traz o link "Ver meus agendamentos" no lugar de "Escolher outro horário". Sem sessão, para a administração ou se a API não responder, nada aparece.
 - Dois pedidos simultâneos do mesmo cliente não passam do limite: a criação trava a linha do cliente (`FOR NO KEY UPDATE`) antes de contar.
 
 **CA-4 — Horário indisponível (RN-05 a RN-07)**
@@ -97,7 +98,7 @@ A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**
 **CA-12 — Confirmação e resumo**
 - A confirmação mostra o barbeiro, o serviço, a data completa, o horário de início e de fim, a duração, o preço e a política de alteração num `Alert` `info` ("Imprevistos acontecem.": remarcar ou cancelar pelo site até o horário marcado, avisando com 2 horas de antecedência quando possível; RN-14, D16), com o botão "Confirmar agendamento".
 - Se o horário escolhido já não está entre os disponíveis quando a tela abre, ela avisa e oferece "Escolher outro horário", sem o botão de confirmar.
-- Depois de confirmar, a página mostra "Seu horário está confirmado." com o resumo e o link "Ver meus agendamentos" (`/meus-agendamentos`, S3.09).
+- Depois de confirmar, a Server Action leva a `/agendar/confirmado/{id}` (#155), uma URL própria que lê `GET /me/appointments/{id}` e mostra "Seu horário está confirmado." com o resumo e o link "Ver meus agendamentos" (`/meus-agendamentos`, S3.09). Recarregar essa página mostra o mesmo horário, e não a confirmação com "Este horário não está mais disponível". Se o agendamento foi cancelado depois, ela diz "Este agendamento não está mais ativo.".
 - Qualquer erro da API (CA-2 a CA-6) aparece com o `message` dela num `Alert`, com o link para escolher outro horário. O web não decide regra.
 
 ## Fluxo e telas
@@ -118,7 +119,7 @@ flowchart LR
 2. **Serviço:** cards com nome, duração e preço, só os que o barbeiro realiza.
 3. **Dia:** os dias com horário livre, como links ("Ter, 3 de nov"), numa grade de 3 colunas no celular. Sem dia: estado vazio com "Escolher outro barbeiro".
 4. **Horário:** chips de horário (links), em grupos Manhã (antes do meio-dia) e Tarde, 3 colunas no celular. Sem horário: estado vazio com "Escolher outro dia".
-5. **Confirmar:** o resumo, a política de alteração num `Alert` `info`, o campo Telefone quando falta e o botão principal. Depois de confirmar, o resumo com "Seu horário está confirmado." e os links "Ver meus agendamentos" e "Voltar para o início".
+5. **Confirmar:** o resumo, a política de alteração num `Alert` `info`, o campo Telefone quando falta e o botão principal. Depois de confirmar, `/agendar/confirmado/{id}`, com "Seu horário está confirmado.", o resumo e os links "Ver meus agendamentos" e "Voltar para o início".
 
 **Aparência (S4.07, #80):** a base visual da vitrine, com o ritmo de tarefa. O título da etapa em Barlow 900 (`text-display-3`), o botão principal no tamanho `md` (60px no celular, 84px a partir de 768px), chips de horário com 44px e de dia com 80px, número em Barlow 600, e hover de 300ms `ease-standard`. A moldura fica em `paper`, logo abaixo do cabeçalho escuro, **sem a faixa escura parcial** das páginas internas: o fluxo segue o Squire, e uma faixa em cada etapa empurraria as opções para fora da primeira tela do celular. Nada mudou na ordem das etapas, nas regras nem nos textos de erro.
 
