@@ -321,7 +321,7 @@ describe("agendamento — fluxo /agendar (D11)", () => {
     ).toHaveAttribute("href", "/agendar?barbeiro=1&servico=2&data=2026-11-03");
   });
 
-  it("a administração vai para /admin (RN-70)", async () => {
+  it("a administração é levada ao agendamento da agenda, com as escolhas (RN-70)", async () => {
     GET.mockResolvedValue({
       data: {
         sub: "admin",
@@ -333,7 +333,21 @@ describe("agendamento — fluxo /agendar (D11)", () => {
       response: { status: 200 },
     });
 
-    await expect(renderPage(CONFIRM)).rejects.toThrow("REDIRECT:/admin");
+    await renderPage(CONFIRM);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Você entrou com a conta da administração.",
+    );
+    expect(
+      screen.getByRole("link", { name: "Agendar para um cliente" }),
+    ).toHaveAttribute(
+      "href",
+      "/admin/agenda/novo?barbeiro=1&servico=2&data=2026-11-03&hora=10:00",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Confirmar agendamento" }),
+    ).toBeNull();
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("JWT recusado com sessão válida: aviso, sem ciclo de login", async () => {

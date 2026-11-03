@@ -8,6 +8,7 @@ const account = vi.hoisted(() => ({ pending: false }));
 
 // A conta lê a sessão no servidor e tem sua própria suíte.
 vi.mock("@/lib/session", () => ({ getCurrentSession: vi.fn() }));
+vi.mock("@/lib/api/client", () => ({ createApiClient: vi.fn() }));
 vi.mock("@/lib/auth-actions", () => ({
   signInWithGoogle: vi.fn(),
   signOut: vi.fn(),
@@ -54,7 +55,7 @@ describe("SiteHeader", () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveTextContent("Entrar");
     expect(links[0]).toHaveClass("min-h-11");
-    expect(links[0].parentElement).toHaveClass("w-52", "justify-end");
+    expect(links[0].parentElement).toHaveClass("min-w-52", "justify-end");
     expect(links[1]).toHaveClass("min-h-11", "w-full");
     expect(links[1].closest("details")).not.toBeNull();
     account.pending = false;

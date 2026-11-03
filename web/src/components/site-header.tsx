@@ -38,9 +38,10 @@ export function SiteHeader() {
         <div className="hidden items-center gap-8 lg:flex">
           <SiteNav layout="row" />
           <div className="flex items-center gap-3">
-            {/* Largura fixa: cabe "Entrar com Google" ou o nome (até 120px) e
-                "Sair", e a troca do fallback não move a navegação. */}
-            <div className="flex w-52 justify-end">
+            {/* Largura mínima: cabe "Entrar com Google", e a troca do
+                fallback não move a navegação do visitante. Logado, a conta
+                cresce com os links da área dele. */}
+            <div className="flex min-w-52 justify-end">
               <Suspense fallback={<AccountPlaceholder />}>
                 <HeaderAccount />
               </Suspense>

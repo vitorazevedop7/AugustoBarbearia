@@ -144,7 +144,7 @@ flowchart LR
 - Cancelar e remarcar pela administração, sem prazo (RN-22): S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 - Trocar o serviço na remarcação (RN-15: o cliente cancela e agenda de novo).
 - Paginação ou filtro do histórico.
-- Link "Meus agendamentos" no cabeçalho do site.
+- O link "Meus agendamentos" no cabeçalho do site entrou depois, na #143 (ver o `SiteHeader` no [design system](../design/design-system.md)).
 
 ## Dúvidas em aberto
 Escolhas desta implementação que nenhuma RN decide, a confirmar:

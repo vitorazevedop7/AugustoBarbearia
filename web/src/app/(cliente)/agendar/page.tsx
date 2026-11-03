@@ -30,6 +30,7 @@ import {
   formatTime,
 } from "@/lib/format";
 import { getCurrentSession } from "@/lib/session";
+import { newAppointmentHref } from "../../admin/agenda/admin-booking-state";
 import { apiErrorMessage } from "../perfil/profile-state";
 import {
   BookingHeader,
@@ -130,6 +131,38 @@ function Unavailable({
       <BookingHeader step={step} />
       <div className="mt-10">
         <Alert tone="danger" title={message} />
+      </div>
+    </BookingMain>
+  );
+}
+
+/**
+ * A administração chegou à confirmação pelo site público. Em vez de levá-la a
+ * `/admin` e perder a escolha, explica e oferece o "Novo agendamento" da
+ * agenda com o mesmo barbeiro, serviço, dia e horário (RN-70, #143).
+ */
+function AdminNotice({
+  selection,
+  summary,
+}: {
+  selection: Required<BookingSelection>;
+  summary: SummaryItem[];
+}) {
+  return (
+    <BookingMain>
+      <BookingHeader step="confirmar" />
+      <ChoiceSummary items={summary} />
+      <div className="mt-10 flex flex-col gap-6">
+        <Alert tone="info" title="Você entrou com a conta da administração.">
+          A administração não agenda para si mesma. Para marcar este horário
+          para um cliente, use o agendamento da agenda: as escolhas vão junto.
+        </Alert>
+        <ButtonLink
+          href={newAppointmentHref(selection)}
+          className="w-full sm:w-auto sm:self-start"
+        >
+          Agendar para um cliente
+        </ButtonLink>
       </div>
     </BookingMain>
   );
@@ -269,8 +302,11 @@ async function confirmStep({
       />
     );
   }
-  // RN-70: a administração não agenda para si.
-  if (me.data.role !== "customer") redirect("/admin");
+  // RN-70: a administração não agenda para si. Ela é levada ao agendamento
+  // da agenda (S5.05), com as mesmas escolhas.
+  if (me.data.role !== "customer") {
+    return <AdminNotice selection={selection} summary={summary} />;
+  }
 
   const slots = await getAvailableSlots(barber.id, service.id, selection.data);
   if (slots === null) {
