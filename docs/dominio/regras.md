@@ -50,7 +50,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-13 — Preço e duração congelados.** O agendamento guarda o preço e a duração do serviço no momento em que foi criado. Mudar o cadastro do serviço depois não afeta agendamentos que já existem. *Origem: padrão adotado.*
 
-**RN-14 — Prazo para cancelar e remarcar.** O cliente pode cancelar ou remarcar até **2 horas antes** do início. Depois disso, o sistema não permite e mostra o contato da barbearia. *Origem: D6; 2025 (casos de uso).*
+**RN-14 — Prazo para cancelar e remarcar.** O cliente pode cancelar ou remarcar pelo site **até o início** do horário. As **2 horas antes** são a antecedência recomendada, não uma trava: nas últimas 2 horas (com o início ainda por vir), a alteração é **em cima da hora**, continua permitida e vem com um aviso que não esconde o custo de avisar tão tarde, com o contato da barbearia para quem só vai se atrasar. Exatamente 2 horas antes ainda está no prazo. A partir do início, o sistema não permite e mostra o contato da barbearia. Na remarcação, o horário novo continua exigindo a antecedência da RN-06. Não há taxa nem bloqueio por reincidência. *Origem: D6; 2025 (casos de uso); D16 (substitui a trava da D6, a confirmar com os proprietários).*
 
 **RN-15 — Remarcação.** Remarcar muda a data, o horário e, se o cliente quiser, o barbeiro. O serviço não muda: para trocar de serviço, o cliente cancela e agenda de novo. O novo horário segue as mesmas regras de disponibilidade (RN-05). *Origem: padrão adotado.*
 
@@ -62,7 +62,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-21 — Regras que valem para a administração.** O agendamento pela administração segue RN-05, itens 1 a 5. **Não** se aplicam a antecedência mínima (RN-06), a janela (RN-07) nem o limite por cliente (RN-11). Isso permite registrar um "encaixe" que começa agora. O encaixe usa um horário da grade (RN-04), que pode já ter começado (às 14h10, o das 14h00, se o barbeiro estiver livre e o serviço couber no expediente); não existe horário fora da grade. *Origem: padrão adotado; o encaixe na grade foi decidido na S5.05 (#97).*
 
-**RN-22 — Alterações pela administração.** A administração pode cancelar ou remarcar qualquer agendamento ativo a qualquer momento, sem o prazo de 2h. *Origem: D6 ("depois desse prazo, só a barbearia altera").*
+**RN-22 — Alterações pela administração.** A administração pode cancelar ou remarcar qualquer agendamento ativo a qualquer momento, sem o prazo do cliente (RN-14), inclusive depois do início. *Origem: D6 ("depois desse prazo, só a barbearia altera"); D16.*
 
 **RN-23 — Vínculo de cadastro.** Se a administração cadastrou um cliente com e-mail, e depois alguém entra com uma conta Google desse mesmo e-mail, o login é vinculado a esse cadastro já existente, sem criar outro. *Origem: padrão adotado.*
 
@@ -123,7 +123,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-52 — Alterações.** Remarcação e cancelamento, feitos por qualquer lado, geram e-mail ao cliente com o novo estado do agendamento (o cancelamento feito pela barbearia diz que foi ela). Cancelar, ou remarcar para um horário que já começou, pela administração não gera e-mail: não há o que avisar. *Origem: D4; 2025 (sistema de e-mails do projeto acadêmico); o caso do horário que já começou é decisão do proprietário, na S5.09.*
 
-**RN-53 — Conteúdo.** Todo e-mail traz o serviço, o barbeiro, a data e a hora, o endereço, um link para "Meus agendamentos" e o contato da barbearia. O aviso "você pode remarcar ou cancelar pelo site até 2 horas antes" (RN-14) só aparece enquanto o prazo vale; depois dele, o e-mail manda falar com a barbearia. *Origem: padrão adotado; o aviso do prazo é decisão do proprietário, na S5.09.*
+**RN-53 — Conteúdo.** Todo e-mail traz o serviço, o barbeiro, a data e a hora, o endereço, um link para "Meus agendamentos" e o contato da barbearia. O texto sobre alterar acompanha o momento do envio (RN-14): antes das 2 horas, a política ("até o horário marcado; se puder, avise com pelo menos 2 horas de antecedência"); nas últimas 2 horas, o convite a avisar ("Imprevisto? Você ainda pode remarcar ou cancelar pelo site até o horário marcado."); depois do início, falar com a barbearia. O cancelamento feito pelo cliente em cima da hora agradece o aviso. *Origem: padrão adotado; o aviso do prazo é decisão do proprietário, na S5.09; D16.*
 
 **RN-54 — Falha de envio.** Se um e-mail falhar, o agendamento **não** é desfeito. A falha fica registrada para diagnóstico. *Origem: padrão adotado.*
 

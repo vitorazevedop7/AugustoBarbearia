@@ -19,7 +19,11 @@ from sqlalchemy.orm import Session
 from app.clock import utc_now
 from app.config import get_settings
 from app.modules.appointments.models import Appointment, CanceledBy
-from app.modules.appointments.service import can_change_at
+from app.modules.appointments.service import (
+    can_change_at,
+    is_late_cancellation,
+    is_late_change,
+)
 from app.modules.barbers.service import get_barber
 from app.modules.catalog.service import get_service
 from app.modules.customers.models import Customer
@@ -108,6 +112,8 @@ def build_email(
             my_appointments_url=f"{web_base_url}/meus-agendamentos",
             canceled_by_shop=appointment.canceled_by == CanceledBy.ADMIN,
             can_change=can_change_at(appointment.starts_at, now),
+            late_change=is_late_change(appointment.starts_at, now),
+            canceled_late=is_late_cancellation(appointment),
         ),
     )
     return Email(

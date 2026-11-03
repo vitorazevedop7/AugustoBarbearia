@@ -20,7 +20,7 @@ const unavailable =
 const deadline = {
   code: "CHANGE_DEADLINE_PASSED",
   message:
-    "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia.",
+    "Seu horário já começou. Se você está a caminho ou não vai conseguir vir, fale com a barbearia.",
 };
 
 function form(fields: Record<string, string> = {}) {
@@ -58,6 +58,26 @@ describe("cancelar e remarcar — Server Actions (RN-14, RN-15)", () => {
       },
     );
   });
+
+  it.each([
+    [cancelAppointment, "cancelado-em-cima"],
+    [rescheduleAppointment, "remarcado-em-cima"],
+  ] as const)(
+    "em cima da hora, a lista agradece o aviso (RN-14): %#",
+    async (action, notice) => {
+      POST.mockResolvedValue({
+        data: { ...appointment(), changed_late: true },
+        response: { status: 200 },
+      });
+
+      await expect(
+        action(
+          idle,
+          form({ starts_at: "2026-11-03T15:00:00-03:00", barber_id: "1" }),
+        ),
+      ).rejects.toThrow(`REDIRECT:/meus-agendamentos?aviso=${notice}`);
+    },
+  );
 
   it("remarca com o horário e o barbeiro escolhidos, sem o serviço", async () => {
     await expect(

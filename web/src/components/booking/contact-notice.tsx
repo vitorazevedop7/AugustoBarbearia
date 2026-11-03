@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Alert } from "@/components/ui/alert";
 import { contactLinks, type ShopContact } from "@/lib/contact";
 
@@ -5,26 +6,31 @@ const textLink =
   "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
 
 export const DEADLINE_TITLE =
-  "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia.";
+  "Seu horário já começou. Se você está a caminho ou não vai conseguir vir, fale com a barbearia.";
 
 /**
- * Aviso de que o cliente já não altera o agendamento pelo site (RN-14), com
- * os contatos que a administração preencheu. O título repete o `message` da
- * API, e quem decide o prazo é ela (`can_cancel`, `can_reschedule`). Sem
- * contato preenchido, o aviso fica só com o título: não aponta para um
- * contato que não existe.
+ * Aviso com os contatos que a administração preencheu (RN-14): depois do
+ * início, quando o cliente já não altera o agendamento pelo site (o título
+ * repete o `message` da API), e nas últimas 2 horas, quando ainda altera mas
+ * talvez só vá se atrasar. Quem decide o momento é a API (`can_cancel`,
+ * `late_change`). Sem contato preenchido, o aviso não aponta para um contato
+ * que não existe.
  */
 export function ContactNotice({
   shop,
   title = DEADLINE_TITLE,
+  children,
 }: {
   /** `null` quando a vitrine não respondeu: o aviso aparece sem os links. */
   shop: ShopContact | null;
   title?: string;
+  /** O texto antes dos contatos. */
+  children?: ReactNode;
 }) {
   const links = shop ? contactLinks(shop) : [];
   return (
     <Alert tone="warning" title={title}>
+      {children ? <p>{children}</p> : null}
       {links.length > 0 ? (
         <ul className="mt-1 flex flex-col gap-1">
           {links.map(({ label, text, href }) => (

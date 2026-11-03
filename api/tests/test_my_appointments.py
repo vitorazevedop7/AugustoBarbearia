@@ -48,8 +48,8 @@ NOT_ACTIVE = {
 DEADLINE = {
     "code": "CHANGE_DEADLINE_PASSED",
     "message": (
-        "Faltam menos de 2 horas para o seu horário. "
-        "Para cancelar ou remarcar, fale com a barbearia."
+        "Seu horário já começou. Se você está a caminho ou não vai "
+        "conseguir vir, fale com a barbearia."
     ),
 }
 SAME_SLOT = {
@@ -188,9 +188,10 @@ def test_rn16_lista_so_os_proprios_em_proximos_e_historico(
         "duration_minutes": 45,
         "canceled_at": None,
         "canceled_by": None,
-        "change_deadline": "2026-11-03T08:00:00-03:00",
+        "change_deadline": "2026-11-03T10:00:00-03:00",
         "can_cancel": True,
         "can_reschedule": True,
+        "late_change": False,
     }
     history = {item["id"]: item for item in body["history"]}
     assert history[canceled.id]["canceled_by"] == "CUSTOMER"
@@ -199,6 +200,7 @@ def test_rn16_lista_so_os_proprios_em_proximos_e_historico(
         assert item["change_deadline"] is None or item["status"] == "SCHEDULED"
         assert item["can_cancel"] is False
         assert item["can_reschedule"] is False
+        assert item["late_change"] is False
 
 
 def test_rn16_sem_agendamentos_a_lista_vem_vazia(
@@ -226,30 +228,36 @@ def test_rn11_agendamento_em_andamento_fica_nos_proximos_sem_acoes(
 
 
 @pytest.mark.parametrize(
-    ("before", "allowed"),
+    ("before", "late"),
     [
-        (timedelta(hours=2), True),
-        (timedelta(hours=2, minutes=-1), False),
+        (timedelta(hours=2), False),
+        (timedelta(hours=2, minutes=-1), True),
+        (timedelta(minutes=1), True),
     ],
+    ids=["2h antes", "1h59 antes", "1 min antes"],
 )
-def test_rn14_prazo_de_2_horas_e_inclusivo(
+def test_rn14_cliente_altera_ate_o_inicio_e_as_2h_marcam_em_cima_da_hora(
     api: TestClient,
     db_session: Session,
     ana: Customer,
     edvaldo: int,
     before: timedelta,
-    allowed: bool,
+    late: bool,
 ) -> None:
+    """D16: o cliente altera até o início. Exatamente 2 horas antes ainda está
+    no prazo recomendado; depois disso, a alteração é em cima da hora."""
     appointment = make_appointment(
         db_session, barber=edvaldo, starts_at=NOW + before, customer=ana
     )
 
     [item] = api.get("/me/appointments").json()["upcoming"]
-    assert item["can_cancel"] is allowed
-    assert item["can_reschedule"] is allowed
+    assert item["can_cancel"] is True
+    assert item["can_reschedule"] is True
+    assert item["late_change"] is late
 
     response = cancel(api, appointment.id)
-    assert response.status_code == (200 if allowed else 409), response.json()
+    assert response.status_code == 200, response.json()
+    assert response.json()["changed_late"] is late
 
 
 def test_rn16_le_um_agendamento_proprio(
@@ -277,6 +285,7 @@ def test_rn14_rn31_rn33_cliente_cancela_dentro_do_prazo(
     assert body["canceled_at"] == "2026-11-02T08:00:00-03:00"
     assert body["change_deadline"] is None
     assert body["can_cancel"] is False
+    assert body["changed_late"] is False
     appointment = stored(db_session, booked)
     assert appointment.status == AppointmentStatus.CANCELED
     assert appointment.canceled_by == CanceledBy.CUSTOMER
@@ -296,12 +305,25 @@ def test_rn32_vaga_cancelada_volta_na_hora(
     assert ten in public_starts(api, edvaldo, corte_e_barba, "2026-11-03")
 
 
+def test_rn14_cliente_cancela_em_cima_da_hora(
+    api: TestClient, db_session: Session, clock: Clock, booked: int
+) -> None:
+    clock.now = (TEN - timedelta(minutes=30)).astimezone(UTC)
+
+    response = cancel(api, booked)
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["status"] == "CANCELED"
+    assert response.json()["changed_late"] is True
+    assert stored(db_session, booked).status == AppointmentStatus.CANCELED
+
+
 @pytest.mark.parametrize(
     "before",
-    [timedelta(hours=1, minutes=59), timedelta(0), timedelta(minutes=-30)],
-    ids=["1h59 antes", "no início", "em andamento"],
+    [timedelta(0), timedelta(minutes=-30)],
+    ids=["no início", "em andamento"],
 )
-def test_rn14_cancelar_fora_do_prazo_e_recusado(
+def test_rn14_cliente_nao_altera_depois_do_inicio(
     api: TestClient,
     db_session: Session,
     ana: Customer,
@@ -322,7 +344,7 @@ def test_rn14_cancelar_fora_do_prazo_e_recusado(
 def test_rn14_o_prazo_conta_do_relogio_da_requisicao(
     api: TestClient, db_session: Session, clock: Clock, booked: int
 ) -> None:
-    clock.now = (TEN - timedelta(hours=1, minutes=30)).astimezone(UTC)
+    clock.now = TEN.astimezone(UTC)
 
     assert cancel(api, booked).json() == DEADLINE
     assert reschedule(api, booked, local(2026, 11, 3, 15)).json() == DEADLINE
@@ -421,7 +443,8 @@ def test_rn15_rn31_cliente_remarca_dentro_do_prazo(
     assert body["service"]["name"] == "Corte + Barba"
     assert body["starts_at"] == "2026-11-04T10:00:00-03:00"
     assert body["ends_at"] == "2026-11-04T10:45:00-03:00"
-    assert body["change_deadline"] == "2026-11-04T08:00:00-03:00"
+    assert body["change_deadline"] == "2026-11-04T10:00:00-03:00"
+    assert body["changed_late"] is False
     appointment = stored(db_session, booked)
     assert appointment.starts_at == WEDNESDAY_TEN
     assert (
@@ -575,10 +598,23 @@ def test_rn15_barbeiro_inexistente(api: TestClient, booked: int) -> None:
     assert response.json()["code"] == "BARBER_NOT_FOUND"
 
 
-@pytest.mark.parametrize(
-    "before", [timedelta(hours=1, minutes=59), timedelta(minutes=-10)]
-)
-def test_rn14_remarcar_fora_do_prazo_e_recusado(
+def test_rn14_cliente_remarca_em_cima_da_hora(
+    api: TestClient, db_session: Session, clock: Clock, booked: int
+) -> None:
+    """Faltando 30 minutos, a remarcação passa. O horário novo continua
+    exigindo 1 hora de antecedência (RN-06)."""
+    clock.now = (TEN - timedelta(minutes=30)).astimezone(UTC)
+
+    response = reschedule(api, booked, local(2026, 11, 3, 15))
+
+    assert response.status_code == 200, response.json()
+    assert response.json()["changed_late"] is True
+    assert response.json()["late_change"] is False
+    assert stored(db_session, booked).starts_at == local(2026, 11, 3, 15)
+
+
+@pytest.mark.parametrize("before", [timedelta(0), timedelta(minutes=-10)])
+def test_rn14_remarcar_depois_do_inicio_e_recusado(
     api: TestClient,
     db_session: Session,
     ana: Customer,

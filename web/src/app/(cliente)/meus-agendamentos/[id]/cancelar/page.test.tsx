@@ -4,7 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApiClient } from "@/lib/api/client";
 import { getPublicShop } from "@/lib/api/public";
 import { getCurrentSession } from "@/lib/session";
-import { appointment, lateAppointment } from "@/test/appointment-data";
+import {
+  appointment,
+  lateChangeAppointment,
+  startedAppointment,
+} from "@/test/appointment-data";
 import { shop } from "@/test/vitrine-data";
 import CancelAppointmentPage from "./page";
 
@@ -83,7 +87,7 @@ describe("cancelar agendamento — /meus-agendamentos/[id]/cancelar", () => {
 
   it("fora do prazo, mostra o contato e nenhum botão (RN-14)", async () => {
     GET.mockResolvedValue({
-      data: lateAppointment(),
+      data: startedAppointment(),
       response: { status: 200 },
     });
 
@@ -91,9 +95,31 @@ describe("cancelar agendamento — /meus-agendamentos/[id]/cancelar", () => {
 
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Faltam menos de 2 horas para o seu horário.",
+      "Seu horário já começou.",
     );
     expect(screen.getByRole("link", { name: "(75) 3221-0000" })).toBeVisible();
+  });
+
+  it("em cima da hora, ainda cancela, com o aviso e o Manter meu horário (RN-14)", async () => {
+    GET.mockResolvedValue({
+      data: lateChangeAppointment(),
+      response: { status: 200 },
+    });
+
+    await renderPage();
+
+    const notice = screen.getByRole("status");
+    expect(notice).toHaveTextContent(
+      "Faltam menos de 2 horas para o seu horário.",
+    );
+    expect(notice).toHaveTextContent("o Edvaldo já está contando com você");
+    expect(screen.getByRole("link", { name: "(75) 3221-0000" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Cancelar mesmo assim" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Manter meu horário" }),
+    ).toHaveAttribute("href", "/meus-agendamentos");
   });
 
   it("agendamento que não está ativo não pode ser cancelado (RN-31)", async () => {

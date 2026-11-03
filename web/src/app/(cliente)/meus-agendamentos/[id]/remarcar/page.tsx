@@ -182,19 +182,35 @@ export default async function RescheduleAppointmentPage({
   }
 
   return (
-    <Frame step={step} summary={summary}>
+    <Frame step={step} summary={summary} late={appointment.late_change}>
       {content}
     </Frame>
+  );
+}
+
+/**
+ * RN-14: a remarcação nas 2 horas antes do horário é permitida, mas o horário
+ * deixado dificilmente é ocupado. A API diz quando é o caso (`late_change`).
+ */
+function LateNotice() {
+  return (
+    <Alert tone="warning" title="Faltam menos de 2 horas para o seu horário.">
+      Tudo bem remarcar, imprevistos acontecem. Só saiba que, tão em cima da
+      hora, o horário que você deixa dificilmente é ocupado por outro cliente.
+    </Alert>
   );
 }
 
 function Frame({
   step,
   summary = [],
+  late = false,
   children,
 }: {
   step?: RescheduleStep;
   summary?: SummaryItem[];
+  /** Mostra o aviso de remarcação em cima da hora no topo de cada etapa. */
+  late?: boolean;
   children: ReactNode;
 }) {
   const index = RESCHEDULE_STEPS.findIndex((item) => item.step === step);
@@ -214,7 +230,10 @@ function Frame({
         title={current?.title ?? "Remarcar agendamento"}
       />
       <ChoiceSummary items={summary} />
-      <div className="mt-10 flex flex-col gap-6">{children}</div>
+      <div className="mt-10 flex flex-col gap-6">
+        {late ? <LateNotice /> : null}
+        {children}
+      </div>
     </BookingMain>
   );
 }
@@ -340,7 +359,7 @@ async function confirmStep({
   ];
 
   return (
-    <Frame step="confirmar" summary={items}>
+    <Frame step="confirmar" summary={items} late={appointment.late_change}>
       {slot ? (
         <>
           <Alert tone="info" title="O serviço e o valor continuam os mesmos.">

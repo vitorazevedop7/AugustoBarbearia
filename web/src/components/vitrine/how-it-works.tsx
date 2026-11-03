@@ -52,7 +52,10 @@ export function HowItWorks() {
               Receba um lembrete por e-mail cerca de um dia antes, para reservas
               feitas com pelo menos 24 horas de antecedência.
             </p>
-            <p>Cancele ou remarque pelo site até 2 horas antes do horário.</p>
+            <p>
+              Remarque ou cancele pelo site até o horário. Avisando com 2 horas
+              de antecedência, outro cliente aproveita a vaga.
+            </p>
           </div>
         </div>
       </div>

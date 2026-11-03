@@ -143,9 +143,10 @@ def test_rn12_rn13_cliente_agenda_um_horario_disponivel(
         "duration_minutes": 45,
         "canceled_at": None,
         "canceled_by": None,
-        "change_deadline": "2026-11-03T08:00:00-03:00",
+        "change_deadline": "2026-11-03T10:00:00-03:00",
         "can_cancel": True,
         "can_reschedule": True,
+        "late_change": False,
     }
     [appointment] = appointments_of(db_session, ana)
     assert appointment.id == body["id"]

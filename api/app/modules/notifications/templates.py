@@ -39,9 +39,17 @@ PAPER = "#FAF7F2"
 SURFACE = "#FFFFFF"
 BRAND = "#C41E3A"
 
-# RN-14: o mesmo prazo das telas do cliente (`CHANGE_NOTICE` e `can_change_at`,
+# RN-14: o mesmo prazo das telas do cliente (`can_change_at` e `is_late_change`,
 # em `appointments/service.py`); aqui só o texto.
-CHANGE_NOTICE = "Você pode remarcar ou cancelar pelo site até 2 horas antes do horário."
+CHANGE_NOTICE = (
+    "Você pode remarcar ou cancelar pelo site até o horário marcado. "
+    "Se puder, avise com pelo menos 2 horas de antecedência."
+)
+# Enviado nas 2 horas antes do horário (D16): a alteração ainda vale.
+LATE_CHANGE_NOTICE = (
+    "Imprevisto? Você ainda pode remarcar ou cancelar pelo site até o horário "
+    "marcado. Quanto antes avisar, melhor."
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,9 +75,13 @@ class AppointmentDetails:
     # RN-52: cancelado pela barbearia (`canceled_by = ADMIN`, RN-33). Só muda o
     # texto do `CANCELED`: o cliente precisa saber que não foi ele.
     canceled_by_shop: bool = False
-    # RN-14 e RN-53: o aviso "remarque ou cancele pelo site até 2 horas antes" só
-    # vale enquanto o prazo vale. Depois, o e-mail manda falar com a barbearia.
+    # RN-14 e RN-53: o aviso "remarque ou cancele pelo site" só vale antes do
+    # início. Depois, o e-mail manda falar com a barbearia.
     can_change: bool = True
+    # RN-14: o e-mail sai nas 2 horas antes do horário (em cima da hora).
+    late_change: bool = False
+    # RN-14 e RN-33: o cliente cancelou em cima da hora; o e-mail agradece.
+    canceled_late: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,19 +128,17 @@ def short_date(starts_at: datetime) -> str:
 
 
 def _change_outro(details: AppointmentDetails) -> str:
-    """RN-14 e RN-53: o aviso do prazo enquanto ele vale; depois dele, a
-    orientação de falar com a barbearia (os contatos já vêm no fim do e-mail)."""
+    """RN-14 e RN-53: a política no prazo normal, o convite a avisar nas
+    últimas 2 horas e, depois do início, a orientação de falar com a barbearia
+    (os contatos já vêm no fim do e-mail)."""
     if details.can_change:
-        return CHANGE_NOTICE
+        return LATE_CHANGE_NOTICE if details.late_change else CHANGE_NOTICE
     if _contacts(details.shop):
         return (
-            "O prazo para remarcar ou cancelar pelo site já passou. Para mudar "
-            "o horário, fale com a barbearia pelos contatos abaixo."
+            "Seu horário já começou. Para qualquer mudança, fale com a "
+            "barbearia pelos contatos abaixo."
         )
-    return (
-        "O prazo para remarcar ou cancelar pelo site já passou. Para mudar o "
-        "horário, fale com a barbearia."
-    )
+    return "Seu horário já começou. Para qualquer mudança, fale com a barbearia."
 
 
 def _copy(
@@ -139,6 +149,7 @@ def _copy(
     can_change: bool = True,
     change_outro: str = CHANGE_NOTICE,
     has_contacts: bool = True,
+    canceled_late: bool = False,
 ) -> _Copy:
     match kind:
         case NotificationKind.CONFIRMATION:
@@ -176,7 +187,9 @@ def _copy(
             return _Copy(
                 title="Agendamento cancelado",
                 intro=f"Seu agendamento na {shop_name} foi cancelado.",
-                outro="Quer marcar outro horário? É só agendar pelo site.",
+                # RN-14: em cima da hora, o aviso do cliente ainda ajuda.
+                outro=("Obrigado por avisar. " if canceled_late else "")
+                + "Quer marcar outro horário? É só agendar pelo site.",
             )
         case NotificationKind.REMINDER:
             return _Copy(
@@ -185,8 +198,9 @@ def _copy(
                 outro=(
                     "Não vai conseguir vir? "
                     + (
-                        "Remarque ou cancele pelo site até 2 horas antes do horário."
-                        if can_change
+                        "Remarque ou cancele pelo site. Se puder, avise com "
+                        "pelo menos 2 horas de antecedência."
+                        if change_outro == CHANGE_NOTICE
                         else change_outro
                     )
                 ),
@@ -301,6 +315,7 @@ def render(kind: NotificationKind, details: AppointmentDetails) -> RenderedEmail
         can_change=details.can_change,
         change_outro=_change_outro(details),
         has_contacts=bool(_contacts(details.shop)),
+        canceled_late=details.canceled_late,
     )
     return RenderedEmail(
         subject=_subject(kind, details.starts_at),

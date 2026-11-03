@@ -27,10 +27,14 @@ function deadlineText(instant: string): string {
   return `${appointmentDate(instant)}, às ${formatTime(instant)}`;
 }
 
+/** O aviso do cartão e da remarcação nas 2 horas antes do horário (RN-14). */
+export const LATE_TITLE = "Seu horário é daqui a pouco.";
+
 /**
  * Um agendamento do cliente. As ações aparecem conforme `can_cancel` e
  * `can_reschedule`, que a API calcula (RN-14); sem elas, um próximo horário
- * mostra o contato da barbearia.
+ * mostra o contato da barbearia. Nas últimas 2 horas (`late_change`), as
+ * ações continuam, com o aviso e os contatos acima delas.
  */
 export function AppointmentCard({
   appointment,
@@ -93,11 +97,12 @@ export function AppointmentCard({
       ) : null}
       {actionable ? (
         <>
-          {appointment.change_deadline ? (
-            <p className="text-sm text-ink-muted">
-              Você pode cancelar ou remarcar até{" "}
-              {deadlineText(appointment.change_deadline)}.
-            </p>
+          {appointment.late_change ? (
+            <ContactNotice shop={shop} title={LATE_TITLE}>
+              Se surgiu um imprevisto, ainda dá para remarcar ou cancelar por
+              aqui. Vai só se atrasar? Fale com a barbearia antes de cancelar:
+              talvez ainda dê para te atender.
+            </ContactNotice>
           ) : null}
           <div className="flex flex-col gap-3 sm:flex-row">
             {appointment.can_reschedule ? (
@@ -147,8 +152,8 @@ export function appointmentSummary(appointment: MyAppointment): SummaryItem[] {
 
 /**
  * No lugar das ações, quando a API já não permite a alteração: o contato da
- * barbearia se o prazo passou (RN-14), ou o aviso de que o agendamento não
- * está mais ativo (RN-31).
+ * barbearia se o horário já começou (RN-14), ou o aviso de que o agendamento
+ * não está mais ativo (RN-31).
  */
 export function ChangeUnavailable({
   appointment,

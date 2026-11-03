@@ -20,12 +20,18 @@ export const MY_APPOINTMENTS_PATH = "/meus-agendamentos";
 export const NOTICES = {
   cancelado: "Agendamento cancelado.",
   remarcado: "Agendamento remarcado.",
+  // RN-14: a alteração foi em cima da hora (`changed_late` da API).
+  "cancelado-em-cima":
+    "Agendamento cancelado. Obrigado por avisar: assim o barbeiro não fica te esperando.",
+  "remarcado-em-cima": "Agendamento remarcado. Obrigado por avisar.",
 } as const;
 
 export type Notice = keyof typeof NOTICES;
 
 export function noticeFrom(value: unknown): Notice | undefined {
-  return value === "cancelado" || value === "remarcado" ? value : undefined;
+  return typeof value === "string" && Object.hasOwn(NOTICES, value)
+    ? (value as Notice)
+    : undefined;
 }
 
 export const DEADLINE_CODE = "CHANGE_DEADLINE_PASSED";

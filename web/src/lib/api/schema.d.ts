@@ -363,8 +363,8 @@ export interface paths {
         put?: never;
         /**
          * Cancel Appointment
-         * @description Cancela até 2 horas antes do início (RN-14, RN-31 a RN-33) e avisa por
-         *     e-mail (RN-52).
+         * @description Cancela até o início (RN-14, RN-31 a RN-33) e avisa por e-mail (RN-52).
+         *     `changed_late` diz se foi nas últimas 2 horas.
          */
         post: operations["cancel_appointment_me_appointments__appointment_id__cancel_post"];
         delete?: never;
@@ -384,8 +384,9 @@ export interface paths {
         put?: never;
         /**
          * Reschedule Appointment
-         * @description Muda o início e, se pedido, o barbeiro, até 2 horas antes (RN-14,
-         *     RN-15, RN-05 a RN-08), e avisa por e-mail (RN-52).
+         * @description Muda o início e, se pedido, o barbeiro, até o início do horário atual
+         *     (RN-14, RN-15, RN-05 a RN-08), e avisa por e-mail (RN-52). `changed_late`
+         *     diz se foi nas últimas 2 horas.
          */
         post: operations["reschedule_appointment_me_appointments__appointment_id__reschedule_post"];
         delete?: never;
@@ -1185,6 +1186,8 @@ export interface components {
             can_cancel: boolean;
             /** Can Reschedule */
             can_reschedule: boolean;
+            /** Late Change */
+            late_change: boolean;
         };
         /**
          * CustomerAppointmentsResponse
@@ -1195,6 +1198,44 @@ export interface components {
             upcoming: components["schemas"]["CustomerAppointmentResponse"][];
             /** History */
             history: components["schemas"]["CustomerAppointmentResponse"][];
+        };
+        /**
+         * CustomerChangeResponse
+         * @description O agendamento depois de cancelar ou remarcar (RN-14).
+         */
+        CustomerChangeResponse: {
+            /** Id */
+            id: number;
+            status: components["schemas"]["AppointmentStatus"];
+            barber: components["schemas"]["AppointmentBarber"];
+            service: components["schemas"]["AppointmentService"];
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Price */
+            price: string;
+            /** Duration Minutes */
+            duration_minutes: number;
+            /** Canceled At */
+            canceled_at: string | null;
+            canceled_by: components["schemas"]["CanceledBy"] | null;
+            /** Change Deadline */
+            change_deadline: string | null;
+            /** Can Cancel */
+            can_cancel: boolean;
+            /** Can Reschedule */
+            can_reschedule: boolean;
+            /** Late Change */
+            late_change: boolean;
+            /** Changed Late */
+            changed_late: boolean;
         };
         /**
          * CustomerCreate
@@ -3269,7 +3310,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAppointmentResponse"];
+                    "application/json": components["schemas"]["CustomerChangeResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -3349,7 +3390,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerAppointmentResponse"];
+                    "application/json": components["schemas"]["CustomerChangeResponse"];
                 };
             };
             /** @description Unauthorized */

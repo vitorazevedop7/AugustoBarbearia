@@ -57,12 +57,23 @@ class CustomerAppointmentResponse(BaseModel):
     # RN-33: quando e quem cancelou; `null` se não foi cancelado.
     canceled_at: datetime | None
     canceled_by: CanceledBy | None
-    # RN-14: até quando o cliente pode cancelar ou remarcar (início − 2h).
+    # RN-14: até quando o cliente pode cancelar ou remarcar: o início.
     # `null` quando o agendamento não está ativo.
     change_deadline: datetime | None
     # Calculados pela API (RN-14, RN-31): o web só mostra ou esconde as ações.
     can_cancel: bool
     can_reschedule: bool
+    # RN-14: alterar agora é em cima da hora (nas 2 horas antes do início). As
+    # ações continuam disponíveis; o web mostra o aviso.
+    late_change: bool
+
+
+class CustomerChangeResponse(CustomerAppointmentResponse):
+    """O agendamento depois de cancelar ou remarcar (RN-14)."""
+
+    # Esta ação foi em cima da hora (nas 2 horas antes do horário deixado):
+    # o web escolhe o aviso de agradecimento.
+    changed_late: bool
 
 
 class CustomerAppointmentsResponse(BaseModel):

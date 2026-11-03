@@ -19,8 +19,8 @@ from app.modules.appointments.models import (
     CanceledBy,
 )
 from app.modules.appointments.service import (
-    CHANGE_NOTICE,
     can_change_at,
+    is_late_change,
     is_slot_conflict,
 )
 from app.modules.availability.service import (
@@ -50,6 +50,15 @@ class CustomerAppointment:
     appointment: Appointment
     barber: Barber
     service: Service
+
+
+@dataclass(frozen=True, slots=True)
+class CustomerChange:
+    """Um cancelamento ou uma remarcação, e se foi em cima da hora (RN-14):
+    nas 2 horas antes do horário que o cliente deixou."""
+
+    booked: CustomerAppointment
+    late: bool
 
 
 def count_active_appointments(session: Session, customer_id: int, now: datetime) -> int:
@@ -175,18 +184,24 @@ def create_customer_appointment(
 
 
 def change_deadline(appointment: Appointment) -> datetime | None:
-    """RN-14: até quando o cliente pode cancelar ou remarcar. Só o agendamento
-    ativo (RN-31) tem prazo."""
+    """RN-14: até quando o cliente pode cancelar ou remarcar: o início. Só o
+    agendamento ativo (RN-31) tem prazo."""
     if appointment.status != AppointmentStatus.SCHEDULED:
         return None
-    return appointment.starts_at - CHANGE_NOTICE
+    return appointment.starts_at
 
 
 def can_change(appointment: Appointment, now: datetime) -> bool:
-    """RN-14 e RN-31: ativo e com pelo menos 2 horas até o início. O limite é
-    inclusivo: exatamente 2 horas antes ainda pode."""
-    deadline = change_deadline(appointment)
-    return deadline is not None and can_change_at(appointment.starts_at, now)
+    """RN-14 e RN-31: ativo e com o início ainda por vir."""
+    return appointment.status == AppointmentStatus.SCHEDULED and can_change_at(
+        appointment.starts_at, now
+    )
+
+
+def late_change(appointment: Appointment, now: datetime) -> bool:
+    """RN-14: alterar agora é em cima da hora (nas 2 horas antes do início). A
+    tela mostra o aviso, mas a ação continua permitida."""
+    return can_change(appointment, now) and is_late_change(appointment.starts_at, now)
 
 
 def _with_relations(session: Session, appointment: Appointment) -> CustomerAppointment:
@@ -262,7 +277,7 @@ def get_customer_appointment(
 
 
 def _ensure_changeable(appointment: Appointment, now: datetime) -> None:
-    """RN-31: só o agendamento ativo muda; RN-14: até 2 horas antes."""
+    """RN-31: só o agendamento ativo muda; RN-14: até o início."""
     if appointment.status != AppointmentStatus.SCHEDULED:
         raise DomainError(
             code="APPOINTMENT_NOT_ACTIVE",
@@ -273,8 +288,8 @@ def _ensure_changeable(appointment: Appointment, now: datetime) -> None:
         raise DomainError(
             code="CHANGE_DEADLINE_PASSED",
             message=(
-                "Faltam menos de 2 horas para o seu horário. "
-                "Para cancelar ou remarcar, fale com a barbearia."
+                "Seu horário já começou. Se você está a caminho ou não vai "
+                "conseguir vir, fale com a barbearia."
             ),
             status_code=409,
         )
@@ -287,8 +302,10 @@ def cancel_customer_appointment(
     now: datetime,
     *,
     outbox: Outbox,
-) -> CustomerAppointment:
-    """O cliente cancela o próprio agendamento (RN-14, RN-16, RN-31).
+) -> CustomerChange:
+    """O cliente cancela o próprio agendamento até o início (RN-14, RN-16,
+    RN-31). Nas últimas 2 horas, o cancelamento é em cima da hora: a resposta
+    diz isso, para a tela agradecer o aviso.
 
     Registra quando foi e que foi o cliente (RN-33). A vaga fica livre na hora
     (RN-32): a exclusion constraint da RN-08 só considera `SCHEDULED`. O aviso
@@ -296,13 +313,14 @@ def cancel_customer_appointment(
     """
     appointment = _owned_appointment(session, customer_id, appointment_id, lock=True)
     _ensure_changeable(appointment, now)
+    late = is_late_change(appointment.starts_at, now)
     appointment.status = AppointmentStatus.CANCELED
     appointment.canceled_at = now
     appointment.canceled_by = CanceledBy.CUSTOMER
     notification = notify(session, appointment, NotificationKind.CANCELED)
     session.commit()
     outbox.send_after_commit(notification)
-    return _with_relations(session, appointment)
+    return CustomerChange(_with_relations(session, appointment), late)
 
 
 def _rescheduling(appointment: Appointment) -> Rescheduling:
@@ -323,11 +341,12 @@ def reschedule_customer_appointment(
     barber_id: int | None,
     now: datetime,
     outbox: Outbox,
-) -> CustomerAppointment:
+) -> CustomerChange:
     """O cliente remarca o próprio agendamento (RN-14, RN-15, RN-31), numa
     transação:
 
-    1. trava o agendamento e confere o status e o prazo, sobre o horário atual;
+    1. trava o agendamento e confere o status e o prazo, sobre o horário atual
+       (até o início; nas últimas 2 horas, a remarcação é em cima da hora);
     2. sem `barber_id`, o barbeiro continua o mesmo; o serviço nunca muda;
     3. RN-05 a RN-07: o novo início é um dos horários oferecidos para o serviço
        com o barbeiro, com a duração congelada (RN-13). O próprio agendamento
@@ -340,6 +359,7 @@ def reschedule_customer_appointment(
     """
     appointment = _owned_appointment(session, customer_id, appointment_id, lock=True)
     _ensure_changeable(appointment, now)
+    late = is_late_change(appointment.starts_at, now)
     new_barber_id = appointment.barber_id if barber_id is None else barber_id
     if new_barber_id == appointment.barber_id and starts_at == appointment.starts_at:
         raise DomainError(
@@ -368,7 +388,7 @@ def reschedule_customer_appointment(
             raise slot_unavailable() from error
         raise
     outbox.send_after_commit(notification)
-    return _with_relations(session, appointment)
+    return CustomerChange(_with_relations(session, appointment), late)
 
 
 @dataclass(frozen=True, slots=True)

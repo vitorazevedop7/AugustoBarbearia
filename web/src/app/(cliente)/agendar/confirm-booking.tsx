@@ -29,7 +29,7 @@ const textLink =
   "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
 
 /**
- * Etapa 5: o resumo, o aviso das 2 horas (RN-14) e o botão de confirmar. Sem
+ * Etapa 5: o resumo, a política de alteração (RN-14) e o botão de confirmar. Sem
  * telefone no perfil, pede o telefone antes (RN-10). Depois de confirmar, a
  * mesma página mostra o resumo do agendamento criado. Sem JS, a Server Action
  * continua funcionando.
@@ -82,11 +82,10 @@ export function ConfirmBooking({
               ) : null}
             </Alert>
           ) : null}
-          <Alert
-            tone="info"
-            title="Você pode cancelar ou remarcar até 2 horas antes do horário."
-          >
-            Depois disso, fale com a barbearia.
+          <Alert tone="info" title="Imprevistos acontecem.">
+            Você pode remarcar ou cancelar pelo site até o horário marcado. Se
+            puder, avise com pelo menos 2 horas de antecedência: assim outro
+            cliente aproveita o horário.
           </Alert>
           <input type="hidden" name="barber_id" value={barberId} />
           <input type="hidden" name="service_id" value={serviceId} />

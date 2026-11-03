@@ -26,7 +26,7 @@ describe("HowItWorks", () => {
     );
     expect(
       screen.getByText(
-        "Cancele ou remarque pelo site até 2 horas antes do horário.",
+        "Remarque ou cancele pelo site até o horário. Avisando com 2 horas de antecedência, outro cliente aproveita a vaga.",
       ),
     ).toBeVisible();
   });

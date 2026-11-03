@@ -99,7 +99,18 @@ async function finish(
       ...(code ? { code } : {}),
     };
   }
-  redirect(`${MY_APPOINTMENTS_PATH}?aviso=${notice}`);
+  // RN-14: em cima da hora, a lista agradece o aviso.
+  const late = changedLate(result.data);
+  redirect(`${MY_APPOINTMENTS_PATH}?aviso=${notice}${late ? "-em-cima" : ""}`);
+}
+
+function changedLate(data: unknown): boolean {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    "changed_late" in data &&
+    data.changed_late === true
+  );
 }
 
 function errorCode(error: unknown): string | undefined {

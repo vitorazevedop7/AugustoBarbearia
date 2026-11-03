@@ -132,7 +132,7 @@ Visitante, cliente e administração: todos veem a vitrine (RN-70).
 **CA-18 — Como funciona (#129, RN-14, RN-51, D11)**
 - **Dado** um visitante entre a equipe e "Horário e contato"
 - **Quando** lê "Como funciona"
-- **Então** vê os passos barbeiro → serviço → dia e horário → confirmação com a conta Google; o lembrete por e-mail cerca de um dia antes, apenas para reservas feitas com pelo menos 24 horas de antecedência; e a opção de cancelar ou remarcar pelo site até 2 horas antes. O texto não promete lembrete para reservas mais próximas do horário.
+- **Então** vê os passos barbeiro → serviço → dia e horário → confirmação com a conta Google; o lembrete por e-mail cerca de um dia antes, apenas para reservas feitas com pelo menos 24 horas de antecedência; e a opção de remarcar ou cancelar pelo site até o horário, avisando com 2 horas de antecedência quando possível (D16). O texto não promete lembrete para reservas mais próximas do horário.
 - As fotos 7:8 têm `alt` descritivo. No celular só aparece a grande, acima do texto. A menor aparece a partir de `md`, sobreposta com borda `surface` de 8px; no `lg`, a grande sangra para a direita da coluna. A seção recorta a sangria e não causa rolagem horizontal em 360px.
 
 **CA-19 — Foto nos heros internos (#130, D14)**
