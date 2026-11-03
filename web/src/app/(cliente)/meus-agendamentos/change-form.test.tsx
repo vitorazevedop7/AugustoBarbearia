@@ -44,7 +44,7 @@ describe("ChangeForm", () => {
         status: "error",
         code: "CHANGE_DEADLINE_PASSED",
         message:
-          "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia.",
+          "Seu horário já começou. Se você está a caminho ou não vai conseguir vir, fale com a barbearia.",
       }),
     );
 

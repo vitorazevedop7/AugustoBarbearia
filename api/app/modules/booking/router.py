@@ -23,6 +23,7 @@ from app.modules.booking.schemas import (
     AppointmentService,
     CustomerAppointmentResponse,
     CustomerAppointmentsResponse,
+    CustomerChangeResponse,
 )
 from app.modules.customers.dependencies import current_customer
 from app.modules.customers.models import Customer
@@ -69,6 +70,15 @@ def to_response(
         # RN-14: as duas ações seguem o mesmo prazo.
         can_cancel=changeable,
         can_reschedule=changeable,
+        late_change=service.late_change(appointment, now),
+    )
+
+
+def to_change_response(
+    change: service.CustomerChange, now: dt.datetime
+) -> CustomerChangeResponse:
+    return CustomerChangeResponse(
+        **to_response(change.booked, now).model_dump(), changed_late=change.late
     )
 
 
@@ -120,23 +130,23 @@ def get_appointment(
     return to_response(booked, now)
 
 
-@router.post("/{appointment_id}/cancel", response_model=CustomerAppointmentResponse)
+@router.post("/{appointment_id}/cancel", response_model=CustomerChangeResponse)
 def cancel_appointment(
     appointment_id: Id,
     customer: CustomerDep,
     session: SessionDep,
     now: NowDep,
     outbox: OutboxDep,
-) -> CustomerAppointmentResponse:
-    """Cancela até 2 horas antes do início (RN-14, RN-31 a RN-33) e avisa por
-    e-mail (RN-52)."""
-    booked = service.cancel_customer_appointment(
+) -> CustomerChangeResponse:
+    """Cancela até o início (RN-14, RN-31 a RN-33) e avisa por e-mail (RN-52).
+    `changed_late` diz se foi nas últimas 2 horas."""
+    change = service.cancel_customer_appointment(
         session, customer.id, appointment_id, now, outbox=outbox
     )
-    return to_response(booked, now)
+    return to_change_response(change, now)
 
 
-@router.post("/{appointment_id}/reschedule", response_model=CustomerAppointmentResponse)
+@router.post("/{appointment_id}/reschedule", response_model=CustomerChangeResponse)
 def reschedule_appointment(
     appointment_id: Id,
     data: AppointmentReschedule,
@@ -144,10 +154,11 @@ def reschedule_appointment(
     session: SessionDep,
     now: NowDep,
     outbox: OutboxDep,
-) -> CustomerAppointmentResponse:
-    """Muda o início e, se pedido, o barbeiro, até 2 horas antes (RN-14,
-    RN-15, RN-05 a RN-08), e avisa por e-mail (RN-52)."""
-    booked = service.reschedule_customer_appointment(
+) -> CustomerChangeResponse:
+    """Muda o início e, se pedido, o barbeiro, até o início do horário atual
+    (RN-14, RN-15, RN-05 a RN-08), e avisa por e-mail (RN-52). `changed_late`
+    diz se foi nas últimas 2 horas."""
+    change = service.reschedule_customer_appointment(
         session,
         customer.id,
         appointment_id,
@@ -156,7 +167,7 @@ def reschedule_appointment(
         now=now,
         outbox=outbox,
     )
-    return to_response(booked, now)
+    return to_change_response(change, now)
 
 
 @router.get("/{appointment_id}/availability/days", response_model=AvailableDaysResponse)

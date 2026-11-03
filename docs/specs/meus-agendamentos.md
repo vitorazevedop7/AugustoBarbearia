@@ -5,14 +5,14 @@
 - **Status:** implementada
 
 ## Contexto
-Depois de agendar (S3.08), o cliente precisa acompanhar os próprios horários e resolver um imprevisto sem ligar para a barbearia: cancelar ou trocar o dia, o horário ou o barbeiro. O prazo de 2 horas (D6) protege a agenda contra a desistência de última hora (O3), e a vaga cancelada volta na hora para outros clientes (O1). Fora do prazo, a tela mostra o contato da barbearia. Esta funcionalidade reaproveita o motor de disponibilidade (S3.07) e as telas de dia e horário do agendamento (S3.08).
+Depois de agendar (S3.08), o cliente precisa acompanhar os próprios horários e resolver um imprevisto sem ligar para a barbearia: cancelar ou trocar o dia, o horário ou o barbeiro. A antecedência recomendada de 2 horas (D6, D16) protege a agenda contra a desistência de última hora (O3), e a vaga cancelada volta na hora para outros clientes (O1). Fora do prazo, a tela mostra o contato da barbearia. Esta funcionalidade reaproveita o motor de disponibilidade (S3.07) e as telas de dia e horário do agendamento (S3.08).
 
 ## Quem usa
 Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alterações pela administração (RN-22) são da S5.05 ([agendamento-admin.md](agendamento-admin.md)).
 
 ## Histórias
 - Como **cliente**, quero **ver meus próximos horários e o histórico** para **lembrar quando e com quem marquei**.
-- Como **cliente**, quero **cancelar um horário até 2 horas antes** para **liberar a vaga quando não puder ir**.
+- Como **cliente**, quero **cancelar um horário até o início dele** para **avisar a barbearia quando não puder ir, mesmo em cima da hora**.
 - Como **cliente**, quero **trocar o dia, o horário ou o barbeiro sem perder o serviço** para **não precisar cancelar e agendar de novo**.
 - Como **cliente**, quero **ver o contato da barbearia quando o prazo já passou** para **resolver por telefone ou WhatsApp**.
 - Como **barbearia**, quero **saber quem cancelou e quando** para **acompanhar as desistências**.
@@ -32,7 +32,7 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 ## Definições desta funcionalidade
 - **Próximos:** agendamentos `SCHEDULED` que ainda não terminaram (`ends_at` depois de agora), inclusive o que está em andamento, em ordem de início (o mais próximo primeiro). É o mesmo critério de "ativo no futuro" da RN-11 e da RN-60.
 - **Histórico:** todos os outros (cancelados, concluídos, faltas e `SCHEDULED` que já terminaram e esperam a conclusão), do mais recente para o mais antigo. Sem paginação no MVP.
-- **Prazo (RN-14):** o cliente pode cancelar ou remarcar enquanto `agora ≤ início − 2 horas`. O limite é inclusivo, como a antecedência da RN-06. Na remarcação, o prazo vale sobre o horário **atual**; o novo horário segue a antecedência de 1 hora (RN-06).
+- **Prazo (RN-14, D16):** o cliente pode cancelar ou remarcar enquanto `agora < início`. Nas últimas 2 horas (`início − 2h < agora < início`), a alteração é **em cima da hora**: continua permitida, com o aviso. Exatamente 2 horas antes ainda está no prazo. Na remarcação, o prazo vale sobre o horário **atual**; o novo horário segue a antecedência de 1 hora (RN-06).
 - **Remarcar (RN-15, RN-31):** o mesmo agendamento continua `SCHEDULED`, com outro início e, se o cliente quiser, outro barbeiro. O serviço não muda. O preço e a duração continuam os congelados na criação (RN-13): a remarcação não é um agendamento novo. O novo horário é calculado com essa duração congelada.
 - **O próprio horário não ocupa a agenda na remarcação:** o novo horário pode se sobrepor ao atual (ex.: passar das 10h00 para as 10h30 com o mesmo barbeiro). O horário atual exato, com o mesmo barbeiro, não é oferecido de novo.
 
@@ -41,7 +41,7 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 **CA-1 — Lista separada em próximos e histórico (RN-16)**
 - **Dado** um cliente com agendamentos em vários status e outro cliente com agendamentos
 - **Quando** chama `GET /me/appointments`
-- **Então** a API devolve `{ upcoming, history }` só com os agendamentos dele, separados e ordenados como em "Definições". Cada item traz `id`, `status`, `barber`, `service`, `starts_at`, `ends_at` (`-03:00`), `price`, `duration_minutes`, `canceled_at`, `canceled_by`, `change_deadline` (início − 2h, só para `SCHEDULED`) e `can_cancel` / `can_reschedule` calculados pela API (RN-14). O web não calcula o prazo: só usa esses campos.
+- **Então** a API devolve `{ upcoming, history }` só com os agendamentos dele, separados e ordenados como em "Definições". Cada item traz `id`, `status`, `barber`, `service`, `starts_at`, `ends_at` (`-03:00`), `price`, `duration_minutes`, `canceled_at`, `canceled_by`, `change_deadline` (o início, só para `SCHEDULED`), `can_cancel` / `can_reschedule` e `late_change` (alterar agora é em cima da hora), calculados pela API (RN-14). O web não calcula o prazo: só usa esses campos.
 
 **CA-2 — Agendamento de outro cliente (RN-16)**
 - **Dado** um agendamento de outro cliente
@@ -49,14 +49,17 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 - **Então** a API responde `404` com `code` = `APPOINTMENT_NOT_FOUND` e "Agendamento não encontrado.", igual a um id que não existe, para não revelar que ele existe. Nada muda no banco.
 
 **CA-3 — Cancelar dentro do prazo (RN-14, RN-31, RN-32, RN-33)**
-- **Dado** um agendamento `SCHEDULED` do cliente que começa daqui a 2 horas ou mais
+- **Dado** um agendamento `SCHEDULED` do cliente que ainda não começou
 - **Quando** chama `POST /me/appointments/{id}/cancel`
-- **Então** a API responde `200` com o agendamento `CANCELED`, `canceled_by` = `CUSTOMER` e `canceled_at` = agora. O horário volta a aparecer em `GET /public/availability` na mesma hora (a exclusion constraint só considera `SCHEDULED`).
+- **Então** a API responde `200` com o agendamento `CANCELED`, `canceled_by` = `CUSTOMER`, `canceled_at` = agora e `changed_late` (`true` se foi nas últimas 2 horas; a remarcação responde o mesmo campo, sobre o horário deixado). O horário volta a aparecer em `GET /public/availability` na mesma hora (a exclusion constraint só considera `SCHEDULED`).
 
-**CA-4 — Fora do prazo (RN-14)**
-- **Dado** um agendamento que começa em menos de 2 horas (ou já começou)
+**CA-4 — Em cima da hora e depois do início (RN-14, D16)**
+- **Dado** um agendamento que começa em menos de 2 horas
+- **Quando** o cliente cancela ou remarca
+- **Então** a ação passa, com `changed_late` = `true`, e a lista agradece o aviso (CA-10).
+- **Dado** um agendamento que já começou
 - **Quando** o cliente tenta cancelar ou remarcar
-- **Então** a API responde `409` com `code` = `CHANGE_DEADLINE_PASSED` e "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia.", e nada muda. A tela mostra o contato da barbearia.
+- **Então** a API responde `409` com `code` = `CHANGE_DEADLINE_PASSED` e "Seu horário já começou. Se você está a caminho ou não vai conseguir vir, fale com a barbearia.", e nada muda. A tela mostra o contato da barbearia.
 
 **CA-5 — Agendamento que não está ativo (RN-31)**
 - **Dado** um agendamento `CANCELED`, `COMPLETED` ou `NO_SHOW`
@@ -87,14 +90,16 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 **CA-10 — Tela "Meus agendamentos"**
 - **Dado** um cliente logado em `/meus-agendamentos`, numa tela de 360px
 - **Então** vê "Próximos" e "Histórico", com um cartão por agendamento: serviço, barbeiro, data completa, horário de início e fim, valor e o status (`StatusBadge`; um `SCHEDULED` que já terminou aparece como "Aguardando registro").
-- Cartão de "Próximos" com `can_cancel` / `can_reschedule`: os links "Remarcar" (`outline`) e "Cancelar" e o texto "Você pode cancelar ou remarcar até HH:MM de <data>." (de `change_deadline`).
-- Cartão de "Próximos" sem as ações: o aviso "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia." com os links de contato da barbearia (WhatsApp, telefone, Instagram, e-mail, os que estiverem preenchidos). Sem nenhum preenchido, o aviso fica só com o título, sem apontar para um contato que não existe (#145).
+- O topo da página traz a política: "Você pode remarcar ou cancelar até o horário marcado. Se puder, avise com pelo menos 2 horas de antecedência."
+- Cartão de "Próximos" com `can_cancel` / `can_reschedule`: os links "Remarcar" (`outline`) e "Cancelar". Com `late_change`, acima deles, um `Alert` `warning` "Seu horário é daqui a pouco." ("Se surgiu um imprevisto, ainda dá para remarcar ou cancelar por aqui. Vai só se atrasar? Fale com a barbearia antes de cancelar: talvez ainda dê para te atender.") com os contatos.
+- Cartão de "Próximos" sem as ações (já começou): o aviso "Seu horário já começou. Se você está a caminho ou não vai conseguir vir, fale com a barbearia." com os links de contato da barbearia (WhatsApp, telefone, Instagram, e-mail, os que estiverem preenchidos). Sem nenhum preenchido, o aviso fica só com o título, sem apontar para um contato que não existe (#145).
 - Sem nenhum agendamento: o estado vazio "Você ainda não tem horários" com "Agendar horário". Sem próximos, mas com histórico: "Nenhum horário marcado" com "Agendar horário".
 - Sem sessão, o servidor leva a `/entrar?voltar=/meus-agendamentos` (e para as subpáginas, `voltar=` a URL completa). A administração vai para `/admin`.
 
 **CA-11 — Cancelar com confirmação, sem JS**
 - "Cancelar" leva a `/meus-agendamentos/{id}/cancelar`, que mostra o resumo do agendamento, "O horário fica livre para outros clientes." e dois controles: o botão `danger` "Cancelar agendamento" (um `<form>` com Server Action) e o link `ghost` "Voltar".
-- Ao confirmar, a Server Action chama a API e leva a `/meus-agendamentos?aviso=cancelado`, que mostra "Agendamento cancelado." num `Alert` `success`. Qualquer recusa mostra o `message` da API num `Alert` `danger` na mesma página; a recusa do prazo mostra também o contato.
+- Em cima da hora (`late_change`), a página mostra o `Alert` `warning` "Faltam menos de 2 horas para o seu horário." ("Você ainda pode cancelar, mas o <barbeiro> já está contando com você…") com os contatos, o botão `danger` "Cancelar mesmo assim" e o link "Manter meu horário", que volta à lista.
+- Ao confirmar, a Server Action chama a API e leva a `/meus-agendamentos?aviso=cancelado`, que mostra "Agendamento cancelado." num `Alert` `success`. Em cima da hora (`changed_late`), o aviso é `cancelado-em-cima`: "Agendamento cancelado. Obrigado por avisar: assim o barbeiro não fica te esperando."; na remarcação, `remarcado-em-cima`: "Agendamento remarcado. Obrigado por avisar.". Qualquer recusa mostra o `message` da API num `Alert` `danger` na mesma página; a recusa do prazo mostra também o contato.
 - Se o agendamento já não pode ser cancelado quando a página abre, ela mostra o aviso (com o contato, se for o prazo) sem o botão.
 
 **CA-12 — Remarcar reaproveitando as telas do agendamento**
@@ -102,7 +107,8 @@ Cliente. A administração não usa estas telas nem estas rotas (RN-70); as alte
 - O topo mostra "Horário atual" (dia, hora e barbeiro) e as escolhas feitas, cada uma com "Trocar". Trocar o barbeiro leva à etapa de barbeiro, só com os barbeiros da vitrine que realizam o serviço.
 - Dia e horário usam o `DayPicker` e o `TimePicker` da S3.08, com os dias e horários das rotas do CA-8.
 - A confirmação mostra o horário atual e o novo, o serviço e o valor, e o botão "Confirmar remarcação". A Server Action chama a API e leva a `/meus-agendamentos?aviso=remarcado` ("Agendamento remarcado."). Qualquer recusa mostra o `message` da API com o link "Escolher outro horário".
-- Fora do prazo ou fora do status ativo, a página mostra o aviso (com o contato, se for o prazo) no lugar das etapas.
+- Em cima da hora (`late_change`), cada etapa e a confirmação começam com o `Alert` `warning` "Faltam menos de 2 horas para o seu horário." ("Tudo bem remarcar, imprevistos acontecem. Só saiba que, tão em cima da hora, o horário que você deixa dificilmente é ocupado por outro cliente.").
+- Depois do início ou fora do status ativo, a página mostra o aviso (com o contato, se já começou) no lugar das etapas.
 
 ## Fluxo e telas
 
@@ -150,7 +156,7 @@ flowchart LR
 Escolhas desta implementação que nenhuma RN decide, a confirmar:
 - **Preço e duração congelados na remarcação:** a remarcação mantém os valores da criação (RN-13), mesmo que o serviço tenha mudado depois. A alternativa seria recongelar com os valores atuais.
 - **Serviço inativado depois do agendamento:** a remarcação segue a RN-05 inteira, então não há horário para remarcar (item 5); o cliente pode cancelar e falar com a barbearia.
-- **Prazo inclusivo:** exatamente 2 horas antes ainda pode.
+- **Limite das 2 horas:** exatamente 2 horas antes ainda está no prazo, não é "em cima da hora".
 - **`SCHEDULED` que já terminou** vai para o histórico, com o rótulo "Aguardando registro", até a administração concluir ou marcar falta.
 - **Remarcar para o mesmo horário** é recusado com `SAME_SLOT` em vez de aceito sem mudança.
 - **Página de confirmação** do cancelamento no lugar do `<dialog>` do design system, para funcionar sem JS.

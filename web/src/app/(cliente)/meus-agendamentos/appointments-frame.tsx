@@ -15,8 +15,8 @@ export function MyAppointmentsFrame({
         Meus agendamentos
       </h1>
       <p className="mt-4 text-body text-ink-muted">
-        Você pode cancelar ou remarcar até 2 horas antes do horário. Depois
-        disso, fale com a barbearia.
+        Você pode remarcar ou cancelar até o horário marcado. Se puder, avise
+        com pelo menos 2 horas de antecedência.
       </p>
       <div className="mt-10">{children}</div>
     </BookingMain>

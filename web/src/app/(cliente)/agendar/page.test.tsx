@@ -274,7 +274,7 @@ describe("agendamento — fluxo /agendar (D11)", () => {
     expect(screen.getByText("Corte + Barba · 45 min · R$ 35,00")).toBeVisible();
     expect(screen.getByText("10:00 às 10:45")).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Você pode cancelar ou remarcar até 2 horas antes do horário.",
+      "Imprevistos acontecem.Você pode remarcar ou cancelar pelo site até o horário marcado. Se puder, avise com pelo menos 2 horas de antecedência: assim outro cliente aproveita o horário.",
     );
     expect(screen.queryByLabelText("Telefone")).toBeNull();
     expect(

@@ -8,7 +8,11 @@ import {
   getPublicShop,
 } from "@/lib/api/public";
 import { getCurrentSession } from "@/lib/session";
-import { appointment, lateAppointment } from "@/test/appointment-data";
+import {
+  appointment,
+  lateChangeAppointment,
+  startedAppointment,
+} from "@/test/appointment-data";
 import { barbers, service, shop } from "@/test/vitrine-data";
 import RescheduleAppointmentPage from "./page";
 
@@ -180,10 +184,34 @@ describe("remarcar agendamento — /meus-agendamentos/[id]/remarcar (RN-15)", ()
     );
   });
 
+  it.each<Record<string, string>>([
+    { barbeiro: "1" },
+    { barbeiro: "2", data: "2026-11-04", hora: "10:30" },
+  ])(
+    "em cima da hora, avisa no topo do fluxo e na confirmação (RN-14): %j",
+    async (params) => {
+      api({
+        "/me/appointments/{appointment_id}": {
+          data: lateChangeAppointment(),
+          response: { status: 200 },
+        },
+      });
+
+      await renderPage(params);
+
+      expect(
+        screen.getByText("Faltam menos de 2 horas para o seu horário."),
+      ).toBeVisible();
+      expect(screen.getByRole("main")).toHaveTextContent(
+        "Tudo bem remarcar, imprevistos acontecem.",
+      );
+    },
+  );
+
   it("fora do prazo, mostra o contato no lugar das etapas (RN-14)", async () => {
     api({
       "/me/appointments/{appointment_id}": {
-        data: lateAppointment(),
+        data: startedAppointment(),
         response: { status: 200 },
       },
     });
@@ -191,7 +219,7 @@ describe("remarcar agendamento — /meus-agendamentos/[id]/remarcar (RN-15)", ()
     await renderPage({ barbeiro: "1" });
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Faltam menos de 2 horas para o seu horário.",
+      "Seu horário já começou.",
     );
     expect(screen.getByRole("link", { name: "(75) 99999-0000" })).toBeVisible();
     expect(GET).toHaveBeenCalledTimes(1);

@@ -15,14 +15,20 @@ export function appointment(changes: Partial<Appointment> = {}): Appointment {
     duration_minutes: 45,
     canceled_at: null,
     canceled_by: null,
-    change_deadline: "2026-11-03T08:00:00-03:00",
+    change_deadline: "2026-11-03T10:00:00-03:00",
     can_cancel: true,
     can_reschedule: true,
+    late_change: false,
     ...changes,
   };
 }
 
-/** O mesmo agendamento quando faltam menos de 2 horas (RN-14). */
-export function lateAppointment(changes: Partial<Appointment> = {}) {
+/** O mesmo agendamento depois do início: o cliente já não altera (RN-14). */
+export function startedAppointment(changes: Partial<Appointment> = {}) {
   return appointment({ can_cancel: false, can_reschedule: false, ...changes });
+}
+
+/** Nas 2 horas antes do início: ainda altera, com o aviso (RN-14). */
+export function lateChangeAppointment(changes: Partial<Appointment> = {}) {
+  return appointment({ late_change: true, ...changes });
 }

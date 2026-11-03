@@ -148,6 +148,14 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
   - **D15.** Quando a mudança do expediente é recusada (D13), a recusa **lista os agendamentos afetados**, do mais próximo ao mais distante, com data, hora, barbeiro e cliente, cada um com link para o detalhe na agenda. A lista mostra até 20, e a mensagem conta todos.
   - Só contam os **dias cujo horário muda**. Um agendamento que já estava fora do expediente (criado antes da D13, ou um encaixe da administração) impede a mudança do dia dele, não a de outros dias. A decisão passa a integrar a RN-02 e a [spec de horários](../specs/barbearia-horarios.md).
 
+### 2026-11-02 — Cancelar e remarcar em cima da hora
+- **Com:** registro interno. Decisão do Vitor como product owner (issue #141), **a confirmar com os proprietários** na apresentação
+- **Canal:** —
+- **Fatos e decisões:**
+  - **D16.** Substitui a trava da D6. O cliente pode **cancelar e remarcar pelo site até o início** do horário. As 2 horas antes continuam como **antecedência recomendada**: nas últimas 2 horas, a ação é permitida com um aviso que agradece o aviso do cliente, não esconde o incômodo de avisar tão tarde e oferece o contato para quem só vai se atrasar. A partir do início, só a barbearia altera.
+  - Motivo: para a barbearia, um aviso em cima da hora é melhor que uma falta sem aviso. Pesquisa de 2026-11-02 (Booksy, Fresha, theCut): janela de cancelamento com flexibilidade, e firmeza só com quem é reincidente. Sem pagamento online, não há taxa: só a mensagem e o registro de quando foi o cancelamento (`canceled_at`, RN-33), que a administração passa a ver na agenda (#142).
+  - Remarcar continua exigindo 1 hora de antecedência no horário novo (RN-06).
+
 ### 2026-11-02 — Fotos placeholder nas novas áreas da vitrine
 - **Com:** registro interno. Decisão do Vitor como product owner (issue #125, autorizada no pedido de execução das issues #125–#132)
 - **Canal:** —

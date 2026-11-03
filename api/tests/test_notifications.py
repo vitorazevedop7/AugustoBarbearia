@@ -176,7 +176,7 @@ def test_rn53_email_traz_servico_barbeiro_data_endereco_link_e_contato(
         for value in expected:
             assert value in content
     assert "Olá, Ana!" in email.text
-    assert "até 2 horas antes" in email.text
+    assert "pelo menos 2 horas de antecedência" in email.text
     assert 'href="https://wa.me/5575999990000"' in email.html
 
 
@@ -567,3 +567,14 @@ def test_rn52_rn53_cancelamento_pela_barbearia_com_contato_aponta_para_ele() -> 
         "fale com a barbearia pelos contatos abaixo ou agende pelo site." in email.text
     )
     assert "WhatsApp: (75) 99999-0000" in email.text
+
+
+def test_rn14_cancelamento_do_cliente_em_cima_da_hora_agradece_o_aviso() -> None:
+    late = render(NotificationKind.CANCELED, details(canceled_late=True))
+    on_time = render(NotificationKind.CANCELED, details())
+
+    assert (
+        "Obrigado por avisar. Quer marcar outro horário? É só agendar pelo site."
+        in late.text
+    )
+    assert "Obrigado por avisar." not in on_time.text

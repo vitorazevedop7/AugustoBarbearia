@@ -4,7 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createApiClient } from "@/lib/api/client";
 import { getPublicShop } from "@/lib/api/public";
 import { getCurrentSession } from "@/lib/session";
-import { appointment, lateAppointment } from "@/test/appointment-data";
+import {
+  appointment,
+  startedAppointment,
+  lateChangeAppointment,
+} from "@/test/appointment-data";
 import { shop } from "@/test/vitrine-data";
 import MyAppointmentsPage from "./page";
 
@@ -108,8 +112,10 @@ describe("meus agendamentos — /meus-agendamentos", () => {
     expect(card).toHaveTextContent("Edvaldo");
     expect(card).toHaveTextContent("R$ 35,00");
     expect(card).toHaveTextContent("Agendado");
-    expect(card).toHaveTextContent(
-      "Você pode cancelar ou remarcar até terça-feira, 3 de novembro de 2026, às 08:00.",
+    // No prazo normal, sem aviso: a política fica no topo da página.
+    expect(within(card).queryByRole("status")).toBeNull();
+    expect(screen.getByRole("main")).toHaveTextContent(
+      "Você pode remarcar ou cancelar até o horário marcado. Se puder, avise com pelo menos 2 horas de antecedência.",
     );
     expect(
       within(card).getByRole("link", {
@@ -125,7 +131,7 @@ describe("meus agendamentos — /meus-agendamentos", () => {
   });
 
   it("fora do prazo, mostra o contato da barbearia no lugar das ações (RN-14)", async () => {
-    listed([lateAppointment()]);
+    listed([startedAppointment()]);
 
     await renderPage();
 
@@ -133,7 +139,7 @@ describe("meus agendamentos — /meus-agendamentos", () => {
     expect(within(card).queryByRole("link", { name: /Cancelar/ })).toBeNull();
     expect(within(card).queryByRole("link", { name: /Remarcar/ })).toBeNull();
     expect(within(card).getByRole("status")).toHaveTextContent(
-      "Faltam menos de 2 horas para o seu horário. Para cancelar ou remarcar, fale com a barbearia.",
+      "Seu horário já começou. Se você está a caminho ou não vai conseguir vir, fale com a barbearia.",
     );
     expect(
       within(card).getByRole("link", { name: "(75) 99999-0000" }),
@@ -145,7 +151,7 @@ describe("meus agendamentos — /meus-agendamentos", () => {
 
   it("fora do prazo e sem contato cadastrado, não aponta para um contato", async () => {
     vi.mocked(getPublicShop).mockResolvedValue(shop);
-    listed([lateAppointment()]);
+    listed([startedAppointment()]);
 
     await renderPage();
 
@@ -153,7 +159,7 @@ describe("meus agendamentos — /meus-agendamentos", () => {
       screen.getByRole("article", { name: "Corte + Barba" }),
     ).getByRole("status");
     expect(notice).toHaveTextContent(
-      /^Faltam menos de 2 horas para o seu horário\. Para cancelar ou remarcar, fale com a barbearia\.$/,
+      /^Seu horário já começou\. Se você está a caminho ou não vai conseguir vir, fale com a barbearia\.$/,
     );
     expect(within(notice).queryByRole("link")).toBeNull();
   });
@@ -171,7 +177,7 @@ describe("meus agendamentos — /meus-agendamentos", () => {
           can_cancel: false,
           can_reschedule: false,
         }),
-        lateAppointment({
+        startedAppointment({
           id: 9,
           service: { id: 1, name: "Corte Simples" },
           starts_at: "2026-10-30T10:00:00-03:00",
@@ -197,6 +203,38 @@ describe("meus agendamentos — /meus-agendamentos", () => {
     expect(waiting).toHaveTextContent("Aguardando registro");
     expect(within(history).queryAllByRole("link")).toHaveLength(0);
     expect(within(history).queryByRole("status")).toBeNull();
+  });
+
+  it("em cima da hora, mantém as ações com o aviso e os contatos (RN-14)", async () => {
+    listed([lateChangeAppointment()]);
+
+    await renderPage();
+
+    const card = screen.getByRole("article", { name: "Corte + Barba" });
+    const notice = within(card).getByRole("status");
+    expect(notice).toHaveTextContent("Seu horário é daqui a pouco.");
+    expect(notice).toHaveTextContent(
+      "Vai só se atrasar? Fale com a barbearia antes de cancelar",
+    );
+    expect(
+      within(notice).getByRole("link", { name: "(75) 99999-0000" }),
+    ).toBeVisible();
+    expect(within(card).getByRole("link", { name: /Remarcar/ })).toBeVisible();
+    expect(within(card).getByRole("link", { name: /Cancelar/ })).toBeVisible();
+  });
+
+  it.each([
+    [
+      "cancelado-em-cima",
+      "Agendamento cancelado. Obrigado por avisar: assim o barbeiro não fica te esperando.",
+    ],
+    ["remarcado-em-cima", "Agendamento remarcado. Obrigado por avisar."],
+  ])("aviso em cima da hora (%s)", async (aviso, message) => {
+    listed([]);
+
+    await renderPage({ aviso });
+
+    expect(screen.getAllByRole("status")[0]).toHaveTextContent(message);
   });
 
   it("depois de cancelar ou remarcar, mostra o aviso", async () => {

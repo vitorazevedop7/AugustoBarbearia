@@ -28,7 +28,7 @@ Cliente (agenda). O visitante percorre as escolhas e entra com o Google para con
 - RN-13 — Preço e duração congelados
 - RN-16 — Privacidade entre clientes (o cliente vem sempre do token)
 - RN-70 — Perfis e permissões (só o cliente agenda para si)
-- RN-14 — Prazo para cancelar e remarcar (só o aviso na confirmação)
+- RN-14 — Prazo para cancelar e remarcar (só a política na confirmação)
 - RN-50 — Confirmação por e-mail (S5.03, em [notificacoes-email.md](notificacoes-email.md))
 
 ## Decisão de produto: barbeiro antes do serviço
@@ -95,7 +95,7 @@ A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**
 - **Então** vê o campo Telefone antes do botão "Confirmar agendamento". Ao confirmar, a Server Action salva o telefone (`PATCH /me/profile`) e cria o agendamento. Telefone inválido mostra o `message` da API ("Informe o telefone com DDD.") e mantém o que foi digitado. O link "Escolher outro horário" só acompanha a recusa do horário (`SLOT_UNAVAILABLE`); nas outras recusas, o problema não é o horário (#148).
 
 **CA-12 — Confirmação e resumo**
-- A confirmação mostra o barbeiro, o serviço, a data completa, o horário de início e de fim, a duração, o preço e o aviso das 2 horas (RN-14, D6), com o botão "Confirmar agendamento".
+- A confirmação mostra o barbeiro, o serviço, a data completa, o horário de início e de fim, a duração, o preço e a política de alteração num `Alert` `info` ("Imprevistos acontecem.": remarcar ou cancelar pelo site até o horário marcado, avisando com 2 horas de antecedência quando possível; RN-14, D16), com o botão "Confirmar agendamento".
 - Se o horário escolhido já não está entre os disponíveis quando a tela abre, ela avisa e oferece "Escolher outro horário", sem o botão de confirmar.
 - Depois de confirmar, a página mostra "Seu horário está confirmado." com o resumo e o link "Ver meus agendamentos" (`/meus-agendamentos`, S3.09).
 - Qualquer erro da API (CA-2 a CA-6) aparece com o `message` dela num `Alert`, com o link para escolher outro horário. O web não decide regra.
@@ -118,7 +118,7 @@ flowchart LR
 2. **Serviço:** cards com nome, duração e preço, só os que o barbeiro realiza.
 3. **Dia:** os dias com horário livre, como links ("Ter, 3 de nov"), numa grade de 3 colunas no celular. Sem dia: estado vazio com "Escolher outro barbeiro".
 4. **Horário:** chips de horário (links), em grupos Manhã (antes do meio-dia) e Tarde, 3 colunas no celular. Sem horário: estado vazio com "Escolher outro dia".
-5. **Confirmar:** o resumo, o aviso das 2 horas num `Alert` `info`, o campo Telefone quando falta e o botão principal. Depois de confirmar, o resumo com "Seu horário está confirmado." e os links "Ver meus agendamentos" e "Voltar para o início".
+5. **Confirmar:** o resumo, a política de alteração num `Alert` `info`, o campo Telefone quando falta e o botão principal. Depois de confirmar, o resumo com "Seu horário está confirmado." e os links "Ver meus agendamentos" e "Voltar para o início".
 
 **Aparência (S4.07, #80):** a base visual da vitrine, com o ritmo de tarefa. O título da etapa em Barlow 900 (`text-display-3`), o botão principal no tamanho `md` (60px no celular, 84px a partir de 768px), chips de horário com 44px e de dia com 80px, número em Barlow 600, e hover de 300ms `ease-standard`. A moldura fica em `paper`, logo abaixo do cabeçalho escuro, **sem a faixa escura parcial** das páginas internas: o fluxo segue o Squire, e uma faixa em cada etapa empurraria as opções para fora da primeira tela do celular. Nada mudou na ordem das etapas, nas regras nem nos textos de erro.
 

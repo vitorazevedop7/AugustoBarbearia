@@ -41,9 +41,10 @@ describe("ConfirmBooking", () => {
         duration_minutes: 45,
         canceled_at: null,
         canceled_by: null,
-        change_deadline: "2026-11-03T08:00:00-03:00",
+        change_deadline: "2026-11-03T10:00:00-03:00",
         can_cancel: true,
         can_reschedule: true,
+        late_change: false,
       },
     });
     render(<ConfirmBooking {...props} />);

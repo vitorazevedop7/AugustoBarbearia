@@ -20,7 +20,7 @@ Cliente (recebe, quando agenda, remarca ou cancela, e quando a administração f
 - RN-01 — Fuso de São Paulo (data e hora no e-mail)
 - RN-50 — Confirmação
 - RN-51 — Lembrete
-- RN-14 — Prazo de 2 horas (o aviso do e-mail)
+- RN-14 — Prazo para alterar (o texto do e-mail, D16)
 - RN-52 — Alterações
 - RN-53 — Conteúdo
 - RN-54 — Falha de envio
@@ -84,12 +84,17 @@ Os dados vindos do banco são escapados no HTML. Um campo opcional da barbearia 
 
 | Tipo | Assunto | Primeira frase |
 |---|---|---|
-| `CONFIRMATION` | "Agendamento confirmado: terça-feira, 3/11, às 10h00" | "Seu horário está confirmado." + o aviso do prazo de 2 horas, enquanto ele vale (abaixo) |
+| `CONFIRMATION` | "Agendamento confirmado: terça-feira, 3/11, às 10h00" | "Seu horário está confirmado." + o texto sobre alterar, conforme o momento do envio (abaixo) |
 | `RESCHEDULED` | "Agendamento remarcado: …" | "Seu agendamento foi remarcado. Veja o novo horário." |
 | `CANCELED` | "Agendamento cancelado: …" | "Seu agendamento foi cancelado." + convite para marcar outro horário |
 | `REMINDER` | "Lembrete: seu horário é terça-feira, 3/11, às 10h00" | "Passando para lembrar do seu horário." |
 
-**Aviso do prazo (RN-14, RN-53).** "Você pode remarcar ou cancelar pelo site até 2 horas antes do horário" (confirmação, remarcação e lembrete) só aparece enquanto o prazo vale: `can_change_at(starts_at, now)` de `appointments/service.py`, a mesma função e a mesma constante `CHANGE_NOTICE` que o `booking` usa (o limite é inclusivo: exatamente 2 horas antes ainda vale). Depois dele, o e-mail diz que o prazo para remarcar ou cancelar pelo site já passou e manda falar com a barbearia, "pelos contatos abaixo" quando o e-mail traz contatos (RN-53) ou só "com a barbearia" quando não traz. O `CANCELED` não tem o aviso. O "agora" é o do envio (`now` de `build_email`), então um e-mail enviado depois do commit sempre reflete o momento dele.
+**Aviso do prazo (RN-14, RN-53, D16).** Na confirmação, na remarcação e no lembrete, o texto sobre alterar acompanha o momento do envio, pelas mesmas funções que o `booking` usa (`can_change_at` e `is_late_change` de `appointments/service.py`):
+- até 2 horas antes (inclusive): "Você pode remarcar ou cancelar pelo site até o horário marcado. Se puder, avise com pelo menos 2 horas de antecedência." (no lembrete: "Não vai conseguir vir? Remarque ou cancele pelo site. Se puder, avise com pelo menos 2 horas de antecedência.");
+- nas últimas 2 horas: "Imprevisto? Você ainda pode remarcar ou cancelar pelo site até o horário marcado. Quanto antes avisar, melhor.";
+- depois do início: "Seu horário já começou. Para qualquer mudança, fale com a barbearia", com "pelos contatos abaixo" quando o e-mail traz contatos (RN-53).
+
+O `CANCELED` não tem o aviso. O cancelamento feito pelo cliente em cima da hora (`is_late_cancellation`: `canceled_by = CUSTOMER` e `canceled_at` nas 2 horas antes do início) acrescenta "Obrigado por avisar." antes do convite para agendar de novo. O "agora" é o do envio (`now` de `build_email`), então um e-mail enviado depois do commit sempre reflete o momento dele.
 
 **Horário que já começou (RN-50, RN-52, decisão do proprietário).** As ações da administração não registram nem enviam e-mail quando o horário já começou (`starts_at <= now`, com o `utc_now` da requisição): confirmação de um encaixe ou de um atendimento já acontecido, cancelamento de um horário que já começou e remarcação para um horário que já começou (vale o horário novo). Não há lembrete a proteger: o horário que começou nunca entra na janela do lembrete (RN-51), então a falta do `RESCHEDULED` não muda o job. As ações do cliente não mudam: o horário dele sempre está no futuro.
 
@@ -192,8 +197,8 @@ A lógica é `send_due_reminders(session, sender, now)` em `notifications/remind
 
 **CA-14 — Aviso do prazo (RN-14, RN-53)**
 - **Dado** um e-mail de confirmação, remarcação ou lembrete
-- **Quando** faltam mais de 2 horas para o início (ou exatamente 2)
-- **Então** ele traz o aviso "remarque ou cancele pelo site até 2 horas antes"; com menos de 2 horas, diz que o prazo passou e manda falar com a barbearia.
+- **Quando** faltam 2 horas ou mais para o início
+- **Então** ele traz a política ("até o horário marcado; se puder, avise com pelo menos 2 horas de antecedência"); com menos de 2 horas, o convite a avisar ("Imprevisto? Você ainda pode…"); depois do início, manda falar com a barbearia.
 
 **CA-12 — Remarcação pela administração e lembrete (RN-51)**
 - **Dado** um agendamento remarcado pela administração para daqui a 24h ou mais

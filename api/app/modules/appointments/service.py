@@ -14,23 +14,42 @@ from app.modules.appointments.models import (
     OVERLAP_CONSTRAINT,
     Appointment,
     AppointmentStatus,
+    CanceledBy,
 )
 
 # SQLSTATEs do Postgres para a reserva que perde a disputa por um horário.
 EXCLUSION_VIOLATION = "23P01"
 DEADLOCK_DETECTED = "40P01"
 
-# RN-14: o cliente cancela ou remarca até 2 horas antes do início.
+# RN-14: a antecedência recomendada. O cliente cancela ou remarca até o
+# início; nas últimas 2 horas, a alteração é "em cima da hora" (D16).
 CHANGE_NOTICE = timedelta(hours=2)
 
 
 def can_change_at(starts_at: datetime, now: datetime) -> bool:
     """RN-14: ainda dá para o cliente cancelar ou remarcar um horário que
-    começa em `starts_at`. O limite é inclusivo: exatamente 2 horas antes ainda
-    pode. Só o tempo; o status (RN-31) é conferido por quem chama. É a regra que
-    o `booking` aplica e que os e-mails (RN-53) usam para dizer se o prazo vale.
+    começa em `starts_at`: até o início, sem incluí-lo. Só o tempo; o status
+    (RN-31) é conferido por quem chama. É a regra que o `booking` aplica e que
+    os e-mails (RN-53) usam para escolher o texto.
     """
-    return now <= starts_at - CHANGE_NOTICE
+    return now < starts_at
+
+
+def is_late_change(starts_at: datetime, now: datetime) -> bool:
+    """RN-14: a alteração agora é em cima da hora, nas 2 horas antes do início
+    e com ele ainda por vir. Exatamente 2 horas antes ainda está no prazo."""
+    return starts_at - CHANGE_NOTICE < now < starts_at
+
+
+def is_late_cancellation(appointment: Appointment) -> bool:
+    """RN-14 e RN-33: o cliente cancelou nas 2 horas antes do início. O
+    cancelamento da administração não conta: quem decide é ela."""
+    return (
+        appointment.status == AppointmentStatus.CANCELED
+        and appointment.canceled_by == CanceledBy.CUSTOMER
+        and appointment.canceled_at is not None
+        and is_late_change(appointment.starts_at, appointment.canceled_at)
+    )
 
 
 def barber_has_future_appointments(

@@ -134,8 +134,15 @@ def test_rn52_remarcar_de_horario_que_ja_comecou_para_um_futuro_envia(
 
 # O aviso do prazo de 2 horas (RN-14, RN-53).
 
-EXPIRED = "O prazo para remarcar ou cancelar pelo site já passou."
-VALID = "Você pode remarcar ou cancelar pelo site até 2 horas antes do horário."
+STARTED_NOTICE = "Seu horário já começou."
+VALID = (
+    "Você pode remarcar ou cancelar pelo site até o horário marcado. "
+    "Se puder, avise com pelo menos 2 horas de antecedência."
+)
+LATE = (
+    "Imprevisto? Você ainda pode remarcar ou cancelar pelo site até o horário "
+    "marcado. Quanto antes avisar, melhor."
+)
 
 
 def email_for(
@@ -164,23 +171,27 @@ def email_for(
     "kind", [NotificationKind.CONFIRMATION, NotificationKind.RESCHEDULED]
 )
 @pytest.mark.parametrize(
-    ("ahead", "valid"),
+    ("ahead", "notice"),
     [
-        (timedelta(hours=2, minutes=1), True),
-        (timedelta(hours=2), True),
-        (timedelta(hours=1, minutes=59), False),
-        (timedelta(minutes=10), False),
+        (timedelta(hours=2, minutes=1), VALID),
+        (timedelta(hours=2), VALID),
+        (timedelta(hours=1, minutes=59), LATE),
+        (timedelta(minutes=10), LATE),
+        (timedelta(0), STARTED_NOTICE),
+        (timedelta(minutes=-10), STARTED_NOTICE),
     ],
 )
-def test_rn14_rn53_aviso_do_prazo_so_aparece_enquanto_vale(
+def test_rn14_rn53_aviso_do_prazo_acompanha_o_momento_do_envio(
     db_session: Session,
     bia: Customer,
     edvaldo: int,
     shop_with_contacts: None,  # noqa: F811
     kind: NotificationKind,
     ahead: timedelta,
-    valid: bool,
+    notice: str,
 ) -> None:
+    """D16: no prazo, a política; nas últimas 2 horas, o convite a avisar;
+    depois do início, falar com a barbearia."""
     starts_at = local(2026, 11, 4, 16)
 
     text, html = email_for(
@@ -188,11 +199,11 @@ def test_rn14_rn53_aviso_do_prazo_so_aparece_enquanto_vale(
     )
 
     for content in (text, html):
-        assert (VALID in content) is valid
-        assert (EXPIRED in content) is not valid
+        for other in (VALID, LATE, STARTED_NOTICE):
+            assert (other in content) is (other == notice)
         # RN-53: os contatos vêm em todo e-mail, valendo o prazo ou não.
         assert "(75) 99999-0000" in content
-    if not valid:
+    if notice == STARTED_NOTICE:
         assert "fale com a barbearia pelos contatos abaixo" in text
 
 
@@ -207,10 +218,10 @@ def test_rn53_prazo_vencido_sem_contatos_nao_manda_olhar_abaixo(
         edvaldo,
         NotificationKind.CONFIRMATION,
         starts_at=starts_at,
-        now=starts_at - timedelta(minutes=30),
+        now=starts_at + timedelta(minutes=5),
     )
 
-    assert f"{EXPIRED} Para mudar o horário, fale com a barbearia." in text
+    assert f"{STARTED_NOTICE} Para qualquer mudança, fale com a barbearia." in text
     assert "contatos abaixo" not in text
 
 
@@ -227,7 +238,7 @@ def test_rn14_rn53_lembrete_tambem_so_cita_o_prazo_enquanto_vale(
         starts_at=starts_at,
         now=starts_at - timedelta(hours=24),
     )
-    expired, _ = email_for(
+    late, _ = email_for(
         db_session,
         bia,
         edvaldo,
@@ -236,10 +247,12 @@ def test_rn14_rn53_lembrete_tambem_so_cita_o_prazo_enquanto_vale(
         now=local(2026, 11, 5, 15),
     )
 
-    assert "Remarque ou cancele pelo site até 2 horas antes do horário." in valid
-    assert EXPIRED not in valid
-    assert EXPIRED in expired
-    assert "até 2 horas antes" not in expired
+    assert (
+        "Não vai conseguir vir? Remarque ou cancele pelo site. Se puder, avise "
+        "com pelo menos 2 horas de antecedência."
+    ) in valid
+    assert LATE not in valid
+    assert f"Não vai conseguir vir? {LATE}" in late
 
 
 def test_rn14_rn53_cancelamento_nao_traz_o_aviso_do_prazo(
@@ -257,7 +270,8 @@ def test_rn14_rn53_cancelamento_nao_traz_o_aviso_do_prazo(
     )
 
     assert VALID not in text
-    assert EXPIRED not in text
+    assert LATE not in text
+    assert STARTED_NOTICE not in text
 
 
 def test_rn53_email_enviado_pela_rota_usa_o_relogio_da_requisicao(
@@ -267,11 +281,11 @@ def test_rn53_email_enviado_pela_rota_usa_o_relogio_da_requisicao(
     edvaldo: int,
     corte_e_barba: int,
 ) -> None:
-    """Agendado 1h40 antes do início: o prazo de 2 horas já passou, e o e-mail
-    da administração diz isso em vez de prometer o que não vale mais."""
+    """Agendado 1h40 antes do início: o e-mail da administração já sai em
+    cima da hora e convida a avisar, em vez da política do prazo normal."""
     response = create(api, edvaldo, corte_e_barba, IN_90_MIN, customer_id=bia.id)
 
     assert response.status_code == 201, response.json()
     [email] = sender.sent
-    assert EXPIRED in email.text
+    assert LATE in email.text
     assert VALID not in email.text

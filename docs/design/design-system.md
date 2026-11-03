@@ -138,7 +138,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `MobileMenu` | `mobile-menu.tsx` | Pronto |
 | `SiteHeader`, `HeaderFrame` | `components/site-header.tsx`, `header-frame.tsx` | Pronto (cabeçalho de todas as páginas) |
 | `DayPicker`, `TimePicker` | `components/booking/day-picker.tsx`, `time-picker.tsx` | Pronto (escolha de dia e de horário do agendamento, reaproveitável na remarcação) |
-| `ContactNotice` | `components/booking/contact-notice.tsx` | Pronto (aviso de prazo vencido com os contatos da barbearia, RN-14) |
+| `ContactNotice` | `components/booking/contact-notice.tsx` | Pronto (aviso com os contatos da barbearia: depois do início e em cima da hora, RN-14) |
 | Card de agendamento do cliente | `app/(cliente)/meus-agendamentos/appointment-card.tsx` | Pronto (só em "Meus agendamentos"; a agenda da administração terá o seu) |
 | Agenda da administração: `AgendaToolbar`, `AgendaDayView`, `AgendaWeekView`, `AgendaBarberColumn`, `AgendaItem`, `AppointmentDetail` | `app/admin/agenda/` | Pronto (só na agenda; recebem as ações das próximas issues por `actions`, `children`, `barberExtra` e `dayExtra`) |
 | Tabela, diálogo de confirmação, esqueleto de carregamento | — | Planejado: nasce com a primeira tela que precisar dele |
@@ -197,7 +197,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 - **`Alert`** dá retorno dentro da página, com título curto e texto opcional. Os tons são `info`, `success`, `warning` e `danger`.
 - `danger` usa `role="alert"` (o leitor de tela lê na hora); os outros usam `role="status"`.
-- Use depois de uma ação ("Seu horário está confirmado."), para um aviso de regra ("Faltam menos de 2 horas.") e para o `message` de erro da API.
+- Use depois de uma ação ("Seu horário está confirmado."), para um aviso de regra ("Faltam menos de 2 horas para o seu horário.") e para o `message` de erro da API.
 - Não há toast. A confirmação aparece na página para onde a ação leva, porque toast some antes de ser lido e se perde no celular.
 
 ### Estado vazio
@@ -299,14 +299,14 @@ A implementação está na [spec do agendamento](../specs/agendamento-cliente.md
 - **Sem a faixa escura parcial** (S4.07, #80). A moldura (`BookingMain`) fica em `paper`, logo abaixo da faixa escura do cabeçalho. O fluxo segue o Squire, e não as páginas internas do Beard X; no celular, uma faixa a mais em cada uma das 5 etapas empurraria as opções para fora da primeira tela; e o cabeçalho escuro já faz a ligação com a vitrine. A mesma moldura serve a remarcação, "Meus agendamentos" e o cancelamento.
 - **Cada escolha é um link:** um toque avança, sem botão "Continuar" e sem barra fixa no rodapé. Funciona sem JS.
 - Barbeiro em cards com a foto (2 colunas no celular); serviço em cards com duração e preço (uma coluna). Dia com `DayPicker`: só os dias com horário, agrupados por mês, 3 por linha no celular. Horário com `TimePicker`: chips-link com a cara do `ChoiceChip`, agrupados em Manhã e Tarde, 3 por linha no celular. O `ChoiceChip` (`radio`) continua para formulários, como a forma de pagamento.
-- A confirmação mostra o resumo completo, o aviso das 2h (D6) num `Alert` `info`, o campo Telefone quando o perfil não tem, e o botão "Confirmar agendamento". Depois de confirmar, a mesma página mostra "Horário confirmado", o resumo e "Ver meus agendamentos".
+- A confirmação mostra o resumo completo, a política de alteração (D16) num `Alert` `info`, o campo Telefone quando o perfil não tem, e o botão "Confirmar agendamento". Depois de confirmar, a mesma página mostra "Horário confirmado", o resumo e "Ver meus agendamentos".
 - **Remarcação** ([spec](../specs/meus-agendamentos.md)): o mesmo padrão em 4 etapas (barbeiro → dia → horário → confirmar), com o horário atual no topo do resumo. Entra pelo dia, com o barbeiro atual já escolhido; o "Trocar" do barbeiro volta à etapa de barbeiro.
 
 ### Meus agendamentos
 
 - Um cartão por agendamento, em "Próximos" e "Histórico": serviço (`h3`), `StatusBadge`, dia, horário, barbeiro e valor. Um `SCHEDULED` que já passou mostra o `Badge` `muted` "Aguardando registro".
 - As ações "Remarcar" (`outline`, `sm`) e "Cancelar" (`danger`, `sm`) aparecem só quando a API diz que pode (`can_reschedule`, `can_cancel`), com o prazo por extenso acima. O nome acessível inclui a data ("Cancelar o horário de terça-feira, 3 de novembro de 2026").
-- Sem as ações, o próximo horário mostra o `ContactNotice`: o aviso das 2 horas em `warning`, com os links de contato.
+- Em cima da hora (`late_change`), o cartão mantém as ações e mostra acima delas o `ContactNotice` "Seu horário é daqui a pouco.". Sem as ações (o horário já começou), mostra o `ContactNotice` com a mensagem da API, em `warning`, com os links de contato.
 - Depois de cancelar ou remarcar, a lista mostra um `Alert` `success` ("Agendamento cancelado.").
 
 ### Confirmação destrutiva
