@@ -79,6 +79,14 @@ def count_active_appointments(session: Session, customer_id: int, now: datetime)
     )
 
 
+def can_book_more(session: Session, customer_id: int, now: datetime) -> bool:
+    """RN-11: o cliente tem menos de 2 agendamentos ativos no futuro. A criação
+    confere de novo, com a linha do cliente travada."""
+    return count_active_appointments(session, customer_id, now) < (
+        MAX_ACTIVE_APPOINTMENTS
+    )
+
+
 def _lock_customer(session: Session, customer_id: int) -> Customer:
     """Trava o cliente até o fim da transação e relê o cadastro.
 
@@ -137,7 +145,7 @@ def create_customer_appointment(
             ),
             status_code=409,
         )
-    if count_active_appointments(session, customer.id, now) >= MAX_ACTIVE_APPOINTMENTS:
+    if not can_book_more(session, customer.id, now):
         raise DomainError(
             code="APPOINTMENT_LIMIT_REACHED",
             message=(

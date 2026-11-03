@@ -83,3 +83,6 @@ class CustomerAppointmentsResponse(BaseModel):
     upcoming: list[CustomerAppointmentResponse]
     # Todos os outros, do mais recente ao mais antigo.
     history: list[CustomerAppointmentResponse]
+    # RN-11: o cliente ainda pode marcar outro horário (menos de 2 ativos). O
+    # web avisa o limite no início do fluxo, antes das escolhas (#155).
+    can_book: bool

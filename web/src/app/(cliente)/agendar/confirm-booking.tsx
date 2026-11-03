@@ -1,29 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { type Ref, useActionState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert } from "@/components/ui/alert";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { TextField } from "@/components/ui/field";
-import {
-  formatDuration,
-  formatLongDate,
-  formatPrice,
-  formatTime,
-  localDate,
-} from "@/lib/format";
 import { confirmBooking } from "./actions";
 import {
   BookingHeader,
   ChoiceSummary,
   type SummaryItem,
 } from "@/components/booking/booking-frame";
-import {
-  MY_APPOINTMENTS_PATH,
-  type BookedAppointment,
-  type ConfirmState,
-} from "./booking-state";
+import { MY_APPOINTMENTS_PATH, type ConfirmState } from "./booking-state";
 
 const textLink =
   "font-semibold text-brand underline underline-offset-4 transition-colors duration-300 ease-standard hover:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none";
@@ -31,8 +20,8 @@ const textLink =
 /**
  * Etapa 5: o resumo, a política de alteração (RN-14) e o botão de confirmar. Sem
  * telefone no perfil, pede o telefone antes (RN-10). Depois de confirmar, a
- * mesma página mostra o resumo do agendamento criado. Sem JS, a Server Action
- * continua funcionando.
+ * Server Action leva à página do horário confirmado. Sem JS, ela continua
+ * funcionando.
  */
 export function ConfirmBooking({
   summary,
@@ -57,16 +46,6 @@ export function ConfirmBooking({
     confirmBooking,
     { status: "idle", phone: "" },
   );
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const success = state.status === "success" ? state.appointment : undefined;
-
-  useEffect(() => {
-    if (success) headingRef.current?.focus();
-  }, [success]);
-
-  if (success)
-    return <Confirmed appointment={success} headingRef={headingRef} />;
-
   return (
     <>
       <BookingHeader step="confirmar" />
@@ -78,6 +57,11 @@ export function ConfirmBooking({
               {state.code === "SLOT_UNAVAILABLE" ? (
                 <Link href={changeTimeHref} className={textLink}>
                   Escolher outro horário
+                </Link>
+              ) : state.code === "APPOINTMENT_LIMIT_REACHED" ? (
+                // RN-11: o caminho é cancelar um dos horários marcados.
+                <Link href={MY_APPOINTMENTS_PATH} className={textLink}>
+                  Ver meus agendamentos
                 </Link>
               ) : null}
             </Alert>
@@ -132,51 +116,5 @@ function SubmitButton() {
     >
       Confirmar agendamento
     </Button>
-  );
-}
-
-/** O agendamento criado, com o link para "Meus agendamentos" (S3.09). */
-function Confirmed({
-  appointment,
-  headingRef,
-}: {
-  appointment: BookedAppointment;
-  headingRef: Ref<HTMLHeadingElement>;
-}) {
-  const date = formatLongDate(localDate(appointment.starts_at));
-  const start = formatTime(appointment.starts_at);
-  return (
-    <>
-      <BookingHeader title="Horário confirmado" headingRef={headingRef} />
-      <div className="mt-8">
-        <Alert
-          tone="success"
-          title={`Seu horário está confirmado para ${date}, às ${start}.`}
-        />
-      </div>
-      <ChoiceSummary
-        items={[
-          { label: "Barbeiro", value: appointment.barber.name },
-          {
-            label: "Serviço",
-            value: `${appointment.service.name} · ${formatDuration(appointment.duration_minutes)}`,
-          },
-          { label: "Dia", value: date },
-          {
-            label: "Horário",
-            value: `${start} às ${formatTime(appointment.ends_at)}`,
-          },
-          { label: "Valor", value: formatPrice(appointment.price) },
-        ]}
-      />
-      <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-        <ButtonLink href={MY_APPOINTMENTS_PATH}>
-          Ver meus agendamentos
-        </ButtonLink>
-        <ButtonLink href="/" variant="ghost">
-          Voltar para o início
-        </ButtonLink>
-      </div>
-    </>
   );
 }

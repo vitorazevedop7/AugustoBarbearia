@@ -210,7 +210,36 @@ def test_rn16_sem_agendamentos_a_lista_vem_vazia(
 
     response = api.get("/me/appointments")
 
-    assert response.json() == {"upcoming": [], "history": []}
+    assert response.json() == {"upcoming": [], "history": [], "can_book": True}
+
+
+@pytest.mark.parametrize(("active", "can_book"), [(1, True), (2, False)])
+def test_rn11_lista_diz_se_o_cliente_ainda_pode_agendar(
+    api: TestClient,
+    db_session: Session,
+    ana: Customer,
+    edvaldo: int,
+    active: int,
+    can_book: bool,
+) -> None:
+    """#155: o web avisa o limite antes das escolhas, sem contar ele mesmo."""
+    for day in range(active):
+        make_appointment(
+            db_session,
+            barber=edvaldo,
+            starts_at=local(2026, 11, 4 + day, 10),
+            customer=ana,
+        )
+    # Cancelado e já concluído não contam (RN-11).
+    make_appointment(
+        db_session,
+        barber=edvaldo,
+        starts_at=local(2026, 11, 6, 10),
+        customer=ana,
+        status=AppointmentStatus.CANCELED,
+    )
+
+    assert api.get("/me/appointments").json()["can_book"] is can_book
 
 
 def test_rn11_agendamento_em_andamento_fica_nos_proximos_sem_acoes(

@@ -4,14 +4,19 @@ import { redirect } from "next/navigation";
 import { createApiClient } from "@/lib/api/client";
 import { getCurrentSession, safeRedirectPath } from "@/lib/session";
 import { apiErrorCode, apiErrorMessage } from "../perfil/profile-state";
-import { confirmUnavailableMessage, type ConfirmState } from "./booking-state";
+import {
+  confirmedHref,
+  confirmUnavailableMessage,
+  type ConfirmState,
+} from "./booking-state";
 
 const TIMEOUT_MS = 5000;
 
 /**
  * Confirma o agendamento pela API, que decide tudo (RN-05 a RN-13). Sem
  * telefone no perfil, o formulário traz o campo, e ele é salvo antes (RN-10).
- * Qualquer recusa volta com o `message` da API.
+ * Qualquer recusa volta com o `message` da API. Deu certo: vai para a página
+ * do horário confirmado, que pode ser recarregada (#155).
  */
 export async function confirmBooking(
   _previous: ConfirmState,
@@ -65,7 +70,7 @@ export async function confirmBooking(
       ? failed()
       : failed(apiErrorMessage(created.error), apiErrorCode(created.error));
   }
-  return { status: "success", phone, appointment: created.data };
+  redirect(confirmedHref(created.data.id));
 }
 
 /**
