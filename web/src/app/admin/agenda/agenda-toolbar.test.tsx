@@ -30,3 +30,25 @@ describe("barra da agenda", () => {
     expect(screen.getByLabelText("Ir para a data")).toHaveValue("2026-11-03");
   });
 });
+
+describe("barra da agenda no celular (#156)", () => {
+  it("as setas mantêm o nome acessível, e o campo de data, o rótulo", () => {
+    render(
+      <AgendaToolbar
+        state={{ data: "2026-11-02", visao: "dia" }}
+        today="2026-11-02"
+        barbers={barbers}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Anterior dia" })).toHaveAttribute(
+      "href",
+      "/admin/agenda?data=2026-11-01",
+    );
+    expect(screen.getByRole("link", { name: "Próximo dia" })).toHaveAttribute(
+      "href",
+      "/admin/agenda?data=2026-11-03",
+    );
+    expect(screen.getByLabelText("Ir para a data")).toHaveValue("2026-11-02");
+  });
+});
