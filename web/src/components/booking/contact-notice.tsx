@@ -19,17 +19,20 @@ export const DEADLINE_TITLE =
 export function ContactNotice({
   shop,
   title = DEADLINE_TITLE,
+  revealOnMount,
   children,
 }: {
   /** `null` quando a vitrine não respondeu: o aviso aparece sem os links. */
   shop: ShopContact | null;
   title?: string;
+  /** Como o `Alert`: depois de uma ação recusada, o aviso recebe o foco. */
+  revealOnMount?: "center" | "top";
   /** O texto antes dos contatos. */
   children?: ReactNode;
 }) {
   const links = shop ? contactLinks(shop) : [];
   return (
-    <Alert tone="warning" title={title}>
+    <Alert tone="warning" title={title} revealOnMount={revealOnMount}>
       {children ? <p>{children}</p> : null}
       {links.length > 0 ? (
         <ul className="mt-1 flex flex-col gap-1">

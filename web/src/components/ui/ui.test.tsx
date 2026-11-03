@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Alert } from "./alert";
 import { StatusBadge } from "./badge";
 import { BarberCard } from "./barber-card";
@@ -101,6 +101,60 @@ describe("Alert", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "Seu horário está confirmado.",
     );
+  });
+});
+
+describe("Alert com revealOnMount (#157)", () => {
+  it("o resultado de um formulário entra na tela e recebe o foco", () => {
+    const scroll = vi.spyOn(Element.prototype, "scrollIntoView");
+    const { rerender } = render(
+      <Alert tone="danger" revealOnMount="center" title="Informe o nome." />,
+    );
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveFocus();
+    expect(scroll).toHaveBeenCalledWith(
+      expect.objectContaining({ block: "center" }),
+    );
+
+    // Outra recusa, com outro texto, anuncia de novo.
+    scroll.mockClear();
+    alert.blur();
+    rerender(
+      <Alert
+        tone="danger"
+        revealOnMount="center"
+        title="Informe o telefone."
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveFocus();
+    expect(scroll).toHaveBeenCalledTimes(1);
+    scroll.mockRestore();
+  });
+
+  it("o aviso de um redirecionamento volta a página ao topo", () => {
+    vi.mocked(window.scrollTo).mockClear();
+
+    render(
+      <Alert
+        tone="success"
+        revealOnMount="top"
+        title="Agendamento cancelado."
+      />,
+    );
+
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: "instant",
+    });
+    expect(screen.getByRole("status")).toHaveFocus();
+  });
+
+  it("sem revealOnMount, não rouba o foco", () => {
+    render(<Alert tone="danger" title="Falhou." />);
+
+    expect(screen.getByRole("alert")).not.toHaveFocus();
+    expect(screen.getByRole("alert")).not.toHaveAttribute("tabindex");
   });
 });
 

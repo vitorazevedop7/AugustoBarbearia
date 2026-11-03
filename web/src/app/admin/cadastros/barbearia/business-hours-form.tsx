@@ -72,12 +72,16 @@ export function BusinessHoursForm({ days }: { days: BusinessHoursDay[] }) {
   return (
     <form action={action} className="flex max-w-2xl flex-col gap-6">
       {state.status === "error" ? (
-        <Alert tone="danger" title={state.message ?? ""}>
+        <Alert tone="danger" revealOnMount="center" title={state.message ?? ""}>
           {state.conflicts ? <Conflicts {...state.conflicts} /> : null}
         </Alert>
       ) : null}
       {state.status === "success" ? (
-        <Alert tone="success" title={state.message ?? ""} />
+        <Alert
+          tone="success"
+          revealOnMount="center"
+          title={state.message ?? ""}
+        />
       ) : null}
       <p className="text-sm text-ink-muted">
         Vale para todos os barbeiros. Os horários oferecidos começam na abertura

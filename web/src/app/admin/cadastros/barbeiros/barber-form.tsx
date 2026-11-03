@@ -33,7 +33,11 @@ export function BarberForm({ barber }: { barber?: Barber }) {
   return (
     <form action={action} className="flex max-w-2xl flex-col gap-6">
       {state.status === "error" ? (
-        <Alert tone="danger" title={state.message ?? ""} />
+        <Alert
+          tone="danger"
+          revealOnMount="center"
+          title={state.message ?? ""}
+        />
       ) : null}
       <TextField
         name="name"

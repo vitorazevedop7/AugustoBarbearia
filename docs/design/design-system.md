@@ -359,6 +359,7 @@ O tom está em [identidade-visual.md](identidade-visual.md#tom). Para a interfac
 - [ ] Um `h1` por página e títulos em ordem.
 - [ ] O conteúdo fica num `main` com `id="main-content"` e `tabIndex={-1}`, o alvo de "Pular para o conteúdo". Vale também para a página não encontrada (`app/not-found.tsx` e `app/admin/not-found.tsx`, #151).
 - [ ] Campos com rótulo; erros ligados ao campo.
+- [ ] Depois de enviar um formulário, a mensagem de erro (ou de sucesso na mesma página) recebe o foco e entra na tela: `Alert` com `revealOnMount="center"`. A página de destino de um redirecionamento com `?aviso=` abre no topo, com o aviso focado: `revealOnMount="top"` (#157).
 - [ ] Imagens com `alt` (ou `alt=""` se forem decorativas).
 - [ ] Funciona sem JS e com `prefers-reduced-motion: reduce`.
 

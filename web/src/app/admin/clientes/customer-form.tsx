@@ -38,7 +38,11 @@ export function CustomerForm({ customer }: { customer?: Customer }) {
   return (
     <form action={action} className="flex max-w-2xl flex-col gap-6">
       {state.status === "error" ? (
-        <Alert tone="danger" title={state.message ?? ""} />
+        <Alert
+          tone="danger"
+          revealOnMount="center"
+          title={state.message ?? ""}
+        />
       ) : null}
       <CustomerFields
         values={values}

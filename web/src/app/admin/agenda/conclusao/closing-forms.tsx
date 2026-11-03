@@ -19,7 +19,7 @@ const initialState: FormState = { status: "idle" };
 
 function ErrorAlert({ state }: { state: FormState }) {
   return state.status === "error" ? (
-    <Alert tone="danger" title={state.message ?? ""} />
+    <Alert tone="danger" revealOnMount="center" title={state.message ?? ""} />
   ) : null;
 }
 

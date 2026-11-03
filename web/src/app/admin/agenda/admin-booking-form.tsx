@@ -51,7 +51,7 @@ export function AdminBookingForm({
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-6">
       {state.status === "error" ? (
-        <Alert tone="danger" title={state.message ?? ""}>
+        <Alert tone="danger" revealOnMount="center" title={state.message ?? ""}>
           {retry && state.code === SLOT_UNAVAILABLE_CODE ? (
             <Link href={retry.href} className={textLink}>
               {retry.label}

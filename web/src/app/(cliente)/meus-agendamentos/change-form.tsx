@@ -44,9 +44,13 @@ export function ChangeForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       {failed && state.code === DEADLINE_CODE ? (
-        <ContactNotice shop={shop} title={state.message} />
+        <ContactNotice
+          shop={shop}
+          title={state.message}
+          revealOnMount="center"
+        />
       ) : failed ? (
-        <Alert tone="danger" title={state.message ?? ""}>
+        <Alert tone="danger" revealOnMount="center" title={state.message ?? ""}>
           {retry ? (
             <Link href={retry.href} className={textLink}>
               {retry.label}

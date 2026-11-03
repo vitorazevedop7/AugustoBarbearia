@@ -24,10 +24,10 @@ export function ProfileForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       {state.status === "error" && state.message ? (
-        <Alert tone="danger" title={state.message} />
+        <Alert tone="danger" revealOnMount="center" title={state.message} />
       ) : null}
       {state.status === "success" && state.message ? (
-        <Alert tone="success" title={state.message} />
+        <Alert tone="success" revealOnMount="center" title={state.message} />
       ) : null}
       <TextField
         label="Nome"

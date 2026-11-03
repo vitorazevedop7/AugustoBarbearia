@@ -27,7 +27,11 @@ export function RemoveTimeBlockForm({
   return (
     <form action={action} className="flex flex-col gap-6">
       {state.status === "error" ? (
-        <Alert tone="danger" title={state.message ?? ""} />
+        <Alert
+          tone="danger"
+          revealOnMount="center"
+          title={state.message ?? ""}
+        />
       ) : null}
       {Object.entries(fields).map(([name, value]) => (
         <input key={name} type="hidden" name={name} value={value} />

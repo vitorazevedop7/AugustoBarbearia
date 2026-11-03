@@ -49,7 +49,7 @@ export default async function MyAppointmentsPage({
     <MyAppointmentsFrame>
       {notice ? (
         <div className="mb-10">
-          <Alert tone="success" title={NOTICES[notice]} />
+          <Alert tone="success" revealOnMount="top" title={NOTICES[notice]} />
         </div>
       ) : null}
       {upcoming.length === 0 && history.length === 0 ? (
