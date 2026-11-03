@@ -51,6 +51,9 @@ class AdminAppointmentResponse(BaseModel):
     # RN-33: quando e quem cancelou; `null` se não foi cancelado.
     canceled_at: datetime | None
     canceled_by: CanceledBy | None
+    # RN-14 e RN-33: o cliente cancelou nas 2 horas antes do início (em cima
+    # da hora). O cancelamento da administração nunca é marcado.
+    canceled_late: bool
     # RN-33: quando e por quem (e-mail da administração) foi concluído ou marcado
     # como falta; `null` nos outros status.
     closed_at: datetime | None

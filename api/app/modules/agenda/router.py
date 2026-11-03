@@ -20,6 +20,7 @@ from app.modules.agenda.schemas import (
     AgendaResponse,
     AgendaService,
 )
+from app.modules.appointments.service import is_late_cancellation
 from app.modules.barbers.models import Barber
 from app.modules.payments.schemas import PaymentResponse
 
@@ -66,6 +67,7 @@ def to_response(entry: service.AgendaEntry) -> AdminAppointmentResponse:
         duration_minutes=appointment.duration_minutes,
         canceled_at=_local(appointment.canceled_at),
         canceled_by=appointment.canceled_by,
+        canceled_late=is_late_cancellation(appointment),
         closed_at=_local(appointment.closed_at),
         closed_by=appointment.closed_by,
         payment=(

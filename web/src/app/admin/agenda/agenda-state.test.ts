@@ -5,6 +5,7 @@ import {
   agendaPeriod,
   appointmentHref,
   appointmentId,
+  canceledAhead,
   formatWeekRange,
   openingLabel,
   parseAgendaParams,
@@ -119,5 +120,16 @@ describe("estado da agenda na URL", () => {
     expect(appointmentId("12")).toBe(12);
     expect(appointmentId("0")).toBeNull();
     expect(appointmentId("1e3")).toBeNull();
+  });
+});
+
+describe("quanto antes o cliente cancelou (RN-33)", () => {
+  it.each([
+    ["2026-11-03T13:30:00-03:00", "30 min"],
+    ["2026-11-03T13:00:00-03:00", "1 h"],
+    ["2026-11-03T12:40:00-03:00", "1 h 20 min"],
+    ["2026-11-03T13:59:30-03:00", "menos de 1 min"],
+  ])("cancelado em %s → %s antes das 14:00", (canceledAt, text) => {
+    expect(canceledAhead("2026-11-03T14:00:00-03:00", canceledAt)).toBe(text);
   });
 });

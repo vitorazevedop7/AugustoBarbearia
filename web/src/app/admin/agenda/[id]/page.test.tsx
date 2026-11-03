@@ -139,6 +139,26 @@ describe("detalhe do agendamento — /admin/agenda/[id]", () => {
     ).toHaveAttribute("href", "/admin/agenda?data=2026-11-03");
   });
 
+  it("cancelamento do cliente em cima da hora diz quanto antes foi (RN-33)", async () => {
+    GET.mockResolvedValue({
+      data: adminAppointment({
+        status: "CANCELED",
+        canceled_at: "2026-11-03T08:40:00-03:00",
+        canceled_by: "CUSTOMER",
+        canceled_late: true,
+      }),
+      response: { status: 200 },
+    });
+
+    await renderPage("7");
+
+    expect(
+      screen.getByText(
+        "Cancelado pelo cliente em cima da hora, 1 h 20 min antes do horário.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("agendamento ativo tem Remarcar e Cancelar, e o aviso da ação (RN-22)", async () => {
     GET.mockResolvedValue({
       data: adminAppointment(),

@@ -8,7 +8,11 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.modules.appointments.models import AppointmentSource, AppointmentStatus
+from app.modules.appointments.models import (
+    AppointmentSource,
+    AppointmentStatus,
+    CanceledBy,
+)
 from app.modules.barbers.models import Barber
 from app.modules.customers.models import Customer
 from tests.factories import (
@@ -292,12 +296,51 @@ def test_detalhe_do_agendamento(
         # A fábrica cancela um dia antes do início, pelo cliente (RN-33).
         "canceled_at": "2026-11-02T14:30:00-03:00",
         "canceled_by": "CUSTOMER",
+        "canceled_late": False,
         "closed_at": None,
         "closed_by": None,
         "payment": None,
     }
     listed = agenda(admin, start="2026-11-03", end="2026-11-03")
     assert listed["appointments"] == [response.json()]
+
+
+@pytest.mark.parametrize(
+    ("canceled_before", "by", "late"),
+    [
+        (timedelta(minutes=30), CanceledBy.CUSTOMER, True),
+        (timedelta(hours=1, minutes=59), CanceledBy.CUSTOMER, True),
+        (timedelta(hours=2), CanceledBy.CUSTOMER, False),
+        (timedelta(hours=3), CanceledBy.CUSTOMER, False),
+        (timedelta(minutes=30), CanceledBy.ADMIN, False),
+    ],
+)
+def test_rn33_agenda_marca_cancelamento_do_cliente_em_cima_da_hora(
+    admin: TestClient,
+    db_session: Session,
+    barbers: dict[str, int],
+    canceled_before: timedelta,
+    by: CanceledBy,
+    late: bool,
+) -> None:
+    """#142 (RN-14, RN-33): só o cancelamento do cliente nas 2 horas antes do
+    início é marcado; o da administração, nunca."""
+    starts_at = local(2026, 11, 3, 14)
+    appointment = make_appointment(
+        db_session,
+        barber=barbers["Lauro"],
+        starts_at=starts_at,
+        status=AppointmentStatus.CANCELED,
+    )
+    appointment.canceled_at = starts_at - canceled_before
+    appointment.canceled_by = by
+    db_session.flush()
+
+    detail = admin.get(f"/admin/appointments/{appointment.id}").json()
+    [listed] = agenda(admin, start="2026-11-03", end="2026-11-03")["appointments"]
+
+    assert detail["canceled_late"] is late
+    assert listed["canceled_late"] is late
 
 
 def test_detalhe_traz_a_origem_da_administracao(

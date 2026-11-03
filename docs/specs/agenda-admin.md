@@ -21,7 +21,7 @@ Administração. O cliente e o visitante não acessam (RN-70).
 - RN-02 — Horário de funcionamento (a moldura de cada dia)
 - RN-30 — Status (todos aparecem, com texto)
 - RN-13 — Preço e duração congelados (a agenda mostra os valores do agendamento)
-- RN-33 — Rastreabilidade (quem cancelou e quando, no detalhe)
+- RN-33 — Rastreabilidade (quem cancelou e quando, no detalhe; o cancelamento do cliente em cima da hora, #142)
 - RN-70 — Perfis e permissões
 - RN-71 — Acesso à administração
 
@@ -38,7 +38,7 @@ Administração. O cliente e o visitante não acessam (RN-70).
 **CA-1 — Agendamentos do período (RN-01, RN-30)**
 - **Dado** agendamentos dos três barbeiros em vários dias e status
 - **Quando** a administração chama `GET /admin/appointments?start=2026-11-02&end=2026-11-08`
-- **Então** a API responde `200` com `start`, `end`, `days` (um por data do período, com `date`, `opens_at` e `closes_at`), `barbers` (como em "Definições") e `appointments`: todos os agendamentos que começam no período, em todos os status, por início, nome do barbeiro e id. Cada um traz `id`, `status`, `source`, `starts_at` e `ends_at` (`-03:00`), `price`, `duration_minutes`, `customer` (`id`, `name`, `phone`, `email`), `barber` (`id`, `name`), `service` (`id`, `name`), `canceled_at` e `canceled_by`.
+- **Então** a API responde `200` com `start`, `end`, `days` (um por data do período, com `date`, `opens_at` e `closes_at`), `barbers` (como em "Definições") e `appointments`: todos os agendamentos que começam no período, em todos os status, por início, nome do barbeiro e id. Cada um traz `id`, `status`, `source`, `starts_at` e `ends_at` (`-03:00`), `price`, `duration_minutes`, `customer` (`id`, `name`, `phone`, `email`), `barber` (`id`, `name`), `service` (`id`, `name`), `canceled_at`, `canceled_by` e `canceled_late` (o cliente cancelou nas 2 horas antes do início; RN-14, RN-33, #142).
 
 **CA-2 — Filtro por barbeiro**
 - **Dado** o mesmo cenário
@@ -64,7 +64,7 @@ Administração. O cliente e o visitante não acessam (RN-70).
 
 **CA-7 — Tela `/admin/agenda`, visão do dia**
 - **Dado** a administração em `/admin/agenda`, sem parâmetros
-- **Então** vê o dia de hoje (São Paulo), com o título da data por extenso e o horário de funcionamento do dia ("Fechado" se for o caso), e uma seção por barbeiro (`h2` com o nome) com os agendamentos em ordem de início. Cada agendamento mostra o horário de início e fim, o cliente, o serviço e o `StatusBadge` (texto, não só cor) e é um link para o detalhe. Barbeiro sem agendamentos mostra "Nenhum agendamento".
+- **Então** vê o dia de hoje (São Paulo), com o título da data por extenso e o horário de funcionamento do dia ("Fechado" se for o caso), e uma seção por barbeiro (`h2` com o nome) com os agendamentos em ordem de início. Cada agendamento mostra o horário de início e fim, o cliente, o serviço e o `StatusBadge` (texto, não só cor) e é um link para o detalhe. Com `canceled_late`, o cartão (no dia e na semana) ganha a etiqueta `warning` "Em cima da hora" ao lado de "Cancelado". Barbeiro sem agendamentos mostra "Nenhum agendamento".
 - Em 360px, as seções ficam uma embaixo da outra (uma lista por barbeiro); a partir de `lg`, os barbeiros ficam lado a lado.
 
 **CA-8 — Visão da semana**
@@ -110,6 +110,12 @@ flowchart LR
 - Módulo novo `app/modules/agenda/` (`router.py`, `schemas.py`, `service.py`). Ele fica acima de `appointments`, `barbers`, `catalog`, `customers` e `shop`, pelo mesmo motivo do `booking`: `appointments` não pode importar `barbers` (`barbers` já depende de `appointments` pela RN-60).
 - As datas entram como datas locais (`AAAA-MM-DD`) e viram instantes de São Paulo no `service.py`; as respostas saem em `-03:00` (RN-01).
 - Leitura só: nenhuma rota desta issue altera o banco.
+
+## Cancelamento do cliente em cima da hora (#142)
+Com a D16 (#141), o cliente cancela até o início. A administração precisa ver quando o cancelamento foi em cima da hora: para entender por que o horário ficou vago e para reconhecer quem faz isso com frequência. A regra é a mesma do cliente e mora na API (`is_late_cancellation`, `appointments/service.py`): `canceled_by = CUSTOMER` e `canceled_at` depois de `starts_at − 2h`. O cancelamento da administração nunca é marcado, porque quem decide é ela. Não há migração: `canceled_at`, `canceled_by` e `starts_at` já existiam (RN-33).
+- **Detalhe:** no lugar de "Cancelado pelo cliente em <data>.", "Cancelado pelo cliente em cima da hora, 30 min antes do horário." (com 1 hora ou mais, "1 h 20 min antes"). A conta dos minutos é só para o texto (`canceledAhead`, `agenda-state.ts`).
+- **Dia e semana:** a etiqueta "Em cima da hora" junto do status.
+- Fora do escopo: contar os cancelamentos tardios de cada cliente em `/admin/clientes`, avisar a administração por e-mail e marcar remarcações em cima da hora (não há data da remarcação no agendamento).
 
 ## Fora do escopo desta spec
 - Bloqueios e folgas (S5.04, #96): entraram pelos pontos de extensão acima, com rota própria (`GET /admin/time-blocks`), em [bloqueios.md](bloqueios.md).

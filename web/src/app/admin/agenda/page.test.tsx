@@ -73,8 +73,9 @@ describe("agenda da administração — /admin/agenda", () => {
             service: { id: 1, name: "Corte Simples" },
             starts_at: "2026-11-03T14:00:00-03:00",
             ends_at: "2026-11-03T14:30:00-03:00",
-            canceled_at: "2026-11-02T10:00:00-03:00",
+            canceled_at: "2026-11-03T13:30:00-03:00",
             canceled_by: "CUSTOMER",
+            canceled_late: true,
           }),
         ],
       }),
@@ -108,6 +109,11 @@ describe("agenda da administração — /admin/agenda", () => {
 
     const lauro = screen.getByRole("region", { name: "Lauro" });
     expect(within(lauro).getByRole("link")).toHaveTextContent("Cancelado");
+    // RN-33: o cliente cancelou 30 minutos antes.
+    expect(within(lauro).getByRole("link")).toHaveTextContent(
+      "Em cima da hora",
+    );
+    expect(item).not.toHaveTextContent("Em cima da hora");
     expect(
       within(screen.getByRole("region", { name: "Manoel" })).getByText(
         "Nenhum agendamento.",
