@@ -106,6 +106,10 @@ def test_rn61_cria_servico_ativo_com_os_barbeiros(admin: TestClient) -> None:
         ("0", "0.00"),
         (30, "30.00"),
         ("25.50", "25.50"),
+        ("25.5", "25.50"),
+        ("1.000,00", "1000.00"),
+        ("1000,00", "1000.00"),
+        ("1.000.000,00", "1000000.00"),
         ("99999999.99", "99999999.99"),
     ],
 )
@@ -460,3 +464,46 @@ def test_rn63_migracao_liga_os_proprietarios_mesmo_renomeados(
         for service in ("Corte + Barba", "Corte Simples")
         for barber_id in owner_ids
     ]
+
+
+@pytest.mark.parametrize(
+    "price",
+    [
+        "1.000",
+        "1.500",
+        "25.5000",
+        "1,000.00",
+        "1e3",
+        "٣",
+        "1.234",
+        "25,505",
+        "1.00,00",
+        "",
+        "R$ 25",
+    ],
+)
+@pytest.mark.parametrize("method", ["post", "patch"])
+def test_rn61_formato_que_mudaria_o_valor_e_recusado(
+    admin: TestClient, price: str, method: str
+) -> None:
+    """#146: "1.000" é mil em pt-BR, mas viraria R$ 1,00. Tudo o que muda o
+    valor em silêncio é recusado com a mensagem dos formatos aceitos."""
+    path = "/admin/services"
+    payload = new_service(admin, price=price)
+    if method == "patch":
+        existing = create(admin)
+        path = f"{path}/{existing['id']}"
+        payload = {"price": price}
+    before = admin.get("/admin/services").json()
+
+    response = admin.request(method, path, json=payload)
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "code": "VALIDATION_ERROR",
+        "message": (
+            "Informe o valor em reais com até duas casas decimais, "
+            "como 25, 25,50 ou 1.000,00."
+        ),
+    }
+    assert admin.get("/admin/services").json() == before

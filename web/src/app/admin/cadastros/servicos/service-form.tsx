@@ -83,7 +83,7 @@ export function ServiceForm({
           inputMode="decimal"
           autoComplete="off"
           className="tabular-nums"
-          hint="Em reais, como 25,00."
+          hint="Em reais, como 25,00 ou 1.000,00."
           defaultValue={value("price")}
         />
         <TextField

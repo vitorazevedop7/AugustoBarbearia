@@ -30,7 +30,7 @@ describe("ServiceForm — RN-61", () => {
       "decimal",
     );
     expect(screen.getByLabelText("Preço")).toHaveAccessibleDescription(
-      "Em reais, como 25,00.",
+      "Em reais, como 25,00 ou 1.000,00.",
     );
     expect(screen.getByLabelText("Duração")).toHaveAttribute("type", "number");
     expect(screen.getByLabelText("Duração")).toHaveAttribute("step", "5");

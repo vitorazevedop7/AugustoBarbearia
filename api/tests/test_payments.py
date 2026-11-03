@@ -163,6 +163,7 @@ def test_rn40_rn33_conclui_com_o_valor_padrao_do_preco_congelado(
         ("30.00", "30.00"),
         ("30,00", "30.00"),
         ("1.234,50", "1234.50"),
+        ("1.000,00", "1000.00"),
         ("0", "0.00"),
         ("0,00", "0.00"),
         (0, "0.00"),
@@ -751,3 +752,20 @@ def test_rn31_duas_conclusoes_simultaneas_so_uma_vale(
     # Se a conclusão venceu, há um pagamento; se a falta venceu, nenhum.
     assert (status, payments) in {("COMPLETED", 1), ("NO_SHOW", 0)}
     assert (status == "COMPLETED") == (payments == 1)
+
+
+@pytest.mark.parametrize("amount", ["1.000", "25.5000", "1,000.00", "1e3", "٣"])
+def test_rn40_valor_que_mudaria_em_silencio_e_recusado(
+    api: TestClient, db_session: Session, edvaldo: int, amount: str
+) -> None:
+    """#146: o valor do pagamento usa o mesmo formato do preço do serviço."""
+    appointment = scheduled(db_session, edvaldo)
+
+    response = complete(api, appointment.id, method="PIX", amount=amount)
+
+    assert response.status_code == 422
+    assert response.json()["message"] == (
+        "Informe o valor em reais com até duas casas decimais, "
+        "como 25, 25,50 ou 1.000,00."
+    )
+    assert payment_of(db_session, appointment.id) is None
