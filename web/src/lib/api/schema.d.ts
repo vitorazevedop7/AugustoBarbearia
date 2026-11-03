@@ -803,6 +803,8 @@ export interface components {
             /** Canceled At */
             canceled_at: string | null;
             canceled_by: components["schemas"]["CanceledBy"] | null;
+            /** Canceled Late */
+            canceled_late: boolean;
             /** Closed At */
             closed_at: string | null;
             /** Closed By */
@@ -839,6 +841,8 @@ export interface components {
             /** Canceled At */
             canceled_at: string | null;
             canceled_by: components["schemas"]["CanceledBy"] | null;
+            /** Canceled Late */
+            canceled_late: boolean;
             /** Closed At */
             closed_at: string | null;
             /** Closed By */

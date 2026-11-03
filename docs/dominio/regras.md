@@ -91,7 +91,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-32 — Liberação da vaga.** Quando um agendamento sai de `AGENDADO`, o horário dele volta a ficar disponível na hora. *Origem: padrão adotado.*
 
-**RN-33 — Rastreabilidade.** O sistema registra quem cancelou (cliente ou administração) e quando, e quem concluiu ou marcou falta. *Origem: padrão adotado.*
+**RN-33 — Rastreabilidade.** O sistema registra quem cancelou (cliente ou administração) e quando, e quem concluiu ou marcou falta. A agenda marca o cancelamento feito pelo cliente nas 2 horas antes do início (em cima da hora, RN-14); o da administração não é marcado. *Origem: padrão adotado; D16 (#142).*
 
 ## 5. Financeiro
 

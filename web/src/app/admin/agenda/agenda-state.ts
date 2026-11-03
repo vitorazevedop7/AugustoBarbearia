@@ -134,3 +134,19 @@ export const SOURCE_LABELS: Record<AgendaAppointment["source"], string> = {
   ONLINE: "Online",
   ADMIN: "Administração",
 };
+
+/**
+ * Quanto antes do horário o cliente cancelou, para o detalhe da agenda: "30
+ * min", "1 h" ou "1 h 20 min". Quem decide se foi em cima da hora é a API
+ * (`canceled_late`, RN-14 e RN-33); aqui só a conta para o texto.
+ */
+export function canceledAhead(startsAt: string, canceledAt: string): string {
+  const minutes = Math.floor(
+    (Date.parse(startsAt) - Date.parse(canceledAt)) / 60_000,
+  );
+  if (minutes < 1) return "menos de 1 min";
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${minutes} min`;
+  return rest === 0 ? `${hours} h` : `${hours} h ${rest} min`;
+}

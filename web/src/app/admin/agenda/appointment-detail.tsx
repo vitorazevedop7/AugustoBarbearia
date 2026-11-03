@@ -8,7 +8,11 @@ import {
   formatTime,
   localDate,
 } from "@/lib/format";
-import { SOURCE_LABELS, type AgendaAppointment } from "./agenda-state";
+import {
+  canceledAhead,
+  SOURCE_LABELS,
+  type AgendaAppointment,
+} from "./agenda-state";
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -86,7 +90,17 @@ export function AppointmentDetail({
           <Row label="E-mail">{customer.email ?? "Não informado"}</Row>
         </dl>
       </section>
-      {appointment.status === "CANCELED" && appointment.canceled_at ? (
+      {appointment.status === "CANCELED" &&
+      appointment.canceled_at &&
+      appointment.canceled_late ? (
+        // RN-14 e RN-33: para entender o horário vago e reconhecer quem
+        // costuma cancelar assim.
+        <p className="text-sm text-ink-muted">
+          Cancelado pelo cliente em cima da hora,{" "}
+          {canceledAhead(appointment.starts_at, appointment.canceled_at)} antes
+          do horário.
+        </p>
+      ) : appointment.status === "CANCELED" && appointment.canceled_at ? (
         <p className="text-sm text-ink-muted">
           Cancelado{" "}
           {appointment.canceled_by === "CUSTOMER"

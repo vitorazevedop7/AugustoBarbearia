@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { StatusBadge } from "@/components/ui/badge";
+import { Badge, StatusBadge } from "@/components/ui/badge";
 import { formatTime } from "@/lib/format";
 import type { AgendaAppointment } from "./agenda-state";
 
@@ -31,7 +31,13 @@ export function AgendaItem({
             {formatTime(appointment.starts_at)}–
             {formatTime(appointment.ends_at)}
           </span>
-          <StatusBadge status={appointment.status} />
+          <span className="flex flex-wrap items-center gap-1.5">
+            {appointment.canceled_late ? (
+              // RN-14 e RN-33: cancelado pelo cliente nas 2 horas antes.
+              <Badge tone="warning">Em cima da hora</Badge>
+            ) : null}
+            <StatusBadge status={appointment.status} />
+          </span>
         </span>
         <span className="font-semibold text-ink wrap-anywhere">
           {appointment.customer.name}
