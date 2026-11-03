@@ -76,6 +76,8 @@ Administração. O cliente e o visitante não acessam (RN-70).
 - Links "Dia" e "Semana" trocam a visão; links "Todos" e um por barbeiro (os ativos, mais o escolhido se estiver inativo) trocam o filtro. O escolhido tem `aria-current`.
 - Um formulário `GET` com um campo de data ("Ir para a data") leva a qualquer dia, mantendo a visão e o barbeiro. O campo sempre mostra o dia da agenda: depois de "Anterior", "Hoje" ou "Próximo", uma data digitada e não enviada é descartada (#153).
 - Tudo é link ou formulário `GET`: funciona sem JS.
+- **No celular** (abaixo de `sm`, #156), a barra fica compacta para o primeiro agendamento do dia aparecer sem rolar em 375×812: "Anterior" e "Próximo" viram setas (o nome acessível continua "Anterior dia"/"Próximo semana"), período e visão ficam na mesma linha, os filtros de barbeiro ficam mais estreitos, o rótulo "Ir para a data" fica só para o leitor de tela e "Novo agendamento" e "Bloquear horário" ficam lado a lado. No desktop, nada muda.
+- As abas da administração rolam na horizontal no celular, e a borda direita esmaece para mostrar que há mais abas.
 
 **CA-10 — Detalhe na tela**
 - O link de um agendamento leva a `/admin/agenda/{id}`, com o estado da agenda na URL. A página mostra serviço, status, dia, horário e duração, barbeiro, valor, origem ("Online" ou "Administração"), o cliente com nome, telefone (link `tel:`) e e-mail, e, se cancelado, quando e por quem (RN-33). "Voltar para a agenda" volta para a mesma visão.

@@ -22,7 +22,10 @@ export function AdminNav() {
   const pathname = usePathname();
   return (
     <nav aria-label="Administração" className="border-b border-line bg-surface">
-      <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 sm:px-6 lg:px-8">
+      {/* No celular as abas não cabem: elas rolam na horizontal, e a borda
+          direita esmaece para indicar que há mais (#156). O espaço extra no
+          fim deixa a última aba sair do esmaecimento. */}
+      <ul className="mx-auto flex max-w-7xl gap-2 overflow-x-auto pr-12 pl-4 [mask-image:linear-gradient(to_right,black_calc(100%-3rem),transparent)] sm:px-6 sm:[mask-image:none] lg:px-8">
         {items.map(({ href, label }) => {
           const current = isCurrent(pathname, href);
           return (
