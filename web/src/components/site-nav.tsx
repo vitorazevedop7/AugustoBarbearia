@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /** Páginas da vitrine no cabeçalho. "Contato" é a seção do fim da página inicial. */
-export const siteLinks = [
+export const siteLinks: SiteLink[] = [
   { href: "/servicos", label: "Serviços" },
   { href: "/barbeiros", label: "Barbeiros" },
   { href: "/#contato", label: "Contato" },
@@ -16,7 +16,8 @@ const focus =
 const layouts = {
   row: {
     list: "flex items-center gap-6",
-    link: `inline-flex min-h-11 items-center border-b-2 text-sm font-semibold text-surface hover:border-b-brand focus-visible:outline-offset-4 ${focus}`,
+    // Sem quebra: em 1024px, a vitrine e "Meus agendamentos" ainda cabem na linha.
+    link: `inline-flex min-h-11 items-center border-b-2 text-sm font-semibold whitespace-nowrap text-surface hover:border-b-brand focus-visible:outline-offset-4 ${focus}`,
     current: "border-b-brand",
     idle: "border-b-transparent",
   },
@@ -28,14 +29,27 @@ const layouts = {
   },
 };
 
-/** Links da vitrine, sobre o cabeçalho escuro. A página atual ganha `aria-current` e um traço em `brand`. */
-export function SiteNav({ layout }: { layout: "row" | "column" }) {
+export type SiteLink = { href: string; label: string };
+
+/**
+ * Links sobre o cabeçalho escuro: a vitrine ("Principal") ou, com `links`, as
+ * áreas da conta. A página atual ganha `aria-current` e um traço em `brand`.
+ */
+export function SiteNav({
+  layout,
+  links = siteLinks,
+  label = "Principal",
+}: {
+  layout: "row" | "column";
+  links?: SiteLink[];
+  label?: string;
+}) {
   const pathname = usePathname();
   const { list, link, current, idle } = layouts[layout];
   return (
-    <nav aria-label="Principal">
+    <nav aria-label={label}>
       <ul className={list}>
-        {siteLinks.map(({ href, label }) => {
+        {links.map(({ href, label }) => {
           const isCurrent = href === pathname;
           return (
             <li key={href}>

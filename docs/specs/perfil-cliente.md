@@ -104,7 +104,7 @@ Sem JavaScript, o formulário continua funcionando. O campo de telefone usa `typ
 - O cadastro de cliente pela administração: [cadastro-clientes.md](cadastro-clientes.md) (S5.02). Lá também está a regra de que a administração não altera o e-mail de quem já vinculou a conta Google.
 - Pedir o telefone dentro do fluxo de agendamento (RN-10): entra com o agendamento.
 - Atualizar o nome ou o e-mail do cadastro quando eles mudam no Google.
-- Link para o perfil no cabeçalho e exclusão dos dados (RN-72).
+- Exclusão dos dados (RN-72). O link "Perfil" no cabeçalho entrou na #143 (ver o `SiteHeader` no [design system](../design/design-system.md)).
 
 ## Dúvidas em aberto
 Nenhuma.

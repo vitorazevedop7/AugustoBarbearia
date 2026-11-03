@@ -231,6 +231,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 ### Cabeçalho
 
 - **`SiteHeader`** fica no layout raiz e é sempre escuro: o logo no círculo `surface` (o PNG só funciona sobre o claro, P1), o nome em Barlow 900, a navegação em `surface` com o traço `brand` na página atual, a conta (`outline-light` e `ghost-light`) e o "Agendar" (`primary`, `sm`). Tem 80px de altura e segue o container da vitrine.
+- **A conta leva à área de cada um** (#143). O papel vem de `GET /me`, no `Suspense` da conta: o cliente vê "Meus agendamentos" e "Perfil", e a administração vê "Administração", numa `nav` "Sua conta" no mesmo estilo da navegação (linha no desktop, coluna no menu do celular). No desktop, o "Olá, Nome" sai da linha para caber em 1024px, e os links não quebram; no menu do celular, ele fica junto do "Sair". Sem resposta da API, a conta fica só com o nome e o "Sair".
 - **Não é fixo**, como no Beard X: em todas as páginas, ele rola com a página, e quem rola o deixa para trás (decisão de 2026-11-01, #116). Por isso as seções com âncora (`#contato`) não precisam de `scroll-margin`.
 - **`HeaderFrame`** decide o modo pela página (`data-mode`), sem depender de JS:
 

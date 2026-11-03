@@ -87,7 +87,7 @@ A ordem do fluxo é **barbeiro → serviço → dia → horário → confirmar**
 - **Dado** um visitante sem sessão
 - **Quando** chega à confirmação (`hora` escolhida)
 - **Então** o servidor leva a `/entrar?voltar=<a URL completa da confirmação>`. Depois do Google, ele volta para a confirmação com tudo escolhido.
-- A administração logada que chega à confirmação vai para `/admin` (RN-70).
+- A administração logada que chega à confirmação vê o resumo e o aviso "Você entrou com a conta da administração.", sem o botão de confirmar, e o botão "Agendar para um cliente", que abre o "Novo agendamento" da agenda (`/admin/agenda/novo`) com o mesmo barbeiro, serviço, dia e horário (RN-70, #143).
 
 **CA-11 — Telefone na confirmação (RN-10)**
 - **Dado** um cliente sem telefone (`has_phone` = `false` em `GET /me`)
