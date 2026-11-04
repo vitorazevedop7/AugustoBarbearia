@@ -238,6 +238,16 @@ docker compose exec api uv run pytest tests/test_business_hours_appointments.py
 
 Salvar o horário de funcionamento (`PUT /admin/business-hours`) que deixe algum agendamento `SCHEDULED` com início futuro fora do novo expediente é recusado por inteiro com `409 BUSINESS_HOURS_CONFLICT` (RN-02, D13). Só contam os dias que mudam, e a recusa traz `appointments` (até 20) e `total` além de `code` e `message` (D15, #124; `DomainError(..., extra=)` acrescenta campos ao corpo); a tela lista cada agendamento com link para `/admin/agenda/[id]` e mantém o que foi enviado. `update_business_hours` (`shop/service.py`) trava os sete dias de `BusinessHours` em ordem com `FOR UPDATE` antes de conferir os agendamentos, e `ensure_slot_available` trava o dia da reserva com `FOR SHARE` e o relê (`get_business_hours(..., lock=True)`), para criar, remarcar e editar o expediente se ordenarem. A trava do cliente na criação pelo site é `FOR NO KEY UPDATE`, para não fechar um deadlock com a reserva da administração e a edição. Os testes de concorrência usam transações reais e apagam o que gravaram. A [spec](docs/specs/barbearia-horarios.md) documenta as regras e as decisões.
 
+### Demonstração no notebook — #184
+
+```bash
+scripts/demo.sh up       # sobe a demonstração, mostra o link público e mantém o Mac acordado
+scripts/demo.sh reset    # apaga o banco da demonstração; a próxima subida recria os dados fictícios
+docker compose exec api uv run pytest tests/test_seed_demo.py
+```
+
+A demonstração da apresentação (ADR 0010) é o `docker-compose.demo.yml`: projeto `augusto-demo`, banco `augusto_demo`, `api` e `web` nos estágios de produção dos Dockerfiles, o web em `http://localhost:3001` e um Cloudflare Tunnel gratuito (`tunnel`) com link `https://*.trycloudflare.com`, que muda a cada reinício. O script sobe o túnel antes e grava o link em `DEMO_URL` no `.env.demo` (criado do `.env.demo.example` e do `.env`, fora do git). O serviço `setup` roda o Alembic e `python -m app.jobs.seed_demo`, que cria clientes sem e-mail e duas semanas de agenda em volta de hoje. Ele **recusa** banco cujo nome não termina em `_demo` e não faz nada se já há agendamentos. Novas tabelas ou constraints que os dados fictícios precisem respeitar entram em `seed_demo.py` e no teste. A [spec](docs/specs/demonstracao-local.md) tem o roteiro do ensaio e do dia.
+
 ### Deploy de produção na Railway — #32
 
 ```bash

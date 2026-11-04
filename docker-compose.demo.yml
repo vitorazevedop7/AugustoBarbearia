@@ -1,0 +1,118 @@
+# Demonstração no notebook, aberta pelo celular por um túnel (ADR 0010, #184).
+# Uso: scripts/demo.sh up. O roteiro está em docs/specs/demonstracao-local.md.
+#
+# Projeto separado do de desenvolvimento: banco próprio, imagens de produção
+# (os estágios finais dos Dockerfiles, os mesmos que vão para a Railway) e o
+# web em http://localhost:3001, para não brigar com o `docker compose up`.
+name: augusto-demo
+
+# A imagem da API é construída pelo serviço `api` e reaproveitada pelo `setup`.
+x-api: &api
+  image: augusto-demo-api
+  environment:
+    DATABASE_URL: postgresql://augusto:augusto@db:5432/augusto_demo
+    ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+    AUTH_JWKS_URL: http://web:3000/api/auth/jwks
+    AUTH_ISSUER: ${DEMO_URL:?rode scripts/demo.sh up}
+    AUTH_AUDIENCE: ${DEMO_URL:?rode scripts/demo.sh up}
+    RESEND_API_KEY: ${RESEND_API_KEY:-}
+    EMAIL_FROM: ${EMAIL_FROM:-}
+    WEB_BASE_URL: ${DEMO_URL:?rode scripts/demo.sh up}
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: augusto
+      POSTGRES_PASSWORD: augusto
+      POSTGRES_DB: augusto_demo
+    volumes:
+      - demo-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U augusto -d augusto_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Migrações do Alembic e dados fictícios, uma vez a cada subida. O comando
+  # dos dados não faz nada se o banco já os tem.
+  setup:
+    <<: *api
+    pull_policy: never
+    command:
+      ["sh", "-c", "alembic upgrade head && python -m app.jobs.seed_demo"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    <<: *api
+    build:
+      context: ./api
+      target: runtime
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # Tabelas do Better Auth. A imagem de produção do web não tem a CLI, então
+  # roda no estágio de desenvolvimento, com o código por volume, como no
+  # compose de desenvolvimento.
+  auth-migrate:
+    build:
+      context: ./web
+      target: dev
+    image: augusto-demo-web-dev
+    command: ["pnpm", "auth:migrate"]
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgresql://augusto:augusto@db:5432/augusto_demo
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      target: runner
+    image: augusto-demo-web
+    environment:
+      DATABASE_URL: postgresql://augusto:augusto@db:5432/augusto_demo
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?preencha o .env.demo}
+      BETTER_AUTH_URL: ${DEMO_URL:?rode scripts/demo.sh up}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      AUTH_ISSUER: ${DEMO_URL:?rode scripts/demo.sh up}
+      AUTH_AUDIENCE: ${DEMO_URL:?rode scripts/demo.sh up}
+      API_INTERNAL_URL: http://api:8000
+    ports:
+      - "127.0.0.1:3001:3000"
+    # O web só sobe com a API pronta: antes disso, a vitrine abriria sem
+    # serviços nem barbeiros.
+    depends_on:
+      api:
+        condition: service_healthy
+      auth-migrate:
+        condition: service_completed_successfully
+
+  # Cloudflare Tunnel gratuito: publica o web num https://<nome>.trycloudflare.com,
+  # que aparece no log. O endereço muda toda vez que este serviço reinicia.
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.1
+    command: ["tunnel", "--no-autoupdate", "--url", "http://web:3000"]
+    restart: "no"
+
+volumes:
+  demo-db-data:
