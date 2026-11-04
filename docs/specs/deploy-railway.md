@@ -97,6 +97,8 @@ O mantenedor (Vitor), que executa os passos nos painéis. Nenhum usuário final.
 3. **Variables:** ver a tabela da `api` em "Variáveis por serviço". Os valores que dependem do domínio do `web` podem ficar para depois do passo 4.
 
 ### 4. Serviço `web`
+> **Ordem do primeiro deploy:** crie o `web` só depois que o deploy da `api` estiver **Active**, com o healthcheck `/health` verde. A Railway não espera um serviço pelo outro. Se o `web` abrir antes, a vitrine aparece sem serviços nem barbeiros. A falha da API não fica no cache, e a página se corrige no recarregamento seguinte, mas não é isso que os proprietários devem ver. Depois que o domínio do `web` existir, aplique as variáveis da `api` que dependem dele e faça **Redeploy** da `api`.
+
 1. **New → GitHub Repo →** `AugustoBarbearia`. Renomeie o serviço para `web`.
 2. **Settings:**
 
