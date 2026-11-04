@@ -97,7 +97,7 @@ O mantenedor (Vitor), que executa os passos nos painéis. Nenhum usuário final.
 3. **Variables:** ver a tabela da `api` em "Variáveis por serviço". Os valores que dependem do domínio do `web` podem ficar para depois do passo 4.
 
 ### 4. Serviço `web`
-> **Ordem do primeiro deploy:** crie o `web` só depois que o deploy da `api` estiver **Active**, com o healthcheck `/health` verde. A Railway não espera um serviço pelo outro. Se o `web` abrir antes, a vitrine aparece sem serviços nem barbeiros. A falha da API não fica no cache, e a página se corrige no recarregamento seguinte, mas não é isso que os proprietários devem ver. Depois que o domínio do `web` existir, aplique as variáveis da `api` que dependem dele e faça **Redeploy** da `api`.
+> **Ordem do primeiro deploy:** crie o `web` só depois que o deploy da `api` estiver **Active**, com o healthcheck `/health` verde. A Railway não espera um serviço pelo outro. Se o `web` abrir antes, a vitrine aparece sem serviços nem barbeiros. A falha da API não fica no cache, e a página se corrige no recarregamento seguinte, mas não é isso que os proprietários devem ver. Depois que o domínio do `web` existir, preencha as variáveis da `api` que dependem dele e clique em **Deploy** nas mudanças pendentes. A Railway reimplanta a `api` sozinha.
 
 1. **New → GitHub Repo →** `AugustoBarbearia`. Renomeie o serviço para `web`.
 2. **Settings:**
@@ -183,7 +183,7 @@ Percorra os critérios de aceite, CA-1 a CA-6, e a #91 (Safari e login real), ag
 
 ## Variáveis por serviço
 
-`${{...}}` são variáveis de referência da Railway: o painel completa e mantém o valor. Os nomes e o papel de cada variável estão em [arquitetura.md](../arquitetura.md#variáveis-de-ambiente).
+`${{...}}` são variáveis de referência da Railway: o painel completa e mantém o valor. Toda mudança de variável fica pendente até você clicar em **Deploy**, que reimplanta os serviços afetados. Os nomes e o papel de cada variável estão em [arquitetura.md](../arquitetura.md#variáveis-de-ambiente).
 
 **`api`**
 
@@ -227,7 +227,7 @@ Percorra os critérios de aceite, CA-1 a CA-6, e a #91 (Safari e login real), ag
 - **O web não chega à API, ou a API não busca o JWKS:** confira a porta nas URLs privadas (`:8000` e `:3000`) e o `http://` (a rede privada não usa `https`). Ambientes da Railway criados antes de 16/10/2025 só resolvem IPv6 na rede privada. Num projeto novo isso não acontece. Se acontecer, troque o start da `api` para `uvicorn app.main:app --host :: --port 8000` e aponte `AUTH_JWKS_URL` para `https://<domínio do web>/api/auth/jwks`.
 - **Deploy da `api` parado no *pre-deploy*:** a migração falhou. O log do deploy mostra o erro do Alembic, e a versão anterior continua no ar.
 - **Login volta com `redirect_uri_mismatch`:** a URI do passo 7 precisa ser exatamente `https://<domínio>/api/auth/callback/google`, sem barra no final.
-- **`/admin` manda para `/` com o seu e-mail:** confira `ADMIN_EMAILS` na `api` e faça redeploy depois de mudar variáveis.
+- **`/admin` manda para `/` com o seu e-mail:** confira `ADMIN_EMAILS` na `api` e se a mudança de variável foi aplicada (botão **Deploy** das mudanças pendentes).
 - **E-mail não chega:** o registro aparece `FAILED` na tabela `notifications`, com o erro. Confira se o domínio está **Verified** no Resend e se `EMAIL_FROM` usa esse domínio.
 
 ## Custo do trial
