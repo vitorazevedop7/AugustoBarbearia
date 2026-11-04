@@ -60,7 +60,7 @@ Nenhuma regra de negócio. Segue o ADR 0007 e os comandos do `CLAUDE.md`.
   - Node, pnpm, Python e uv vêm dos mesmos arquivos do projeto: `web/.node-version`, `packageManager`, `api/.python-version` e a versão do uv do `api/Dockerfile`.
 - **Segurança:** o token do workflow só lê o repositório (`permissions: contents: read`), e o checkout não guarda credenciais.
 - **Execuções antigas:** um push novo no mesmo PR cancela a execução anterior.
-- **CI verde antes do merge é regra de processo** (#46). O repositório é privado numa conta GitHub Free, e nesse plano o GitHub não aplica rulesets nem proteção de branch. Tornar o repositório público ou pagar o Pro/Team contraria a D9 e o ADR 0009. Por isso, quem faz o merge confere antes que o `changes` está verde e que `api`, `web` e `contract` estão verdes ou pulados. Se o plano mudar, a regra no GitHub exige os quatro checks: `changes`, `api`, `web` e `contract`.
+- **CI verde antes do merge é regra de processo** (#46). O repositório é privado numa conta GitHub Free, e nesse plano o GitHub não aplica rulesets nem proteção de branch. Tornar o repositório público ou pagar o Pro/Team contraria a D9. Por isso, quem faz o merge confere antes que o `changes` está verde e que `api`, `web` e `contract` estão verdes ou pulados. Se o plano mudar, a regra no GitHub exige os quatro checks: `changes`, `api`, `web` e `contract`.
 
 ## API
 Nenhuma rota nova.

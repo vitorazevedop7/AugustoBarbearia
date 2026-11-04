@@ -1,19 +1,19 @@
-# Spec — Deploy de demonstração na Railway
+# Spec — Deploy de produção na Railway
 
 - **Issue:** #32
-- **Fase:** Demonstração no ar (ver [roadmap](../produto/roadmap.md))
+- **Fase:** Produção na Railway, depois do aceite (ver [roadmap](../produto/roadmap.md))
 - **Status:** pronta para implementar
 
 ## Contexto
-A apresentação aos proprietários precisa de um link de verdade, que eles abram no próprio celular. O [ADR 0009](../decisoes/0009-demonstracao-no-trial.md) põe a demonstração no trial gratuito da Railway, no formato do [ADR 0005](../decisoes/0005-hospedagem.md) (`web`, `api`, `postgres` e `jobs`). Se os proprietários aprovarem, a barbearia assina o plano no mesmo projeto, e a demonstração vira produção. Esta spec é o passo a passo dessa montagem. Boa parte dele é manual, no painel da Railway, no Google Cloud e no Resend.
+Depois que os proprietários aceitarem o sistema, ele vai para a Railway no formato do [ADR 0005](../decisoes/0005-hospedagem.md) (`web`, `api`, `postgres` e `jobs`), no plano Hobby pago pela barbearia. A demonstração da apresentação não passa por aqui: ela roda no notebook ([ADR 0010](../decisoes/0010-demonstracao-local-com-tunel.md)). Esta spec é o passo a passo da montagem de produção. Boa parte dele é manual, no painel da Railway, no Google Cloud e no Resend.
 
 ## Quem usa
 O mantenedor (Vitor), que executa os passos nos painéis. Nenhum usuário final.
 
 ## Histórias
-- Como mantenedor, quero um passo a passo com os valores exatos de cada serviço, para montar a demonstração sem adivinhar nada.
+- Como mantenedor, quero um passo a passo com os valores exatos de cada serviço, para montar a produção sem adivinhar nada.
 - Como mantenedor, quero que um merge na `main` publique sozinho, para não repetir o deploy à mão.
-- Como proprietário, quero abrir o link no celular, entrar com o Google e receber o e-mail do agendamento, para avaliar o sistema de verdade.
+- Como proprietário, quero o site no ar no domínio da barbearia, para os clientes agendarem sozinhos.
 
 ## Regras envolvidas
 - RN-51 — lembrete cerca de 24h antes (serviço `jobs`)
@@ -26,7 +26,7 @@ O mantenedor (Vitor), que executa os passos nos painéis. Nenhum usuário final.
 - **Porta fixa por variável.** A `api` escuta na 8000, e o `web` na 3000 (os `CMD` dos Dockerfiles). A variável `PORT` de cada serviço é definida com esse valor, para o *healthcheck* e o domínio público da Railway acertarem a porta.
 - **Imagens sem mudança.** Os Dockerfiles já terminam no estágio de produção (`runtime` na API, `runner` no web), que é o que a Railway constrói. O `jobs` usa a imagem da API com outro comando.
 - **Tabelas do Better Auth por `pnpm auth:migrate` rodado da máquina.** A imagem standalone do web não leva a CLI do Better Auth. A CLI roda uma vez pelo container de desenvolvimento, apontada para o banco da Railway por um acesso público temporário (passo 6).
-- **Dados de exemplo pela tela, não por script.** As migrações já criam a barbearia, o horário de funcionamento, os três barbeiros (com as fotos fictícias, D10) e os serviços "Corte Simples" e "Corte + Barba". Os agendamentos de exemplo são criados pela administração, em "Novo agendamento" (S5.05), porque o mesmo banco vira produção, e dados falsos inseridos por script ficariam misturados aos reais (ver Perguntas abertas).
+- **Banco sem dados fictícios.** As migrações já criam a barbearia, o horário de funcionamento, os três barbeiros (com as fotos fictícias, D10) e os serviços "Corte Simples" e "Corte + Barba". O resto entra pela administração, com os dados reais. Os dados fictícios da demonstração ficam só no notebook, e o comando que os cria se recusa a rodar fora de um banco de demonstração.
 
 ## Critérios de aceite
 **CA-1 — No ar**
@@ -42,7 +42,7 @@ O mantenedor (Vitor), que executa os passos nos painéis. Nenhum usuário final.
 **CA-3 — E-mail ao cliente**
 - **Dado** o Resend com domínio verificado
 - **Quando** uma conta Google que **não** é a dona da conta do Resend agenda pelo site
-- **Então** ela recebe o e-mail de confirmação, e o link "Meus agendamentos" abre o domínio da demonstração.
+- **Então** ela recebe o e-mail de confirmação, e o link "Meus agendamentos" abre o domínio de produção.
 
 **CA-4 — Lembrete**
 - **Dado** o serviço `jobs` com cron de hora em hora
@@ -50,26 +50,26 @@ O mantenedor (Vitor), que executa os passos nos painéis. Nenhum usuário final.
 - **Então** o cliente recebe o lembrete, e o log do `jobs` mostra cada execução sem erro.
 
 **CA-5 — Deploy contínuo**
-- **Dado** a demonstração no ar
+- **Dado** a produção no ar
 - **Quando** um PR é mergeado na `main`
 - **Então** só os serviços cuja pasta mudou são implantados de novo, sem ação manual.
 
-**CA-6 — Custo zero**
-- **Dado** a montagem completa
-- **Então** nenhum plano pago foi assinado, e nenhum cartão foi cadastrado.
+**CA-6 — Custo sob controle**
+- **Dado** a montagem completa no plano Hobby
+- **Então** a Railway tem um limite rígido de gasto e um alerta por e-mail configurados, e o meio de pagamento é o da barbearia.
 
 ## Passo a passo
 
 > Use os nomes de serviço exatamente como estão aqui (`Postgres`, `api`, `web`, `jobs`): as variáveis de referência (`${{api.RAILWAY_PRIVATE_DOMAIN}}`) usam esses nomes. Nunca cole segredo em chat, issue ou commit.
 
 ### 0. Antes de começar
-1. A data da apresentação está marcada, e faltam cerca de 7 dias. O trial dura 30 dias a partir do cadastro (ADR 0009).
+1. Os proprietários aceitaram o sistema, e a barbearia vai pagar a hospedagem (D9).
 2. A `main` está com o CI verde (`gh run list --branch main --limit 1`).
 3. Você tem um domínio próprio para o remetente dos e-mails, com acesso ao DNS (passo 8). Sem ele, o CA-3 não passa.
 
 ### 1. Conta e projeto
-1. Entre em [railway.com](https://railway.com) com **Login pelo GitHub**, sem assinar plano e sem cadastrar cartão. A conta verificada pelo GitHub ganha o trial completo. Sem a verificação, o trial é limitado (rede de saída restrita), e o envio pelo Resend falharia.
-2. Confira de novo os limites do trial em [Free Trial](https://docs.railway.com/reference/pricing/free-trial). Em novembro de 2026: US$ 5 de crédito único, 30 dias, até 5 serviços por projeto (usamos 4). O trial acaba no que vier primeiro: 30 dias ou os US$ 5. Veja "Custo do trial" abaixo.
+1. Entre em [railway.com](https://railway.com) e assine o plano **Hobby** com o meio de pagamento da barbearia. Quem fica como dono da conta é combinado com os proprietários no aceite.
+2. Confira de novo os limites e os preços do Hobby em [Plans](https://docs.railway.com/reference/pricing/plans). Em novembro de 2026: US$ 5 por mês com US$ 5 de uso incluso. Veja "Custo" abaixo.
 3. Crie um projeto vazio chamado `augusto-barbearia`. Se o painel pedir uma região, escolha a mais próxima do Brasil (leste dos EUA).
 4. Na integração com o GitHub, dê ao app da Railway acesso ao repositório privado `vitorazevedop7/AugustoBarbearia`.
 
@@ -161,7 +161,7 @@ No projeto `augusto-barbearia-130405` do Google Cloud:
    - URI de redirecionamento autorizado: `https://<domínio do web>/api/auth/callback/google`
 2. Cole o ID e a chave secreta em `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` do `web`.
 3. **Tela de consentimento OAuth → Publicar app** ("Em produção"). No modo "Em teste", só os usuários de teste entram, e nenhum cliente da barbearia conseguiria agendar. O login pede só `openid`, `email` e `profile`, que não são escopos sensíveis, e por isso o Google não exige verificação para publicar. Não envie logotipo na tela de consentimento: com logotipo, o Google pede a verificação da marca.
-4. Entre no domínio da demonstração com uma conta que não seja de teste e confirme que não aparece a tela "o Google não verificou este app". Se aparecer, volte ao modo "Em teste" e inclua as contas Google dos proprietários como usuários de teste (o caminho alternativo da #32).
+4. Entre no domínio de produção com uma conta que não seja de teste e confirme que não aparece a tela "o Google não verificou este app". Se aparecer, o app precisa passar pela verificação do Google antes de o site ser divulgado aos clientes. Até lá, só os usuários de teste conseguem entrar.
 
 ### 8. Resend
 1. Crie a conta gratuita no [Resend](https://resend.com).
@@ -173,13 +173,12 @@ No projeto `augusto-barbearia-130405` do Google Cloud:
 
 Com o remetente de testes (`onboarding@resend.dev`), os e-mails só chegam ao dono da conta, e o CA-3 não passa.
 
-### 9. Dados da demonstração
-1. Entre com a conta de `ADMIN_EMAILS` e confira em `/admin/cadastros` os barbeiros, os serviços (preço e duração) e o horário de funcionamento.
+### 9. Dados reais
+1. Entre com a conta de `ADMIN_EMAILS` e confira em `/admin/cadastros` os barbeiros, os serviços (preço e duração) e o horário de funcionamento, com os valores que os proprietários confirmarem.
 2. Cadastre o endereço e os contatos da barbearia (#144).
-3. Crie dois ou três agendamentos pela agenda, em "Novo agendamento", para a agenda e o relatório não aparecerem vazios. Use o nome "Cliente de exemplo" e deixe o e-mail em branco, para nenhum e-mail sair.
 
 ### 10. Conferência
-Percorra os critérios de aceite, CA-1 a CA-6, e a #91 (Safari e login real), agora no domínio da demonstração. Para conferir o CA-5, faça um PR pequeno, mergeie e veja o deploy novo nos serviços da pasta alterada.
+Percorra os critérios de aceite, CA-1 a CA-6, no domínio de produção. Para conferir o CA-5, faça um PR pequeno, mergeie e veja o deploy novo nos serviços da pasta alterada.
 
 ## Variáveis por serviço
 
@@ -230,19 +229,15 @@ Percorra os critérios de aceite, CA-1 a CA-6, e a #91 (Safari e login real), ag
 - **`/admin` manda para `/` com o seu e-mail:** confira `ADMIN_EMAILS` na `api` e se a mudança de variável foi aplicada (botão **Deploy** das mudanças pendentes).
 - **E-mail não chega:** o registro aparece `FAILED` na tabela `notifications`, com o erro. Confira se o domínio está **Verified** no Resend e se `EMAIL_FROM` usa esse domínio.
 
-## Custo do trial
-O crédito do trial é de US$ 5, e o trial acaba aos 30 dias **ou** quando o crédito acaba, o que vier primeiro. Depois, a conta cai no plano Free (US$ 1 por mês), que não mantém os serviços no ar. Três serviços contínuos (`web`, `api`, `Postgres`) usam algumas centenas de MB de memória, o que fica perto do limite de US$ 5 em 30 dias. O `jobs` só consome enquanto roda. Por isso:
-- acompanhe o consumo em **Usage** a cada dois ou três dias;
-- mantenha uma réplica por serviço e não ligue recursos extras (réplicas, volumes adicionais);
-- se o consumo projetado passar do crédito antes da decisão dos proprietários, a saída é a do ADR 0009: a barbearia assina o Hobby no mesmo projeto, ou o plano B (outra plataforma gratuita) entra em discussão.
+## Custo
+O Hobby custa US$ 5 por mês e inclui US$ 5 de uso. Três serviços contínuos (`web`, `api`, `Postgres`) usam algumas centenas de MB de memória, cerca de US$ 3 a 5 por mês a US$ 10 por GB/mês. O `jobs` só consome enquanto roda. A estimativa total é de US$ 5 a 10 por mês (ADR 0005).
 
-Os dados do banco do trial são apagados 30 dias depois do fim do crédito, a não ser que a conta assine um plano antes.
+Em **Workspace → Usage**, configure:
+- um **alerta por e-mail** perto dos US$ 5 incluídos;
+- um **limite rígido** (mínimo de US$ 10). Ao atingir esse limite, a Railway tira todos os serviços do ar. Por isso, ele fica acima do consumo esperado, só como proteção contra um gasto fora do normal.
 
 ## Fora do escopo
-- Domínio próprio da barbearia e passagem das contas (Railway, Google, Resend) para ela: Fase 2 (`roadmap.md`).
+- Domínio próprio do site e passagem das contas (Railway, Google, Resend) para o nome da barbearia: Fase 2 (`roadmap.md`).
 - Backup automatizado do banco além do que a Railway oferece.
 - Ambiente de homologação.
 - Configuração da Railway em arquivo (`.railway/railway.ts`), enquanto ele não cobre os campos usados aqui.
-
-## Perguntas abertas
-- **Agendamentos de exemplo no banco que vira produção.** A proposta é criá-los pela tela, com "Cliente de exemplo", e cancelá-los se a barbearia aprovar o sistema. Eles continuam no histórico como cancelados. Se os proprietários preferirem um banco limpo, a alternativa é recriar o `Postgres` antes de assinar o plano (perde os cadastros feitos na demonstração).

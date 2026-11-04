@@ -1,6 +1,6 @@
 # 0009 — Demonstração no trial da Railway e custo da barbearia após a aprovação
 
-- **Status:** aceito
+- **Status:** substituído por [0010](0010-demonstracao-local-com-tunel.md)
 - **Data:** 2026-10-28
 
 ## Contexto
