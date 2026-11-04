@@ -60,6 +60,7 @@ flowchart LR
 - Cerca de uma semana antes da apresentação, deploy no **trial gratuito da Railway** ([ADR 0009](../decisoes/0009-demonstracao-no-trial.md)). A conta só é criada nesse momento, porque o trial dura 30 dias a partir do cadastro.
 - Cliente OAuth do Google para o domínio da demonstração, com o app publicado ou as contas dos proprietários incluídas como usuários de teste.
 - Dados de exemplo realistas: os três barbeiros, os serviços e alguns agendamentos.
+- O passo a passo está em [specs/deploy-railway.md](../specs/deploy-railway.md).
 
 **Por que assim:** custo zero até a decisão dos proprietários (D9). Se eles aprovarem, a barbearia assina o plano no mesmo projeto, e a demonstração vira produção sem migração.
 

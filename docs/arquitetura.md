@@ -231,12 +231,14 @@ Não há ambiente de homologação no MVP. Até a demonstração, o sistema só 
 
 ### Serviços na Railway
 
-| Serviço | Imagem | Comando | Público? |
-|---|---|---|---|
-| `web` | `/web/Dockerfile` | `node server.js` (Next standalone) | Sim (domínio) |
-| `api` | `/api/Dockerfile` | `alembic upgrade head && uvicorn app.main:app` | Não (rede privada) |
-| `jobs` | `/api/Dockerfile` | `python -m app.jobs.send_reminders`, cron `0 * * * *` | Não |
-| `postgres` | Gerenciado | — | Não |
+| Serviço | Imagem (Root Directory) | Comando | Antes do deploy | Watch Paths | Público? |
+|---|---|---|---|---|---|
+| `web` | `web/Dockerfile` (`/web`) | `node server.js` (Next standalone), porta 3000 | — | `/web/**` | Sim (domínio gerado, porta 3000) |
+| `api` | `api/Dockerfile` (`/api`) | `uvicorn app.main:app`, porta 8000, healthcheck `/health` | `alembic upgrade head` | `/api/**` | Não (rede privada) |
+| `jobs` | `api/Dockerfile` (`/api`) | `python -m app.jobs.send_reminders`, cron `0 * * * *` (UTC), sem reinício | — | `/api/**` | Não |
+| `Postgres` | Gerenciado | — | — | — | Não |
+
+A configuração fica no painel da Railway, porque o arquivo de configuração no repositório foi descontinuado por ela e o substituto ainda não cobre cron, Dockerfile e *watch paths*. O passo a passo completo, com os valores de cada campo e de cada variável, está em [specs/deploy-railway.md](specs/deploy-railway.md). As tabelas do Better Auth são criadas uma vez por `pnpm auth:migrate`, rodado da máquina contra o banco da Railway.
 
 ## Variáveis de ambiente
 
@@ -257,6 +259,7 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 | `BETTER_AUTH_URL` | web | URL pública do site, com protocolo (`https://...`); também é a base absoluta do `og:image` |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | web | Login com Google |
 | `API_INTERNAL_URL` | web | Endereço da API na rede privada |
+| `PORT` | web, api | Só na Railway: a porta em que o serviço escuta (`3000` no web, `8000` na API), para o healthcheck e o domínio acertarem a porta |
 
 ### Sessões, migrações e testes
 
