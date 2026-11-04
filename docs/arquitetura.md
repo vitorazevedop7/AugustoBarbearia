@@ -224,7 +224,7 @@ web/
 | Ambiente | Como sobe | Banco |
 |---|---|---|
 | Desenvolvimento | `docker compose up` ([0004](decisoes/0004-docker.md)) | Postgres do compose |
-| Demonstração | Notebook do Vitor, com as imagens de produção e um link público por túnel ([0010](decisoes/0010-demonstracao-local-com-tunel.md)) | Postgres próprio da demonstração, com dados fictícios |
+| Demonstração | `scripts/demo.sh up` no notebook do Vitor: `docker-compose.demo.yml`, com as imagens de produção e um link público por túnel ([0010](decisoes/0010-demonstracao-local-com-tunel.md), [spec](specs/demonstracao-local.md)) | Postgres próprio (`augusto_demo`), com dados fictícios |
 | Produção | Push na `main` → deploy na Railway ([0005](decisoes/0005-hospedagem.md)), montado depois do aceite, no plano pago pela barbearia | Postgres da Railway |
 
 Não há ambiente de homologação no MVP. Até o aceite dos proprietários, o sistema só roda localmente.
@@ -260,6 +260,7 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | web | Login com Google |
 | `API_INTERNAL_URL` | web | Endereço da API na rede privada |
 | `PORT` | web, api | Só na Railway: a porta em que o serviço escuta (`3000` no web, `8000` na API), para o healthcheck e o domínio acertarem a porta |
+| `DEMO_URL` | web, api | Só na demonstração (`.env.demo`): o link do túnel, gravado pelo `scripts/demo.sh`. Vira `BETTER_AUTH_URL`, `AUTH_ISSUER`, `AUTH_AUDIENCE` e `WEB_BASE_URL` |
 
 ### Sessões, migrações e testes
 

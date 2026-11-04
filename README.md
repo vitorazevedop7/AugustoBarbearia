@@ -143,6 +143,10 @@ Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`,
 
 O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente).
 
+### Demonstração no notebook
+
+Para apresentar o sistema, `scripts/demo.sh up` sobe uma cópia separada, com as imagens de produção, dados fictícios e um link `https://` público para abrir no celular (ADR 0010). O roteiro, inclusive o cadastro do link no Google, está em [docs/specs/demonstracao-local.md](docs/specs/demonstracao-local.md).
+
 ## CI
 
 Todo PR, e todo push na `main`, roda o workflow [CI](.github/workflows/ci.yml) no GitHub Actions:
