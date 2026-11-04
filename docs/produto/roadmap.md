@@ -8,7 +8,7 @@ Decisões que embasam este documento: D0–D11 em [registro.md](../cliente/regis
 
 ```mermaid
 flowchart LR
-    F0[Fase 0<br/>Fundação] --> F1[Fase 1<br/>MVP] --> D[Demonstração<br/>no ar] --> A{{Apresentação<br/>aos proprietários}} --> F2[Fase 2<br/>Ajustes + WhatsApp] --> F3[Fase 3<br/>Fidelidade]
+    F0[Fase 0<br/>Fundação] --> F1[Fase 1<br/>MVP] --> D[Demonstração<br/>no notebook] --> A{{Apresentação<br/>aos proprietários}} --> P[Produção<br/>na Railway] --> F2[Fase 2<br/>Ajustes + WhatsApp] --> F3[Fase 3<br/>Fidelidade]
 ```
 
 ### Fase 0 — Fundação
@@ -53,16 +53,22 @@ flowchart LR
 
 **Por que este recorte:** ele ataca os três problemas centrais (sobreposição, faltas e falta de registro) com o mínimo de funcionalidades. O financeiro entra no MVP porque concluir o atendimento é o que fecha o ciclo da agenda, e o registro sai quase de graça junto.
 
-### Demonstração no ar
+### Demonstração no notebook
 
-**Objetivo:** os proprietários abrem o sistema no próprio celular, por um link de verdade, durante e depois da apresentação.
+**Objetivo:** na apresentação, os proprietários abrem o sistema real no próprio celular, por um link `https://`.
 
-- Cerca de uma semana antes da apresentação, deploy no **trial gratuito da Railway** ([ADR 0009](../decisoes/0009-demonstracao-no-trial.md)). A conta só é criada nesse momento, porque o trial dura 30 dias a partir do cadastro.
-- Cliente OAuth do Google para o domínio da demonstração, com o app publicado ou as contas dos proprietários incluídas como usuários de teste.
-- Dados de exemplo realistas: os três barbeiros, os serviços e alguns agendamentos.
-- O passo a passo está em [specs/deploy-railway.md](../specs/deploy-railway.md).
+- O sistema roda no notebook do Vitor com as imagens de produção e um banco próprio, e um túnel gratuito (Cloudflare Tunnel) gera o link público ([ADR 0010](../decisoes/0010-demonstracao-local-com-tunel.md)).
+- Dados fictícios realistas: clientes, uma semana de agenda, pagamentos, uma falta e uma folga, para a agenda e o relatório não aparecerem vazios.
+- Login com Google pelo cliente OAuth local, com o endereço do túnel cadastrado no dia e as contas dos proprietários como usuários de teste.
 
-**Por que assim:** custo zero até a decisão dos proprietários (D9). Se eles aprovarem, a barbearia assina o plano no mesmo projeto, e a demonstração vira produção sem migração.
+**Por que assim:** custo zero até a decisão dos proprietários (D9). A conta da Railway já usou o trial, e o plano Free não comporta os quatro serviços.
+
+### Produção na Railway
+
+**Objetivo:** o sistema no ar de vez, depois do aceite, pago pela barbearia.
+
+- Deploy no plano Hobby da Railway, pago pela barbearia ([ADR 0005](../decisoes/0005-hospedagem.md)). O passo a passo está em [specs/deploy-railway.md](../specs/deploy-railway.md).
+- Remetente dos e-mails num domínio verificado no Resend e dados reais da barbearia (contatos, bios). O banco começa sem os dados fictícios.
 
 ### Fase 2 — Ajustes pós-apresentação e WhatsApp
 
@@ -70,7 +76,7 @@ flowchart LR
 
 - Ajustes vindos da apresentação. As decisões D0–D9 podem ser revistas aqui.
 - Notificações por **WhatsApp** (D4). Exige uma conta Business verificada da barbearia, com CNPJ (P3), então só é viável depois da apresentação.
-- Passagem da infraestrutura para o nome da barbearia (domínio próprio, contas e custos).
+- Passagem da infraestrutura para o nome da barbearia (domínio próprio e contas).
 
 ### Fase 3 — Programa de fidelidade
 

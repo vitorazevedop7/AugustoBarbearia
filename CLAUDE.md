@@ -9,7 +9,7 @@ Sistema web de agendamento e gestão para a **Augusto Barbearia**, uma barbearia
 - **web/**: Next.js (App Router, TypeScript strict), Tailwind, Better Auth (Google + plugin JWT). É também o BFF.
 - **api/**: Python + FastAPI, SQLAlchemy 2 + Alembic, Pydantic v2, pytest. Todas as regras de negócio ficam aqui.
 - **PostgreSQL**, Docker / `docker compose`, deploy na Railway, e-mail via Resend.
-- Os motivos de cada escolha estão em `docs/decisoes/` (ADRs 0001–0009).
+- Os motivos de cada escolha estão em `docs/decisoes/` (ADRs 0001–0010).
 
 ## Comandos
 
@@ -238,13 +238,13 @@ docker compose exec api uv run pytest tests/test_business_hours_appointments.py
 
 Salvar o horário de funcionamento (`PUT /admin/business-hours`) que deixe algum agendamento `SCHEDULED` com início futuro fora do novo expediente é recusado por inteiro com `409 BUSINESS_HOURS_CONFLICT` (RN-02, D13). Só contam os dias que mudam, e a recusa traz `appointments` (até 20) e `total` além de `code` e `message` (D15, #124; `DomainError(..., extra=)` acrescenta campos ao corpo); a tela lista cada agendamento com link para `/admin/agenda/[id]` e mantém o que foi enviado. `update_business_hours` (`shop/service.py`) trava os sete dias de `BusinessHours` em ordem com `FOR UPDATE` antes de conferir os agendamentos, e `ensure_slot_available` trava o dia da reserva com `FOR SHARE` e o relê (`get_business_hours(..., lock=True)`), para criar, remarcar e editar o expediente se ordenarem. A trava do cliente na criação pelo site é `FOR NO KEY UPDATE`, para não fechar um deadlock com a reserva da administração e a edição. Os testes de concorrência usam transações reais e apagam o que gravaram. A [spec](docs/specs/barbearia-horarios.md) documenta as regras e as decisões.
 
-### Deploy de demonstração na Railway — #32
+### Deploy de produção na Railway — #32
 
 ```bash
 docker compose run --rm --no-deps -e DATABASE_URL='<DATABASE_PUBLIC_URL do Postgres>' web pnpm auth:migrate
 ```
 
-A demonstração roda no trial da Railway (ADR 0009) com quatro serviços: `Postgres`, `api` (`/api`, *pre-deploy* `alembic upgrade head`, sem domínio público), `web` (`/web`, domínio gerado) e `jobs` (imagem da API, `python -m app.jobs.send_reminders` no cron `0 * * * *`). A configuração fica **no painel**, não em arquivo: a Railway descontinuou o `railway.json`, e o `.railway/railway.ts` ainda não cobre cron, Dockerfile e *watch paths*. Um merge na `main` implanta só os serviços da pasta alterada. As tabelas do Better Auth são criadas pelo comando acima, com o acesso público do `Postgres` ligado só durante a execução. A [spec](docs/specs/deploy-railway.md) tem o passo a passo da Railway, do Google OAuth e do Resend e os valores de cada variável. Mudou serviço, comando ou variável da Railway? Atualize a spec e `arquitetura.md` no mesmo PR.
+Depois do aceite dos proprietários, a produção roda na Railway, no plano Hobby pago pela barbearia (ADR 0005), com quatro serviços: `Postgres`, `api` (`/api`, *pre-deploy* `alembic upgrade head`, sem domínio público), `web` (`/web`, domínio gerado) e `jobs` (imagem da API, `python -m app.jobs.send_reminders` no cron `0 * * * *`). A configuração fica **no painel**, não em arquivo: a Railway descontinuou o `railway.json`, e o `.railway/railway.ts` ainda não cobre cron, Dockerfile e *watch paths*. Um merge na `main` implanta só os serviços da pasta alterada. As tabelas do Better Auth são criadas pelo comando acima, com o acesso público do `Postgres` ligado só durante a execução. A [spec](docs/specs/deploy-railway.md) tem o passo a passo da Railway, do Google OAuth e do Resend e os valores de cada variável. Mudou serviço, comando ou variável da Railway? Atualize a spec e `arquitetura.md` no mesmo PR.
 
 ## Mapa da documentação
 

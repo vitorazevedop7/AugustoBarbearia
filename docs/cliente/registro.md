@@ -115,7 +115,7 @@ Tabela viva: atualize o status quando resolver. A resolução também vira uma e
 - **Com:** registro interno. Decisão do Vitor como product owner
 - **Canal:** —
 - **Fatos e decisões:**
-  - **D9.** **Nada é pago até a apresentação.** O MVP é demonstrado num ambiente gratuito, no ar e acessível pelo celular dos proprietários. Se eles quiserem o sistema, a hospedagem definitiva (com mensalidade) passa a ser **paga pela barbearia**. Isso substitui a premissa de `visao.md` de que o custo seria do Vitor até a apresentação. Detalhes técnicos no [ADR 0009](../decisoes/0009-demonstracao-no-trial.md).
+  - **D9.** **Nada é pago até a apresentação.** O MVP é demonstrado num ambiente gratuito, no ar e acessível pelo celular dos proprietários. Se eles quiserem o sistema, a hospedagem definitiva (com mensalidade) passa a ser **paga pela barbearia**. Isso substitui a premissa de `visao.md` de que o custo seria do Vitor até a apresentação. Detalhes técnicos no [ADR 0009](../decisoes/0009-demonstracao-no-trial.md), substituído pelo [ADR 0010](../decisoes/0010-demonstracao-local-com-tunel.md) (demonstração no notebook com link público).
 
 ### 2026-10-29 — Fotos placeholder dos barbeiros
 - **Com:** registro interno. Decisão do Vitor como product owner
