@@ -30,7 +30,11 @@ from app.modules.notifications.sender import (
     ResendSender,
     get_email_sender,
 )
-from app.modules.notifications.service import notify, send_notification
+from app.modules.notifications.service import (
+    idempotency_key,
+    notify,
+    send_notification,
+)
 from app.modules.notifications.templates import (
     AppointmentDetails,
     ShopContact,
@@ -143,7 +147,23 @@ def test_rn50_agendar_envia_confirmacao_ao_cliente(
     [email] = sender.sent
     assert email.to == "ana@example.com"
     assert email.subject == "Agendamento confirmado: terça-feira, 3/11, às 10h00"
-    assert email.idempotency_key == f"notification-{notification.id}"
+    assert email.idempotency_key == idempotency_key(notification)
+
+
+def test_rn54_chave_de_idempotencia_nao_se_repete_depois_de_recriar_o_banco() -> None:
+    # O Resend guarda a chave por 24h na conta inteira (#189): o mesmo id num
+    # banco recriado, ou noutro banco, não pode repetir a chave.
+    def registro(created_at: datetime) -> Notification:
+        return Notification(id=7, created_at=created_at)
+
+    antes = registro(datetime(2026, 11, 5, 14, 0, 0, 123456, tzinfo=UTC))
+    depois = registro(datetime(2026, 11, 5, 20, 30, 0, 123456, tzinfo=UTC))
+
+    assert idempotency_key(antes) != idempotency_key(depois)
+    assert idempotency_key(antes) == idempotency_key(
+        registro(datetime(2026, 11, 5, 14, 0, 0, 123456, tzinfo=UTC))
+    )
+    assert idempotency_key(antes) == "notification-7-1793887200123456"
 
 
 def test_rn53_email_traz_servico_barbeiro_data_endereco_link_e_contato(
