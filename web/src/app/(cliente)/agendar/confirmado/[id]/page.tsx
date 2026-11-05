@@ -26,6 +26,10 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
+// Cancelado, concluído, inexistente ou de outro cliente: o título não promete
+// o horário (#190).
+const INACTIVE_TITLE = "Seu agendamento";
+
 /**
  * O agendamento criado, numa URL própria (#155): recarregar a página mostra
  * o mesmo horário, sem pedir a confirmação de novo nem falar em "alguém" que
@@ -51,7 +55,7 @@ export default async function ConfirmedPage({
   if (!loaded.data) {
     return (
       <BookingMain>
-        <BookingHeader title="Horário confirmado" />
+        <BookingHeader title={INACTIVE_TITLE} />
         <div className="mt-8">
           <Alert
             tone="danger"
@@ -69,11 +73,14 @@ export default async function ConfirmedPage({
   const appointment = loaded.data;
   const date = formatLongDate(localDate(appointment.starts_at));
   const start = formatTime(appointment.starts_at);
+  const scheduled = appointment.status === "SCHEDULED";
   return (
     <BookingMain>
-      <BookingHeader title="Horário confirmado" />
+      <BookingHeader
+        title={scheduled ? "Horário confirmado" : INACTIVE_TITLE}
+      />
       <div className="mt-8">
-        {appointment.status === "SCHEDULED" ? (
+        {scheduled ? (
           <Alert
             tone="success"
             title={`Seu horário está confirmado para ${date}, às ${start}.`}
