@@ -59,6 +59,18 @@ tunnel_url() {
     grep -Eo 'https://[a-z0-9-]+\.trycloudflare\.com' | tail -n 1 || true
 }
 
+# O túnel rápido morre se o Mac dorme ou perde a conexão: o Cloudflare apaga o
+# endereço, mas o container continua de pé. Ele está morto sem resposta nenhuma
+# (o DNS some), com 530 (o Cloudflare não tem conexão com este túnel) ou com
+# "Tunnel not found" no log recente. Com o web parado, um túnel vivo ainda
+# responde (502), então isso não conta como morto.
+tunnel_alive() {
+  local url=$1 code
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null) || true
+  case "$code" in "" | 000 | 530) return 1 ;; esac
+  ! compose logs --since 2m tunnel 2>/dev/null | grep -q "Tunnel not found"
+}
+
 wait_for_tunnel() {
   local url=""
   for _ in $(seq 1 60); do
@@ -86,7 +98,13 @@ up() {
   prepare_env
   # O túnel sobe antes, para o link entrar na configuração do web e da API.
   compose up -d tunnel
-  local url
+  local url previous
+  previous=$(get_env "$ENV_FILE" DEMO_URL)
+  url=$(tunnel_url)
+  if [ -n "$url" ] && ! tunnel_alive "$url"; then
+    echo "O túnel $url caiu. Criando outro; o link vai mudar."
+    compose up -d --force-recreate tunnel
+  fi
   url=$(wait_for_tunnel)
   set_env DEMO_URL "$url"
   compose up -d --build db setup api auth-migrate web
@@ -105,6 +123,11 @@ No Google Cloud, cliente OAuth "Augusto Barbearia — local", inclua:
 
 O link muda se o túnel reiniciar. Não rode "down" até o fim da reunião.
 EOF
+  if [ -n "$previous" ] && [ "$previous" != "$url" ] && [ "$previous" != "http://pendente" ]; then
+    echo
+    echo "ATENÇÃO: o link mudou desde a última subida ($previous)."
+    echo "Troque os dois endereços antigos no Google pelos de cima, senão o login falha."
+  fi
 
   # Só num terminal: rodado por outro programa, o script termina aqui.
   if [ -t 1 ] && command -v caffeinate >/dev/null; then
@@ -118,7 +141,15 @@ case "${1:-}" in
   up) up ;;
   url)
     url=$(tunnel_url)
-    [ -n "$url" ] && echo "$url" || { echo "Túnel fora do ar." >&2; exit 1; }
+    if [ -z "$url" ]; then
+      echo "Túnel fora do ar." >&2
+      exit 1
+    fi
+    echo "$url"
+    if ! tunnel_alive "$url"; then
+      echo "Esse link não responde mais. Rode scripts/demo.sh up para criar outro." >&2
+      exit 1
+    fi
     ;;
   logs) compose logs -f ;;
   down) compose down ;;

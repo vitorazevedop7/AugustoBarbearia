@@ -62,7 +62,7 @@ Nenhuma regra nova. Os dados fictícios respeitam as regras que o banco e a API 
 
 ```bash
 scripts/demo.sh up      # sobe tudo, mostra o link e mantém o Mac acordado
-scripts/demo.sh url     # mostra o link atual
+scripts/demo.sh url     # mostra o link atual e avisa se ele não responde mais
 scripts/demo.sh logs    # acompanha os logs
 scripts/demo.sh down    # para tudo e guarda o banco da demonstração
 scripts/demo.sh reset   # para tudo e apaga o banco; a próxima subida recria os dados com as datas de hoje
@@ -83,11 +83,12 @@ Na primeira vez, o script cria o `.env.demo` a partir do `.env.demo.example`, co
    - `scripts/demo.sh up`, num terminal que fica aberto (ele mantém o Mac acordado).
    - Cadastre os dois endereços novos no cliente OAuth local. Pode apagar os de subidas anteriores.
    - Teste o login no seu celular, no 4G, e abra `/admin`.
-2. **Durante:** notebook na tomada, tampa aberta e o roteador do celular como reserva da internet. Não rode `down` nem reinicie o Docker: o link mudaria.
-3. **Se o túnel cair:** `scripts/demo.sh url` mostra se ele ainda existe. Sem link, mostre pelo próprio notebook em `http://localhost:3001`. A vitrine e o agendamento funcionam, mas o login com Google não, porque o site espera o endereço do túnel.
+2. **Durante:** notebook na tomada, tampa aberta e o roteador do celular como reserva da internet. Não rode `down` nem reinicie o Docker: o link mudaria. Com o Mac dormindo (tampa fechada, por exemplo) ou sem internet, o Cloudflare apaga o túnel, e o endereço não volta mais, mesmo com o container de pé.
+3. **Se o túnel cair** (o celular diz que o servidor não foi encontrado): rode `scripts/demo.sh up` de novo. O script percebe o túnel morto, cria outro e avisa que o link mudou. Troque os dois endereços no Google e espere alguns minutos. Enquanto isso, mostre pelo próprio notebook em `http://localhost:3001`. A vitrine e o agendamento funcionam, mas o login com Google não, porque o site espera o endereço do túnel.
 4. **Depois:** `scripts/demo.sh down`. Os dados fictícios ficam só no notebook. A produção segue a [spec da Railway](deploy-railway.md), com o banco limpo.
 
 ## Problemas comuns
+- **"O servidor não foi encontrado" no celular:** o túnel morreu. Rode `scripts/demo.sh up` e troque os endereços no Google.
 - **"redirect_uri_mismatch" no login:** o endereço do túnel não está no cliente OAuth, ou o Google ainda não aplicou a mudança. Confira se a URI termina em `/api/auth/callback/google`, sem barra no final.
 - **"Acesso bloqueado" ou "app não verificado" com a conta de um proprietário:** a conta não está nos usuários de teste.
 - **A vitrine abre sem serviços:** a API não estava pronta. Recarregue a página. A falha não fica no cache.
