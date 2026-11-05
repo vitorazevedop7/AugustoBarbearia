@@ -68,9 +68,13 @@ describe("horário confirmado — /agendar/confirmado/[id] (#155)", () => {
 
     await renderPage();
 
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Seu agendamento" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
       "Este agendamento não está mais ativo.",
     );
+    expect(document.body).not.toHaveTextContent("Horário confirmado");
   });
 
   it("sem sessão, leva ao login e volta para esta página", async () => {
@@ -92,6 +96,9 @@ describe("horário confirmado — /agendar/confirmado/[id] (#155)", () => {
 
     await renderPage();
 
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Seu agendamento" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Agendamento não encontrado.",
     );
