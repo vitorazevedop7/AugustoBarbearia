@@ -39,7 +39,7 @@ Cliente (recebe, quando agenda, remarca ou cancela, e quando a administração f
 2. **Depois do commit:** o service entrega o registro à `Outbox`. Na API, a `Outbox` da requisição agenda o envio como *background task* do FastAPI: a resposta sai primeiro e o envio usa a mesma sessão, que só fecha depois das tarefas.
 3. **No envio:** `send_notification(session, notification_id, sender, now=None)` trava o registro, monta o e-mail e chama o remetente. Sucesso → `SENT`; qualquer exceção do remetente → `FAILED` com a mensagem do erro. O agendamento nunca é desfeito (RN-54).
 
-O envio é **idempotente**: só um registro `PENDING` é enviado. Chamar de novo para um registro `SENT` ou `FAILED` não faz nada. No Resend, o envio leva a chave de idempotência `notification-<id>`, então uma repetição do mesmo registro não gera um segundo e-mail.
+O envio é **idempotente**: só um registro `PENDING` é enviado. Chamar de novo para um registro `SENT` ou `FAILED` não faz nada. No Resend, o envio leva a chave de idempotência `notification-<id>-<created_at em microssegundos>`, então uma repetição do mesmo registro não gera um segundo e-mail. O `created_at` entra porque o Resend guarda a chave por 24 horas na conta inteira: só o id se repetiria num banco recriado (o `reset` da demonstração) ou noutro banco com a mesma chave da API, e o Resend recusaria o envio (#189).
 
 Um registro que fica `PENDING` indica que o processo caiu entre o commit e o envio. No MVP não há reenvio automático.
 
@@ -218,7 +218,7 @@ sequenceDiagram
     A->>D: transação: agendamento + notification PENDING
     A-->>W: 201
     A->>D: trava a notification
-    A->>R: envia (idempotency key notification-<id>)
+    A->>R: envia (idempotency key notification-<id>-<created_at>)
     R-->>A: ok ou erro
     A->>D: SENT ou FAILED (RN-54)
 ```

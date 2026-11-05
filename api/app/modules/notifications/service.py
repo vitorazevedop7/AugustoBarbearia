@@ -10,7 +10,7 @@ A API interna, que o lembrete (S5.08) e as ações da administração (S5.09, em
 """
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
 from sqlalchemy import select
@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 # O erro guardado é para diagnóstico; o resto fica no log.
 ERROR_MAX_LENGTH = 1000
+EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 
 
 class Outbox(Protocol):
@@ -121,8 +122,20 @@ def build_email(
         subject=rendered.subject,
         html=rendered.html,
         text=rendered.text,
-        idempotency_key=f"notification-{notification.id}",
+        idempotency_key=idempotency_key(notification),
     )
+
+
+def idempotency_key(notification: Notification) -> str:
+    """Chave de idempotência do Resend, igual em todas as tentativas do registro.
+
+    O Resend guarda a chave por 24 horas na conta inteira, não por banco. Só o
+    id se repetiria depois de recriar o banco (o `reset` da demonstração) ou
+    entre bancos com a mesma chave da API, e o Resend recusaria o envio
+    (#189). O `created_at` do registro, em microssegundos, não se repete.
+    """
+    created = (notification.created_at - EPOCH) // timedelta(microseconds=1)
+    return f"notification-{notification.id}-{created}"
 
 
 def _describe(error: Exception) -> str:

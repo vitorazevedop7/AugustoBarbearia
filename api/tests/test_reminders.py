@@ -26,6 +26,7 @@ from app.modules.notifications.models import (
 )
 from app.modules.notifications.reminders import ReminderReport, send_due_reminders
 from app.modules.notifications.sender import Email
+from app.modules.notifications.service import idempotency_key
 from tests.factories import barber_id, local, make_appointment, service_by_name
 
 # O "agora" do job nos testes: segunda-feira, 10h00 em São Paulo.
@@ -172,7 +173,7 @@ def test_rn51_lembrete_vai_ao_cliente_com_o_conteudo_dos_outros_emails(
     assert "Corte + Barba" in email.text
     assert "Edvaldo" in email.text
     assert "/meus-agendamentos" in email.text
-    assert email.idempotency_key == f"notification-{notification.id}"
+    assert email.idempotency_key == idempotency_key(notification)
     assert notification.status == NotificationStatus.SENT
     assert notification.recipient == "ana@example.com"
     assert notification.sent_at is not None
