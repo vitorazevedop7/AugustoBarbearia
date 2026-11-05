@@ -6,13 +6,16 @@
 #   scripts/demo.sh url     mostra o link atual
 #   scripts/demo.sh logs    acompanha os logs
 #   scripts/demo.sh down    para tudo e guarda o banco da demonstração
-#   scripts/demo.sh reset   para tudo e apaga o banco (os dados fictícios
-#                           são recriados na próxima subida, com as datas de hoje)
+#   scripts/demo.sh reset   apaga o banco e mantém o túnel (os dados fictícios
+#                           são recriados na próxima subida, com as datas de hoje,
+#                           e o link continua o mesmo se o túnel ainda responder)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 ENV_FILE=.env.demo
 LOCAL_URL=http://localhost:3001
+# Volume do banco: <name do docker-compose.demo.yml>_<volume>.
+DB_VOLUME=augusto-demo_demo-db-data
 
 # O compose exige DEMO_URL e BETTER_AUTH_SECRET até para ler logs. Antes de o
 # túnel mostrar o link, vale um valor provisório.
@@ -153,9 +156,15 @@ case "${1:-}" in
     ;;
   logs) compose logs -f ;;
   down) compose down ;;
-  reset) compose down -v ;;
+  reset)
+    # Tudo menos o túnel: com ele de pé, o próximo "up" reaproveita o link, e
+    # os endereços cadastrados no Google continuam valendo.
+    compose rm --stop --force -v db setup api auth-migrate web
+    docker volume rm --force "$DB_VOLUME" >/dev/null
+    echo "Banco da demonstração apagado. Rode scripts/demo.sh up para recriar os dados com as datas de hoje."
+    ;;
   *)
-    sed -n '2,10p' "$0"
+    sed -n '2,11p' "$0"
     exit 1
     ;;
 esac
