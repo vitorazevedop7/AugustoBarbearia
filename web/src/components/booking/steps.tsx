@@ -82,7 +82,7 @@ export function ServiceStep({
               <span className="font-heading text-display-4 font-black uppercase text-ink">
                 {service.name}
               </span>
-              <span className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase tabular-nums">
+              <span className="text-sm font-semibold text-ink-muted tabular-nums">
                 <span className="sr-only">Duração: </span>
                 {formatDuration(service.duration_minutes)}
               </span>

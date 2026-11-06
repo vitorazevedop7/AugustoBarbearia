@@ -52,7 +52,7 @@ export function StepHeader({
   return (
     <header>
       {progress ? (
-        <p className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
+        <p className="text-sm font-semibold text-ink-muted">
           Etapa {progress.number} de {progress.total} · {progress.label}
         </p>
       ) : null}
@@ -109,7 +109,7 @@ export function ChoiceSummary({ items }: { items: SummaryItem[] }) {
     <dl className="mt-8 divide-y divide-line bg-surface px-4 shadow-card sm:px-6">
       {items.map(({ label, value, changeHref }) => (
         <div key={label} className="flex items-center gap-4 py-3 sm:py-4">
-          <dt className="w-20 shrink-0 text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
+          <dt className="w-20 shrink-0 text-sm font-semibold text-ink-muted">
             {label}
           </dt>
           <dd className="min-w-0 flex-1 text-ink">{value}</dd>

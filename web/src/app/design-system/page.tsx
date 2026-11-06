@@ -182,7 +182,7 @@ export default function DesignSystemPage() {
             <p className="text-sm text-ink-muted">
               Apoio · Inter 14px em ink-muted
             </p>
-            <p className="text-xs font-semibold tracking-[0.08em] uppercase">
+            <p className="text-sm font-semibold ">
               Rótulo em caixa alta · Inter 600, 0,08em
             </p>
           </div>
@@ -297,7 +297,7 @@ export default function DesignSystemPage() {
               },
             ].map(({ legend, slots }) => (
               <fieldset key={legend}>
-                <legend className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
+                <legend className="text-sm font-semibold text-ink-muted">
                   {legend}
                 </legend>
                 <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -519,7 +519,7 @@ export default function DesignSystemPage() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
+                <p className="text-sm font-semibold text-ink-muted">
                   Ter, 3 de nov · 14:30
                 </p>
                 <h3 className="mt-2 font-heading text-display-4 font-black text-ink uppercase">

@@ -15,8 +15,8 @@ function revealIndex(index: number): CSSProperties {
 }
 
 /**
- * Serviços da vitrine num card branco único, na ordem da API, em 1 coluna no
- * celular e 2 a partir do `md`. `null` = a API não respondeu. Com `limit`,
+ * Serviços da vitrine como a tabela de preços: uma linha por serviço, na
+ * ordem da API. `null` = a API não respondeu. Com `limit`,
  * mostra só os primeiros (a página inicial).
  */
 export function ServiceList({
@@ -46,7 +46,7 @@ export function ServiceList({
   }
   return (
     <ServiceCard>
-      <ul className="grid gap-x-16 gap-y-12 [--reveal-cols:1] md:grid-cols-2 md:[--reveal-cols:2]">
+      <ul className="divide-y divide-line border-b border-line [--reveal-cols:1]">
         {services.slice(0, limit).map((service, index) => (
           <li key={service.id} data-reveal="rise" style={revealIndex(index)}>
             <ServiceItem
@@ -65,18 +65,13 @@ export function ServiceList({
   );
 }
 
-/** Largura do card: 1 coluna, 2 a partir do `sm` e 3 a partir do `lg`, até 1340px. */
+/** Largura do card: 1 coluna e 3 a partir do `md`, até 1340px (três barbeiros sem um sozinho na última linha). */
 const PHOTO_SIZES =
-  "(min-width: 1404px) 428px, (min-width: 1024px) calc((100vw - 7.5rem) / 3), (min-width: 640px) calc((100vw - 4.5rem) / 2), calc(100vw - 2rem)";
-
-/** Deslocamento de cada coluna da grade de barbeiros no desktop: 0, 75 e 145px. */
-const STEPS = ["", "lg:mt-[75px]", "lg:mt-[145px]"];
+  "(min-width: 1404px) 425px, (min-width: 768px) calc((100vw - 7rem) / 3), calc(100vw - 2rem)";
 
 /**
  * Barbeiros ativos em cards, na ordem da API. `null` = a API não respondeu.
- * No desktop (3 colunas), os cards descem em degraus de 0, 75 e 145px, como a
- * equipe do Beard X; no celular e no tablet, ficam alinhados. O degrau é
- * margem, e não `transform`, para não brigar com o `rise` da entrada ao rolar.
+ * Os três formam um conjunto: retratos do mesmo tamanho, topos alinhados.
  */
 export function BarberList({
   barbers,
@@ -105,14 +100,9 @@ export function BarberList({
     );
   }
   return (
-    <ul className="grid gap-6 [--reveal-cols:1] sm:grid-cols-2 sm:[--reveal-cols:2] lg:grid-cols-3 lg:items-start lg:gap-7 lg:[--reveal-cols:3]">
+    <ul className="grid gap-x-6 gap-y-14 [--reveal-cols:1] md:grid-cols-[repeat(3,minmax(0,1fr))] md:[--reveal-cols:3] lg:gap-x-8">
       {barbers.map((barber, index) => (
-        <li
-          key={barber.id}
-          data-reveal="rise"
-          style={revealIndex(index)}
-          className={STEPS[index % STEPS.length]}
-        >
+        <li key={barber.id} data-reveal="rise" style={revealIndex(index)}>
           <BarberCard
             name={barber.name}
             photoPath={barber.photo_path}

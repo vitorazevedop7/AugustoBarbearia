@@ -9,11 +9,14 @@ export function FixedPhotoLayer({
   photo,
   preload = false,
   imageClassName = "",
+  overlayClassName = "bg-ink/70",
 }: {
   photo: VitrinePhoto;
   /** Exclusivo do hero inicial, que é o LCP. */
   preload?: boolean;
   imageClassName?: string;
+  /** O véu sobre a foto; o hero usa um degradê só atrás do texto. */
+  overlayClassName?: string;
 }) {
   return (
     <>
@@ -28,7 +31,10 @@ export function FixedPhotoLayer({
           className={`object-cover ${imageClassName}`}
         />
       </div>
-      <div aria-hidden="true" className="absolute inset-0 bg-ink/70" />
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 ${overlayClassName}`}
+      />
     </>
   );
 }

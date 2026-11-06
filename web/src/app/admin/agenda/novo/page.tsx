@@ -357,7 +357,7 @@ async function customerStep(selection: NewAppointmentSelection, query: string) {
         <section aria-labelledby="clientes-encontrados">
           <h3
             id="clientes-encontrados"
-            className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase"
+            className="text-sm font-semibold text-ink-muted"
           >
             Clientes encontrados
           </h3>

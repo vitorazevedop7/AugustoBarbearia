@@ -79,7 +79,7 @@ export function MobileMenu({
       onToggle={onToggle}
       className="group lg:hidden"
     >
-      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border-2 border-surface px-4 text-xs font-semibold tracking-[0.08em] text-surface uppercase transition-colors duration-300 ease-standard hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
+      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 border-2 border-surface px-4 text-sm font-semibold text-surface transition-colors duration-300 ease-standard hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"

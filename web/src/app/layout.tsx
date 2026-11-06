@@ -44,7 +44,7 @@ export default function RootLayout({
       <body className="flex min-h-dvh flex-col font-sans antialiased">
         <a
           href="#main-content"
-          className="sr-only z-10 bg-surface px-4 py-3 text-brand focus:not-sr-only focus:fixed focus:z-50 focus:top-2 focus:left-2 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+          className="sr-only fixed top-2 left-2 z-50 bg-surface px-4 py-3 text-brand focus:not-sr-only focus:fixed focus:z-50 focus:top-2 focus:left-2 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
         >
           Pular para o conteúdo
         </a>

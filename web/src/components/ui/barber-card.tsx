@@ -2,16 +2,10 @@ import { BarberPhoto } from "./barber-photo";
 import { ButtonLink } from "./button";
 
 /**
- * Card de barbeiro da vitrine, no padrão do Beard X: foto 6:7 (ou a inicial)
- * com o nome por cima, num degradê escuro, e "Agendar com <nome>" abaixo.
- *
- * O degradê acompanha o texto, e não a foto: um bloco `ink/80`–`ink/90` fica
- * atrás do nome e da apresentação, e só a faixa acima dele esmaece. Assim o
- * contraste passa no AA sobre qualquer foto, mesmo com o nome em duas linhas,
- * e a inicial do barbeiro sem foto continua à vista acima do bloco.
- *
- * Por cima da foto vai só a primeira linha da apresentação. Com `fullBio`
- * (página dos barbeiros), ela sai da foto e aparece inteira abaixo dela.
+ * Card de barbeiro da vitrine: o retrato 4:5 (ou a inicial), limpo, e o nome
+ * logo abaixo, em Barlow, com a primeira linha da apresentação e "Agendar com
+ * <nome>". Com `fullBio` (página dos barbeiros), a apresentação aparece
+ * inteira.
  */
 export function BarberCard({
   name,
@@ -33,34 +27,18 @@ export function BarberCard({
   const Heading = headingLevel;
   const firstLine = bio?.trim().split("\n")[0]?.trim();
   return (
-    <article className="group flex h-full flex-col">
-      <div className="relative">
-        <BarberPhoto
-          name={name}
-          photoPath={photoPath}
-          sizes={sizes}
-          ratio="6/7"
-          zoom
-        />
-        <div className="absolute inset-x-0 bottom-0">
-          <div
-            aria-hidden="true"
-            className="h-16 bg-linear-to-t from-ink/80 to-transparent"
-          />
-          <div className="bg-linear-to-t from-ink/90 to-ink/80 px-6 pb-6 sm:px-8 sm:pb-8">
-            <Heading className="font-heading text-display-3 font-black uppercase text-surface">
-              {name}
-            </Heading>
-            {firstLine && !fullBio ? (
-              <p className="mt-1 line-clamp-1 text-body text-on-ink-muted">
-                {firstLine}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </div>
+    <article className="flex h-full flex-col">
+      <BarberPhoto name={name} photoPath={photoPath} sizes={sizes} />
+      <Heading className="mt-6 font-heading text-display-3 font-black uppercase text-ink">
+        {name}
+      </Heading>
+      {firstLine && !fullBio ? (
+        <p className="mt-2 line-clamp-1 text-body text-ink-muted">
+          {firstLine}
+        </p>
+      ) : null}
       {bio && fullBio ? (
-        <p className="mt-6 text-body whitespace-pre-line text-ink-muted">
+        <p className="mt-3 text-body whitespace-pre-line text-ink-muted">
           {bio}
         </p>
       ) : null}

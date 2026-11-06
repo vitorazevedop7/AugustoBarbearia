@@ -41,7 +41,7 @@ describe("página de barbeiros — RN-60", () => {
     expect(container.querySelector("[data-page-band] img")).toBeNull();
   });
 
-  it("mostra cada barbeiro com foto 6:7, a apresentação inteira e o link para agendar com ele", async () => {
+  it("mostra cada barbeiro com retrato 4:5, a apresentação inteira e o link para agendar com ele", async () => {
     vi.mocked(getPublicBarbers).mockResolvedValue([
       {
         id: 7,
@@ -66,7 +66,7 @@ describe("página de barbeiros — RN-60", () => {
       "Foto de Bruno",
     );
     expect(within(bruno).getByRole("img").parentElement).toHaveClass(
-      "aspect-[6/7]",
+      "aspect-[4/5]",
     );
     expect(bruno).toHaveTextContent(
       "Apresentação cadastrada. Com uma segunda linha.",
@@ -78,14 +78,13 @@ describe("página de barbeiros — RN-60", () => {
     expect(within(edvaldo).getByText("E")).toBeInTheDocument();
   });
 
-  it("põe as fotos sobre a faixa escura parcial, mais alta que o maior degrau", async () => {
+  it("põe as fotos sobre a faixa escura parcial", async () => {
     vi.mocked(getPublicBarbers).mockResolvedValue(barbers);
 
     const { container } = render(await BarbersPage());
 
     const band = container.querySelector("[data-page-band]");
     expect(band).toHaveAttribute("aria-hidden", "true");
-    // 240px no desktop: o terceiro card, 145px abaixo, também a atravessa.
     expect(band).toHaveClass("-z-10", "bg-ink", "lg:h-60");
     expect(band?.parentElement).toContainElement(
       screen.getAllByRole("article")[0],

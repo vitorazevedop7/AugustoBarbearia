@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Ornament } from "@/components/ui/ornament";
 
 /**
  * Topo das páginas internas da vitrine, como no Beard X: a faixa escura com o
@@ -14,11 +13,15 @@ export function PageHero({
   title,
   description,
   photo,
+  band = true,
   children,
 }: {
   title: string;
   description: string;
   photo?: { src: string };
+  /** A faixa parcial que as fotos atravessam. A tabela de preços, que é
+   *  tipo sobre o papel, começa abaixo da faixa escura, sem ela. */
+  band?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -41,23 +44,24 @@ export function PageHero({
           </div>
         ) : null}
         <div className="mx-auto max-w-site">
-          <div className="motion-safe:animate-rise">
-            <Ornament align="start" tone="dark" />
-          </div>
-          <h1 className="mt-6 font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:200ms]">
+          <h1 className="font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
             {title}
           </h1>
-          <p className="mt-6 max-w-2xl text-body text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:400ms]">
+          <p className="mt-6 max-w-2xl text-lead text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:160ms]">
             {description}
           </p>
         </div>
       </section>
-      <div className="relative isolate px-4 pb-section sm:px-6 lg:px-8">
-        <div
-          aria-hidden="true"
-          data-page-band
-          className="absolute inset-x-0 top-0 -z-10 h-32 bg-ink md:h-48 lg:h-60"
-        />
+      <div
+        className={`relative isolate px-4 pb-section sm:px-6 lg:px-8 ${band ? "" : "pt-12 lg:pt-20"}`}
+      >
+        {band ? (
+          <div
+            aria-hidden="true"
+            data-page-band
+            className="absolute inset-x-0 top-0 -z-10 h-32 bg-ink md:h-48 lg:h-60"
+          />
+        ) : null}
         <div className="mx-auto max-w-site">{children}</div>
       </div>
     </>

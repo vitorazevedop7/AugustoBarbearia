@@ -21,6 +21,8 @@ import { useEffect } from "react";
  */
 export function RevealObserver() {
   useEffect(() => {
+    // O CSS só esconde o pendente sob `.js`: sem script, nada some.
+    document.documentElement.classList.add("js");
     if (
       typeof IntersectionObserver === "undefined" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches

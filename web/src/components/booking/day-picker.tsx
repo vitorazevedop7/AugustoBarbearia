@@ -25,7 +25,7 @@ export function DayPicker({
         <section key={month} aria-labelledby={`mes-${month}`}>
           <Heading
             id={`mes-${month}`}
-            className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase"
+            className="text-sm font-semibold text-ink-muted"
           >
             {formatMonth(dates[0])}
           </Heading>

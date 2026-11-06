@@ -1,6 +1,4 @@
-import { FramedPhoto } from "@/components/ui/framed-photo";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { vitrinePhotos } from "@/lib/vitrine-photos";
 
 const STEPS = [
   "Escolha o barbeiro.",
@@ -9,54 +7,38 @@ const STEPS = [
   "Confirme com sua conta Google.",
 ];
 
-/** O fluxo existente (D11), com as condições das RN-14 e RN-51. */
+/**
+ * O fluxo existente (D11), com as condições das RN-14 e RN-51: os quatro
+ * passos lado a lado numa `ol` de verdade (o numeral é o contador da lista),
+ * e as duas condições abaixo de um filete.
+ */
 export function HowItWorks() {
   return (
     <section
       aria-labelledby="como-funciona-titulo"
-      className="overflow-hidden bg-surface px-4 py-section sm:px-6 lg:px-8"
+      className="bg-paper-2 px-4 py-section-l sm:px-6 lg:px-8"
     >
-      <div className="mx-auto grid max-w-site items-center gap-12 lg:grid-cols-2 lg:gap-32">
-        <div className="relative min-w-0 md:pb-[25%] md:pl-8 lg:order-2 lg:-mr-[max(2rem,calc((100vw-var(--container-site))/2))] lg:pl-0">
-          <FramedPhoto
-            photo={vitrinePhotos.howChair}
-            ratioClassName="aspect-[7/8]"
-            sizes="(min-width: 1024px) calc((100vw - 8rem) / 2), (min-width: 768px) calc(100vw - 5rem), (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)"
-            data-reveal="zoom"
-          />
-          <div className="absolute bottom-0 left-0 hidden w-[70%] border-8 border-surface md:block lg:-left-16">
-            <FramedPhoto
-              photo={vitrinePhotos.howPhone}
-              ratioClassName="aspect-[7/8]"
-              sizes="(min-width: 1024px) 35vw, 70vw"
-              data-reveal="zoom"
-            />
-          </div>
-        </div>
-
-        <div data-reveal="rise" className="min-w-0 lg:order-1">
-          <SectionHeading
-            id="como-funciona-titulo"
-            title="Como funciona"
-            align="start"
-          />
-          <ol className="mt-8 list-decimal space-y-4 pl-7 text-body marker:font-heading marker:font-black marker:text-brand">
-            {STEPS.map((step) => (
-              <li key={step} className="pl-2">
-                {step}
-              </li>
-            ))}
-          </ol>
-          <div className="mt-8 space-y-4 text-body text-ink-muted">
-            <p>
-              Receba um lembrete por e-mail cerca de um dia antes, para reservas
-              feitas com pelo menos 24 horas de antecedência.
-            </p>
-            <p>
-              Remarque ou cancele pelo site até o horário. Avisando com 2 horas
-              de antecedência, outro cliente aproveita a vaga.
-            </p>
-          </div>
+      <div className="mx-auto max-w-site" data-reveal="rise">
+        <SectionHeading id="como-funciona-titulo" title="Como funciona" />
+        <ol className="steps mt-12 grid gap-10 sm:grid-cols-[repeat(2,minmax(0,1fr))] lg:mt-16 lg:grid-cols-[repeat(4,minmax(0,1fr))] lg:gap-8">
+          {STEPS.map((step) => (
+            <li
+              key={step}
+              className="border-t border-ink pt-6 font-heading text-display-4 font-black text-ink uppercase"
+            >
+              {step}
+            </li>
+          ))}
+        </ol>
+        <div className="mt-14 grid gap-6 border-t border-line pt-8 text-body text-ink-muted md:grid-cols-[repeat(2,minmax(0,1fr))] md:gap-8 lg:mt-20">
+          <p className="max-w-xl">
+            Receba um lembrete por e-mail cerca de um dia antes, para reservas
+            feitas com pelo menos 24 horas de antecedência.
+          </p>
+          <p className="max-w-xl">
+            Remarque ou cancele pelo site até o horário. Avisando com 2 horas de
+            antecedência, outro cliente aproveita a vaga.
+          </p>
         </div>
       </div>
     </section>

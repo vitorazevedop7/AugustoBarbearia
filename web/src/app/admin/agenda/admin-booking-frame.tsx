@@ -36,7 +36,7 @@ export function AdminStepFrame({
     <AdminPage title={pageTitle}>
       <div className="flex max-w-3xl flex-col">
         {progress ? (
-          <p className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase">
+          <p className="text-sm font-semibold text-ink-muted">
             Etapa {progress.number} de {progress.total} · {progress.label}
           </p>
         ) : null}

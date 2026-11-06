@@ -81,17 +81,15 @@ describe("página de serviços — RN-61", () => {
     ).toHaveAttribute("href", "/agendar?servico=3");
   });
 
-  it("põe o card de serviços sobre a faixa escura parcial, como no Beard X", async () => {
+  it("começa a tabela de preços abaixo da faixa escura, sem faixa parcial", async () => {
     vi.mocked(getPublicServices).mockResolvedValue(services);
 
     const { container } = render(await ServicesPage());
 
-    const band = container.querySelector("[data-page-band]");
-    expect(band).toHaveAttribute("aria-hidden", "true");
-    expect(band).toHaveClass("absolute", "-z-10", "bg-ink");
-    expect(band?.parentElement).toHaveClass("relative", "isolate");
-    const card = screen.getAllByRole("article")[0].closest(".shadow-card");
-    expect(band?.parentElement).toContainElement(card as HTMLElement);
+    // A tabela é tipo escuro sobre o papel: não pode cruzar a faixa escura.
+    expect(container.querySelector("[data-page-band]")).toBeNull();
+    const list = screen.getAllByRole("article")[0].closest("ul");
+    expect(list?.parentElement).toHaveClass("border-t-2", "border-ink");
   });
 
   it("mostra o estado vazio", async () => {
