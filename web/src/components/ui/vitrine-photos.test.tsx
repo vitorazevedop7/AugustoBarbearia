@@ -17,7 +17,9 @@ describe("fotos compartilhadas da vitrine", () => {
     const photo = screen.getByRole("img", { name: vitrinePhotos.about.alt });
     expect(photo).toHaveAttribute("loading", "lazy");
     expect(photo).toHaveAttribute("sizes", "50vw");
-    expect(photo).toHaveClass("motion-reduce:group-hover:scale-100");
+    // A foto fica parada, sem zoom no hover; o contorno é um filete por dentro.
+    expect(photo).not.toHaveClass("group-hover:scale-110");
+    expect(photo.parentElement).toHaveClass("-outline-offset-1");
     expect(photo.parentElement).toHaveClass("aspect-[7/8]", "overflow-hidden");
     expect(photo.parentElement).toHaveAttribute("data-reveal", "zoom");
   });

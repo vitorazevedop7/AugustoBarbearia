@@ -11,27 +11,51 @@ export function InfoLabel({
   children: string;
 }) {
   return (
-    <Tag className="text-xs font-semibold tracking-[0.08em] text-on-ink-muted uppercase">
-      {children}
-    </Tag>
+    <Tag className="text-sm font-semibold text-on-ink-muted">{children}</Tag>
   );
 }
 
 const linkOnInk =
-  "underline decoration-line-on-ink underline-offset-4 transition-colors duration-300 ease-standard hover:decoration-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none";
+  "underline decoration-line-on-ink underline-offset-4 transition-colors duration-200 ease-standard hover:decoration-surface active:text-on-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface motion-reduce:transition-none";
 
-/** Horário de funcionamento sobre a faixa escura, com os dias iguais juntos. */
+/**
+ * Horário de funcionamento sobre a faixa escura, com os dias iguais juntos,
+ * em linhas separadas por filetes. `lg` é o quadro grande da seção de
+ * contato; o padrão é o do rodapé.
+ */
 export function BusinessHoursList({
   days,
+  size = "md",
 }: {
   days: PublicShop["business_hours"];
+  size?: "md" | "lg";
 }) {
+  const large = size === "lg";
   return (
-    <dl className="space-y-2">
+    <dl
+      className={
+        large
+          ? "divide-y divide-line-on-ink border-y border-line-on-ink"
+          : "space-y-2"
+      }
+    >
       {groupBusinessHours(days).map(({ days: label, hours }) => (
-        <div key={label} className="flex justify-between gap-6">
-          <dt className="text-on-ink-muted">{label}</dt>
-          <dd className="font-semibold text-surface tabular-nums">{hours}</dd>
+        <div
+          key={label}
+          className={`flex items-baseline justify-between gap-6 ${large ? "py-5" : ""}`}
+        >
+          <dt
+            className={
+              large ? "text-body text-on-ink-muted" : "text-on-ink-muted"
+            }
+          >
+            {label}
+          </dt>
+          <dd
+            className={`text-surface tabular-nums ${large ? "font-heading text-display-4 font-black uppercase" : "font-semibold"}`}
+          >
+            {hours}
+          </dd>
         </div>
       ))}
     </dl>

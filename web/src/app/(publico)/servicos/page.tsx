@@ -22,6 +22,7 @@ export default async function ServicesPage() {
     <main id="main-content" tabIndex={-1} className="flex-1">
       <PageHero
         photo={vitrinePhotos.servicesHero}
+        band={false}
         title="Serviços"
         description="Preço e duração de cada serviço, e quem realiza. Escolha um para agendar."
       >

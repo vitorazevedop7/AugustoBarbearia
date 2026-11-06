@@ -31,21 +31,13 @@ describe("HowItWorks", () => {
     ).toBeVisible();
   });
 
-  it("inclui as duas fotos descritivas com carga lazy e espaço reservado", () => {
-    const { container } = render(<HowItWorks />);
+  it("numera os passos pela própria lista, só com tipo, sem fotos", () => {
+    render(<HowItWorks />);
 
-    const chair = screen.getByAltText("Cliente na cadeira durante o corte");
-    const phone = screen.getByAltText("Cliente com o celular na barbearia");
-    for (const photo of [chair, phone]) {
-      expect(photo).toHaveAttribute("loading", "lazy");
-      expect(photo.parentElement).toHaveClass("aspect-[7/8]");
-    }
-    expect(phone.parentElement?.parentElement).toHaveClass(
-      "hidden",
-      "md:block",
-      "border-8",
-      "border-surface",
-    );
-    expect(container.querySelector("section")).toHaveClass("overflow-hidden");
+    const section = screen.getByRole("region", { name: "Como funciona" });
+    // O numeral é o contador da `ol` (classe `steps`), não um rótulo à parte.
+    expect(within(section).getByRole("list").tagName).toBe("OL");
+    expect(within(section).getByRole("list")).toHaveClass("steps");
+    expect(within(section).queryByRole("img")).toBeNull();
   });
 });

@@ -6,28 +6,28 @@ type Variant =
 type Size = "md" | "sm";
 
 const base =
-  "inline-flex items-center justify-center gap-2 border-2 text-center font-heading font-black uppercase transition-[background-color,border-color,color,transform] duration-300 ease-standard focus-visible:outline-2 focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none";
+  "inline-flex items-center justify-center gap-2 border-2 text-center font-heading font-black whitespace-nowrap uppercase tracking-[0.02em] transition-[background-color,border-color,color] duration-200 ease-standard focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-55 motion-reduce:transition-none";
 
-/** Sobe 3px no hover; o `ghost` (e o `ghost-light`) não sobe porque não tem caixa. */
-const lift = "hover:-translate-y-0.75 motion-reduce:hover:translate-y-0";
+/** Um sinal só no hover: a cor. O pressionado escurece um degrau. */
+const lift = "";
 
 const variants: Record<Variant, string> = {
-  primary: `${lift} border-brand bg-brand text-surface hover:border-brand-strong hover:bg-brand-strong focus-visible:outline-brand`,
-  outline: `${lift} border-ink text-ink hover:bg-ink hover:text-paper focus-visible:outline-ink`,
-  "outline-light": `${lift} border-surface text-surface hover:bg-surface hover:text-ink focus-visible:outline-surface`,
-  danger: `${lift} border-danger text-danger hover:bg-danger hover:text-surface focus-visible:outline-danger`,
+  primary: `${lift} border-brand bg-brand text-surface hover:border-brand-strong hover:bg-brand-strong active:border-ink active:bg-ink focus-visible:outline-brand`,
+  outline: `${lift} border-ink text-ink hover:bg-ink hover:text-paper active:border-brand-strong active:bg-brand-strong active:text-surface focus-visible:outline-ink`,
+  "outline-light": `${lift} border-surface text-surface hover:bg-surface hover:text-ink active:bg-paper-2 active:text-ink focus-visible:outline-surface`,
+  danger: `${lift} border-danger text-danger hover:bg-danger hover:text-surface active:bg-brand-strong active:text-surface focus-visible:outline-danger`,
   ghost:
-    "border-transparent text-ink underline-offset-4 hover:underline focus-visible:outline-ink",
+    "border-transparent text-ink underline-offset-4 hover:underline active:text-brand focus-visible:outline-ink",
   "ghost-light":
-    "border-transparent text-surface underline-offset-4 hover:underline focus-visible:outline-surface",
+    "border-transparent text-surface underline-offset-4 hover:underline active:text-on-ink-muted focus-visible:outline-surface",
 };
 
 /**
- * `md` segue o Beard X: 60px de altura no celular e 84px a partir do `md`.
- * `sm` é o compacto da administração, do cabeçalho e dos cards.
+ * `md` é o botão da vitrine: 52px de altura. `sm` (44px) é o compacto da
+ * administração, do cabeçalho e das linhas de serviço.
  */
 const sizes: Record<Size, string> = {
-  md: "min-h-15 px-6 py-4 text-base leading-5 md:min-h-21 md:text-lg",
+  md: "min-h-13 px-7 py-3 text-base leading-5",
   sm: "min-h-11 px-5 py-2.5 text-sm leading-5",
 };
 

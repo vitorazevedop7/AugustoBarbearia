@@ -43,7 +43,7 @@ export function BarberPhoto({
     : "";
   return (
     <div
-      className={`@container relative ${ratios[ratio]} overflow-hidden bg-line ${className}`}
+      className={`@container relative ${ratios[ratio]} overflow-hidden bg-line outline-1 -outline-offset-1 outline-ink/10 ${className}`}
     >
       {showPhoto ? (
         <Image

@@ -159,7 +159,7 @@ describe("Alert com revealOnMount (#157)", () => {
 });
 
 describe("ServiceCard", () => {
-  it("é um card branco único com os serviços em grade", () => {
+  it("é a tabela de preços, sem card, aberta por um filete", () => {
     render(
       <ServiceCard>
         <ul>
@@ -187,7 +187,8 @@ describe("ServiceCard", () => {
       </ServiceCard>,
     );
     const card = screen.getByRole("list").parentElement!;
-    expect(card).toHaveClass("bg-surface", "shadow-card");
+    expect(card).toHaveClass("border-t-2", "border-ink");
+    expect(card).not.toHaveClass("bg-surface", "shadow-card");
     expect(screen.getAllByRole("article")).toHaveLength(2);
     // Sem quem realiza, a linha "Com" não aparece.
     expect(card).not.toHaveTextContent("Com");
@@ -223,7 +224,7 @@ describe("ServiceItem", () => {
 });
 
 describe("BarberCard", () => {
-  it("põe o nome e a primeira linha da apresentação sobre a foto 6:7", () => {
+  it("põe o nome e a primeira linha da apresentação abaixo do retrato 4:5", () => {
     render(
       <BarberCard
         name="Lauro"
@@ -235,18 +236,14 @@ describe("BarberCard", () => {
       />,
     );
     const photo = screen.getByRole("img", { name: "Foto de Lauro" });
-    expect(photo.parentElement).toHaveClass("aspect-[6/7]", "overflow-hidden");
-    // Zoom de 1,1 no hover, dentro da moldura, sem movimento se pedido.
-    expect(photo).toHaveClass(
-      "group-hover:scale-110",
-      "duration-300",
-      "motion-reduce:group-hover:scale-100",
-    );
+    expect(photo.parentElement).toHaveClass("aspect-[4/5]", "overflow-hidden");
+    // A foto fica parada: sem zoom no hover.
+    expect(photo).not.toHaveClass("group-hover:scale-110");
     const heading = screen.getByRole("heading", { level: 2, name: "Lauro" });
-    expect(heading).toHaveClass("text-surface");
-    // O texto fica num bloco escuro (ink/80 a ink/90) sobre a foto: contraste AA.
-    expect(heading.parentElement).toHaveClass("from-ink/90", "to-ink/80");
-    expect(heading.parentElement).toHaveTextContent("Primeira linha.");
+    expect(heading).toHaveClass("text-ink");
+    // O nome vem depois do retrato, fora da foto.
+    expect(photo.parentElement?.nextElementSibling).toBe(heading);
+    expect(heading.nextElementSibling).toHaveTextContent("Primeira linha.");
     expect(screen.queryByText(/Segunda linha/)).toBeNull();
     expect(
       screen.getByRole("link", { name: "Agendar com Lauro" }),
@@ -265,10 +262,12 @@ describe("BarberCard", () => {
       />,
     );
     const heading = screen.getByRole("heading", { level: 3, name: "Lauro" });
-    expect(heading.parentElement).not.toHaveTextContent("Primeira linha.");
+    // A apresentação vem inteira, sem o corte de uma linha.
+    expect(heading.nextElementSibling).toBe(screen.getByText(/Segunda linha/));
     expect(screen.getByText(/Segunda linha/)).toHaveTextContent(
       "Primeira linha. Segunda linha.",
     );
+    expect(screen.getByText(/Segunda linha/)).not.toHaveClass("line-clamp-1");
   });
 
   it("mostra a inicial, sem imagem, quando não há foto", () => {

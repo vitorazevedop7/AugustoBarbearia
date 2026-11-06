@@ -1,36 +1,37 @@
 import { ButtonLink } from "@/components/ui/button";
-import { FixedPhotoLayer } from "@/components/ui/fixed-photo-layer";
-import { Ornament } from "@/components/ui/ornament";
 import { BOOKING_PATH } from "@/lib/booking";
-import { vitrinePhotos } from "@/lib/vitrine-photos";
 
-/** A faixa de vídeo da referência vira uma chamada para o fluxo existente. */
+/**
+ * Faixa escura entre a galeria e a equipe: a frase grande à esquerda e, à
+ * direita, o que acontece depois e o botão. Só tipo, sem foto: as seções
+ * vizinhas já são de fotos.
+ */
 export function BookingBand() {
   return (
     <section
       aria-labelledby="agendar-titulo"
-      className="relative isolate flex items-center justify-center bg-ink px-4 py-section text-center [clip-path:inset(0)] sm:px-6 lg:min-h-[70svh] lg:px-8"
+      className="bg-ink px-4 py-section text-surface sm:px-6 lg:px-8"
     >
-      <FixedPhotoLayer
-        photo={vitrinePhotos.bookingBand}
-        imageClassName="object-[55%_50%] brightness-75"
-      />
-      <div className="relative mx-auto max-w-3xl" data-reveal="rise">
-        <Ornament tone="dark" />
+      <div
+        className="mx-auto grid max-w-site gap-8 lg:grid-cols-12 lg:items-end lg:gap-8"
+        data-reveal="rise"
+      >
         <h2
           id="agendar-titulo"
-          className="mt-6 font-heading text-display-2 font-black uppercase text-surface"
+          className="font-heading text-display-1 font-black uppercase text-surface lg:col-span-7"
         >
           Agende pelo celular
         </h2>
-        <p className="mx-auto mt-6 max-w-xl text-body text-on-ink-muted">
-          Escolha o barbeiro, o serviço e o horário. Receba a confirmação por
-          e-mail.
-        </p>
-        <div className="mt-10">
-          <ButtonLink href={BOOKING_PATH} className="w-full sm:w-auto">
-            Agendar horário
-          </ButtonLink>
+        <div className="flex flex-col gap-6 lg:col-span-4 lg:col-start-9">
+          <p className="max-w-md text-lead text-on-ink-muted">
+            Escolha o barbeiro, o serviço e o horário. Receba a confirmação por
+            e-mail.
+          </p>
+          <div>
+            <ButtonLink href={BOOKING_PATH} className="w-full sm:w-auto">
+              Agendar horário
+            </ButtonLink>
+          </div>
         </div>
       </div>
     </section>

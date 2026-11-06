@@ -1,46 +1,89 @@
+/* Hallmark · shape: Price Board (/), kept banner (/servicos, /barbeiros) · genre: editorial · theme: brand · redesign: full · job: book
+ * paper: oklch(97.2% 0.008 75) · accent: oklch(52% 0.19 19) · display: Barlow 900 caps · body: Inter · hero: Ledge (/), Banner (/servicos, /barbeiros) · nav: edge-aligned, the wordmark, three links, the account and the booking action · footer: mast, the wordmark large over hours, contact and the legal line · signature: the price list set as the board on the shop wall, prices large beside each booking action
+ * axes: light/display-heavy/chromatic-red · posture: restrained · contrast: pass · fold: pass · imagery: photographs, the project's own stand-ins (D12), natural · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S4 R4 V4 · weakest: S, a barbershop page fits any barbershop; led with the real price list as the board on the wall instead of a centred card grid */
+/* Hallmark · waive 44c · hero: Ledge on / fills min-h-svh with the head resting at its base; Banner on /servicos and /barbeiros · the home photo is the whole first screen and the inner pages open on their list */
+/* Hallmark · waive 78 · the h2s on /servicos and /barbeiros are the service and barber names, items of one list under the banner h1 · the inner pages are a price list and a team list, not sectioned pages */
+/* Hallmark · waive 83 · /servicos and /barbeiros close on the shop's own photo mosaic of its work under the list · the mosaic is the shop's portfolio of cuts and beards */
+/* Hallmark · waive 59 · on /barbeiros the portraits cross the dark band of the banner, a zero gap by design · the team photos overlap the ink band as the shop's inner pages do */
+/* Hallmark · dismissed 77 · /servicos and /barbeiros are catalogue pages: banner, the list, the mosaic and the footer */
+/* Hallmark · dropped faixa-agendar.jpg, como-funciona-cadeira.jpg, como-funciona-celular.jpg · the band and the steps are set in type so gallery, team and steps never run as two photograph-led sections in a row (83) */
+/* Hallmark · dropped the floating razor, scissors and comb drawings · 80 names drawn illustrations past icon size */
 @import "tailwindcss";
+@import "./base.css" layer(base);
 
-/* Tokens da identidade visual (docs/design/identidade-visual.md). */
+/* Tokens da identidade visual (docs/design/identidade-visual.md), em OKLCH,
+   com os neutros puxados para o tom quente do papel. Os nomes são os do
+   projeto; os papéis do Hallmark (--color-accent, --color-rule…) apontam
+   para eles no @theme. */
 :root {
-  --brand: #c41e3a;
-  --brand-strong: #8b1528;
-  --brand-on-dark: #e63946;
-  --logo-red: #ff3131;
-  --ink: #111111;
-  --ink-muted: #5c5c5c;
-  --paper: #faf7f2;
-  --surface: #ffffff;
-  --line: #e5e1da;
-  --on-ink-muted: #bdb8b0;
-  --line-on-ink: #333333;
-  --success: #1e7f4f;
-  --warning: #9a5b00;
-  --danger: #b42318;
+  --brand: oklch(52% 0.19 19);
+  --brand-strong: oklch(40.5% 0.148 17);
+  --brand-on-dark: oklch(64% 0.2 23);
+  --logo-red: oklch(64% 0.23 27);
+  --ink: oklch(18.5% 0.008 40);
+  --ink-muted: oklch(46% 0.012 55);
+  --paper: oklch(97.2% 0.008 75);
+  --paper-2: oklch(94.2% 0.013 75);
+  --surface: oklch(99.2% 0.004 75);
+  --line: oklch(89.5% 0.012 70);
+  --on-ink-muted: oklch(79% 0.012 70);
+  --line-on-ink: oklch(33% 0.008 40);
+  --success: oklch(50% 0.12 155);
+  --warning: oklch(52% 0.12 65);
+  --danger: oklch(50% 0.18 28);
 
-  /* Ritmo da vitrine (Beard X): o valor muda com a tela, e o tema o expõe
-     como `text-body` e `py-section`. */
+  /* Escala de espaço do Hallmark (múltiplos de 4px, como o Tailwind). */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 144px;
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* Ritmo da vitrine: o corpo cresce no `md`; as seções se separam por 120 e
+     144px no desktop (176px na seção de respiro maior). */
   --body-size: 1rem;
-  --body-leading: 1.5;
-  --section-y: 5.5rem;
+  --body-leading: 1.55;
+  --section-y: 4.5rem;
+  --section-y-l: 6rem;
 }
 
 @media (width >= 40rem) {
   :root {
-    --section-y: 6.25rem;
+    --section-y: 5.5rem;
+    --section-y-l: 7rem;
   }
 }
 
 @media (width >= 48rem) {
   :root {
-    --body-size: 1.125rem;
-    --body-leading: 1.667;
-    --section-y: 10rem;
+    --body-size: 1.0625rem;
+    --body-leading: 1.6;
+    --section-y: 7.5rem;
+    --section-y-l: 9rem;
   }
 }
 
 @media (width >= 64rem) {
   :root {
-    --section-y: 15rem;
+    --section-y: 9rem;
+    --section-y-l: 11rem;
   }
 }
 
@@ -52,6 +95,7 @@
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
   --color-surface: var(--surface);
   --color-line: var(--line);
   --color-on-ink-muted: var(--on-ink-muted);
@@ -59,43 +103,55 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  /* Papéis do Hallmark sobre os tokens do projeto. */
+  --color-accent: var(--brand);
+  --color-accent-ink: var(--surface);
+  --color-focus: var(--brand);
+  --color-muted: var(--ink-muted);
+  --color-rule: var(--line);
+  --color-error: var(--danger);
   --font-sans: var(--font-inter);
   --font-heading: var(--font-barlow);
-  /* Corpo da vitrine: 16px com entrelinha 1,5 no celular; 18px com 1,667 a partir do `md`. */
+  --font-display: var(--font-barlow);
+  --font-body: var(--font-inter);
   --text-body: var(--body-size);
   --text-body--line-height: var(--body-leading);
-  /* Padding vertical das seções da vitrine: 88, 100, 160 e 240px. */
   --spacing-section: var(--section-y);
+  --spacing-section-l: var(--section-y-l);
 }
 
 @theme {
-  /* Títulos da vitrine (Barlow 900, caixa alta): crescem com a tela de 360
-     a 1280px. Os extremos e as entrelinhas são os medidos no Beard X. */
-  --text-display-1: clamp(2rem, 0.533rem + 6.522vw, 5.75rem);
-  --text-display-1--line-height: 1.065;
-  --text-display-2: clamp(1.75rem, 1.065rem + 3.043vw, 3.5rem);
-  --text-display-2--line-height: 1.196;
-  --text-display-3: clamp(1.5rem, 1.157rem + 1.522vw, 2.375rem);
-  --text-display-3--line-height: 1.368;
-  --text-display-4: clamp(1.25rem, 1.152rem + 0.435vw, 1.5rem);
-  --text-display-4--line-height: 1.583;
+  /* Títulos da vitrine (Barlow 900, caixa alta), de 360 a 1440px. O hero
+     da página inicial tem o próprio passo, maior, preso em 1920. Em caixa
+     alta, a entrelinha nunca fica abaixo de 1,0. */
+  --text-display-hero: clamp(3rem, 1.2rem + 7.6vw, 8.25rem);
+  --text-display-hero--line-height: 1;
+  --text-display-1: clamp(2.5rem, 1rem + 5vw, 5.25rem);
+  --text-display-1--line-height: 1.02;
+  --text-display-2: clamp(2rem, 1.1rem + 2.8vw, 3.5rem);
+  --text-display-2--line-height: 1.04;
+  --text-display-3: clamp(1.5rem, 1.15rem + 1.2vw, 2.375rem);
+  --text-display-3--line-height: 1.1;
+  --text-display-4: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-display-4--line-height: 1.2;
+  --text-lead: clamp(1.125rem, 1rem + 0.35vw, 1.375rem);
+  --text-lead--line-height: 1.45;
 
-  /* Container da vitrine: até 1340px de conteúdo. */
+  /* Container da vitrine: até 1340px de conteúdo; em 1920 as margens crescem. */
   --container-site: 83.75rem;
 
-  /* Curva dos hovers da referência: 300ms `ease`. */
-  --ease-standard: ease;
+  /* Chegadas desaceleram; nunca o `ease` do navegador. */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --shadow-card: 0 2px 12px rgb(16 16 16 / 0.08);
+  --shadow-card: 0 1px 2px oklch(20% 0.01 40 / 0.05);
 
-  /* Cascata do hero ao carregar: sobe 10% da altura do próprio elemento,
-     como o preset `rise` da entrada ao rolar (500ms `ease`). */
-  --animate-rise: rise 500ms ease both;
+  /* Cascata do hero ao carregar: sobe 8px e aparece, uma vez. */
+  --animate-rise: rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
 
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(10%);
+      transform: translateY(8px);
     }
   }
 }
@@ -105,10 +161,10 @@ body {
   color: var(--ink);
 }
 
-/* Menu do celular (MobileMenu): o painel desce de trás do cabeçalho em
-   400ms `ease`. Aberto, ele trava a rolagem da página, mesmo sem JS. */
+/* Menu do celular (MobileMenu): o painel desce de trás do cabeçalho.
+   Aberto, ele trava a rolagem da página, mesmo sem JS. */
 @theme {
-  --animate-menu-down: menu-down 400ms ease both;
+  --animate-menu-down: menu-down 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 
   @keyframes menu-down {
     from {
@@ -119,13 +175,33 @@ body {
 
 @media (width < 64rem) {
   html:has([data-mobile-menu][open]) {
-    overflow: hidden;
+    overflow: clip;
   }
 }
 
 ::selection {
   background: var(--brand);
   color: var(--surface);
+}
+
+/* Lista de passos de "Como funciona": o numeral é um contador da própria
+   `ol`, em Barlow, e não um rótulo acima do texto. */
+.steps {
+  counter-reset: step;
+}
+.steps > li {
+  counter-increment: step;
+}
+.steps > li::before {
+  content: counter(step);
+  display: block;
+  font-family: var(--font-barlow);
+  font-weight: 900;
+  font-size: var(--text-display-2);
+  line-height: 1;
+  color: var(--brand);
+  margin-bottom: var(--space-lg);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Entrada ao rolar: só esconde o que o RevealObserver marcou como pendente
@@ -139,25 +215,25 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   [data-reveal-state="done"] {
     transition:
-      opacity 500ms ease,
-      transform 500ms ease;
-    transition-delay: 200ms;
+      opacity 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: 120ms;
     transition-delay: calc(
-      var(--reveal-delay, 200ms) +
-        mod(var(--reveal-index, 0), var(--reveal-cols, 1)) * 50ms
+      var(--reveal-delay, 120ms) +
+        mod(var(--reveal-index, 0), var(--reveal-cols, 1)) * 40ms
     );
   }
 
-  [data-reveal-state="pending"] {
+  .js [data-reveal-state="pending"] {
     opacity: 0;
-    transform: translateY(10%);
+    transform: translateY(8px);
   }
 
-  [data-reveal-state="pending"][data-reveal="fade"] {
+  .js [data-reveal-state="pending"][data-reveal="fade"] {
     transform: none;
   }
 
-  [data-reveal-state="pending"][data-reveal="zoom"] {
-    transform: scale(0.92);
+  .js [data-reveal-state="pending"][data-reveal="zoom"] {
+    transform: translateY(8px);
   }
 }

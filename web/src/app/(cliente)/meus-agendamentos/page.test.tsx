@@ -94,8 +94,8 @@ describe("meus agendamentos — /meus-agendamentos", () => {
     expect(screen.getByText("Você ainda não tem horários")).toBeVisible();
     const book = screen.getByRole("link", { name: "Agendar horário" });
     expect(book).toHaveAttribute("href", "/agendar");
-    // A ação principal da tela usa o botão `md`: 60px no celular, 84px a partir do `md`.
-    expect(book).toHaveClass("min-h-15", "md:min-h-21");
+    // A ação principal da tela usa o botão `md`, de 52px.
+    expect(book).toHaveClass("min-h-13");
   });
 
   it("próximo horário dentro do prazo: remarcar e cancelar (RN-14)", async () => {

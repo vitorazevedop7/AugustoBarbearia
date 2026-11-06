@@ -1,0 +1,56 @@
+/* Base do Hallmark, adaptada ao projeto: o que o Floor já decidiu. Os
+   tamanhos e as famílias dos títulos ficam com os utilitários do Tailwind,
+   porque a administração usa Inter nos títulos (identidade-visual.md). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  overflow-x: clip;
+}
+html {
+  scrollbar-color: var(--color-muted) var(--color-paper);
+  scroll-padding-top: var(--space-3xl);
+}
+body {
+  caret-color: var(--color-accent);
+}
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+h1,
+h2,
+h3 {
+  font-synthesis: none;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+[hidden] {
+  display: none !important;
+}
+.num,
+.figure,
+td.num {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  *:not(.keep-motion),
+  *:not(.keep-motion)::before,
+  *:not(.keep-motion)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

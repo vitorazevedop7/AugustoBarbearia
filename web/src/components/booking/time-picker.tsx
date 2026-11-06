@@ -36,7 +36,7 @@ export function TimePicker({
           <section key={group.id} aria-labelledby={`periodo-${group.id}`}>
             <Heading
               id={`periodo-${group.id}`}
-              className="text-xs font-semibold tracking-[0.08em] text-ink-muted uppercase"
+              className="text-sm font-semibold text-ink-muted"
             >
               {group.title}
             </Heading>

@@ -62,7 +62,7 @@ describe("página inicial (vitrine)", () => {
     ).toBeNull();
   });
 
-  it("mostra o hero de tela inteira com a foto decorativa, prioridade e overlay", async () => {
+  it("mostra o hero de tela inteira com a foto decorativa, prioridade e o degradê atrás do texto", async () => {
     render(await HomePage());
 
     const hero = screen
@@ -80,10 +80,11 @@ describe("página inicial (vitrine)", () => {
     // Tela inteira; no desktop, a camada da foto fica fixa e o hero a recorta.
     expect(hero).toHaveClass("min-h-svh", "[clip-path:inset(0)]");
     expect(photo.parentElement).toHaveClass("absolute", "motion-safe:lg:fixed");
-    expect(hero.querySelector(".bg-ink\\/70")).toHaveAttribute(
-      "aria-hidden",
-      "true",
-    );
+    // O degradê escurece só o lado do texto (embaixo, à esquerda).
+    const overlay = hero.querySelector(".from-ink\\/90");
+    expect(overlay).toHaveAttribute("aria-hidden", "true");
+    expect(overlay).toHaveClass("bg-linear-to-tr");
+    expect(hero).toHaveClass("items-end");
   });
 
   it("usa a frase de destaque e o texto sobre da administração", async () => {
@@ -132,10 +133,10 @@ describe("página inicial (vitrine)", () => {
     expect(
       within(servicos).getByRole("link", { name: "Ver todos os serviços" }),
     ).toHaveAttribute("href", "/servicos");
-    // Um card branco único, com a grade de 1 coluna no celular e 2 no `md`.
+    // A tabela de preços: uma linha por serviço, separadas por filetes.
     const grid = within(servicos).getByRole("list");
-    expect(grid).toHaveClass("md:grid-cols-2");
-    expect(grid.parentElement).toHaveClass("bg-surface", "shadow-card");
+    expect(grid).toHaveClass("divide-y");
+    expect(grid.parentElement).toHaveClass("border-t-2", "border-ink");
     expect(within(grid).getAllByRole("listitem")[1]).toHaveAttribute(
       "data-reveal",
       "rise",
@@ -171,18 +172,15 @@ describe("página inicial (vitrine)", () => {
     },
   );
 
-  it("mostra a faixa de agendamento entre a galeria e a equipe, com foto decorativa lazy", async () => {
+  it("mostra a faixa de agendamento entre a galeria e a equipe, só com tipo", async () => {
     render(await HomePage());
     const band = section("Agende pelo celular");
     expect(section("Nosso trabalho").nextElementSibling).toBe(band);
     expect(band.nextElementSibling).toBe(section("Nossa equipe"));
-    expect(band).toHaveClass("[clip-path:inset(0)]", "lg:min-h-[70svh]");
-    const image = within(band).getByRole("presentation");
-    expect(image).toHaveAttribute("loading", "lazy");
-    expect(image).not.toHaveAttribute("fetchpriority");
-    // O brilho reduzido sustenta o contraste AA do texto sobre a foto.
-    expect(image).toHaveClass("object-[55%_50%]", "brightness-75");
-    expect(image.parentElement).toHaveClass("motion-safe:lg:fixed");
+    // Faixa escura sem foto: as seções vizinhas já são de fotos.
+    expect(band).toHaveClass("bg-ink");
+    expect(within(band).queryByRole("presentation")).toBeNull();
+    expect(within(band).queryByRole("img")).toBeNull();
     expect(band).toHaveTextContent("Receba a confirmação por e-mail.");
     expect(
       within(band).getByRole("link", { name: "Agendar horário" }),
@@ -203,14 +201,13 @@ describe("página inicial (vitrine)", () => {
     expect(
       within(equipe).getByRole("link", { name: "Conhecer a equipe" }),
     ).toHaveAttribute("href", "/barbeiros");
-    // Degraus de 0, 75 e 145px só no desktop.
-    const [first, second, third] = within(equipe).getAllByRole("listitem");
-    expect(first.className).not.toContain("mt-");
-    expect(second).toHaveClass("lg:mt-[75px]");
-    expect(third).toHaveClass("lg:mt-[145px]");
+    // Os três retratos formam um conjunto: topos alinhados, sem degraus.
+    for (const item of within(equipe).getAllByRole("listitem")) {
+      expect(item.className).not.toContain("mt-");
+    }
   });
 
-  it("decora as bordas das seções com ornamentos atrás do conteúdo", async () => {
+  it("não desenha ornamentos nas bordas das seções", async () => {
     vi.mocked(getPublicShop).mockResolvedValue({
       ...shop,
       about: "Texto sobre cadastrado.",
@@ -220,11 +217,7 @@ describe("página inicial (vitrine)", () => {
 
     for (const name of ["Sobre a barbearia", "Serviços", "Nossa equipe"]) {
       const region = section(name);
-      // A seção recorta o ornamento (sem rolagem horizontal) e o põe atrás.
-      expect(region).toHaveClass("relative", "isolate", "overflow-hidden");
-      const ornament = region.querySelector("svg[data-reveal='fade']");
-      expect(ornament).toHaveAttribute("aria-hidden", "true");
-      expect(ornament).toHaveClass("-z-10", "pointer-events-none");
+      expect(region.querySelector("svg[data-reveal='fade']")).toBeNull();
     }
   });
 
