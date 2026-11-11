@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow, Inter } from "next/font/google";
+import { Barlow, Inter, Libre_Caslon_Text } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { siteUrl } from "@/lib/site-url";
@@ -12,10 +12,19 @@ const inter = Inter({
   display: "swap",
 });
 
+// Só os botões: os títulos saíram da Barlow na #196.
 const barlow = Barlow({
   subsets: ["latin"],
-  weight: ["600", "900"],
+  weight: ["900"],
   variable: "--font-barlow",
+  display: "swap",
+});
+
+// Títulos, nomes, preços e numerais: a serifada mais próxima do logo (#196).
+const caslon = Libre_Caslon_Text({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-caslon",
   display: "swap",
 });
 
@@ -39,7 +48,7 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} ${barlow.variable} motion-safe:scroll-smooth`}
+      className={`${inter.variable} ${barlow.variable} ${caslon.variable} motion-safe:scroll-smooth`}
     >
       <body className="flex min-h-dvh flex-col font-sans antialiased">
         <a

@@ -1,5 +1,5 @@
 /* Hallmark · shape: Price Board (/), kept banner (/servicos, /barbeiros) · genre: editorial · theme: brand · redesign: full · job: book
- * paper: oklch(97.2% 0.008 75) · accent: oklch(52% 0.19 19) · display: Barlow 900 caps · body: Inter · hero: Ledge (/), Banner (/servicos, /barbeiros) · nav: edge-aligned, the wordmark, three links, the account and the booking action · footer: mast, the wordmark large over hours, contact and the legal line · signature: the price list set as the board on the shop wall, prices large beside each booking action
+ * paper: oklch(97.2% 0.008 75) · accent: oklch(52% 0.19 19) · display: Libre Caslon Text, mixed case (#196); buttons: Barlow 900 caps · body: Inter · hero: Ledge (/), Banner (/servicos, /barbeiros) · nav: edge-aligned, the wordmark, three links, the account and the booking action · footer: mast, the wordmark large over hours, contact and the legal line · signature: the price list set as the board on the shop wall, prices large beside each booking action
  * axes: light/display-heavy/chromatic-red · posture: restrained · contrast: pass · fold: pass · imagery: photographs, the project's own stand-ins (D12), natural · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H5 E4 S4 R4 V4 · weakest: S, a barbershop page fits any barbershop; led with the real price list as the board on the wall instead of a centred card grid */
 /* Hallmark · waive 44c · hero: Ledge on / fills min-h-svh with the head resting at its base; Banner on /servicos and /barbeiros · the home photo is the whole first screen and the inner pages open on their list */
@@ -111,8 +111,9 @@
   --color-rule: var(--line);
   --color-error: var(--danger);
   --font-sans: var(--font-inter);
-  --font-heading: var(--font-barlow);
-  --font-display: var(--font-barlow);
+  --font-heading: var(--font-caslon);
+  --font-display: var(--font-caslon);
+  --font-button: var(--font-barlow);
   --font-body: var(--font-inter);
   --text-body: var(--body-size);
   --text-body--line-height: var(--body-leading);
@@ -121,19 +122,20 @@
 }
 
 @theme {
-  /* Títulos da vitrine (Barlow 900, caixa alta), de 360 a 1440px. O hero
-     da página inicial tem o próprio passo, maior, preso em 1920. Em caixa
-     alta, a entrelinha nunca fica abaixo de 1,0. */
+  /* Títulos da vitrine (Libre Caslon Text 400, em maiúsculas e minúsculas,
+     como o logo, #196), de 360 a 1440px. O hero da página inicial tem o
+     próprio passo, maior, preso em 1920. Com minúsculas, a entrelinha deixa
+     espaço para as descendentes (g, p) da linha de cima. */
   --text-display-hero: clamp(3rem, 1.2rem + 7.6vw, 8.25rem);
-  --text-display-hero--line-height: 1;
+  --text-display-hero--line-height: 1.08;
   --text-display-1: clamp(2.5rem, 1rem + 5vw, 5.25rem);
-  --text-display-1--line-height: 1.02;
+  --text-display-1--line-height: 1.1;
   --text-display-2: clamp(2rem, 1.1rem + 2.8vw, 3.5rem);
-  --text-display-2--line-height: 1.04;
+  --text-display-2--line-height: 1.12;
   --text-display-3: clamp(1.5rem, 1.15rem + 1.2vw, 2.375rem);
-  --text-display-3--line-height: 1.1;
+  --text-display-3--line-height: 1.18;
   --text-display-4: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
-  --text-display-4--line-height: 1.2;
+  --text-display-4--line-height: 1.25;
   --text-lead: clamp(1.125rem, 1rem + 0.35vw, 1.375rem);
   --text-lead--line-height: 1.45;
 
@@ -185,7 +187,7 @@ body {
 }
 
 /* Lista de passos de "Como funciona": o numeral é um contador da própria
-   `ol`, em Barlow, e não um rótulo acima do texto. */
+   `ol`, na fonte dos títulos, e não um rótulo acima do texto. */
 .steps {
   counter-reset: step;
 }
@@ -195,8 +197,8 @@ body {
 .steps > li::before {
   content: counter(step);
   display: block;
-  font-family: var(--font-barlow);
-  font-weight: 900;
+  font-family: var(--font-caslon);
+  font-weight: 400;
   font-size: var(--text-display-2);
   line-height: 1;
   color: var(--brand);

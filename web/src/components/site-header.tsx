@@ -30,7 +30,7 @@ export function SiteHeader() {
           <span className="grid size-14 shrink-0 place-items-center rounded-full bg-surface">
             <Image src="/logo.png" alt="" width={44} height={44} preload />
           </span>
-          <span className="font-heading text-lg leading-tight font-black text-surface uppercase sm:text-xl">
+          <span className="font-heading text-lg leading-tight font-normal text-surface sm:text-xl">
             Augusto Barbearia
           </span>
         </Link>

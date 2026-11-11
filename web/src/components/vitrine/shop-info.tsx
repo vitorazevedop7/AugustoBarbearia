@@ -52,7 +52,7 @@ export function BusinessHoursList({
             {label}
           </dt>
           <dd
-            className={`text-surface tabular-nums ${large ? "font-heading text-display-4 font-black uppercase" : "font-semibold"}`}
+            className={`text-surface tabular-nums ${large ? "font-heading text-display-4 font-normal" : "font-semibold"}`}
           >
             {hours}
           </dd>

@@ -24,7 +24,7 @@ export function HowItWorks() {
           {STEPS.map((step) => (
             <li
               key={step}
-              className="border-t border-ink pt-6 font-heading text-display-4 font-black text-ink uppercase"
+              className="border-t border-ink pt-6 font-heading text-display-4 font-normal text-ink"
             >
               {step}
             </li>

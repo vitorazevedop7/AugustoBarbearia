@@ -60,7 +60,7 @@ Ainda não há contato da barbearia no código: a página diz "pelo contato da b
 - **Então** o texto cabe sem rolagem horizontal e segue o [checklist de acessibilidade](../design/design-system.md#acessibilidade-checklist-de-cada-tela).
 
 ## Fluxo e telas
-- **`/privacidade`** (grupo `(publico)`, Server Component estático): fundo `paper`, ornamento e título em Barlow 900 caixa alta (`text-display-2`, Playfair até a S4.03), texto de abertura e a data da última atualização. Logo abaixo, um card `surface` "Em resumo". Depois, as seções em texto corrido até `max-w-2xl`, com títulos `text-display-3`, separadas por `line`.
+- **`/privacidade`** (grupo `(publico)`, Server Component estático): fundo `paper`, ornamento e título em Libre Caslon Text (`text-display-2`; Barlow 900 em caixa alta da S4.03 até a #196, Playfair antes), texto de abertura e a data da última atualização. Logo abaixo, um card `surface` "Em resumo". Depois, as seções em texto corrido até `max-w-2xl`, com títulos `text-display-3`, separadas por `line`.
 - **Rodapé:** na faixa de baixo, ao lado do "©", o link "Política de privacidade".
 - **`/entrar`:** na frase sobre os dados do Google, o link "Política de privacidade".
 - Sem estados de carregando, vazio ou erro: a página não busca dados.

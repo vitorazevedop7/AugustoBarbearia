@@ -3,7 +3,7 @@ import { ButtonLink } from "./button";
 
 /**
  * Card de barbeiro da vitrine: o retrato 4:5 (ou a inicial), limpo, e o nome
- * logo abaixo, em Barlow, com a primeira linha da apresentação e "Agendar com
+ * logo abaixo, na fonte dos títulos, com a primeira linha da apresentação e "Agendar com
  * <nome>". Com `fullBio` (página dos barbeiros), a apresentação aparece
  * inteira.
  */
@@ -29,7 +29,7 @@ export function BarberCard({
   return (
     <article className="flex h-full flex-col">
       <BarberPhoto name={name} photoPath={photoPath} sizes={sizes} />
-      <Heading className="mt-6 font-heading text-display-3 font-black uppercase text-ink">
+      <Heading className="mt-6 font-heading text-display-3 font-normal text-ink">
         {name}
       </Heading>
       {firstLine && !fullBio ? (

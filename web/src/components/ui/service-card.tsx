@@ -45,7 +45,7 @@ export function ServiceItem({
   return (
     <article className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-6 gap-y-5 py-7 md:grid-cols-12 md:items-center md:gap-x-8 md:py-9">
       <div className="min-w-0 md:col-span-7">
-        <Heading className="font-heading text-display-3 font-black uppercase text-ink">
+        <Heading className="font-heading text-display-3 font-normal text-ink">
           {name}
         </Heading>
         <p className="mt-2 text-sm font-semibold text-ink tabular-nums">
@@ -63,7 +63,7 @@ export function ServiceItem({
           </p>
         ) : null}
       </div>
-      <p className="font-heading text-display-3 font-black text-ink tabular-nums md:col-span-3 md:text-right">
+      <p className="font-heading text-display-3 font-normal text-ink tabular-nums md:col-span-3 md:text-right">
         <span className="sr-only">Preço: </span>
         {formatPrice(price)}
       </p>

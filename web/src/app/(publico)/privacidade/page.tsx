@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
     >
       <article className="mx-auto max-w-2xl">
         <Ornament align="start" />
-        <h1 className="mt-6 font-heading text-display-2 font-black uppercase text-ink">
+        <h1 className="mt-6 font-heading text-display-2 font-normal text-ink">
           Política de privacidade
         </h1>
         <p className="mt-4 text-body text-ink-muted">
@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
         >
           <h2
             id="resumo"
-            className="font-heading text-display-4 font-black uppercase text-ink"
+            className="font-heading text-display-4 font-normal text-ink"
           >
             Em resumo
           </h2>
@@ -169,10 +169,7 @@ function PolicySection({
       aria-labelledby={id}
       className="mt-12 border-t border-line pt-10 sm:mt-16"
     >
-      <h2
-        id={id}
-        className="font-heading text-display-3 font-black uppercase text-ink"
-      >
+      <h2 id={id} className="font-heading text-display-3 font-normal text-ink">
         {title}
       </h2>
       <div className="mt-4 space-y-4 text-body">{children}</div>

@@ -44,7 +44,7 @@ export function PageHero({
           </div>
         ) : null}
         <div className="mx-auto max-w-site">
-          <h1 className="font-heading text-display-1 font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
+          <h1 className="font-heading text-display-1 font-normal text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
             {title}
           </h1>
           <p className="mt-6 max-w-2xl text-lead text-on-ink-muted motion-safe:animate-rise motion-safe:[animation-delay:160ms]">

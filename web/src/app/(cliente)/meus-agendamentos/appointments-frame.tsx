@@ -11,7 +11,7 @@ export function MyAppointmentsFrame({
 }) {
   return (
     <BookingMain busy={busy}>
-      <h1 className="font-heading text-display-3 font-black uppercase text-ink">
+      <h1 className="font-heading text-display-3 font-normal text-ink">
         Meus agendamentos
       </h1>
       <p className="mt-4 text-body text-ink-muted">
