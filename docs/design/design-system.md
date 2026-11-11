@@ -19,12 +19,12 @@ O mesmo sistema tem dois ritmos:
 | | Vitrine (`(publico)`) | Área logada (`(cliente)` e `admin`) |
 |---|---|---|
 | Objetivo | Encantar e levar a agendar | Concluir a tarefa rápido |
-| Títulos | Barlow 900 em caixa alta, escala `text-display-*`, à esquerda e sem ornamento acima | Administração: Inter 600 (`text-2xl`/`text-xl`), sem ornamento |
+| Títulos | Libre Caslon Text 400 em maiúsculas e minúsculas (#196), escala `text-display-*`, à esquerda e sem ornamento acima | Administração: Inter 600 (`text-2xl`/`text-xl`), sem ornamento |
 | Respiro | Seções `py-section` (72 a 144px) e `py-section-l` (96 a 176px) | Telas do cliente: 40/64px acima e 64/96px abaixo (celular/`md`), blocos de 24 a 40px. Administração: blocos de 24 a 48px |
 | Fundos | Faixas `ink`, `paper`, `surface` e `paper-2` alternadas; em `/barbeiros`, a faixa escura parcial que as fotos atravessam | `paper` com cards em `surface`, logo abaixo da faixa escura do cabeçalho |
 | Movimento | Cascata no hero e entrada ao rolar | Só hover e foco. Nada entra animado |
 
-O fluxo de agendamento (`/agendar`) e as telas do cliente (`/meus-agendamentos`, `/perfil`, `/entrar`) são da área logada, mas usam a base da vitrine desde a S4.07 (#80): títulos em Barlow 900 em caixa alta, o texto de apoio abaixo do título em `text-body`, o botão `md` (52px) na ação principal da tela e o hover em `ease-standard`. O ritmo continua o de tarefa: sem `py-section`, sem entrada animada e sem a faixa escura parcial (ver [Fluxo de agendamento](#fluxo-de-agendamento)).
+O fluxo de agendamento (`/agendar`) e as telas do cliente (`/meus-agendamentos`, `/perfil`, `/entrar`) são da área logada, mas usam a base da vitrine desde a S4.07 (#80): títulos em Libre Caslon Text, em maiúsculas e minúsculas, o texto de apoio abaixo do título em `text-body`, o botão `md` (52px) na ação principal da tela e o hover em `ease-standard`. O ritmo continua o de tarefa: sem `py-section`, sem entrada animada e sem a faixa escura parcial (ver [Fluxo de agendamento](#fluxo-de-agendamento)).
 
 ## Fundamentos
 
@@ -54,7 +54,7 @@ Os valores e o contraste estão em [identidade-visual.md](identidade-visual.md#c
 | Display 3 | `font-heading text-display-3 font-black uppercase` | Nome do serviço, preço e nome do barbeiro; título das telas do cliente |
 | Display 4 | `font-heading text-display-4 font-black uppercase` | Passos de "Como funciona", horários do quadro de contato, títulos pequenos de bloco, estado vazio, cards da área do cliente |
 | Apoio grande | `text-lead` | A frase do hero e o texto ao lado de um título grande |
-| Número menor | `font-heading font-semibold` | O dia no `DayPicker` (Barlow 600) |
+| Número menor | `font-heading font-semibold` | O dia no `DayPicker` (Libre Caslon Text 700) |
 | Título da administração | `text-2xl font-semibold` | Título da página em `admin` (Inter) |
 | Corpo da vitrine | `text-body` | Texto corrido da vitrine: 16px/1,55 no celular, 17px/1,6 a partir do `md` |
 | Corpo da área logada | `text-base leading-relaxed` | Texto corrido em `(cliente)` e `admin`. Nas telas do cliente, o texto de apoio logo abaixo do `h1` usa `text-body` |
@@ -160,7 +160,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 | `ghost` | Ação de baixa ênfase: "Voltar", "Limpar filtro" |
 | `ghost-light` | O `ghost` sobre faixa `ink`: o "Sair" do cabeçalho |
 
-- **Texto:** Barlow 900 em caixa alta, com 0,02em de espaçamento e sem quebra de linha (16px no `md`; 14px no `sm`).
+- **Texto:** Barlow 900 em caixa alta (`font-button`), com 0,02em de espaçamento e sem quebra de linha (16px no `md`; 14px no `sm`).
 - **Tamanhos:** `md` (padrão: 52px em todas as telas) e `sm` (44px: administração, cabeçalho, linhas de serviço, cards e tabelas). Na administração, todos os botões são `sm`. Nas telas do cliente, a ação principal da tela é sempre `md`: "Confirmar agendamento", "Salvar", "Entrar com Google", "Cancelar agendamento" e o botão do estado vazio que faz a pessoa seguir ("Agendar horário", "Escolher outro dia"); as ações dentro de um cartão ("Remarcar", "Cancelar") continuam `sm`.
 - **Estados:** hover só troca a cor, em 200ms (o `ghost` sublinha); o pressionado (`active:`) escurece um degrau; foco com contorno; `disabled` a 55% com `cursor-not-allowed` e o atributo nativo; e `pending` (trava o botão, mostra um indicador girando e marca `aria-busy`). Use `pending` enquanto uma Server Action roda, com o `useFormStatus` do React.
 - **No celular,** o botão principal de um formulário ou etapa ocupa a largura toda (`w-full sm:w-auto`).
@@ -180,7 +180,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 - **`ChoiceChip`** é um `radio` com cara de botão, para escolher **uma** opção de uma grade curta: o horário livre, a forma de pagamento.
 - Agrupe os chips num `<fieldset>` com `<legend>` ("Manhã", "Tarde"). A grade tem 3 colunas no celular e 6 no desktop.
-- Os chips-link do agendamento (`TimePicker`, `DayPicker`) têm a mesma borda e o mesmo hover, com o número em Barlow 600 (`font-heading font-semibold`): o horário em 18px, com 44px de altura, e o dia em 24px, num chip de 80px.
+- Os chips-link do agendamento (`TimePicker`, `DayPicker`) têm a mesma borda e o mesmo hover, com o número em Libre Caslon Text 700 (`font-heading font-semibold`): o horário em 18px, com 44px de altura, e o dia em 24px, num chip de 80px.
 - **Estados:** livre (borda `ink-muted`), escolhido (`brand`), foco (contorno) e indisponível (riscado). Prefira **não mostrar** um horário indisponível; o riscado é para quando o contexto pede, como na remarcação.
 - Por ser `radio`, funciona sem JS e com as setas do teclado.
 
@@ -231,7 +231,7 @@ Ficam em `web/src/components/ui`. Cada componente novo entra nesta tabela, na p�
 
 ### Cabeçalho
 
-- **`SiteHeader`** fica no layout raiz e é sempre escuro: o logo no círculo `surface` (o PNG só funciona sobre o claro, P1), o nome em Barlow 900, a navegação em `surface` com o traço `brand` na página atual, a conta (`outline-light` e `ghost-light`) e o "Agendar" (`primary`, `sm`). Tem 80px de altura e segue o container da vitrine.
+- **`SiteHeader`** fica no layout raiz e é sempre escuro: o logo no círculo `surface` (o PNG só funciona sobre o claro, P1), o nome em Libre Caslon Text, a navegação em `surface` com o traço `brand` na página atual, a conta (`outline-light` e `ghost-light`) e o "Agendar" (`primary`, `sm`). Tem 80px de altura e segue o container da vitrine.
 - **A conta leva à área de cada um** (#143). O papel vem de `GET /me`, no `Suspense` da conta: o cliente vê "Meus agendamentos" e "Perfil", e a administração vê "Administração", numa `nav` "Sua conta" no mesmo estilo da navegação (linha no desktop, coluna no menu do celular). No desktop, o "Olá, Nome" sai da linha para caber em 1024px, e os links não quebram; no menu do celular, ele fica junto do "Sair". Sem resposta da API, a conta fica só com o nome e o "Sair".
 - **Não é fixo**, como no Beard X: em todas as páginas, ele rola com a página, e quem rola o deixa para trás (decisão de 2026-11-01, #116). Por isso as seções com âncora (`#contato`) não precisam de `scroll-margin`.
 - **`HeaderFrame`** decide o modo pela página (`data-mode`), sem depender de JS:
@@ -275,7 +275,7 @@ Desde o redesign de 2026-11-06, a página inicial segue o Hallmark: cada seção
 - **Galeria:** mosaico de 12 colunas: o degradê em retrato nas colunas 1 a 5, ocupando as duas linhas; a navalha 16:10 nas colunas 6 a 12; abaixo dela, a bancada (3 colunas) e a barba (4 colunas). "Agendar horário" fica no `aside` do título. No tablet, uma grade 2 × 2 (retrato e navalha em 4:5). No celular, o retrato e a navalha na largura toda e as outras duas lado a lado.
 - **"Agende pelo celular":** só tipo. A frase em `text-display-1` nas colunas 1 a 7, o texto em `text-lead` e o botão nas colunas 9 a 12, alinhados pela base.
 - **Equipe:** os três retratos 4:5 alinhados, com "Conhecer a equipe" no `aside` do título.
-- **"Como funciona":** os quatro passos lado a lado numa `ol` com a classe `.steps`: o numeral é o contador da lista, em Barlow 900 `brand` (`text-display-2`), sobre um filete `ink`, e o passo em `text-display-4`. Abaixo de um filete `line`, as duas condições (RN-51 e RN-14) em duas colunas. Sem fotos.
+- **"Como funciona":** os quatro passos lado a lado numa `ol` com a classe `.steps`: o numeral é o contador da lista, em Libre Caslon Text `brand` (`text-display-2`), sobre um filete `ink`, e o passo em `text-display-4`. Abaixo de um filete `line`, as duas condições (RN-51 e RN-14) em duas colunas. Sem fotos.
 - **Horário e contato:** o título, o apoio e "Agendar horário" nas colunas 1 a 5; nas colunas 7 a 12, o quadro de horários (`BusinessHoursList size="lg"`: linhas entre filetes, o horário em `text-display-4`) e, abaixo, endereço e contatos em duas colunas.
 - **Rodapé (mastro):** o logo e o nome em `text-display-1` de ponta a ponta; abaixo de um filete, o horário e o contato; e a linha legal com "Política de privacidade".
 - **Heros internos:** foto opcional apenas na faixa do título, com overlay `bg-ink/80`. Em `/barbeiros`, a faixa parcial atrás do começo do conteúdo continua lisa; `/servicos` não a usa.
@@ -372,7 +372,7 @@ As três escolhas abaixo vieram da adaptação do Beard X e continuam valendo de
 
 | Tema | Escolha atual | Alternativa |
 |---|---|---|
-| Fonte dos títulos | **Decidido em 2026-10-31 e em uso desde a S4.03 (#76):** Barlow 900 em caixa alta, como o Beard X ([identidade-visual.md](identidade-visual.md#tipografia)) | Playfair Display 700, que conversava com o "A" serifado do logo |
+| Fonte dos títulos | **Decidido em 2026-11-10 (#196):** Libre Caslon Text em maiúsculas e minúsculas, parecida com o logo do Instagram ([identidade-visual.md](identidade-visual.md#tipografia)). De 2026-10-31 (S4.03, #76) até a #196, era Barlow 900 em caixa alta, como o Beard X | Playfair Display, mais contrastada, ou Libre Baskerville, mais larga |
 | Cor de acento | O vermelho da marca, que substitui o champanhe do Beard X | Um segundo acento quente para detalhes |
 | Breakpoints | Padrões do Tailwind | Os do Webflow (479/767/991) |
 

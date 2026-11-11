@@ -37,7 +37,7 @@ export function BarberStep({
               zoom
               decorative
             />
-            <span className="p-4 font-heading text-display-4 font-black uppercase text-ink">
+            <span className="p-4 font-heading text-display-4 font-normal text-ink">
               {barber.name}
             </span>
           </Link>
@@ -79,7 +79,7 @@ export function ServiceStep({
             className={`${cardLink} items-start justify-between gap-4 p-5 sm:p-6`}
           >
             <span className="flex min-w-0 flex-col gap-1">
-              <span className="font-heading text-display-4 font-black uppercase text-ink">
+              <span className="font-heading text-display-4 font-normal text-ink">
                 {service.name}
               </span>
               <span className="text-sm font-semibold text-ink-muted tabular-nums">
@@ -92,7 +92,7 @@ export function ServiceStep({
                 </span>
               ) : null}
             </span>
-            <span className="shrink-0 font-heading text-display-4 font-black text-brand tabular-nums">
+            <span className="shrink-0 font-heading text-display-4 font-normal text-brand tabular-nums">
               <span className="sr-only">Preço: </span>
               {formatPrice(service.price)}
             </span>

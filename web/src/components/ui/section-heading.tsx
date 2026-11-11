@@ -35,7 +35,7 @@ export function SectionHeading({
     >
       <h2
         id={id}
-        className={`font-heading text-display-2 font-black uppercase ${centered ? "" : "lg:col-span-7"} ${tone === "dark" ? "text-surface" : "text-ink"}`}
+        className={`font-heading text-display-2 font-normal ${centered ? "" : "lg:col-span-7"} ${tone === "dark" ? "text-surface" : "text-ink"}`}
       >
         {title}
       </h2>

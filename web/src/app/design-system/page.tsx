@@ -97,7 +97,7 @@ function Showcase({
     >
       <h2
         id={`${id}-title`}
-        className="font-heading text-display-3 font-black text-ink uppercase"
+        className="font-heading text-display-3 font-normal text-ink"
       >
         {title}
       </h2>
@@ -112,7 +112,7 @@ export default function DesignSystemPage() {
       <section className="bg-ink px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-site">
           <Ornament align="start" tone="dark" />
-          <h1 className="mt-6 font-heading text-display-1 font-black text-surface uppercase">
+          <h1 className="mt-6 font-heading text-display-1 font-normal text-surface">
             Design system
           </h1>
           <p className="mt-4 max-w-2xl text-body text-on-ink-muted">
@@ -156,20 +156,20 @@ export default function DesignSystemPage() {
 
         <Showcase id="tipografia" title="Tipografia">
           <div className="space-y-6">
-            <p className="font-heading text-display-1 font-black uppercase">
+            <p className="font-heading text-display-1 font-normal">
               Display 1 · hero
             </p>
-            <p className="font-heading text-display-2 font-black uppercase">
+            <p className="font-heading text-display-2 font-normal">
               Display 2 · título de seção
             </p>
-            <p className="font-heading text-display-3 font-black uppercase">
+            <p className="font-heading text-display-3 font-normal">
               Display 3 · nome em card
             </p>
-            <p className="font-heading text-display-4 font-black uppercase">
+            <p className="font-heading text-display-4 font-normal">
               Display 4 · título pequeno de bloco
             </p>
-            <p className="font-heading text-2xl font-semibold uppercase">
-              Barlow 600 · números e títulos menores
+            <p className="font-heading text-2xl font-semibold">
+              Libre Caslon 700 · números e títulos menores
             </p>
             <p className="text-2xl font-semibold">
               Título da área logada · Inter 600
@@ -522,7 +522,7 @@ export default function DesignSystemPage() {
                 <p className="text-sm font-semibold text-ink-muted">
                   Ter, 3 de nov · 14:30
                 </p>
-                <h3 className="mt-2 font-heading text-display-4 font-black text-ink uppercase">
+                <h3 className="mt-2 font-heading text-display-4 font-normal text-ink">
                   Corte + barba
                 </h3>
                 <p className="mt-1 text-sm text-ink-muted">

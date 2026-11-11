@@ -54,7 +54,7 @@ export default async function HomePage() {
             <div data-reveal="rise" className="min-w-0 lg:col-span-5">
               <h2
                 id="sobre-titulo"
-                className="font-heading text-display-2 font-black uppercase text-ink"
+                className="font-heading text-display-2 font-normal text-ink"
               >
                 Sobre a barbearia
               </h2>
@@ -173,7 +173,7 @@ function Hero({ shop }: { shop: PublicShop | null }) {
           <div className="motion-safe:animate-rise">
             <Ornament align="start" tone="dark" />
           </div>
-          <h1 className="mt-6 font-heading text-display-hero font-black uppercase text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
+          <h1 className="mt-6 font-heading text-display-hero font-normal text-surface motion-safe:animate-rise motion-safe:[animation-delay:80ms]">
             {shop?.name ?? SHOP_NAME}
           </h1>
           <p className="mt-6 max-w-xl text-lead text-surface motion-safe:animate-rise motion-safe:[animation-delay:160ms]">
@@ -237,7 +237,7 @@ function ContactSection({ shop }: { shop: PublicShop | null }) {
         <div data-reveal="rise" className="lg:col-span-5">
           <h2
             id="contato-titulo"
-            className="font-heading text-display-2 font-black uppercase text-surface"
+            className="font-heading text-display-2 font-normal text-surface"
           >
             Horário e contato
           </h2>

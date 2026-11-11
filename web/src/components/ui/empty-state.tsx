@@ -18,7 +18,7 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center border border-dashed border-ink-muted bg-surface px-6 py-12 text-center">
       <Ornament />
-      <p className="mt-6 font-heading text-display-4 font-black uppercase text-ink">
+      <p className="mt-6 font-heading text-display-4 font-normal text-ink">
         {title}
       </p>
       {description ? (

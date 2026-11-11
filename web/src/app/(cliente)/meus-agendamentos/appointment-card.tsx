@@ -59,7 +59,7 @@ export function AppointmentCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h3
           id={titleId}
-          className="font-heading text-display-4 font-black uppercase text-ink"
+          className="font-heading text-display-4 font-normal text-ink"
         >
           {appointment.service.name}
         </h3>

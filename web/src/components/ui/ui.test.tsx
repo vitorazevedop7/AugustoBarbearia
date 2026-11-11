@@ -212,7 +212,8 @@ describe("ServiceItem", () => {
       level: 3,
       name: "Corte + Barba",
     });
-    expect(heading).toHaveClass("font-heading", "font-black", "uppercase");
+    expect(heading).toHaveClass("font-heading", "font-normal");
+    expect(heading).not.toHaveClass("uppercase");
     expect(item).toHaveTextContent("Preço: R$ 35,00");
     expect(item).toHaveTextContent("Duração: 45 min");
     expect(item).toHaveTextContent("Com toalha quente.");

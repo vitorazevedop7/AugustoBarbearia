@@ -18,7 +18,7 @@ export function BookingBand() {
       >
         <h2
           id="agendar-titulo"
-          className="font-heading text-display-1 font-black uppercase text-surface lg:col-span-7"
+          className="font-heading text-display-1 font-normal text-surface lg:col-span-7"
         >
           Agende pelo celular
         </h2>

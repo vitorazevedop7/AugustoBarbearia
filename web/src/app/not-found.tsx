@@ -21,7 +21,7 @@ export default function NotFound() {
     >
       <div className="mx-auto w-full max-w-md bg-surface p-6 text-center shadow-card sm:p-10">
         <Ornament />
-        <h1 className="mt-6 font-heading text-display-3 font-black uppercase text-ink">
+        <h1 className="mt-6 font-heading text-display-3 font-normal text-ink">
           Página não encontrada
         </h1>
         <p className="mt-4 text-body text-ink-muted">

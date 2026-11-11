@@ -52,7 +52,7 @@ describe("TimePicker", () => {
         .map((link) => link.textContent),
     ).toEqual(["11:00", "11:30"]);
     expect(screen.queryByRole("region", { name: "Tarde" })).toBeNull();
-    // Área de toque de 44px e o número em Barlow 600, como o dia.
+    // Área de toque de 44px e o número na fonte dos títulos, em negrito, como o dia.
     expect(screen.getByRole("link", { name: "11:30" })).toHaveClass(
       "min-h-11",
       "font-heading",

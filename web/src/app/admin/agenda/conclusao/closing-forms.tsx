@@ -131,7 +131,7 @@ export function NoShowForm({
       open={state.status === "error" || undefined}
       className="flex flex-col gap-4"
     >
-      <summary className="inline-flex min-h-11 w-full cursor-pointer list-none items-center justify-center border-2 border-danger px-5 py-2.5 text-center font-heading text-sm leading-5 font-black text-danger uppercase hover:bg-danger hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-danger sm:w-auto [&::-webkit-details-marker]:hidden">
+      <summary className="inline-flex min-h-11 w-full cursor-pointer list-none items-center justify-center border-2 border-danger px-5 py-2.5 text-center font-button text-sm leading-5 font-black text-danger uppercase hover:bg-danger hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-danger sm:w-auto [&::-webkit-details-marker]:hidden">
         Marcar falta
       </summary>
       <form action={action} className="mt-4 flex flex-col gap-4">
@@ -179,7 +179,7 @@ export function CorrectPaymentForm({
       open={state.status === "error" || undefined}
       className="flex flex-col gap-4"
     >
-      <summary className="inline-flex min-h-11 w-full cursor-pointer list-none items-center justify-center border-2 border-ink px-5 py-2.5 text-center font-heading text-sm leading-5 font-black text-ink uppercase hover:bg-ink hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink sm:w-auto [&::-webkit-details-marker]:hidden">
+      <summary className="inline-flex min-h-11 w-full cursor-pointer list-none items-center justify-center border-2 border-ink px-5 py-2.5 text-center font-button text-sm leading-5 font-black text-ink uppercase hover:bg-ink hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink sm:w-auto [&::-webkit-details-marker]:hidden">
         Corrigir
       </summary>
       <form action={action} className="mt-4 flex flex-col gap-5">

@@ -2,6 +2,8 @@
 
 > Este documento cuida da **marca**: logo, cores, fontes, tom, linguagem e movimento. Os componentes e os padrões de tela estão no [design system](design-system.md).
 
+> **Decisão de 2026-11-10 (#196):** os títulos passam a usar a **Libre Caslon Text** (Google Fonts, 400/700), em **maiúsculas e minúsculas** e peso normal, a serifada livre mais próxima do logo que a barbearia usa no Instagram. A Barlow 900 em caixa alta fica só nos botões. O resto da marca não muda. Onde as decisões abaixo falam de títulos em Barlow, vale esta.
+
 > **Decisão de 2026-11-06 (redesign Hallmark):** o dono do projeto aprovou o redesign feito com o Hallmark, que substitui a aproximação ao Beard X na **composição** da vitrine. A marca fica: o vermelho `brand`, Barlow 900 em caixa alta, Inter, o logo e as formas quadradas. Mudam a disposição das seções, o ritmo, os botões, os rótulos e o movimento, descritos abaixo. As medições do Beard X continuam em [referencia-beard-x.md](referencia-beard-x.md) como histórico.
 
 > **Decisão de 2026-10-31 (Sprint 4):** a vitrine se aproxima do [Beard X](referencia-beard-x.md) medido ao vivo. Os títulos passam a ser **Barlow 900 em caixa alta** (no lugar da Playfair Display), o acento continua o **vermelho `brand`** (não o champanhe do Beard X) e o **fundo fixo do hero vale só no desktop**. A fonte, a escala dos títulos, o corpo, o respiro e o botão entraram na S4.03 (#76). O cabeçalho e o hero entraram na S4.04 (#77), e a entrada ao rolar, na S4.05 (#78). Serviços, equipe e ornamentos vieram na S4.06 (#79), e as páginas internas e as telas do cliente fecharam a sprint na S4.07 (#80).
@@ -47,21 +49,22 @@ Desde o redesign de 2026-11-06, os tokens ficam em **OKLCH** no código, com os 
 
 | Papel | Fonte | Uso |
 |---|---|---|
-| Títulos da vitrine | **Barlow** (Google Fonts), 900 em **caixa alta** (600 para títulos menores) | Títulos do hero e das seções, nomes em cards e números. Substitui a Playfair Display, que ficava com 700 e sem caixa alta |
+| Títulos da vitrine | **Libre Caslon Text** (Google Fonts), 400 em **maiúsculas e minúsculas** (700 para números menores) | Títulos do hero e das seções, nome no cabeçalho e no rodapé, nomes em cards, preços e números. Desde a #196, no lugar da Barlow 900 em caixa alta, para ficar parecida com o logo |
+| Botões | **Barlow** (Google Fonts), 900 em **caixa alta** | Só os botões (`Button` e os botões de conclusão da agenda) |
 | Texto e interface | **Inter** (Google Fonts), 400/500/600 | Todo o resto: formulários, tabelas, botões de apoio, administração |
 
 - O corpo da vitrine (`text-body`) tem **17px com entrelinha de 1,6** a partir do `md` e 16px com entrelinha de 1,55 no celular. O texto de apoio logo abaixo de um título grande usa `text-lead` (18 a 22px). Na administração, o texto segue a escala padrão do Tailwind, com base de 16px.
-- Os títulos da vitrine usam uma escala própria, que cresce com a tela (`clamp`) de 360 a 1440px. Em caixa alta, a entrelinha nunca fica abaixo de 1,0. O hero da página inicial tem o próprio passo, `text-display-hero`, preso em 132px a partir de 1440px:
+- Os títulos da vitrine usam uma escala própria, que cresce com a tela (`clamp`) de 360 a 1440px. Com minúsculas, a entrelinha deixa espaço para as descendentes (g, p) da linha de cima: nunca fica abaixo de 1,08. O hero da página inicial tem o próprio passo, `text-display-hero`, preso em 132px a partir de 1440px:
 
 | Token | Celular → desktop | Entrelinha | Uso |
 |---|---|---|---|
-| `text-display-hero` | 48 → 132px | 1,0 | Nome da barbearia no hero da página inicial |
-| `text-display-1` | 40 → 84px | 1,02 | Título das páginas internas, a faixa "Agende pelo celular" e o nome no rodapé |
-| `text-display-2` | 32 → 56px | 1,04 | Título de seção e numeral dos passos |
-| `text-display-3` | 24 → 38px | 1,1 | Nome do serviço e preço na tabela, nome do barbeiro; título das telas do cliente |
-| `text-display-4` | 20 → 24px | 1,2 | Passos de "Como funciona", horários no quadro de contato, títulos pequenos de bloco e estado vazio |
+| `text-display-hero` | 48 → 132px | 1,08 | Nome da barbearia no hero da página inicial |
+| `text-display-1` | 40 → 84px | 1,1 | Título das páginas internas, a faixa "Agende pelo celular" e o nome no rodapé |
+| `text-display-2` | 32 → 56px | 1,12 | Título de seção e numeral dos passos |
+| `text-display-3` | 24 → 38px | 1,18 | Nome do serviço e preço na tabela, nome do barbeiro; título das telas do cliente |
+| `text-display-4` | 20 → 24px | 1,25 | Passos de "Como funciona", horários no quadro de contato, títulos pequenos de bloco e estado vazio |
 
-- Os títulos são sempre em **caixa alta** (`uppercase`), em Barlow 900 (`font-black`). Barlow 600 (`font-semibold`) fica para números menores, como o dia no `DayPicker`. Em 360px, confira a quebra de linha: palavra longa não pode estourar a tela.
+- Os títulos são em **maiúsculas e minúsculas**, como o logo, em Libre Caslon Text 400 (`font-normal`), sem `uppercase`. O negrito (700, `font-semibold` ou `font-bold`) fica para números menores, como o dia no `DayPicker`. Em 360px, confira a quebra de linha: palavra longa não pode estourar a tela.
 - Botões em Barlow 900 em caixa alta, com espaçamento de 0,02em. Rótulos, legendas, badges e textos pequenos em destaque usam Inter 600 em `text-sm` (14px), em caixa normal e **sem** espaçamento extra: a caixa alta espaçada saiu de toda a interface no redesign de 2026-11-06.
 - Na administração, os títulos continuam em Inter: lá a prioridade é densidade e leitura rápida.
 
@@ -82,7 +85,7 @@ Desde o redesign de 2026-11-06, a composição da vitrine é a do Hallmark, sobr
 - **Hero:** ocupa a tela inteira (`min-h-svh`), na postura *Ledge*: o nome descansa embaixo, à esquerda, com a frase e os botões. Um degradê de `ink` (`bg-linear-to-tr`, de 90% a 15%) escurece só o lado do texto, no lugar do véu de 70% sobre a foto inteira. No desktop, a foto fica fixa enquanto a página rola; no celular, ela rola junto (S4.04, #77). A foto fixa é uma camada `fixed` recortada pelo `clip-path` do hero, e não `background-attachment: fixed`, que o Safari ignora.
 - **Elevação mínima:** a vitrine separa por filetes e por troca de papel, sem cards. A sombra `shadow-card` ficou só um filete de 1px a 5%, para os cards que restam na área logada. As fotos levam um contorno interno de `ink` a 10%.
 - **Botões:** primário em `brand` com texto branco, contorno em `ink` e contorno claro sobre o escuro. Caixa alta, sem quebra de linha e anel de foco visível. O `md` tem **52px** em todas as telas, com largura total no celular; o `sm` (44px) fica para a administração, o cabeçalho e as linhas de serviço e de barbeiro. O hover só troca a cor (o botão não sobe mais), e o pressionado escurece um degrau (`active:`).
-- **Cabeçalho** (S4.04, #77): sempre escuro, com o logo no círculo claro, o nome em Barlow 900 em caixa alta e 80px de altura.
+- **Cabeçalho** (S4.04, #77): sempre escuro, com o logo no círculo claro, o nome em Libre Caslon Text, em maiúsculas e minúsculas, e 80px de altura.
   - Não é fixo: rola com a página, como no Beard X (decisão de 2026-11-01, #116, que substitui a faixa fixa da S4.04).
   - Na página inicial, fica transparente no topo do hero. Ele nunca fica transparente sobre fundo claro.
   - Nas outras páginas, é uma faixa `ink` no topo, contínua com a faixa escura do `PageHero`. As telas do cliente e da administração usam a mesma faixa: ela combina com o rodapé escuro e não disputa com o conteúdo claro.
@@ -160,8 +163,9 @@ Além das cores, `globals.css` define os tokens de ritmo e tipografia da vitrine
 
 | Classe | Token | Valor |
 |---|---|---|
-| `font-heading` | `--font-heading` | Barlow (600 e 900), pela variável `--font-barlow` do `next/font` |
-| `text-display-hero`, `text-display-1` a `text-display-4` | `--text-display-*` | `clamp` de 360 a 1440px, entrelinha de 1,0 a 1,2 |
+| `font-heading` | `--font-heading` | Libre Caslon Text (400 e 700), pela variável `--font-caslon` do `next/font` |
+| `font-button` | `--font-button` | Barlow 900, pela variável `--font-barlow` do `next/font`. Só nos botões |
+| `text-display-hero`, `text-display-1` a `text-display-4` | `--text-display-*` | `clamp` de 360 a 1440px, entrelinha de 1,08 a 1,25 |
 | `text-lead` | `--text-lead` | 18 a 22px, entrelinha 1,45 |
 | `text-body` | `--body-size`, `--body-leading` | 16px/1,55; 17px/1,6 a partir do `md` |
 | `py-section` | `--section-y` | 72, 88, 120 e 144px (base, `sm`, `md`, `lg`) |
@@ -170,7 +174,7 @@ Além das cores, `globals.css` define os tokens de ritmo e tipografia da vitrine
 | `max-w-site` | `--container-site` | 1340px |
 | `ease-standard` | `--ease-standard` | `cubic-bezier(0.16, 1, 0.3, 1)` |
 
-Os papéis do Hallmark apontam para os tokens do projeto no `@theme`: `--color-accent` e `--color-focus` são o `brand`, `--color-muted` é o `ink-muted`, `--color-rule` é o `line`, `--font-display` é a Barlow e `--font-body` é a Inter. As regras de base que o Hallmark exige (`overflow-x: clip`, foco visível, quebra dos títulos, menos movimento) estão em `web/src/app/base.css`. O topo do `globals.css` traz o carimbo do Hallmark com as decisões e as dispensas registradas.
+Os papéis do Hallmark apontam para os tokens do projeto no `@theme`: `--color-accent` e `--color-focus` são o `brand`, `--color-muted` é o `ink-muted`, `--color-rule` é o `line`, `--font-display` é a Libre Caslon Text e `--font-body` é a Inter. As regras de base que o Hallmark exige (`overflow-x: clip`, foco visível, quebra dos títulos, menos movimento) estão em `web/src/app/base.css`. O topo do `globals.css` traz o carimbo do Hallmark com as decisões e as dispensas registradas.
 
 O componente usa sempre o token (`bg-brand`, `text-ink`, `text-display-2`, `py-section`, `shadow-card`), nunca o hex direto. Os tokens estão em `web/src/app/globals.css`.
 

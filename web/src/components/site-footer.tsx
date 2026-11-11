@@ -26,7 +26,7 @@ export async function SiteFooter() {
           <span className="grid size-16 shrink-0 place-items-center rounded-full bg-surface sm:size-20">
             <Image src="/logo.png" alt="" width={56} height={56} />
           </span>
-          <p className="min-w-0 font-heading text-display-1 font-black uppercase [overflow-wrap:break-word]">
+          <p className="min-w-0 font-heading text-display-1 font-normal [overflow-wrap:break-word]">
             {name}
           </p>
         </div>

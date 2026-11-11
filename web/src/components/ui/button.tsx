@@ -6,7 +6,7 @@ type Variant =
 type Size = "md" | "sm";
 
 const base =
-  "inline-flex items-center justify-center gap-2 border-2 text-center font-heading font-black whitespace-nowrap uppercase tracking-[0.02em] transition-[background-color,border-color,color] duration-200 ease-standard focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-55 motion-reduce:transition-none";
+  "inline-flex items-center justify-center gap-2 border-2 text-center font-button font-black whitespace-nowrap uppercase tracking-[0.02em] transition-[background-color,border-color,color] duration-200 ease-standard focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-55 motion-reduce:transition-none";
 
 /** Um sinal só no hover: a cor. O pressionado escurece um degrau. */
 const lift = "";
