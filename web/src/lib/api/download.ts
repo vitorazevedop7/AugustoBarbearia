@@ -19,7 +19,7 @@ function message(error: unknown): string {
 
 /**
  * Repassa ao navegador um arquivo que a API gerou (CSV, `.ics`), pelo Route
- * Handler: o navegador nunca chama a API (ADR 0004). `result` vem do cliente
+ * Handler: o navegador nunca chama a API (ADR 0003). `result` vem do cliente
  * tipado com `parseAs: "arrayBuffer"`, que mantém os bytes (o BOM do CSV
  * inclusive). O tipo e o nome do arquivo são os da API.
  *
