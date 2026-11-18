@@ -54,6 +54,11 @@ export function cancelHref(id: number): string {
   return `${MY_APPOINTMENTS_PATH}/${id}/cancelar`;
 }
 
+/** O `.ics` do agendamento, entregue pelo Route Handler `[id]/calendario`. */
+export function calendarHref(id: number): string {
+  return `${MY_APPOINTMENTS_PATH}/${id}/calendario`;
+}
+
 /**
  * O que o cliente já escolheu na remarcação. Fica na URL
  * (`?barbeiro=&data=&hora=`), como no `/agendar`. O serviço não muda (RN-15).

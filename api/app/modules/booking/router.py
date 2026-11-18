@@ -3,7 +3,7 @@
 import datetime as dt
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.clock import TIMEZONE, utc_now
@@ -16,6 +16,7 @@ from app.modules.availability.schemas import (
     AvailableSlot,
 )
 from app.modules.booking import service
+from app.modules.booking.calendar import calendar_filename, render_ics
 from app.modules.booking.schemas import (
     AppointmentBarber,
     AppointmentCreate,
@@ -129,6 +130,41 @@ def get_appointment(
     (RN-16)."""
     booked = service.get_customer_appointment(session, customer.id, appointment_id)
     return to_response(booked, now)
+
+
+@router.get(
+    "/{appointment_id}/calendar.ics",
+    response_class=Response,
+    responses={
+        200: {
+            "description": "O agendamento como evento de calendário (RFC 5545).",
+            "content": {"text/calendar": {"schema": {"type": "string"}}},
+        },
+    },
+)
+def get_appointment_calendar(
+    appointment_id: Id, customer: CustomerDep, session: SessionDep
+) -> Response:
+    """O agendamento ativo do cliente do token como arquivo `.ics` (RN-16,
+    RN-31). O de outro cliente responde 404; o que não está mais ativo, 409."""
+    booked, address = service.get_calendar_appointment(
+        session, customer.id, appointment_id
+    )
+    content = render_ics(
+        booked.appointment,
+        barber=booked.barber,
+        service=booked.service,
+        address=address,
+    )
+    return Response(
+        content=content,
+        media_type="text/calendar; charset=utf-8",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{calendar_filename(appointment_id)}"'
+            )
+        },
+    )
 
 
 @router.post("/{appointment_id}/cancel", response_model=CustomerChangeResponse)

@@ -104,6 +104,27 @@ describe("horário confirmado — /agendar/confirmado/[id] (#155)", () => {
     );
   });
 
+  it("confirmado, oferece Adicionar ao calendário", async () => {
+    await renderPage();
+
+    expect(
+      screen.getByRole("link", { name: "Adicionar ao calendário" }),
+    ).toHaveAttribute("href", "/meus-agendamentos/7/calendario");
+  });
+
+  it("cancelado, não oferece o calendário (RN-31)", async () => {
+    GET.mockResolvedValue({
+      data: appointment({ status: "CANCELED", can_cancel: false }),
+      response: { status: 200 },
+    });
+
+    await renderPage();
+
+    expect(
+      screen.queryByRole("link", { name: "Adicionar ao calendário" }),
+    ).toBeNull();
+  });
+
   it("id inválido é página não encontrada", async () => {
     await expect(renderPage("abc")).rejects.toThrow("NOT_FOUND");
   });

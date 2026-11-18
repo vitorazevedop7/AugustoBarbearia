@@ -164,6 +164,24 @@ describe("meus agendamentos — /meus-agendamentos", () => {
     expect(within(notice).queryByRole("link")).toBeNull();
   });
 
+  it("próximo horário ativo oferece Adicionar ao calendário; o histórico não", async () => {
+    listed(
+      [appointment()],
+      [appointment({ id: 8, status: "CANCELED", can_cancel: false })],
+    );
+
+    await renderPage();
+
+    const upcoming = screen.getByRole("region", { name: "Próximos" });
+    expect(
+      within(upcoming).getByRole("link", { name: /Adicionar ao calendário/ }),
+    ).toHaveAttribute("href", "/meus-agendamentos/7/calendario");
+    const history = screen.getByRole("region", { name: "Histórico" });
+    expect(
+      within(history).queryByRole("link", { name: /Adicionar ao calendário/ }),
+    ).toBeNull();
+  });
+
   it("histórico: cancelado por quem e o que espera registro, sem ações", async () => {
     listed(
       [],

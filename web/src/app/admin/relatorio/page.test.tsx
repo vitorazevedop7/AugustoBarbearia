@@ -264,5 +264,22 @@ describe("relatório financeiro — /admin/relatorio — RN-43", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Não foi possível carregar o relatório. Tente novamente em instantes.",
     );
+    // Sem o relatório, não há o que exportar.
+    expect(
+      screen.queryByRole("link", { name: "Exportar CSV" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("Exportar CSV leva ao Route Handler com o período e o barbeiro atuais", async () => {
+    await renderPage({
+      inicio: "2026-10-01",
+      fim: "2026-10-31",
+      barbeiro: "2",
+    });
+
+    expect(screen.getByRole("link", { name: "Exportar CSV" })).toHaveAttribute(
+      "href",
+      "/admin/relatorio/exportar?inicio=2026-10-01&fim=2026-10-31&barbeiro=2",
+    );
   });
 });

@@ -3,6 +3,7 @@ import {
   formatPeriod,
   monthPeriod,
   parseReportParams,
+  exportHref,
   reportHref,
   shortcuts,
   weekPeriod,
@@ -84,6 +85,17 @@ describe("estado do relatório na URL — RN-43", () => {
     ).toBe("/admin/relatorio?inicio=2026-11-01&fim=2026-11-30&barbeiro=2");
     expect(reportHref({ inicio: "2026-11-01", fim: "2026-11-30" })).toBe(
       "/admin/relatorio?inicio=2026-11-01&fim=2026-11-30",
+    );
+  });
+
+  it("o link do CSV leva o mesmo período e barbeiro da tela", () => {
+    expect(
+      exportHref({ inicio: "2026-11-01", fim: "2026-11-30", barbeiro: 2 }),
+    ).toBe(
+      "/admin/relatorio/exportar?inicio=2026-11-01&fim=2026-11-30&barbeiro=2",
+    );
+    expect(exportHref({ inicio: "2026-11-01", fim: "2026-11-30" })).toBe(
+      "/admin/relatorio/exportar?inicio=2026-11-01&fim=2026-11-30",
     );
   });
 
