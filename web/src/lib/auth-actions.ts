@@ -1,8 +1,13 @@
 "use server";
 
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import {
+  DEMO_ACCOUNTS,
+  isDemoLoginEnabled,
+  parseDemoRole,
+} from "@/lib/demo-mode";
 import { safeRedirectPath } from "@/lib/session";
 
 /** Volta para o campo `voltar` do formulário ou, sem ele, para a página de onde veio o pedido. */
@@ -27,6 +32,21 @@ export async function signInWithGoogle(formData: FormData) {
   });
   if (!url) redirect(`/entrar?error=sem_url`);
   redirect(url);
+}
+
+/**
+ * Server Action dos botões do modo demonstração (#199, ADR 0011): entra numa
+ * das duas contas fictícias e leva à área dela, ou ao `voltar` que a página
+ * pediu. Com a flag desligada, ou um papel desconhecido, responde 404.
+ */
+export async function signInAsDemo(formData: FormData) {
+  const role = parseDemoRole(formData.get("perfil"));
+  if (!isDemoLoginEnabled() || role === null) notFound();
+  const request = { headers: await headers() };
+  if (role === "admin") await auth.api.signInDemoAdmin(request);
+  else await auth.api.signInDemoCustomer(request);
+  const voltar = safeRedirectPath(formData.get("voltar"));
+  redirect(voltar === "/" ? DEMO_ACCOUNTS[role].home : voltar);
 }
 
 /** Server Action do botão "Sair": encerra a sessão e fica na mesma página. */

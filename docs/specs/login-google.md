@@ -82,6 +82,9 @@ As tabelas `user`, `session`, `account`, `verification` e `jwks` são do Better 
 ## API
 Nenhuma rota da FastAPI. No web, o handler `/api/auth/[...all]` expõe as rotas do Better Auth, entre elas o callback do Google, `/api/auth/token` e `/api/auth/jwks`.
 
+## Modo demonstração
+Com `DEMO_LOGIN_ENABLED=true` (desligado por padrão e travado na produção), `/entrar` também oferece "Entrar como administração (demo)" e "Entrar como cliente (demo)", em contas fictícias fixas, sem Google. A sessão e o JWT são os mesmos desta spec. Ver [modo-demonstracao.md](modo-demonstracao.md) e o [ADR 0011](../decisoes/0011-entrada-de-demonstracao.md).
+
 ## Fora do escopo desta spec
 - Validar o JWT e decidir o papel na API (#31).
 - Proteger `/agendar`, `/meus-agendamentos`, `/perfil` e `/admin` (nascem com as próprias telas; a página `/entrar?voltar=` já atende).

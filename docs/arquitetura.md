@@ -52,7 +52,7 @@ sequenceDiagram
     A--)A: depois do commit, envia o e-mail de confirmação (RN-50)
 ```
 
-Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md).
+Detalhes da autenticação: [0003](decisoes/0003-autenticacao.md). O modo demonstração ([0011](decisoes/0011-entrada-de-demonstracao.md)) cria a mesma sessão em contas fictícias, sem Google; o resto do fluxo não muda.
 
 ## API (`/api`)
 
@@ -192,7 +192,9 @@ web/
     ├── lib/
     │   ├── auth.ts                 # configuração do Better Auth (Google + plugin JWT)
     │   ├── auth-jwt.ts             # o JWT para a API (EdDSA, 15 min, sub/email/name)
-    │   ├── auth-actions.ts         # Server Actions de entrar e sair
+    │   ├── auth-actions.ts         # Server Actions de entrar e sair (inclusive a entrada de demonstração)
+    │   ├── auth-demo.ts            # plugin do modo demonstração: entrada só do servidor nas contas fictícias (ADR 0011)
+    │   ├── demo-mode.ts            # contas fictícias e a trava de DEMO_LOGIN_ENABLED / DEMO_LOGIN_ACKNOWLEDGE
     │   ├── session.ts              # sessão atual para Server Components
     │   └── api/
     │       ├── token.ts            # getApiToken(): JWT da sessão atual
@@ -205,6 +207,7 @@ web/
         ├── site-header.tsx / site-nav.tsx / site-footer.tsx  # cabeçalho com navegação e "Agendar"; rodapé com dados da API
         ├── header-frame.tsx        # modo do cabeçalho: transparente sobre o hero da página inicial, faixa escura nas outras; nunca fixo
         ├── header-account.tsx      # login ou "Olá, <nome>" do cabeçalho: a única parte que lê a sessão, num Suspense
+        ├── demo-sign-in.tsx / demo-banner.tsx  # modo demonstração: os botões de /entrar e a faixa no topo do cabeçalho
         ├── vitrine/                # seções da vitrine: listas de serviços e barbeiros, horário e contato e topo
         ├── booking/                # agendamento e remarcação: DayPicker, TimePicker, BarberStep/ServiceStep, a moldura das etapas e o ContactNotice (contato quando o prazo passou)
         └── ui/                     # componentes do design system (docs/design/design-system.md)
@@ -264,6 +267,8 @@ Só os **nomes**. Os valores ficam no `.env` local (não versionado) e nas vari�
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | web | Login com Google |
 | `API_INTERNAL_URL` | web | Endereço da API na rede privada |
 | `PORT` | web, api | Só na Railway: a porta em que o serviço escuta (`3000` no web, `8000` na API), para o healthcheck e o domínio acertarem a porta |
+| `DEMO_LOGIN_ENABLED` | web | Modo demonstração ([spec](specs/modo-demonstracao.md), [0011](decisoes/0011-entrada-de-demonstracao.md)): `true` liga a entrada sem Google nas contas fictícias e a faixa "Ambiente de demonstração". Padrão desligado; na produção, nunca definida. Ligada no compose da demonstração e opcional no `.env` de desenvolvimento |
+| `DEMO_LOGIN_ACKNOWLEDGE` | web | Só no compose da demonstração: `public-demo`. Numa imagem de produção (`NODE_ENV=production`), sem esse valor o web ignora `DEMO_LOGIN_ENABLED` e registra o erro no log |
 | `DEMO_URL` | web, api | Só na demonstração (`.env.demo`): o link do túnel, gravado pelo `scripts/demo.sh`. Vira `BETTER_AUTH_URL`, `AUTH_ISSUER`, `AUTH_AUDIENCE` e `WEB_BASE_URL` |
 
 ### Sessões, migrações e testes

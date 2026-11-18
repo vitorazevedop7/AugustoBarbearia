@@ -28,8 +28,10 @@ Nenhuma regra nova. Os dados fictícios respeitam as regras que o banco e a API 
 - **Imagens de produção**: `api` no estágio `runtime` e `web` no `runner`, os mesmos que vão para a Railway. O estágio de desenvolvimento só aparece no `auth-migrate`, porque a imagem de produção do web não tem a CLI do Better Auth.
 - **Ordem de subida**: `db` → `setup` (Alembic e dados fictícios) → `api` saudável → `web`. Com o web antes da API, a vitrine abriria sem serviços.
 - **Dados fictícios por comando** (`python -m app.jobs.seed_demo`): o comando só roda num banco cujo nome termina em `_demo`, e não faz nada se o banco já tem agendamentos. A agenda é montada em volta do dia em que o banco foi criado, então o banco é recriado no dia da reunião (`reset`).
-- **Clientes fictícios sem e-mail**: nenhum e-mail de confirmação ou lembrete sai para eles. O serviço `jobs` (lembretes) não faz parte da demonstração.
-- **Concluídos "por" quem administra**: o `closed_by` dos dados fictícios é o primeiro e-mail de `ADMIN_EMAILS`.
+- **Clientes fictícios sem e-mail**: nenhum e-mail de confirmação ou lembrete sai para eles. O serviço `jobs` (lembretes) não faz parte da demonstração. A exceção é o cliente da entrada de demonstração (abaixo), com e-mail `.local`, que não recebe mensagem.
+- **Entrada sem Google** ([modo-demonstracao.md](modo-demonstracao.md), ADR 0011, #199): o compose liga `DEMO_LOGIN_ENABLED` e `DEMO_LOGIN_ACKNOWLEDGE=public-demo` no web, e `/entrar` oferece "Entrar como administração (demo)" e "Entrar como cliente (demo)". Assim, quem não está entre os usuários de teste do Google, ou o túnel recém-trocado sem os endereços no Google, ainda entra. Para desligar, `DEMO_LOGIN_ENABLED=false` no `.env.demo`.
+- **Cliente da demonstração preenchido**: o `seed_demo` cria `cliente@demo.augustobarbearia.local` com telefone, um horário marcado a pelo menos um dia (só um, para ele ainda poder agendar ao vivo, RN-11), dois concluídos e um cancelado. O primeiro login o vincula ao cadastro pelo e-mail (RN-23).
+- **Concluídos "por" quem administra**: o `closed_by` dos dados fictícios é o primeiro e-mail de `ADMIN_EMAILS`. O compose põe a conta fictícia `admin@demo.augustobarbearia.local` em primeiro, antes dos e-mails do `.env.demo`, então nenhum e-mail real aparece nos dados fictícios.
 - **Túnel rápido do Cloudflare**, sem conta: o endereço `https://<nome>.trycloudflare.com` muda toda vez que o serviço `tunnel` reinicia. O script sobe o túnel antes, lê o endereço do log e o grava em `DEMO_URL`, que vira `BETTER_AUTH_URL`, `AUTH_ISSUER`, `AUTH_AUDIENCE` e `WEB_BASE_URL`. O `reset` apaga o banco sem tocar no túnel, para limpar os dados sem trocar o link nem os endereços cadastrados no Google (#188).
 - **Login pelo cliente OAuth local**: o endereço do túnel é cadastrado nele a cada subida, e as contas dos proprietários entram como usuários de teste (o app OAuth está "em teste").
 
@@ -48,6 +50,11 @@ Nenhuma regra nova. Os dados fictícios respeitam as regras que o banco e a API 
 - **Dado** o endereço do túnel cadastrado no cliente OAuth e a conta Google como usuária de teste
 - **Quando** entro com o Google
 - **Então** volto logado ao site, e a conta de `ADMIN_EMAILS` abre `/admin`.
+
+**CA-3b — Entrada sem Google (#199)**
+- **Dado** a demonstração no ar
+- **Quando** toco em "Entrar como administração (demo)" ou "Entrar como cliente (demo)" em `/entrar`
+- **Então** abro `/admin` ou `/meus-agendamentos` (com o próximo horário e o histórico), e todas as páginas mostram a faixa "Ambiente de demonstração — dados fictícios".
 
 **CA-4 — Administração preenchida**
 - **Dado** o banco recém-criado
@@ -68,7 +75,7 @@ scripts/demo.sh down    # para tudo e guarda o banco da demonstração
 scripts/demo.sh reset   # apaga o banco e mantém o túnel; a próxima subida recria os dados com as datas de hoje
 ```
 
-Na primeira vez, o script cria o `.env.demo` a partir do `.env.demo.example`, copia do `.env` as credenciais do Google, `ADMIN_EMAILS` e o Resend, e gera um `BETTER_AUTH_SECRET` novo. O `.env.demo` não vai para o git.
+Na primeira vez, o script cria o `.env.demo` a partir do `.env.demo.example`, copia do `.env` as credenciais do Google, `ADMIN_EMAILS` e o Resend, e gera um `BETTER_AUTH_SECRET` novo. O `.env.demo` não vai para o git. Um `.env.demo` criado antes da #199 não tem `DEMO_LOGIN_ENABLED`; o compose assume `true`.
 
 ## Roteiro do ensaio (dias antes da reunião)
 1. **Google Cloud**, projeto `augusto-barbearia-130405` → **Tela de consentimento OAuth → Usuários de teste**: inclua as contas Google dos proprietários.
@@ -82,7 +89,7 @@ Na primeira vez, o script cria o `.env.demo` a partir do `.env.demo.example`, co
    - `scripts/demo.sh reset`, para os dados fictícios ganharem as datas de hoje. O túnel continua de pé.
    - `scripts/demo.sh up`, num terminal que fica aberto (ele mantém o Mac acordado).
    - Se o script avisar que o link mudou (o túnel do ensaio morreu com o Mac dormindo, por exemplo), cadastre os dois endereços novos no cliente OAuth local. Pode apagar os de subidas anteriores. Sem o aviso, os endereços cadastrados continuam valendo.
-   - Teste o login no seu celular, no 4G, e abra `/admin`.
+   - Teste o login no seu celular, no 4G, e abra `/admin`. Se o Google ainda não aceitar o endereço novo, use "Entrar como administração (demo)".
 2. **Durante:** notebook na tomada, tampa aberta e o roteador do celular como reserva da internet. Não rode `down` nem reinicie o Docker: o link mudaria. Com o Mac dormindo (tampa fechada, por exemplo) ou sem internet, o Cloudflare apaga o túnel, e o endereço não volta mais, mesmo com o container de pé.
 3. **Se o túnel cair** (o celular diz que o servidor não foi encontrado): rode `scripts/demo.sh up` de novo. O script percebe o túnel morto, cria outro e avisa que o link mudou. Troque os dois endereços no Google e espere alguns minutos. Enquanto isso, mostre pelo próprio notebook em `http://localhost:3001`. A vitrine e o agendamento funcionam, mas o login com Google não, porque o site espera o endereço do túnel.
 4. **Depois:** `scripts/demo.sh down`. Os dados fictícios ficam só no notebook. A produção segue a [spec da Railway](deploy-railway.md), com o banco limpo.

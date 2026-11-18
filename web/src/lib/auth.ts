@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import { Pool } from "pg";
+import { demoLogin } from "./auth-demo";
 import { apiJwt } from "./auth-jwt";
 
 /**
@@ -33,6 +34,9 @@ export const auth = betterAuth({
       issuer: process.env.AUTH_ISSUER || undefined,
       audience: process.env.AUTH_AUDIENCE || undefined,
     }),
+    // Entrada sem Google do modo demonstração (#199, ADR 0011): endpoints só
+    // do servidor, que recusam com a flag desligada.
+    demoLogin(),
     // Deixa as Server Actions gravarem os cookies do Better Auth. Fica por último.
     nextCookies(),
   ],
