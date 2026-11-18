@@ -115,6 +115,15 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 
 **RN-44 — Atendimento sem agendamento prévio.** O cliente que chega e é atendido na hora é registrado como um agendamento feito pela administração começando agora (RN-21) e depois concluído normalmente. Todo valor do financeiro vem de um atendimento concluído. Não existe lançamento avulso. *Origem: padrão adotado.*
 
+**RN-45 — Indicadores do painel.** O início da administração mostra, no fuso de São Paulo e pelo dia e hora em que cada atendimento **começa**:
+- o **mês até hoje** (do dia 1 até hoje) comparado ao **mesmo trecho do mês anterior** (até o mesmo dia, ou até o fim do mês anterior se ele for mais curto): faturamento (RN-40), atendimentos concluídos, faltas, **taxa de faltas** (faltas ÷ (concluídos + faltas)) e **ticket médio** (faturamento ÷ concluídos), com a variação de cada um; sem base no período anterior, não há variação;
+- o **faturamento diário** dos últimos 30 dias, hoje incluso;
+- a **ocupação** de cada barbeiro ativo nos 7 dias antes de hoje e em hoje mais os 6 seguintes: minutos agendados (agendados, concluídos e faltas; não os cancelados) sobre os minutos de expediente (RN-02) menos os bloqueios (RN-03);
+- os **horários de pico**: quantos atendimentos (agendados, concluídos e faltas) começaram em cada dia da semana e hora, nos 90 dias antes de hoje;
+- os **próximos atendimentos de hoje**.
+
+*Origem: padrão adotado (S6.01, #198); as escolhas a confirmar estão na [spec](../specs/painel-admin.md).*
+
 ## 6. Notificações (e-mail)
 
 **RN-50 — Confirmação.** Quando um agendamento é criado, o cliente recebe um e-mail de confirmação, se tiver e-mail cadastrado. Quando a administração agenda um horário que já começou (o encaixe, ou o registro de um atendimento que já aconteceu), não há e-mail. *Origem: D4; 2025 (RF03); o caso do horário que já começou é decisão do proprietário, na S5.09.*
@@ -151,6 +160,7 @@ Termos do domínio (Agendamento, Bloqueio, Atendimento…) estão definidos em [
 | Concluir atendimento e marcar falta | — | — | ✅ |
 | Cadastros (barbeiros, serviços, horários, clientes) | — | — | ✅ |
 | Relatório financeiro | — | — | ✅ |
+| Painel de indicadores (RN-45) | — | — | ✅ |
 
 **RN-71 — Acesso à administração.** Só entram na administração as contas Google que estão numa **lista de e-mails autorizados**. Qualquer outra conta Google é tratada como cliente. *Origem: D2, D3; o mecanismo da lista é padrão adotado.*
 

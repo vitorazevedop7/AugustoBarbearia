@@ -248,6 +248,14 @@ docker compose exec api uv run pytest tests/test_seed_demo.py
 
 A demonstração da apresentação (ADR 0010) é o `docker-compose.demo.yml`: projeto `augusto-demo`, banco `augusto_demo`, `api` e `web` nos estágios de produção dos Dockerfiles, o web em `http://localhost:3001` e um Cloudflare Tunnel gratuito (`tunnel`) com link `https://*.trycloudflare.com`, que muda a cada reinício. O script sobe o túnel antes e grava o link em `DEMO_URL` no `.env.demo` (criado do `.env.demo.example` e do `.env`, fora do git). O serviço `setup` roda o Alembic e `python -m app.jobs.seed_demo`, que cria clientes sem e-mail e duas semanas de agenda em volta de hoje. Ele **recusa** banco cujo nome não termina em `_demo` e não faz nada se já há agendamentos. Novas tabelas ou constraints que os dados fictícios precisem respeitar entram em `seed_demo.py` e no teste. A [spec](docs/specs/demonstracao-local.md) tem o roteiro do ensaio e do dia.
 
+### Painel de indicadores — S6.01
+
+```bash
+docker compose exec api uv run pytest tests/test_dashboard.py
+```
+
+`/admin` é o painel (RN-45): o mês até hoje comparado ao mesmo trecho do mês anterior (faturamento, concluídos, ticket médio e taxa de faltas, com a variação), o faturamento dos últimos 30 dias, a ocupação de cada barbeiro ativo (7 dias antes e a partir de hoje), os horários de pico (dia da semana × hora, 90 dias), os próximos de hoje com link para `/admin/agenda/[id]` e, no fim, os atalhos. Na API, o módulo `app/modules/dashboard/` (acima de `payments`, `agenda`, `barbers`, `shop` e `time_blocks`) tem só `GET /admin/dashboard`, com o relógio por `utc_now`; as contas ficam em `service.py` (`period_indicators`, `previous_month_to_date`, `merged_minutes`, `occupancy`, `peak_hours`), em `Decimal`, e dinheiro e percentuais saem como string (`"125.00"`, `"12.5"`). No web, os blocos são Server Components de `src/app/admin/painel/dashboard-view.tsx`, com gráficos em SVG do servidor, sem biblioteca e sem JS, e as contas de exibição (geometria das barras, níveis do mapa de calor, texto da variação) em `dashboard-state.ts`. A [spec](docs/specs/painel-admin.md) documenta as definições e as decisões a confirmar.
+
 ### Deploy de produção na Railway — #32
 
 ```bash

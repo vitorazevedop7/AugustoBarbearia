@@ -779,6 +779,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dashboard
+         * @description Os indicadores do negócio no momento da chamada, em São Paulo (RN-01):
+         *     o mês até hoje comparado ao mesmo trecho do mês anterior, o faturamento dos
+         *     últimos 30 dias, a ocupação de cada barbeiro, os horários de pico dos
+         *     últimos 90 dias e os atendimentos de hoje (RN-45).
+         */
+        get: operations["dashboard_admin_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1075,6 +1098,15 @@ export interface components {
             /** Bio */
             bio?: string | null;
         };
+        /** BarberOccupancy */
+        BarberOccupancy: {
+            /** Barber Id */
+            barber_id: number;
+            /** Barber Name */
+            barber_name: string;
+            past: components["schemas"]["OccupancyWindow"];
+            upcoming: components["schemas"]["OccupancyWindow"];
+        };
         /** BarberResponse */
         BarberResponse: {
             /** Id */
@@ -1354,6 +1386,39 @@ export interface components {
             /** Email */
             email?: string | null;
         };
+        /** DailyRevenue */
+        DailyRevenue: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Revenue */
+            revenue: string;
+            /** Completed Count */
+            completed_count: number;
+        };
+        /**
+         * Dashboard
+         * @description O painel da administração. Datas no fuso de São Paulo (`-03:00`, RN-01);
+         *     dinheiro e percentuais como string decimal (`"125.00"`, `"12.5"`).
+         */
+        Dashboard: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            current: components["schemas"]["PeriodIndicators"];
+            previous: components["schemas"]["PeriodIndicators"];
+            changes: components["schemas"]["IndicatorChanges"];
+            /** Daily Revenue */
+            daily_revenue: components["schemas"]["DailyRevenue"][];
+            /** Occupancy */
+            occupancy: components["schemas"]["BarberOccupancy"][];
+            peak_hours: components["schemas"]["PeakHours"];
+            today: components["schemas"]["TodaySummary"];
+        };
         /** ErrorResponse */
         ErrorResponse: {
             /** Code */
@@ -1402,6 +1467,21 @@ export interface components {
             status: "ok";
         };
         /**
+         * IndicatorChanges
+         * @description RN-45: a variação do mês corrente sobre o mesmo trecho do anterior.
+         *     `null` quando o anterior é zero (não há base para a variação).
+         */
+        IndicatorChanges: {
+            /** Revenue */
+            revenue: string | null;
+            /** Completed Count */
+            completed_count: string | null;
+            /** Average Ticket */
+            average_ticket: string | null;
+            /** No Show Rate */
+            no_show_rate: string | null;
+        };
+        /**
          * Me
          * @description Identidade autenticada e se o cadastro já permite agendar (RN-10).
          */
@@ -1432,6 +1512,28 @@ export interface components {
             count: number;
         };
         /**
+         * OccupancyWindow
+         * @description RN-45: minutos ocupados sobre minutos de expediente livres de bloqueio.
+         */
+        OccupancyWindow: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Booked Minutes */
+            booked_minutes: number;
+            /** Available Minutes */
+            available_minutes: number;
+            /** Rate */
+            rate: string | null;
+        };
+        /**
          * PaymentMethod
          * @description RN-40: dinheiro, Pix, débito ou crédito.
          * @enum {string}
@@ -1455,6 +1557,64 @@ export interface components {
             method?: components["schemas"]["PaymentMethod"] | null;
             /** Amount */
             amount?: (string | number) | null;
+        };
+        /**
+         * PeakHours
+         * @description RN-45: atendimentos por dia da semana e hora de início, em São Paulo.
+         */
+        PeakHours: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Hours */
+            hours: number[];
+            /** Rows */
+            rows: components["schemas"]["PeakRow"][];
+            /** Max Count */
+            max_count: number;
+        };
+        /** PeakRow */
+        PeakRow: {
+            /** Weekday */
+            weekday: number;
+            /** Open */
+            open: boolean;
+            /** Counts */
+            counts: number[];
+        };
+        /**
+         * PeriodIndicators
+         * @description RN-45: os números de um período (o mês até hoje, ou o mesmo trecho do
+         *     mês anterior). `null` quando a conta não tem denominador.
+         */
+        PeriodIndicators: {
+            /**
+             * Start
+             * Format: date
+             */
+            start: string;
+            /**
+             * End
+             * Format: date
+             */
+            end: string;
+            /** Revenue */
+            revenue: string;
+            /** Completed Count */
+            completed_count: number;
+            /** No Show Count */
+            no_show_count: number;
+            /** No Show Rate */
+            no_show_rate: string | null;
+            /** Average Ticket */
+            average_ticket: string | null;
         };
         /**
          * PublicBarberResponse
@@ -1673,6 +1833,43 @@ export interface components {
             all_day: boolean;
             /** Reason */
             reason: string | null;
+        };
+        /** TodayAppointment */
+        TodayAppointment: {
+            /** Id */
+            id: number;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Customer Name */
+            customer_name: string;
+            /** Barber Name */
+            barber_name: string;
+            /** Service Name */
+            service_name: string;
+            /** In Progress */
+            in_progress: boolean;
+        };
+        /** TodaySummary */
+        TodaySummary: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Total Count */
+            total_count: number;
+            /** Completed Count */
+            completed_count: number;
+            /** Upcoming */
+            upcoming: components["schemas"]["TodayAppointment"][];
         };
     };
     responses: never;
@@ -5054,6 +5251,62 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    dashboard_admin_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
