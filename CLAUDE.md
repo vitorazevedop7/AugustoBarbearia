@@ -9,7 +9,7 @@ Sistema web de agendamento e gestão para a **Augusto Barbearia**, uma barbearia
 - **web/**: Next.js (App Router, TypeScript strict), Tailwind, Better Auth (Google + plugin JWT). É também o BFF.
 - **api/**: Python + FastAPI, SQLAlchemy 2 + Alembic, Pydantic v2, pytest. Todas as regras de negócio ficam aqui.
 - **PostgreSQL**, Docker / `docker compose`, deploy na Railway, e-mail via Resend.
-- Os motivos de cada escolha estão em `docs/decisoes/` (ADRs 0001–0010).
+- Os motivos de cada escolha estão em `docs/decisoes/` (ADRs 0001–0011).
 
 ## Comandos
 
@@ -255,6 +255,16 @@ docker compose exec api uv run pytest tests/test_dashboard.py
 ```
 
 `/admin` é o painel (RN-45): o mês até hoje comparado ao mesmo trecho do mês anterior (faturamento, concluídos, ticket médio e taxa de faltas, com a variação), o faturamento dos últimos 30 dias, a ocupação de cada barbeiro ativo (7 dias antes e a partir de hoje), os horários de pico (dia da semana × hora, 90 dias), os próximos de hoje com link para `/admin/agenda/[id]` e, no fim, os atalhos. Na API, o módulo `app/modules/dashboard/` (acima de `payments`, `agenda`, `barbers`, `shop` e `time_blocks`) tem só `GET /admin/dashboard`, com o relógio por `utc_now`; as contas ficam em `service.py` (`period_indicators`, `previous_month_to_date`, `merged_minutes`, `occupancy`, `peak_hours`), em `Decimal`, e dinheiro e percentuais saem como string (`"125.00"`, `"12.5"`). No web, os blocos são Server Components de `src/app/admin/painel/dashboard-view.tsx`, com gráficos em SVG do servidor, sem biblioteca e sem JS, e as contas de exibição (geometria das barras, níveis do mapa de calor, texto da variação) em `dashboard-state.ts`. A [spec](docs/specs/painel-admin.md) documenta as definições e as decisões a confirmar.
+
+### Modo demonstração — S6.02
+
+```bash
+# no .env: DEMO_LOGIN_ENABLED=true e admin@demo.augustobarbearia.local em ADMIN_EMAILS
+docker compose up -d api web
+docker compose exec web pnpm vitest run src/lib/demo-mode.test.ts src/lib/auth-demo.test.ts src/lib/auth-actions.test.ts
+```
+
+Com `DEMO_LOGIN_ENABLED=true` (desligado por padrão), `/entrar` mostra "Entrar como administração (demo)" e "Entrar como cliente (demo)", e todas as páginas, a faixa "Ambiente de demonstração — dados fictícios" (ADR 0011). As contas são fixas (`admin@demo.augustobarbearia.local`, `cliente@demo.augustobarbearia.local`, em `web/src/lib/demo-mode.ts`) e entram pela Server Action `signInAsDemo`, que chama endpoints do Better Auth **só do servidor** (`web/src/lib/auth-demo.ts`): sessão e JWT iguais aos do Google, sem senha nem cadastro aberto, e 404 com a flag desligada. A API não muda: o papel vem de `ADMIN_EMAILS`. Numa imagem de produção, a flag só vale com `DEMO_LOGIN_ACKNOWLEDGE=public-demo`, que só o `docker-compose.demo.yml` define; sem ela, o web a ignora e registra o erro. O compose da demonstração liga as duas e põe a conta de administração em primeiro no `ADMIN_EMAILS` (o `closed_by` do seed), e o `seed_demo` cria o cliente fictício com telefone, um horário marcado e histórico. A [spec](docs/specs/modo-demonstracao.md) documenta a trava e as contas.
 
 ### Deploy de produção na Railway — #32
 

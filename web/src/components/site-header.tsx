@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { DemoBanner } from "@/components/demo-banner";
 import { AccountPlaceholder, HeaderAccount } from "@/components/header-account";
 import { HeaderFrame } from "@/components/header-frame";
 import { SiteNav } from "@/components/site-nav";
@@ -19,6 +20,10 @@ import { BOOKING_PATH } from "@/lib/booking";
 export function SiteHeader() {
   return (
     <HeaderFrame>
+      {/* Só com o modo demonstração ligado (#199). */}
+      <Suspense fallback={null}>
+        <DemoBanner />
+      </Suspense>
       <div className="mx-auto flex h-20 max-w-site items-center justify-between gap-4">
         <Link
           href="/"

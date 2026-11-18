@@ -145,7 +145,7 @@ O `.env.example` lista todas as variáveis do sistema; a explicação de cada um
 
 ### Demonstração no notebook
 
-Para apresentar o sistema, `scripts/demo.sh up` sobe uma cópia separada, com as imagens de produção, dados fictícios e um link `https://` público para abrir no celular (ADR 0010). O roteiro, inclusive o cadastro do link no Google, está em [docs/specs/demonstracao-local.md](docs/specs/demonstracao-local.md).
+Para apresentar o sistema, `scripts/demo.sh up` sobe uma cópia separada, com as imagens de produção, dados fictícios e um link `https://` público para abrir no celular (ADR 0010). O roteiro, inclusive o cadastro do link no Google, está em [docs/specs/demonstracao-local.md](docs/specs/demonstracao-local.md). A demonstração também liga o modo demonstração (ADR 0011): `/entrar` oferece "Entrar como administração (demo)" e "Entrar como cliente (demo)", sem conta Google, com a faixa "Ambiente de demonstração — dados fictícios" ([docs/specs/modo-demonstracao.md](docs/specs/modo-demonstracao.md)).
 
 ## CI
 

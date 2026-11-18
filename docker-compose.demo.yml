@@ -11,7 +11,9 @@ x-api: &api
   image: augusto-demo-api
   environment:
     DATABASE_URL: postgresql://augusto:augusto@db:5432/augusto_demo
-    ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+    # A conta fictícia do modo demonstração (#199) vem primeiro: o seed usa o
+    # primeiro e-mail como `closed_by`, e nenhum e-mail real aparece nos dados.
+    ADMIN_EMAILS: admin@demo.augustobarbearia.local,${ADMIN_EMAILS:-}
     AUTH_JWKS_URL: http://web:3000/api/auth/jwks
     AUTH_ISSUER: ${DEMO_URL:?rode scripts/demo.sh up}
     AUTH_AUDIENCE: ${DEMO_URL:?rode scripts/demo.sh up}
@@ -97,6 +99,11 @@ services:
       AUTH_ISSUER: ${DEMO_URL:?rode scripts/demo.sh up}
       AUTH_AUDIENCE: ${DEMO_URL:?rode scripts/demo.sh up}
       API_INTERNAL_URL: http://api:8000
+      # Modo demonstração (#199, ADR 0011): "Entrar como administração (demo)"
+      # e "Entrar como cliente (demo)" em /entrar. A imagem é de produção, então
+      # a flag só vale com a confirmação, que só este arquivo define.
+      DEMO_LOGIN_ENABLED: ${DEMO_LOGIN_ENABLED:-true}
+      DEMO_LOGIN_ACKNOWLEDGE: public-demo
     ports:
       - "127.0.0.1:3001:3000"
     # O web só sobe com a API pronta: antes disso, a vitrine abriria sem

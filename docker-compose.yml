@@ -66,6 +66,8 @@ services:
       AUTH_ISSUER: ${AUTH_ISSUER:-}
       AUTH_AUDIENCE: ${AUTH_AUDIENCE:-}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:8000}
+      # Modo demonstração (#199): entrada sem Google nas contas fictícias.
+      DEMO_LOGIN_ENABLED: ${DEMO_LOGIN_ENABLED:-false}
     ports:
       - "3000:3000"
     volumes:

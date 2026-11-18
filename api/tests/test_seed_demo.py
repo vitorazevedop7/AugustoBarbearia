@@ -16,7 +16,11 @@ from app.jobs.seed_demo import (
     check_demo_database,
     seed,
 )
-from app.modules.appointments.models import Appointment, AppointmentStatus
+from app.modules.appointments.models import (
+    Appointment,
+    AppointmentStatus,
+    CanceledBy,
+)
 from app.modules.customers.models import Customer
 from app.modules.payments.models import Payment
 from app.modules.time_blocks.models import TimeBlock
@@ -73,7 +77,8 @@ def test_recusa_banco_que_ja_tem_agendamentos(db_session: Session) -> None:
 
 
 def test_cria_clientes_e_todos_os_status(report: SeedReport) -> None:
-    assert report.customers == len(seed_demo.CUSTOMERS)
+    # Os fictícios da lista e o cliente da entrada de demonstração (#199).
+    assert report.customers == len(seed_demo.CUSTOMERS) + 1
     assert report.completed > 0
     assert report.no_show > 0
     assert report.canceled > 0
@@ -82,9 +87,56 @@ def test_cria_clientes_e_todos_os_status(report: SeedReport) -> None:
 
 
 def test_clientes_ficticios_sem_email(db_session: Session, report: SeedReport) -> None:
-    """Nenhum e-mail sai para um cliente fictício (RN-50, RN-51)."""
+    """Nenhum e-mail sai para um cliente fictício (RN-50, RN-51). Só o cliente
+    da entrada de demonstração tem e-mail, num domínio `.local`, que não
+    recebe mensagem."""
     emails = db_session.scalars(select(Customer.email)).all()
-    assert all(email is None for email in emails)
+    assert [email for email in emails if email is not None] == [
+        seed_demo.DEMO_CUSTOMER_EMAIL
+    ]
+    assert seed_demo.DEMO_CUSTOMER_EMAIL.endswith(".local")
+
+
+def demo_customer(session: Session) -> Customer:
+    customer = session.scalar(
+        select(Customer).where(Customer.email == seed_demo.DEMO_CUSTOMER_EMAIL)
+    )
+    assert customer is not None
+    return customer
+
+
+def test_rn10_cliente_da_demonstracao_tem_telefone_e_sem_conta(
+    db_session: Session, report: SeedReport
+) -> None:
+    """O login de demonstração vincula a conta pelo e-mail (RN-23), e o
+    telefone já cadastrado deixa agendar sem passar pelo perfil (RN-10)."""
+    customer = demo_customer(db_session)
+    assert customer.phone == seed_demo.DEMO_CUSTOMER_PHONE
+    assert customer.auth_user_id is None
+
+
+def test_cliente_da_demonstracao_tem_proximo_e_historico(
+    db_session: Session, report: SeedReport
+) -> None:
+    customer = demo_customer(db_session)
+    mine = db_session.scalars(
+        select(Appointment).where(Appointment.customer_id == customer.id)
+    ).all()
+    statuses = [appointment.status for appointment in mine]
+
+    # RN-11: um só marcado, para ele ainda poder agendar ao vivo.
+    upcoming = [a for a in mine if a.status == AppointmentStatus.SCHEDULED]
+    assert len(upcoming) == 1
+    # RN-14: dá para remarcar e cancelar sem o aviso de última hora.
+    assert upcoming[0].starts_at >= NOW + timedelta(days=1)
+    assert statuses.count(AppointmentStatus.COMPLETED) == 2
+    assert statuses.count(AppointmentStatus.CANCELED) == 1
+    for appointment in mine:
+        if appointment.status == AppointmentStatus.CANCELED:
+            assert appointment.starts_at < NOW
+            assert appointment.canceled_by == CanceledBy.CUSTOMER
+        if appointment.status == AppointmentStatus.COMPLETED:
+            assert appointment.ends_at <= NOW
 
 
 def test_status_coerente_com_o_horario(db_session: Session, report: SeedReport) -> None:

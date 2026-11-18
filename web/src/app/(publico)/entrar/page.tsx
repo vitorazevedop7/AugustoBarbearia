@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DemoSignIn } from "@/components/demo-sign-in";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Ornament } from "@/components/ui/ornament";
 import { signInWithGoogle } from "@/lib/auth-actions";
+import { isDemoLoginEnabled } from "@/lib/demo-mode";
 import { getCurrentSession, safeRedirectPath } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -49,6 +51,7 @@ export default async function SignInPage({
             Entrar com Google
           </Button>
         </form>
+        {isDemoLoginEnabled() ? <DemoSignIn destination={destination} /> : null}
         <p className="mt-6 text-sm text-ink-muted">
           Do Google recebemos só o seu nome, e-mail e foto, usados apenas para o
           seu atendimento. Saiba mais na{" "}

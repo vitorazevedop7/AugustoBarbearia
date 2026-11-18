@@ -2,7 +2,9 @@
 
 Cria clientes, duas semanas de agenda em volta de hoje (concluídos com
 pagamento, faltas, cancelamentos e marcados) e dois bloqueios, para a agenda e
-o relatório não aparecerem vazios na apresentação. Só roda num banco cujo nome
+o relatório não aparecerem vazios na apresentação. Entre os clientes está o da
+entrada de demonstração (#199), com telefone, um horário marcado e histórico,
+para "Meus agendamentos" abrir preenchido. Só roda num banco cujo nome
 termina em `_demo` e que ainda não tem agendamentos: o banco de produção nunca
 recebe esses dados.
 """
@@ -65,6 +67,19 @@ CUSTOMERS = (
     ("Samuel Moreira", "75991234518"),
 )
 
+# Cliente da entrada "Entrar como cliente (demo)" do web (#199,
+# `web/src/lib/demo-mode.ts`). O primeiro login vincula a conta a este cadastro
+# pelo e-mail (RN-23). O domínio `.local` não recebe e-mail.
+DEMO_CUSTOMER_EMAIL = "cliente@demo.augustobarbearia.local"
+DEMO_CUSTOMER_NAME = "Cliente Demo"
+DEMO_CUSTOMER_PHONE = "75991234599"
+# Quantos agendamentos do histórico passam para o cliente da demonstração.
+DEMO_CUSTOMER_COMPLETED = 2
+DEMO_CUSTOMER_CANCELED = 1
+# O próximo horário dele começa pelo menos um dia depois de agora, para
+# "Remarcar" e "Cancelar" aparecerem sem o aviso de última hora (RN-14).
+DEMO_CUSTOMER_LEAD = timedelta(days=1)
+
 # Pesos aproximados de uma barbearia: Pix na frente, dinheiro por último.
 PAYMENT_WEIGHTS = (
     (PaymentMethod.PIX, 45),
@@ -122,7 +137,10 @@ def seed(
     hours = {row.weekday: row for row in session.scalars(select(BusinessHours))}
     offers = _offers(session)
     customers = [Customer(name=name, phone=phone) for name, phone in CUSTOMERS]
-    session.add_all(customers)
+    demo_customer = Customer(
+        name=DEMO_CUSTOMER_NAME, phone=DEMO_CUSTOMER_PHONE, email=DEMO_CUSTOMER_EMAIL
+    )
+    session.add_all([*customers, demo_customer])
     session.flush()
 
     today = now.astimezone(TIMEZONE).date()
@@ -130,6 +148,7 @@ def seed(
     session.add_all(blocks)
 
     counts = dict.fromkeys(AppointmentStatus, 0)
+    created: list[Appointment] = []
     payments: list[tuple[Appointment, PaymentMethod]] = []
     for offset in range(-PAST_DAYS, FUTURE_DAYS + 1):
         day = today + timedelta(days=offset)
@@ -165,12 +184,14 @@ def seed(
                     closed_by=closed_by,
                 )
                 session.add(appointment)
+                created.append(appointment)
                 counts[appointment.status] += 1
                 if method is not None:
                     payments.append((appointment, method))
                 # A próxima reserva começa no primeiro horário da grade livre.
                 while start < ends:
                     start += SLOT_STEP
+    _give_to_demo_customer(created, demo_customer, now)
     session.flush()
     # RN-40: o concluído tem o pagamento, com o preço congelado como valor.
     session.add_all(
@@ -179,13 +200,51 @@ def seed(
     )
     session.flush()
     return SeedReport(
-        customers=len(customers),
+        customers=len(customers) + 1,
         completed=counts[AppointmentStatus.COMPLETED],
         no_show=counts[AppointmentStatus.NO_SHOW],
         canceled=counts[AppointmentStatus.CANCELED],
         scheduled=counts[AppointmentStatus.SCHEDULED],
         time_blocks=len(blocks),
     )
+
+
+def _give_to_demo_customer(
+    appointments: Sequence[Appointment], customer: Customer, now: datetime
+) -> None:
+    """Passa ao cliente da demonstração um horário marcado e um histórico.
+
+    Reaproveita agendamentos já sorteados, em vez de criar outros, para não
+    cruzar horários (RN-08) nem bloqueios (RN-03). Só um marcado: com dois, o
+    cliente chegaria ao limite da RN-11 e não conseguiria agendar ao vivo.
+    """
+    by_start = sorted(appointments, key=lambda appointment: appointment.starts_at)
+    upcoming = [
+        appointment
+        for appointment in by_start
+        if appointment.status == AppointmentStatus.SCHEDULED
+        and appointment.starts_at >= now + DEMO_CUSTOMER_LEAD
+    ][:1]
+    recent_first = list(reversed(by_start))
+    completed = [
+        appointment
+        for appointment in recent_first
+        if appointment.status == AppointmentStatus.COMPLETED
+    ][:DEMO_CUSTOMER_COMPLETED]
+    canceled = [
+        appointment
+        for appointment in recent_first
+        if appointment.status == AppointmentStatus.CANCELED
+        and appointment.starts_at < now
+    ][:DEMO_CUSTOMER_CANCELED]
+    for appointment in [*completed, *canceled, *upcoming]:
+        appointment.customer_id = customer.id
+        if appointment.status == AppointmentStatus.CANCELED:
+            # RN-33: no histórico dele, quem cancelou foi ele mesmo.
+            appointment.canceled_by = CanceledBy.CUSTOMER
+        if appointment.status == AppointmentStatus.SCHEDULED:
+            # Marcado pelo site, como o cliente faria.
+            appointment.source = AppointmentSource.ONLINE
 
 
 def _offers(session: Session) -> dict[int, list[Service]]:

@@ -25,6 +25,8 @@ vi.mock("@/components/header-account", async (importOriginal) => {
   };
 });
 vi.mock("next/navigation", () => ({ usePathname: vi.fn() }));
+// A faixa do modo demonstração lê a requisição e tem sua própria suíte.
+vi.mock("@/components/demo-banner", () => ({ DemoBanner: () => null }));
 
 describe("SiteHeader", () => {
   beforeEach(() => {
