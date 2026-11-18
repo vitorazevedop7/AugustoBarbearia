@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClasses } from "@/components/ui/button";
 import { SelectField, TextField } from "@/components/ui/field";
 import {
   REPORT_PATH,
@@ -19,10 +19,13 @@ export function ReportToolbar({
   state,
   today,
   barbers,
+  exportLink,
 }: {
   state: ReportState;
   today: string;
   barbers: FilterBarber[];
+  /** O CSV do período; sem ele (relatório que não carregou), não há botão. */
+  exportLink?: string;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -91,6 +94,17 @@ export function ReportToolbar({
           Ver relatório
         </Button>
       </form>
+      {exportLink ? (
+        // `<a download>` e não `Link`: o destino é um arquivo, e o `Link`
+        // pré-carregaria o CSV só por ele aparecer na tela.
+        <a
+          href={exportLink}
+          download
+          className={`${buttonClasses({ variant: "outline", size: "sm" })} self-start`}
+        >
+          Exportar CSV
+        </a>
+      ) : null}
     </div>
   );
 }

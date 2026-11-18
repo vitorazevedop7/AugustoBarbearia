@@ -4,7 +4,7 @@ import { loadBarbers } from "../agenda/data";
 import { todayInSaoPaulo } from "../agenda/agenda-state";
 import { AdminPage } from "../admin-page";
 import { loadReport } from "./data";
-import { formatPeriod, parseReportParams } from "./report-state";
+import { exportHref, formatPeriod, parseReportParams } from "./report-state";
 import { ReportToolbar } from "./report-toolbar";
 import { ReportBreakdowns, ReportList, ReportSummary } from "./report-view";
 
@@ -51,7 +51,12 @@ export default async function ReportPage({
   return (
     <AdminPage title="Relatório financeiro">
       <div className="flex flex-col gap-8">
-        <ReportToolbar state={state} today={today} barbers={filterBarbers} />
+        <ReportToolbar
+          state={state}
+          today={today}
+          barbers={filterBarbers}
+          exportLink={report.data ? exportHref(state) : undefined}
+        />
         <section aria-labelledby="periodo" className="flex flex-col gap-6">
           <h2 id="periodo" className="text-lg font-semibold text-ink">
             {formatPeriod(state)}

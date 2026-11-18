@@ -1,4 +1,5 @@
 import type { SummaryItem } from "@/components/booking/booking-frame";
+import { CalendarLink } from "@/components/booking/calendar-link";
 import { ContactNotice } from "@/components/booking/contact-notice";
 import { Alert } from "@/components/ui/alert";
 import { Badge, StatusBadge } from "@/components/ui/badge";
@@ -94,6 +95,13 @@ export function AppointmentCard({
             : "pela barbearia"}{" "}
           em {deadlineText(appointment.canceled_at)}.
         </p>
+      ) : null}
+      {upcoming && appointment.status === "SCHEDULED" ? (
+        <CalendarLink
+          appointmentId={appointment.id}
+          label={`o horário de ${date}`}
+          className="self-start"
+        />
       ) : null}
       {actionable ? (
         <>

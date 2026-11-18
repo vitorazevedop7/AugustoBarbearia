@@ -3,7 +3,7 @@
 import datetime as dt
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_admin
@@ -13,6 +13,7 @@ from app.errors import ErrorResponse
 from app.ids import Id
 from app.modules.agenda.schemas import AgendaBarber, AgendaService
 from app.modules.reports import service
+from app.modules.reports.export import csv_filename, render_csv
 from app.modules.reports.schemas import (
     BarberTotal,
     CompletedAppointment,
@@ -83,4 +84,36 @@ def financial_report(
             )
             for row in report.completed
         ],
+    )
+
+
+@router.get(
+    "/financial.csv",
+    response_class=Response,
+    responses={
+        200: {
+            "description": "A lista dos concluídos do período em CSV.",
+            "content": {"text/csv": {"schema": {"type": "string"}}},
+        },
+        422: {"model": ErrorResponse},
+    },
+)
+def financial_report_csv(
+    start: Annotated[dt.date, Query(description="Data local de São Paulo.")],
+    end: Annotated[dt.date, Query(description="Data local de São Paulo, inclusiva.")],
+    session: SessionDep,
+    barber_id: Id | None = None,
+) -> Response:
+    """A lista dos concluídos do período como arquivo CSV para o Excel pt-BR:
+    `;` como separador, vírgula decimal, UTF-8 com BOM (RN-43). Mesmo período,
+    filtro e erros do relatório."""
+    report = service.financial_report(
+        session, start=start, end=end, barber_id=barber_id
+    )
+    return Response(
+        content=render_csv(report),
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{csv_filename(start, end)}"'
+        },
     )

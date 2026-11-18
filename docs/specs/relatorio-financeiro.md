@@ -111,20 +111,23 @@ flowchart LR
 - **Resumo:** três cartões (Faturamento, Atendimentos concluídos, Faltas).
 - **Detalhe:** duas listas lado a lado a partir de `lg` (por barbeiro e por forma de pagamento), e abaixo a lista dos concluídos: data e hora, cliente, serviço, barbeiro, forma e valor.
 - **Estados:** carregando (`loading.tsx`), erro (`Alert`) e vazio (texto).
-- **Sem gráficos e sem exportação.**
+- **Exportar CSV (S6.03, #200):** abaixo do formulário, o botão "Exportar CSV" é um `<a download>` para `/admin/relatorio/exportar?inicio=&fim=&barbeiro=`, com o período e o barbeiro que a tela mostra. Ele só aparece quando o relatório carregou. O Route Handler (`web/src/app/admin/relatorio/exportar/route.ts`) lê os mesmos parâmetros da tela (`parseReportParams`: sem datas, vale "Este mês"), chama `GET /admin/reports/financial.csv` com o token do servidor e devolve o arquivo com o tipo e o nome da API; o navegador nunca chama a API. Se a API recusar (período inválido, sem permissão), a resposta é o `message` dela em texto simples, com o mesmo status.
+- **Sem gráficos.**
 
 ## API
 | Método | Caminho | Quem | O que faz |
 |---|---|---|---|
 | `GET` | `/admin/reports/financial?start=&end=&barber_id=` | Administração (`require_admin`) | O relatório do período: totais, por barbeiro, por forma de pagamento, faltas e a lista dos concluídos |
+| `GET` | `/admin/reports/financial.csv?start=&end=&barber_id=` | Administração (`require_admin`) | A lista dos concluídos do período como arquivo CSV (S6.03). Mesmos parâmetros, validações e erros do relatório (`422 INVALID_PERIOD`, `404 BARBER_NOT_FOUND`) |
 
-- Módulo novo `app/modules/reports/` (`router.py`, `schemas.py`, `service.py`). Ele fica **acima** de `payments`, `agenda` e `barbers`: lê `Appointment`, `Payment`, `Customer`, `Barber` e `Service`, reaproveita `period_bounds` de `agenda.service` e `get_barber` de `barbers.service`, e ninguém o importa. Não mora em `payments` para não acoplar o fechamento do atendimento (escrita) a uma leitura agregada, e não cria ciclo.
+- **Formato do CSV** (`reports/export.py`, pensado para abrir direto no Excel pt-BR): separador `;`; valor com vírgula decimal e sem separador de milhar (`1250,50`), que o Excel reconhece como número; data `dd/mm/aaaa` e hora `HH:MM` em colunas separadas, em hora de São Paulo (RN-01); UTF-8 **com BOM** (sem ele o Excel quebra os acentos) e linhas em CRLF. Colunas: `Data;Hora;Cliente;Barbeiro;Serviço;Pagamento;Valor (R$)`, uma linha por atendimento concluído, na ordem da lista do relatório (início, barbeiro, id); sem concluídos, só o cabeçalho. Forma de pagamento por extenso (Dinheiro, Pix, Débito, Crédito). Nomes que começam com `=`, `+`, `-`, `@`, tabulação ou retorno recebem o prefixo `'`, para o Excel não executar fórmula digitada por um cliente. O arquivo se chama `relatorio-AAAA-MM-DD-a-AAAA-MM-DD.csv` (`Content-Disposition: attachment`). Reaproveita `financial_report`, então a lista é exatamente a do relatório.
+- Módulo novo `app/modules/reports/` (`router.py`, `schemas.py`, `service.py`, `export.py`). Ele fica **acima** de `payments`, `agenda` e `barbers`: lê `Appointment`, `Payment`, `Customer`, `Barber` e `Service`, reaproveita `period_bounds` de `agenda.service` e `get_barber` de `barbers.service`, e ninguém o importa. Não mora em `payments` para não acoplar o fechamento do atendimento (escrita) a uma leitura agregada, e não cria ciclo.
 - A data entra como data local (`AAAA-MM-DD`) e vira instante de São Paulo no `service.py`; as respostas saem em `-03:00` (RN-01).
 - Consultas: a lista dos concluídos (com as junções de cliente, barbeiro e serviço, no período e no barbeiro) e a contagem de faltas por barbeiro. O total, a quantidade de concluídos e os totais por barbeiro e por forma de pagamento são somados em `Decimal` a partir da lista, então o CA-2 vale sempre, mesmo que um pagamento seja corrigido durante a montagem (com agregados separados em `READ COMMITTED`, cada consulta poderia ver um estado diferente). A soma em Python é exata porque os valores são `numeric(10,2)`.
 - Índices: nenhum novo. A agenda lê pelo mesmo filtro de `starts_at` sem índice dedicado, e o volume de uma barbearia (dezenas de atendimentos por dia, no máximo alguns milhares por ano) não justifica uma migração; se crescer, o índice entra numa issue própria.
 
 ## Fora do escopo desta spec
-- Exportação (CSV ou PDF) e gráficos: vão para o backlog se os proprietários pedirem.
+- Exportação em PDF ou XLSX e gráficos: vão para o backlog se os proprietários pedirem. O CSV da lista dos concluídos entrou na S6.03 (#200); ele não traz os totais por barbeiro e por forma (a soma da coluna Valor dá o faturamento).
 - Comissão, percentual do barbeiro, despesas, lucro e taxa da maquininha.
 - Comparar com o período anterior.
 - Paginação da lista (o limite de 366 dias a mantém num tamanho razoável).

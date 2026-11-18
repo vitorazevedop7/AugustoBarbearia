@@ -5,6 +5,7 @@ import {
   BookingMain,
   ChoiceSummary,
 } from "@/components/booking/booking-frame";
+import { CalendarLink } from "@/components/booking/calendar-link";
 import { Alert } from "@/components/ui/alert";
 import { ButtonLink } from "@/components/ui/button";
 import {
@@ -46,6 +47,9 @@ export default async function ConfirmedPage({
   const links = (
     <div className="mt-10 flex flex-col gap-3 sm:flex-row">
       <ButtonLink href={MY_APPOINTMENTS_PATH}>Ver meus agendamentos</ButtonLink>
+      {loaded.data?.status === "SCHEDULED" ? (
+        <CalendarLink appointmentId={loaded.data.id} size="md" />
+      ) : null}
       <ButtonLink href="/" variant="ghost">
         Voltar para o início
       </ButtonLink>

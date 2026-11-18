@@ -352,6 +352,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/appointments/{appointment_id}/calendar.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Appointment Calendar
+         * @description O agendamento ativo do cliente do token como arquivo `.ics` (RN-16,
+         *     RN-31). O de outro cliente responde 404; o que não está mais ativo, 409.
+         */
+        get: operations["get_appointment_calendar_me_appointments__appointment_id__calendar_ics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/appointments/{appointment_id}/cancel": {
         parameters: {
             query?: never;
@@ -728,6 +749,28 @@ export interface paths {
          *     Entra o atendimento que **começa** no período, em São Paulo (RN-01, RN-43).
          */
         get: operations["financial_report_admin_reports_financial_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reports/financial.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Financial Report Csv
+         * @description A lista dos concluídos do período como arquivo CSV para o Excel pt-BR:
+         *     `;` como separador, vírgula decimal, UTF-8 com BOM (RN-43). Mesmo período,
+         *     filtro e erros do relatório.
+         */
+        get: operations["financial_report_csv_admin_reports_financial_csv_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3299,6 +3342,82 @@ export interface operations {
             };
         };
     };
+    get_appointment_calendar_me_appointments__appointment_id__calendar_ics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                appointment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description O agendamento como evento de calendário (RFC 5545). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/calendar": string;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     cancel_appointment_me_appointments__appointment_id__cancel_post: {
         parameters: {
             query?: never;
@@ -4842,6 +4961,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FinancialReport"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Default Response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    financial_report_csv_admin_reports_financial_csv_get: {
+        parameters: {
+            query: {
+                /** @description Data local de São Paulo. */
+                start: string;
+                /** @description Data local de São Paulo, inclusiva. */
+                end: string;
+                barber_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A lista dos concluídos do período em CSV. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
             /** @description Unauthorized */

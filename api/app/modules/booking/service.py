@@ -38,6 +38,7 @@ from app.modules.catalog.service import get_service
 from app.modules.customers.models import Customer
 from app.modules.notifications.models import NotificationKind
 from app.modules.notifications.service import Outbox, notify
+from app.modules.shop.service import get_shop
 
 # RN-11: no máximo 2 agendamentos ativos no futuro por cliente.
 MAX_ACTIVE_APPOINTMENTS = 2
@@ -282,6 +283,25 @@ def get_customer_appointment(
     return _with_relations(
         session, _owned_appointment(session, customer_id, appointment_id)
     )
+
+
+def get_calendar_appointment(
+    session: Session, customer_id: int, appointment_id: int
+) -> tuple[CustomerAppointment, str | None]:
+    """O agendamento para o arquivo de calendário e o endereço da barbearia.
+
+    RN-16: só o do próprio cliente. RN-31: só o ativo vira evento; o cancelado
+    ou concluído responde `409 APPOINTMENT_NOT_ACTIVE`, para ninguém pôr na
+    agenda um horário que não existe mais.
+    """
+    booked = get_customer_appointment(session, customer_id, appointment_id)
+    if booked.appointment.status != AppointmentStatus.SCHEDULED:
+        raise DomainError(
+            code="APPOINTMENT_NOT_ACTIVE",
+            message="Este agendamento não está mais ativo.",
+            status_code=409,
+        )
+    return booked, get_shop(session).address
 
 
 def _ensure_changeable(appointment: Appointment, now: datetime) -> None:

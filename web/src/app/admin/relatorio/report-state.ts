@@ -74,6 +74,13 @@ export function reportHref(state: ReportState): string {
   return `${REPORT_PATH}?${params.toString()}`;
 }
 
+export const EXPORT_PATH = `${REPORT_PATH}/exportar`;
+
+/** O CSV do mesmo período e barbeiro que a tela mostra. */
+export function exportHref(state: ReportState): string {
+  return reportHref(state).replace(REPORT_PATH, EXPORT_PATH);
+}
+
 export type Shortcut = { label: string; period: Period };
 
 /** Os atalhos de período, na ordem da tela. */
