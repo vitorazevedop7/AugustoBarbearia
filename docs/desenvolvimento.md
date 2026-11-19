@@ -1,15 +1,10 @@
-# Augusto Barbearia
+# Guia de desenvolvimento
 
-Sistema web de agendamento e gestão para a Augusto Barbearia.
-
-- **Cliente:** vê os serviços e os barbeiros, agenda com a conta Google, remarca e cancela, e recebe confirmação e lembrete por e-mail.
-- **Administração:** agenda de todos os barbeiros, agendamento por telefone ou balcão, conclusão de atendimento com pagamento, cadastros e relatório financeiro.
-
-> Em desenvolvimento: Fase 0 (fundação do MVP). Ver o [roadmap](docs/produto/roadmap.md).
+Como rodar, testar e mexer em cada parte do sistema. A apresentação do projeto está no [README](../README.md); as regras do repositório, no [CLAUDE.md](../CLAUDE.md).
 
 ## Stack
 
-Next.js (web) · FastAPI (api) · PostgreSQL · Docker · Railway. Detalhes e motivos em [docs/decisoes](docs/decisoes/).
+Next.js (web) · FastAPI (api) · PostgreSQL · Docker · Railway. Detalhes e motivos em [docs/decisoes](decisoes/).
 
 ## Rodando localmente
 
@@ -66,7 +61,7 @@ pnpm dev
 
 Qualidade: `pnpm lint && pnpm typecheck && pnpm test && pnpm build`. O build baixa Inter e Barlow do Google Fonts e gera a saída standalone.
 
-Os tipos da API ficam em `src/lib/api/schema.d.ts`, gerado e versionado ([ADR 0008](docs/decisoes/0008-contrato-openapi.md)). Mudou um schema da API? Regenere no mesmo PR:
+Os tipos da API ficam em `src/lib/api/schema.d.ts`, gerado e versionado ([ADR 0008](decisoes/0008-contrato-openapi.md)). Mudou um schema da API? Regenere no mesmo PR:
 
 ```bash
 pnpm gen:api                       # lê $API_INTERNAL_URL/openapi.json (padrão http://localhost:8000)
@@ -110,21 +105,21 @@ docker compose up -d api web
 docker compose exec api uv run pytest tests/test_auth.py
 ```
 
-Entre com Google e abra http://localhost:3000/admin: um e-mail da lista vê “Acesso permitido”; outra conta é redirecionada para `/`. Sem sessão, o destino é `/entrar?voltar=/admin`. Se a sessão existe, mas a API rejeita o JWT (ex.: JWKS indisponível), a página mostra um aviso sem entrar em ciclo de redirecionamentos. `GET /me` retorna `sub`, `email`, `name`, `role` (`admin` ou `customer`) e `has_phone` do usuário autenticado; `GET /admin/ping` retorna `{ "status": "ok" }` apenas para administradores. Ambos recebem Bearer JWT e recusam credenciais inválidas com 401; a rota administrativa retorna 403 para clientes. Os testes de auth geram chaves locais e simulam JWKS, sem depender de Google ou do web. Detalhes na [spec de autenticação](docs/specs/autenticacao-api.md).
+Entre com Google e abra http://localhost:3000/admin: um e-mail da lista vê “Acesso permitido”; outra conta é redirecionada para `/`. Sem sessão, o destino é `/entrar?voltar=/admin`. Se a sessão existe, mas a API rejeita o JWT (ex.: JWKS indisponível), a página mostra um aviso sem entrar em ciclo de redirecionamentos. `GET /me` retorna `sub`, `email`, `name`, `role` (`admin` ou `customer`) e `has_phone` do usuário autenticado; `GET /admin/ping` retorna `{ "status": "ok" }` apenas para administradores. Ambos recebem Bearer JWT e recusam credenciais inválidas com 401; a rota administrativa retorna 403 para clientes. Os testes de auth geram chaves locais e simulam JWKS, sem depender de Google ou do web. Detalhes na [spec de autenticação](specs/autenticacao-api.md).
 
-**Perfil do cliente.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta Google fora de `ADMIN_EMAILS` e abra http://localhost:3000/perfil. O primeiro acesso cria o cadastro de cliente com o nome e o e-mail do Google, ou o vincula a um cadastro com o mesmo e-mail (RN-23). Informe o telefone com DDD e salve; `GET /me` passa a indicar `has_phone: true`. Detalhes na [spec do perfil](docs/specs/perfil-cliente.md).
+**Perfil do cliente.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta Google fora de `ADMIN_EMAILS` e abra http://localhost:3000/perfil. O primeiro acesso cria o cadastro de cliente com o nome e o e-mail do Google, ou o vincula a um cadastro com o mesmo e-mail (RN-23). Informe o telefone com DDD e salve; `GET /me` passa a indicar `has_phone: true`. Detalhes na [spec do perfil](specs/perfil-cliente.md).
 
-**Cadastro de barbeiros.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta de `ADMIN_EMAILS` e abra http://localhost:3000/admin/cadastros/barbeiros. Edvaldo, Lauro e Manoel já aparecem com fotos fictícias em 4:5, que não retratam os proprietários (D10; as fotos reais são a pendência P10). A migração preserva fotos já definidas pela administração. Crie um barbeiro, edite a apresentação (até 400 caracteres) e mude a situação para Inativo; ele continua na lista, depois dos ativos. Detalhes na [spec do cadastro de barbeiros](docs/specs/cadastro-barbeiros.md).
+**Cadastro de barbeiros.** Depois de `docker compose exec api alembic upgrade head`, entre com uma conta de `ADMIN_EMAILS` e abra http://localhost:3000/admin/cadastros/barbeiros. Edvaldo, Lauro e Manoel já aparecem com fotos fictícias em 4:5, que não retratam os proprietários (D10; as fotos reais são a pendência P10). A migração preserva fotos já definidas pela administração. Crie um barbeiro, edite a apresentação (até 400 caracteres) e mude a situação para Inativo; ele continua na lista, depois dos ativos. Detalhes na [spec do cadastro de barbeiros](specs/cadastro-barbeiros.md).
 
-**Cadastro de serviços.** Com a conta de administração, abra http://localhost:3000/admin/cadastros/servicos. Corte Simples (30 min, R$ 25,00) e Corte + Barba (45 min, R$ 35,00) já aparecem, feitos pelos três proprietários (os preços reais são a pendência P9). Crie um serviço, escolha os barbeiros que o realizam e depois mude a situação para Inativo; ele continua na lista, depois dos ativos. Uma duração fora dos múltiplos de 5 (ou abaixo de 10 minutos), um preço negativo ou um serviço sem barbeiro voltam com a explicação da API. Detalhes na [spec do cadastro de serviços](docs/specs/cadastro-servicos.md).
+**Cadastro de serviços.** Com a conta de administração, abra http://localhost:3000/admin/cadastros/servicos. Corte Simples (30 min, R$ 25,00) e Corte + Barba (45 min, R$ 35,00) já aparecem, feitos pelos três proprietários (os preços reais são a pendência P9). Crie um serviço, escolha os barbeiros que o realizam e depois mude a situação para Inativo; ele continua na lista, depois dos ativos. Uma duração fora dos múltiplos de 5 (ou abaixo de 10 minutos), um preço negativo ou um serviço sem barbeiro voltam com a explicação da API. Detalhes na [spec do cadastro de serviços](specs/cadastro-servicos.md).
 
-**Vitrine.** Sem login, abra http://localhost:3000 numa largura de 360px: o hero com a chamada "Agendar horário", os serviços com preço e duração, a equipe (com as fotos fictícias dos proprietários) e o horário de funcionamento. O endereço e os contatos aparecem quando a administração os preenche em `/admin/cadastros/barbearia`. `/servicos` e `/barbeiros` listam tudo. Inative um serviço ou um barbeiro na administração e recarregue: ele some da vitrine. O "Agendar" leva a `/agendar`. Detalhes na [spec da vitrine](docs/specs/vitrine.md).
+**Vitrine.** Sem login, abra http://localhost:3000 numa largura de 360px: o hero com a chamada "Agendar horário", os serviços com preço e duração, a equipe (com as fotos fictícias dos proprietários) e o horário de funcionamento. O endereço e os contatos aparecem quando a administração os preenche em `/admin/cadastros/barbearia`. `/servicos` e `/barbeiros` listam tudo. Inative um serviço ou um barbeiro na administração e recarregue: ele some da vitrine. O "Agendar" leva a `/agendar`. Detalhes na [spec da vitrine](specs/vitrine.md).
 
-**Horários disponíveis.** Depois de `docker compose exec api alembic upgrade head`, consulte os horários livres de um barbeiro para um serviço, sem login: `curl "http://localhost:8000/public/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"` (use uma data entre hoje e 30 dias à frente). A resposta traz os inícios de 30 em 30 minutos que cabem no expediente, com pelo menos 1 hora de antecedência e sem cruzar agendamentos ativos, no fuso de São Paulo. O banco recusa dois agendamentos ativos sobrepostos do mesmo barbeiro, mesmo com reservas simultâneas, e um barbeiro com agendamentos marcados não pode ser inativado. Detalhes na [spec de disponibilidade](docs/specs/disponibilidade.md).
+**Horários disponíveis.** Depois de `docker compose exec api alembic upgrade head`, consulte os horários livres de um barbeiro para um serviço, sem login: `curl "http://localhost:8000/public/availability?barber_id=1&service_id=2&date=AAAA-MM-DD"` (use uma data entre hoje e 30 dias à frente). A resposta traz os inícios de 30 em 30 minutos que cabem no expediente, com pelo menos 1 hora de antecedência e sem cruzar agendamentos ativos, no fuso de São Paulo. O banco recusa dois agendamentos ativos sobrepostos do mesmo barbeiro, mesmo com reservas simultâneas, e um barbeiro com agendamentos marcados não pode ser inativado. Detalhes na [spec de disponibilidade](specs/disponibilidade.md).
 
-**Agendamento.** Abra http://localhost:3000/agendar numa largura de 360px, sem login: escolha o barbeiro, o serviço (só os que ele faz), o dia e o horário, um toque por tela. Ao escolher o horário, o site pede o login com Google e volta para a confirmação. Sem telefone no perfil, a confirmação pede o telefone. Depois de confirmar, a página mostra o resumo e o link "Ver meus agendamentos". Um cliente pode ter no máximo 2 agendamentos marcados, e dois clientes nunca ficam com o mesmo horário. Detalhes na [spec do agendamento](docs/specs/agendamento-cliente.md).
+**Agendamento.** Abra http://localhost:3000/agendar numa largura de 360px, sem login: escolha o barbeiro, o serviço (só os que ele faz), o dia e o horário, um toque por tela. Ao escolher o horário, o site pede o login com Google e volta para a confirmação. Sem telefone no perfil, a confirmação pede o telefone. Depois de confirmar, a página mostra o resumo e o link "Ver meus agendamentos". Um cliente pode ter no máximo 2 agendamentos marcados, e dois clientes nunca ficam com o mesmo horário. Detalhes na [spec do agendamento](specs/agendamento-cliente.md).
 
-**Meus agendamentos.** Logado como cliente, abra http://localhost:3000/meus-agendamentos: os próximos horários e o histórico. Até 2 horas antes do início, cada horário tem "Remarcar" (barbeiro, dia e horário, com as mesmas telas do agendamento) e "Cancelar" (com uma página de confirmação). Depois disso, o cartão mostra o contato da barbearia. Detalhes na [spec de meus agendamentos](docs/specs/meus-agendamentos.md).
+**Meus agendamentos.** Logado como cliente, abra http://localhost:3000/meus-agendamentos: os próximos horários e o histórico. Até 2 horas antes do início, cada horário tem "Remarcar" (barbeiro, dia e horário, com as mesmas telas do agendamento) e "Cancelar" (com uma página de confirmação). Depois disso, o cartão mostra o contato da barbearia. Detalhes na [spec de meus agendamentos](specs/meus-agendamentos.md).
 
 A API espera o banco ficar saudável, e o web espera a API. O código de `api/` e `web/` é montado nos containers, então editar um arquivo recarrega o serviço. As dependências (`.venv` e `node_modules`) ficam dentro dos containers e não se misturam com as da sua máquina.
 
@@ -141,24 +136,24 @@ Em desenvolvimento, a página inicial mostra o status da API (`GET /health`) num
 
 Depois de mudar `pyproject.toml`, `uv.lock`, `package.json` ou `pnpm-lock.yaml`, rode `docker compose up --build -V` para reconstruir as imagens e recriar os volumes de dependências. `docker compose down` para tudo; `docker compose down -v` também apaga os dados do banco.
 
-O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](docs/arquitetura.md#variáveis-de-ambiente).
+O `.env.example` lista todas as variáveis do sistema; a explicação de cada uma está em [arquitetura.md](arquitetura.md#variáveis-de-ambiente).
 
 ### Demonstração no notebook
 
-Para apresentar o sistema, `scripts/demo.sh up` sobe uma cópia separada, com as imagens de produção, dados fictícios e um link `https://` público para abrir no celular (ADR 0010). O roteiro, inclusive o cadastro do link no Google, está em [docs/specs/demonstracao-local.md](docs/specs/demonstracao-local.md). A demonstração também liga o modo demonstração (ADR 0011): `/entrar` oferece "Entrar como administração (demo)" e "Entrar como cliente (demo)", sem conta Google, com a faixa "Ambiente de demonstração — dados fictícios" ([docs/specs/modo-demonstracao.md](docs/specs/modo-demonstracao.md)).
+Para apresentar o sistema, `scripts/demo.sh up` sobe uma cópia separada, com as imagens de produção, dados fictícios e um link `https://` público para abrir no celular (ADR 0010). O roteiro, inclusive o cadastro do link no Google, está em [docs/specs/demonstracao-local.md](specs/demonstracao-local.md). A demonstração também liga o modo demonstração (ADR 0011): `/entrar` oferece "Entrar como administração (demo)" e "Entrar como cliente (demo)", sem conta Google, com a faixa "Ambiente de demonstração — dados fictícios" ([docs/specs/modo-demonstracao.md](specs/modo-demonstracao.md)).
 
 ## CI
 
-Todo PR, e todo push na `main`, roda o workflow [CI](.github/workflows/ci.yml) no GitHub Actions:
+Todo PR, e todo push na `main`, roda o workflow [CI](../.github/workflows/ci.yml) no GitHub Actions:
 - **`api`:** `ruff check`, `ruff format --check`, `pyright`, `alembic upgrade head` e `pytest`, contra um PostgreSQL 17;
 - **`web`:** `lint`, `typecheck`, `test` e `build`;
 - **`contract`:** exporta o OpenAPI da API, roda `pnpm gen:api` e falha se o `schema.d.ts` commitado estiver desatualizado.
 
-Num PR, cada job só roda quando a pasta dele mudou (o `contract` roda se `api/` ou `web/` mudou). O job que não precisa rodar aparece como pulado e conta como aprovado. Na `main`, todos sempre rodam. PR com CI vermelho não é mergeado. Detalhes na [spec](docs/specs/ci.md).
+Num PR, cada job só roda quando a pasta dele mudou (o `contract` roda se `api/` ou `web/` mudou). O job que não precisa rodar aparece como pulado e conta como aprovado. Na `main`, todos sempre rodam. PR com CI vermelho não é mergeado. Detalhes na [spec](specs/ci.md).
 
 ## Documentação
 
-Tudo está em [`docs/`](docs/). Para começar, leia a [visão do produto](docs/produto/visao.md), as [regras de negócio](docs/dominio/regras.md) e a [arquitetura](docs/arquitetura.md). Agentes de IA começam pelo [CLAUDE.md](CLAUDE.md).
+Tudo está em [`docs/`](./). Para começar, leia a [visão do produto](produto/visao.md), as [regras de negócio](dominio/regras.md) e a [arquitetura](arquitetura.md). Agentes de IA começam pelo [CLAUDE.md](../CLAUDE.md).
 
 ## Banco e migrações
 
