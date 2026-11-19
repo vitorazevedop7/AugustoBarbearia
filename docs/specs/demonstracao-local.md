@@ -58,7 +58,7 @@ Nenhuma regra nova. Os dados fictícios respeitam as regras que o banco e a API 
 
 **CA-4 — Administração preenchida**
 - **Dado** o banco recém-criado
-- **Então** a agenda da semana tem concluídos, faltas, cancelados, marcados, uma folga e um bloqueio, e o relatório de "Este mês" tem faturamento por barbeiro e por forma de pagamento.
+- **Então** a agenda da semana tem concluídos, faltas, cancelados, marcados, uma folga e um bloqueio, o relatório de "Este mês" tem faturamento por barbeiro e por forma de pagamento, e o painel compara com o mês anterior e mostra os horários de pico dos últimos 90 dias (o seed gera quatro meses de histórico, mais cheio na sexta, no sábado e no fim de tarde).
 
 **CA-5 — Trava do banco**
 - **Dado** um banco cujo nome não termina em `_demo`
