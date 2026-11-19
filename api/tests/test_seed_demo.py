@@ -7,6 +7,7 @@ from pytest import MonkeyPatch
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.clock import TIMEZONE
 from app.config import get_settings
 from app.jobs import seed_demo
 from app.jobs.seed_demo import (
@@ -214,3 +215,22 @@ def test_proximos_dias_tem_horario_livre(
     # Três barbeiros, das 10h às 19h: 1620 minutos de expediente.
     assert booked is not None
     assert booked < 1620 * 0.6
+
+
+def test_historico_alimenta_o_painel(db_session: Session, report: SeedReport) -> None:
+    """O painel compara com o mês anterior e olha 90 dias de pico (RN-45)."""
+    del report
+    completed = [
+        appointment.starts_at
+        for appointment in appointments(db_session)
+        if appointment.status == AppointmentStatus.COMPLETED
+    ]
+    month_start = local(2026, 11, 1, 0)
+    previous_month = [
+        starts for starts in completed if local(2026, 10, 1, 0) <= starts < month_start
+    ]
+    assert previous_month
+    assert min(completed) <= NOW - timedelta(days=90)
+    # Mais procura na sexta do que na terça (mesmo expediente), como numa barbearia.
+    weekdays = [starts.astimezone(TIMEZONE).weekday() for starts in completed]
+    assert weekdays.count(4) > weekdays.count(1)

@@ -1,8 +1,9 @@
 """Dados fictícios da demonstração: `python -m app.jobs.seed_demo` (ADR 0010, #184).
 
-Cria clientes, duas semanas de agenda em volta de hoje (concluídos com
-pagamento, faltas, cancelamentos e marcados) e dois bloqueios, para a agenda e
-o relatório não aparecerem vazios na apresentação. Entre os clientes está o da
+Cria clientes, quatro meses de histórico e uma semana à frente (concluídos
+com pagamento, faltas, cancelamentos e marcados) e dois bloqueios, para a
+agenda, o relatório e o painel (comparação com o mês anterior, horários de
+pico) não aparecerem vazios na apresentação. Entre os clientes está o da
 entrada de demonstração (#199), com telefone, um horário marcado e histórico,
 para "Meus agendamentos" abrir preenchido. Só roda num banco cujo nome
 termina em `_demo` e que ainda não tem agendamentos: o banco de produção nunca
@@ -39,7 +40,8 @@ from app.modules.time_blocks.models import TimeBlock
 logger = logging.getLogger(__name__)
 
 DEMO_SUFFIX = "_demo"
-PAST_DAYS = 7
+# Quatro meses: o painel compara com o mês anterior e olha 90 dias de pico.
+PAST_DAYS = 120
 FUTURE_DAYS = 7
 # Fixo para a agenda sair igual a cada recriação do banco.
 DEFAULT_SEED = 184
@@ -171,7 +173,11 @@ def seed(
                 service = rng.choice(services)
                 ends = start + timedelta(minutes=service.duration_minutes)
                 blocked = any(s < ends and start < e for s, e in busy)
-                if blocked or ends > closes or rng.random() >= _occupancy(offset):
+                if (
+                    blocked
+                    or ends > closes
+                    or rng.random() >= _occupancy(offset, start)
+                ):
                     start += SLOT_STEP
                     continue
                 appointment, method = _appointment(
@@ -298,11 +304,19 @@ def _time_blocks(
     return blocks
 
 
-def _occupancy(offset: int) -> float:
+def _occupancy(offset: int, start: datetime) -> float:
     """Dias passados cheios; os próximos dias mais vazios, com horários para o
-    agendamento ao vivo na apresentação."""
+    agendamento ao vivo na apresentação.
+
+    No passado, a procura cresce devagar ao longo dos meses (o painel mostra a
+    variação sobre o mês anterior) e tem o desenho de uma barbearia: sexta e
+    sábado mais cheios, fim de tarde mais procurado que o começo da manhã."""
     if offset < 0:
-        return 0.7
+        local = start.astimezone(TIMEZONE)
+        weekday = {4: 0.12, 5: 0.18}.get(local.weekday(), 0.0)
+        hour = 0.1 if local.hour >= 16 else (-0.12 if local.hour < 10 else 0.0)
+        trend = 0.2 * (PAST_DAYS + offset) / PAST_DAYS
+        return min(0.92, max(0.2, 0.45 + trend + weekday + hour))
     if offset == 0:
         return 0.45
     return max(0.15, 0.45 - 0.05 * offset)
