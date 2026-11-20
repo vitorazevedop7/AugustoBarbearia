@@ -25,7 +25,7 @@ O cliente agenda pelo celular; a equipe cuida da agenda, dos atendimentos, dos p
 
 Em 1min11, o vídeo percorre o sistema clicando nas telas reais: o cliente agenda pela vitrine (barbeiro, serviço, dia, horário e confirmação) e acompanha os horários em "Meus agendamentos"; o mesmo fluxo aparece no celular; a administração entra no painel de indicadores, abre a agenda do dia e da semana, conclui um atendimento com o pagamento e consulta o relatório financeiro. Os dados são fictícios e foram gerados pelo seed da demonstração. **[Baixar o vídeo (MP4, 10 MB)](docs/media/demonstracao.mp4)**
 
-Para ver com mais calma, a **[versão completa, de 2min34 (MP4, 6 MB)](docs/media/demo.mp4)** inclui também a busca de clientes, os cadastros e o agendamento feito pela administração.
+Para ver com mais calma, a **[versão completa, de 2min34 (MP4, 6 MB)](docs/media/demo.mp4)** inclui também a busca de clientes, os cadastros e o agendamento feito pela administração. O vídeo de 1 minuto é gerado por código, com o [Remotion](https://www.remotion.dev/), no projeto [`promo/`](promo/README.md).
 
 <table>
   <tr>
