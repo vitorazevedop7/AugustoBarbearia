@@ -1,0 +1,247 @@
+[
+  {
+    "id": "c01-vitrine-topo",
+    "file": "c01-vitrine-topo.png",
+    "box": null,
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c02-vitrine-pagina",
+    "file": "c02-vitrine-pagina.png",
+    "box": null,
+    "full": true,
+    "height": 8719
+  },
+  {
+    "id": "c03-barbeiro",
+    "file": "c03-barbeiro.png",
+    "box": {
+      "x": 810.6666666666666,
+      "y": 382.8125,
+      "w": 298.66666666666663,
+      "h": 456
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c04-servico",
+    "file": "c04-servico.png",
+    "box": {
+      "x": 480,
+      "y": 526.8125,
+      "w": 960,
+      "h": 136
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c05-dia",
+    "file": "c05-dia.png",
+    "box": {
+      "x": 758.8541666666666,
+      "y": 672.1458333333333,
+      "w": 123.41666666666666,
+      "h": 117.33333333333333
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c06-horario",
+    "file": "c06-horario.png",
+    "box": {
+      "x": 642.6666666666666,
+      "y": 918.8125,
+      "w": 146.66666666666666,
+      "h": 58.666666666666664
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c08-entrar",
+    "file": "c08-entrar.png",
+    "box": {
+      "x": 714.6666666666666,
+      "y": 959.5625,
+      "w": 490.66666666666663,
+      "h": 69.33333333333333
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c09-confirmar",
+    "file": "c09-confirmar.png",
+    "box": {
+      "x": 480,
+      "y": 1010.1458333333333,
+      "w": 356.04166666666663,
+      "h": 69.33333333333333
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c10-confirmado",
+    "file": "c10-confirmado.png",
+    "box": null,
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "c11-meus",
+    "file": "c11-meus.png",
+    "box": {
+      "x": 512,
+      "y": 823.3125,
+      "w": 157.60416666666666,
+      "h": 58.666666666666664
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a01-entrar",
+    "file": "a01-entrar.png",
+    "box": {
+      "x": 714.6666666666666,
+      "y": 874.2291666666666,
+      "w": 490.66666666666663,
+      "h": 69.33333333333333
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a02-painel",
+    "file": "a02-painel.png",
+    "box": null,
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a03-painel-pagina",
+    "file": "a03-painel-pagina.png",
+    "box": null,
+    "full": true,
+    "height": 3159
+  },
+  {
+    "id": "a04-agenda-dia",
+    "file": "a04-agenda-dia.png",
+    "box": {
+      "x": 1652.4791666666665,
+      "y": 418.66666666666663,
+      "w": 118.1875,
+      "h": 58.666666666666664
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a05-agenda-semana",
+    "file": "a05-agenda-semana.png",
+    "box": null,
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a06-agenda-escolher",
+    "file": "a06-agenda-escolher.png",
+    "box": {
+      "x": 149.33333333333331,
+      "y": 532,
+      "w": 512,
+      "h": 144
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a07-detalhe",
+    "file": "a07-detalhe.png",
+    "box": null,
+    "full": true,
+    "height": 2645
+  },
+  {
+    "id": "a08-forma",
+    "file": "a08-forma.png",
+    "box": {
+      "x": 605.3333333333333,
+      "y": 566.6666666666666,
+      "w": 397.3333333333333,
+      "h": 74.66666666666666
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a09-concluir",
+    "file": "a09-concluir.png",
+    "box": {
+      "x": 192,
+      "y": 758.6666666666666,
+      "w": 810.6666666666666,
+      "h": 58.666666666666664
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a10-concluido",
+    "file": "a10-concluido.png",
+    "box": null,
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a11-relatorio",
+    "file": "a11-relatorio.png",
+    "box": {
+      "x": 149.33333333333331,
+      "y": 565.3333333333333,
+      "w": 192.77083333333331,
+      "h": 58.666666666666664
+    },
+    "full": false,
+    "height": 1080
+  },
+  {
+    "id": "a12-relatorio-pagina",
+    "file": "a12-relatorio-pagina.png",
+    "box": null,
+    "full": true,
+    "height": 61619
+  },
+  {
+    "id": "m01-vitrine",
+    "file": "m01-vitrine.png",
+    "box": null,
+    "full": false,
+    "height": 1688
+  },
+  {
+    "id": "m02-barbeiro",
+    "file": "m02-barbeiro.png",
+    "box": {
+      "x": 32,
+      "y": 498.625,
+      "w": 342,
+      "h": 541.5
+    },
+    "full": false,
+    "height": 1688
+  },
+  {
+    "id": "m03-dia",
+    "file": "m03-dia.png",
+    "box": null,
+    "full": false,
+    "height": 1688
+  }
+]
